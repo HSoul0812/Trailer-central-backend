@@ -1,0 +1,159 @@
+<?php
+
+namespace App\Indexers;
+
+use ElasticAdapter\Indices\Alias;
+use ElasticAdapter\Indices\Index;
+use ElasticAdapter\Indices\Mapping;
+use ElasticAdapter\Indices\Settings;
+use Elasticsearch\Client;
+use Elasticsearch\Namespaces\IndicesNamespace;
+
+/**
+ * This index manager is able to interact with ElasticSearch 6
+ * Also, is able to set the index alias as writable, somehow in our dev environments it just fail, see `putAlias` method
+ */
+class IndexManager
+{
+    /**
+     * @var IndicesNamespace
+     */
+    private $indices;
+
+    public function __construct(Client $client)
+    {
+        $this->indices = $client->indices();
+    }
+
+    public function open(string $indexName): self
+    {
+        $this->indices->open([
+            'index' => $indexName,
+        ]);
+
+        return $this;
+    }
+
+    public function close(string $indexName): self
+    {
+        $this->indices->close([
+            'index' => $indexName,
+        ]);
+
+        return $this;
+    }
+
+    public function exists(string $indexName): bool
+    {
+        return $this->indices->exists([
+            'index' => $indexName,
+        ]);
+    }
+
+    public function create(Index $index): self
+    {
+        $mapping = $index->getMapping() === null ? [] : $index->getMapping()->toArray();
+        $settings = $index->getSettings() === null ? [] : $index->getSettings()->toArray();
+
+        $params = [
+            'index' => $index->getName(),
+             'include_type_name' => false // just in case we would need to use ES6 cluster as fallback
+        ];
+
+        if (count($mapping) > 0) {
+            $params['body']['mappings'] = $mapping;
+        }
+
+        if (count($settings) > 0) {
+            $params['body']['settings'] = $settings;
+        }
+
+        $this->indices->create($params);
+
+        return $this;
+    }
+
+    public function putMapping(string $indexName, Mapping $mapping): self
+    {
+        $this->indices->putMapping([
+            'index' => $indexName,
+            'body' => $mapping->toArray(),
+        ]);
+
+        return $this;
+    }
+
+    public function putSettings(string $indexName, Settings $settings): self
+    {
+        $this->indices->putSettings([
+            'index' => $indexName,
+            'body' => [
+                'settings' => $settings->toArray(),
+            ],
+        ]);
+
+        return $this;
+    }
+
+    public function drop(string $indexName): self
+    {
+        $this->indices->delete([
+            'index' => $indexName,
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * @return Alias[]
+     */
+    public function getAliases(string $indexName): array
+    {
+        $response = $this->indices->getAlias([
+            'index' => $indexName,
+        ]);
+
+        $aliases = $response[$indexName]['aliases'] ?? [];
+
+        return array_map(static function (array $parameters, string $name) {
+            return new Alias(
+                $name,
+                $parameters['filter'] ?? null,
+                $parameters['routing'] ?? null
+            );
+        }, $aliases, array_keys($aliases));
+    }
+
+    public function putAlias(string $indexName, Alias $alias): self
+    {
+        $params = [
+            'index' => $indexName,
+            'name' => $alias->getName(),
+        ];
+
+        if ($alias->getRouting()) {
+            $params['body']['routing'] = $alias->getRouting();
+        }
+
+        if ($alias->getFilter()) {
+            $params['body']['filter'] = $alias->getFilter();
+        }
+
+        // test cases were failing somehow, this ensure all test related with ElasticSearch wont fail
+        $params['body']['is_write_index'] = true;
+
+        $this->indices->putAlias($params);
+
+        return $this;
+    }
+
+    public function deleteAlias(string $indexName, string $aliasName): self
+    {
+        $this->indices->deleteAlias([
+            'index' => $indexName,
+            'name' => $aliasName,
+        ]);
+
+        return $this;
+    }
+}

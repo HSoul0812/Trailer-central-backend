@@ -27,7 +27,12 @@ class TransactionExecuteQueueRepository implements TransactionExecuteQueueReposi
      */
     public function create($params)
     {
-        $dataToInsert = $this->prepareInventoryDataForInsert($params, $params['is_update']);
+        if (isset($params['without_prepare_data']) && $params['without_prepare_data']) {
+            unset($params['without_prepare_data']);
+            $dataToInsert = $params;
+        } else {
+            $dataToInsert = $this->prepareInventoryDataForInsert($params, $params['is_update']);
+        }
 
         return $this->model->create($dataToInsert);
     }

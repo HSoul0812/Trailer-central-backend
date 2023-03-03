@@ -6,6 +6,7 @@ use App\Http\Middleware\CRM\Text\ReplyTextValidate;
 use App\Http\Middleware\Ecommerce\StripeWebhookValidate;
 use App\Http\Middleware\Ecommerce\TexTrailWebhookValidate;
 use App\Http\Middleware\Ecommerce\ValidHookIpMiddleware;
+use App\Http\Middleware\Integration\ValidIntegrationAccessToken;
 use App\Http\Middleware\InteractionIntegration\IntegrationPermission;
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Middleware\Inventory\InvalidatePermissionMiddleware;
@@ -33,11 +34,13 @@ use App\Http\Middleware\CRM\Text\BlastValidate as TextBlastValidate;
 use App\Http\Middleware\CRM\Text\CampaignValidate as TextCampaignValidate;
 use App\Http\Middleware\CRM\User\SalesPersonValidate;
 use App\Http\Middleware\Dispatch\FacebookValidate;
+use App\Http\Middleware\Dispatch\CraigslistValidate;
 use App\Http\Middleware\Dms\Printer\FormValidate as PrinterFormValidate;
 use App\Http\Middleware\Dms\Printer\InstructionValidate as PrinterInstructionValidate;
 use App\Http\Middleware\Integration\AuthValidate;
 use App\Http\Middleware\Integration\Facebook\CatalogValidate;
 use App\Http\Middleware\Integration\Facebook\ChatValidate;
+use App\Http\Middleware\CRM\Leads\LeadTradeValidate;
 use App\Http\Middleware\Marketing\Facebook\MarketplaceValidate;
 use App\Http\Middleware\Marketing\Facebook\PagetabValidate;
 use App\Http\Middleware\Parts\PartOrderValidate;
@@ -119,6 +122,7 @@ class Kernel extends HttpKernel
         'text.campaign.validate' => TextCampaignValidate::class,
         'text.blast.validate' => TextBlastValidate::class,
         'integration.auth.validate' => AuthValidate::class,
+        'integration.access_token.validate' => ValidIntegrationAccessToken::class,
         'facebook.catalog.validate' => CatalogValidate::class,
         'facebook.chat.validate' => ChatValidate::class,
         'facebook.message.validate' => MessageValidate::class,
@@ -133,9 +137,11 @@ class Kernel extends HttpKernel
         'marketing.facebook.marketplace' => MarketplaceValidate::class,
         'marketing.facebook.pagetab' => PagetabValidate::class,
         'dispatch.facebook' => FacebookValidate::class,
+        'dispatch.craigslist' => CraigslistValidate::class,
         'replytext.validate' => ReplyTextValidate::class,
         'validateDealerIdOnRequest' => ValidateDealerIdOnRequest::class,
         'inventory.cache.permission' => InvalidatePermissionMiddleware::class,
+        'leads.trade.validate' => LeadTradeValidate::class,
         'integration-permission' => IntegrationPermission::class,
     ];
 

@@ -355,7 +355,7 @@ class ImageHelper
 
         // Paste back $imageResource;
         $imageContent = $this->getContentFromResource($imageResource, $imageType);
-        $newImagePath = $this->createTempFile($imageContent);
+        $newImagePath = $this->createTempFile($imageContent, $imageType);
 
         return $newImagePath;
     }
@@ -423,7 +423,7 @@ class ImageHelper
 
         // Paste back $imageResource;
         $imageContent = $this->getContentFromResource($imageResource, $imageType);
-        $newImagePath = $this->createTempFile($imageContent);
+        $newImagePath = $this->createTempFile($imageContent, $imageType);
 
         return $newImagePath;
     }
@@ -474,10 +474,10 @@ class ImageHelper
         }
 
         // Create Local Logo Path
-        $localLogoPath = $this->createTempFile($this->getContentFromResource($logoResource, $logoType));
+        $localLogoPath = $this->createTempFile($this->getContentFromResource($logoResource, $logoType), $imageType);
 
         // Create Resized Logo while keeping ratio
-        $resizedLogo = $this->createTempFile();
+        $resizedLogo = $this->createTempFile('', $logoType);
         shell_exec('convert ' . $localLogoPath . ' -resize ' . $logoWidth . 'x' . $logoHeight . ' ' . $resizedLogo);
 
         // Get New Logo Dimensions
@@ -501,10 +501,10 @@ class ImageHelper
         }
 
         // Create Local Image Path
-        $localImagePath = $this->createTempFile($this->getContentFromResource($imageResource, $imageType));
+        $localImagePath = $this->createTempFile($this->getContentFromResource($imageResource, $imageType), $imageType);
 
         // Add Logo to Image
-        $newImagePath = $this->createTempFile();
+        $newImagePath = $this->createTempFile('', $logoType);
         shell_exec('convert ' . $localImagePath . ' ' . $resizedLogo . ' -alpha on -compose src-over -geometry +' . $x . '+' . $y . ' -composite ' . $newImagePath);
 
         // Delete Tmp Files
@@ -533,11 +533,12 @@ class ImageHelper
      * Create temp files
      *
      * @param string|null $fileContent
+     * @param  int  $mimeType image type as integer commonly used by `getimagesize`, `exif_read_data`, `exif_thumbnail`, `exif_imagetype`
      * @return string new file path
      */
-    protected function createTempFile(string $fileContent = '')
+    protected function createTempFile(string $fileContent = '', $mimeType = null)
     {
-        $randomFilename = $this->getRandomImageNameWithExtension($fileContent);
+        $randomFilename = $this->getRandomImageNameWithExtension($fileContent, $mimeType);
 
         Storage::disk('tmp')->put($randomFilename, $fileContent);
 
@@ -556,14 +557,17 @@ class ImageHelper
 
     /**
      * Creates random image name with a proper extension according to file content
+     * @param  int  $mimeType image type as integer commonly used by `getimagesize`, `exif_read_data`, `exif_thumbnail`, `exif_imagetype`
+     * @throws \Exception when an appropriate source of randomness cannot be found.
      */
-    protected function getRandomImageNameWithExtension(string $fileContent): string
+    protected function getRandomImageNameWithExtension(string $fileContent, $mimeType = null): string
     {
-        $fileInfo = finfo_open();
-        $mimeType = finfo_buffer($fileInfo, $fileContent, FILEINFO_MIME_TYPE);
-        finfo_close($fileInfo);
+        $mimeType= image_type_to_mime_type(((int)$mimeType) ?: 2); // to ensure it always is an integer and do not break something
 
-        return bin2hex(random_bytes(18)).($mimeType ? '.'.str_replace('image/', '', $mimeType) : '');
+        // we gonna use `jpeg` extension as fallback, it is not a problem because for S3 object it doesn't matter
+        $extension = str_replace('image/', '', $mimeType);
+
+        return sprintf('%s.%s', bin2hex(random_bytes(18)), $extension);
     }
 
     /**

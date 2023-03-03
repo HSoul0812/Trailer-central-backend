@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Indexers\DocumentManager;
 use App\Indexers\ElasticSearchEngine;
+use App\Indexers\EngineDecorator;
 use ElasticScoutDriver\Factories\DocumentFactory;
 use ElasticScoutDriver\Factories\DocumentFactoryInterface;
 use ElasticScoutDriver\Factories\ModelFactory;
@@ -11,8 +13,6 @@ use ElasticScoutDriver\Factories\SearchRequestFactory;
 use ElasticScoutDriver\Factories\SearchRequestFactoryInterface;
 use Illuminate\Support\ServiceProvider as AbstractServiceProvider;
 use Laravel\Scout\EngineManager;
-use ElasticScoutDriverPlus\Decorators\EngineDecorator;
-use ElasticAdapter\Documents\DocumentManager;
 
 class ElasticScoutProvider extends AbstractServiceProvider
 {

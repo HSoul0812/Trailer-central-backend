@@ -157,6 +157,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
         \Validator::extend('website_exists', 'App\Rules\Website\WebsiteExists@passes');
         \Validator::extend('lead_exists', 'App\Rules\CRM\Leads\LeadExists@passes');
+        \Validator::extendDependent('lead_trade_valid', 'App\Rules\CRM\Leads\ValidLeadTrade@passes');
         \Validator::extend('lead_type_valid', 'App\Rules\CRM\Leads\ValidLeadType@passes');
         \Validator::extend('lead_status_valid', 'App\Rules\CRM\Leads\ValidLeadStatus@passes');
         \Validator::extend('lead_source_valid', 'App\Rules\CRM\Leads\ValidLeadSource@passes');
@@ -182,6 +183,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('customer_name_unique', 'App\Rules\Dms\Quickbooks\CustomerNameUnique@validate');
         \Validator::extend('stock_type_valid', 'App\Rules\Bulks\Parts\StockTypeValid@passes');
         \Validator::extend('unit_sale_exists', 'App\Rules\Dms\UnitSaleExists@passes');
+        \Validator::extend('valid_clapp_dealer', 'App\Rules\Marketing\Craigslist\ValidDealer@passes');
         \Validator::extend('valid_clapp_profile', 'App\Rules\Marketing\Craigslist\ValidProfile@passes');
         \Validator::extend('valid_include', 'App\Rules\ValidInclude@validate');
         \Validator::extend('location_belongs_to_dealer', 'App\Rules\Locations\LocationBelongsToDealer@passes');
