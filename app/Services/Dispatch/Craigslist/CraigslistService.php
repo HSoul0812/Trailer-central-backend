@@ -303,7 +303,7 @@ class CraigslistService implements CraigslistServiceInterface
         foreach ($queues as $queue) {
             $nowTime = microtime(true);
             $clappPost = ClappPost::fill($queue);
-            $this->queues->update($queue->getParams());
+            $this->queues->update($clappPost->getParams());
             if($this->validatePost($queue, $clappPost)) {
                 $listings->push($clappPost);
             }
