@@ -2,6 +2,7 @@
 
 namespace App\Services\Dispatch\Craigslist;
 
+use App\Models\Marketing\Craigslist\Queue;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
