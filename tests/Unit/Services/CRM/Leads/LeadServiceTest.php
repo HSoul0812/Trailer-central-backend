@@ -32,6 +32,7 @@ use Mockery;
 use Mockery\LegacyMockInterface;
 use Tests\TestCase;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
+use Faker\Factory as Faker;
 
 /**
  * Test for App\Services\CRM\Leads\LeadService
@@ -172,6 +173,8 @@ class LeadServiceTest extends TestCase
 
         $this->trackingRepositoryMock = Mockery::mock(TrackingRepositoryInterface::class);
         $this->app->instance(TrackingRepositoryInterface::class, $this->trackingRepositoryMock);
+
+        $this->faker = Faker::create();
     }
 
 
@@ -214,7 +217,9 @@ class LeadServiceTest extends TestCase
             'inventory_id' => 1,
             'lead_type' => LeadType::TYPE_INVENTORY,
             'preferred_contact' => '',
-            'lead_source' => self::TEST_SOURCE
+            'lead_source' => self::TEST_SOURCE,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName()
         ];
 
         // Create Lead Params
@@ -358,7 +363,9 @@ class LeadServiceTest extends TestCase
             'inventory' => $unitsInterest,
             'lead_types' => $leadTypes,
             'preferred_contact' => '',
-            'lead_source' => self::TEST_SOURCE
+            'lead_source' => self::TEST_SOURCE,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName()
         ];
 
         // Create Lead Params
