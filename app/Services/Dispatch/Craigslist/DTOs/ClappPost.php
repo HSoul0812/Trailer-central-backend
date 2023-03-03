@@ -176,6 +176,11 @@ class ClappPost
      */
     private $postal;
 
+    /**
+     * @var string
+     */
+    private $country;
+
 
     /**
      * @var string
