@@ -23,7 +23,7 @@ class FormTransformer extends TransformerAbstract
             'type'     => $clapp->categoryType,
             'category' => $clapp->qData->postCategory,
             'subarea'  => $clapp->subarea,
-            'hood'     => $clapp->GeographicArea,
+            'hood'     => $clapp->geographicArea,
             'market'   => $clapp->market,
             'images'   => $clapp->qData->images,
             'post' => $this->byCategory($clapp, [
