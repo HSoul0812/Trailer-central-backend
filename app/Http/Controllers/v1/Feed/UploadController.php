@@ -8,9 +8,11 @@ use Illuminate\Support\Facades\Log;
 
 use App\Http\Controllers\RestfulController;
 use App\Jobs\Import\Feed\DealerFeedImporterJob;
-use App\Services\Import\Feed\DealerFeedUploaderService;
 
 use App\Http\Requests\Feed\Factory\UploadFactoryFeedUnitRequest;
+
+use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
+use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 
 /**
  * Class UploadController
@@ -31,12 +33,11 @@ class UploadController extends RestfulController
      *
      * @param Request $request
      * @param string $code
-     * @param DealerFeedUploaderService $feedUploader
-     * @throws \Exception
      * @return Response
-     *
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
      */
-    public function upload(Request $request, string $code, DealerFeedUploaderService $feedUploader): Response
+    public function upload(Request $request, string $code): Response
     {
         $request = new UploadFactoryFeedUnitRequest(array_merge($request->all(), ['code' => $code]));
 
@@ -44,7 +45,7 @@ class UploadController extends RestfulController
             return $this->response->errorBadRequest();
         }
 
-        dispatch((new DealerFeedImporterJob($request->all(), $code, $feedUploader))->onQueue('factory-feeds'));
+        dispatch((new DealerFeedImporterJob($request->all(), $code))->onQueue('factory-feeds'));
 
         return $this->successResponse();
     }

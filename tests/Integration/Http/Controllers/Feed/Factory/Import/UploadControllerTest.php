@@ -34,16 +34,6 @@ class UploadControllerTest extends IntegrationTestCase
 {
 
     /**
-     * @var DealerFeedUploaderService
-     */
-    private $feedUploaderService;
-
-    /**
-     * @var ImporterFactory
-     */
-    private $importerFactory;
-
-    /**
      * @var FactoryUpload
      */
     private $factoryUpload;
@@ -56,12 +46,6 @@ class UploadControllerTest extends IntegrationTestCase
     public function setUp(): void
     {
         parent::setUp();
-
-        $this->feedUploaderService = Mockery::mock(DealerFeedUploaderService::class);
-        $this->app->instance(DealerFeedUploaderService::class, $this->feedUploaderService);
-
-        $this->importerFactory = Mockery::mock(ImporterFactory::class);
-        $this->app->instance(ImporterFactory::class, $this->importerFactory);
 
         $this->factoryUpload = Mockery::mock(FactoryUpload::class);
         $this->app->instance(FactoryUpload::class, $this->factoryUpload);
@@ -87,80 +71,33 @@ class UploadControllerTest extends IntegrationTestCase
         $controller = app(UploadController::class);
 
         // And I have a well-formed "UploadFactoryFeedUnitRequest" request
-        $request = new UploadFactoryFeedUnitRequest($request);
+        $request = new UploadFactoryFeedUnitRequest(
+            json_decode($request, true)
+        );
 
         // Assert the validation passes
         $this->assertTrue($request->validate());
 
         $code = $request->code;
 
-        // It should receive the run methon from uplader service once
-        $this->feedUploaderService->shouldReceive('run')->once();
-
-        // Execute the importer build
-        /* $this->importerFactory->shouldReceive('build')->once();
-
-        // And run the factory upload
+        // And run the factory upload once
         $this->factoryUpload->shouldReceive('run')->once();
 
         // To finally execute the createOrUpdate method once
-        $this->uploadRepository->shouldReceive('createOrUpdate')->once()->with(
-            [
-                'code' => 'norstar',
-                'key' => 'inventory',
-                'type' => '50HDB1422P1087058',
-                'data' => '{
-                            "stock": "DTB8314072ES2R50S62BLK",
-                            "vin": "50HDB1422P1087058",
-                            "model": "Dump",
-                            "year": "2022",
-                            "manufacturer": "NORSTAR",
-                            "brand": "IRON BULL",
-                            "condition": "new",
-                            "msrp": "14467.15",
-                            "price": "9910",
-                            "category": "Dump",
-                            "dealer_id": null,
-                            "dealer_name": "271 TRAILERS",
-                            "dealer_email": null,
-                            "dealer_location_street": "2601 N Main St",
-                            "dealer_location_city": "Paris",
-                            "dealer_location_state": "TX",
-                            "dealer_location_zip": "75460-9354",
-                            "dealer_location_phone": "90378312",
-                            "color_interior": "Black",
-                            "color_exterior": "Black",
-                            "attributes_length": "14",
-                            "attributes_width": "83",
-                            "attributes_gvwr": "14999",
-                            "attributes_axle_capacity": "7000",
-                            "attributes_axle_count": "2",
-                            "attributes_hitch_type": "Bumper",
-                            "ship_date": "2\/22\/2023",
-                            "description": "DTB 83\" x 14\', 2-7K Axles",
-                            "comments": "ES2 - 2 - 7,000 Lb Axles Straight (2 Elec. Brakes )\n000 - 6\" I-Beam Tongue\n000 - 6\" I-Beam Frame\nS62 - 48\" 10 ga. Dump Sides\n000 - Side Step Plate\n000 - ST235\/80 R16 LRE 10 Ply.\n000 - Bumper Pull Adj 14k Coupler 2 5\/16\n000 - Diamond Plate Fenders (Weld On)\n000 - Jack Spring Loaded Drop Leg 1-10K\n000 - Full Size Front Toolbox w\/Pump\n000 - Scissor Hoist TH-516\nR50 - Slide-IN Ramps 16\" x 80\"\n000 - Tarp System (Front Mount)\n000 - Lighting LED (OVAL 6\")\n000 - Standard Wiring Harness\n000 - D-Rings 3\" x 5\/8\" Weld On (4ech) Std.\n000 - Spare Tire Mt.\nC00 - Black\nBacked by IRONCLAD warranty – 3 yr structural, 2 yr component, 2 yr free roadside assistance",
-                            "photos": "https:\/\/statics.mynorstar.com\/Quotes\/Cap_7_cznrc{uzitymj{cu.png",
-                            "source": "NORSTAR"
-                        }',
-            ], $code, '50HDB1422P1087058'
-        ); */
+        $this->uploadRepository->shouldReceive('createOrUpdate')
+            ->once()
+            ->with(
+                $request
+            );
 
-        // When I call the bulkUpdateYear action using the well-formed request
-        $response = $controller->upload($request, $code, $this->feedUploaderService);
+        // When I call the upload action using the well-formed request
+        $response = $controller->upload($request, $code);
 
         // Then I should see that job wit a specific name was enqueued
         Queue::assertPushedOn('factory-feeds', DealerFeedImporterJob::class, function($job) use ($code) {
-            $job->handle();
+            $job->handle($this->factoryUpload);
             return true;
         });
-
-        //Log::shouldReceive('info')->with('Starting DealerFeedImporterJob', ['code' => $code]);
-
-        // $this->importerFactory->build($code);
-
-        // Log::shouldReceive('info')->with('Building for ' . $code);
-
-        // $this->factoryUpload->run($request->all());
 
         // And I should see that response status is 200*/
         self::assertEquals(JsonResponse::HTTP_OK, $response->status());
@@ -175,47 +112,7 @@ class UploadControllerTest extends IntegrationTestCase
     {
         return [
             'Norstar single transaction' => [
-                [
-                    'code' => 'norstar',
-                    'transactions' => [
-                        [
-                            'action' => 'addInventory',
-                            'parameters' => '{
-                                "stock": "DTB8314072ES2R50S62BLK",
-                                "vin": "50HDB1422P1087058",
-                                "model": "Dump",
-                                "year": "2022",
-                                "manufacturer": "NORSTAR",
-                                "brand": "IRON BULL",
-                                "condition": "new",
-                                "msrp": "14467.15",
-                                "price": "9910",
-                                "category": "Dump",
-                                "dealer_id": null,
-                                "dealer_name": "271 TRAILERS",
-                                "dealer_email": null,
-                                "dealer_location_street": "2601 N Main St",
-                                "dealer_location_city": "Paris",
-                                "dealer_location_state": "TX",
-                                "dealer_location_zip": "75460-9354",
-                                "dealer_location_phone": "90378312",
-                                "color_interior": "Black",
-                                "color_exterior": "Black",
-                                "attributes_length": "14",
-                                "attributes_width": "83",
-                                "attributes_gvwr": "14999",
-                                "attributes_axle_capacity": "7000",
-                                "attributes_axle_count": "2",
-                                "attributes_hitch_type": "Bumper",
-                                "ship_date": "2\/22\/2023",
-                                "description": "DTB 83\" x 14\', 2-7K Axles",
-                                "comments": "ES2 - 2 - 7,000 Lb Axles Straight (2 Elec. Brakes )\n000 - 6\" I-Beam Tongue\n000 - 6\" I-Beam Frame\nS62 - 48\" 10 ga. Dump Sides\n000 - Side Step Plate\n000 - ST235\/80 R16 LRE 10 Ply.\n000 - Bumper Pull Adj 14k Coupler 2 5\/16\n000 - Diamond Plate Fenders (Weld On)\n000 - Jack Spring Loaded Drop Leg 1-10K\n000 - Full Size Front Toolbox w\/Pump\n000 - Scissor Hoist TH-516\nR50 - Slide-IN Ramps 16\" x 80\"\n000 - Tarp System (Front Mount)\n000 - Lighting LED (OVAL 6\")\n000 - Standard Wiring Harness\n000 - D-Rings 3\" x 5\/8\" Weld On (4ech) Std.\n000 - Spare Tire Mt.\nC00 - Black\nBacked by IRONCLAD warranty – 3 yr structural, 2 yr component, 2 yr free roadside assistance",
-                                "photos": "https:\/\/statics.mynorstar.com\/Quotes\/Cap_7_cznrc{uzitymj{cu.png",
-                                "source": "NORSTAR"
-                            }'
-                        ]
-                    ]
-                ]
+                '{"code":"norstar","transactions":[{"action":"addInventory","parameters":{"stock":"DTB8314072ES2R50S62BLK","vin":"50HDB1422P1087058","model":"Dump","year":"2022","manufacturer":"NORSTAR","brand":"IRON BULL","condition":"new","msrp":"14467.15","price":"9910","category":"Dump","dealer_id":null,"dealer_name":"271 TRAILERS","dealer_email":null,"dealer_location_street":"2601 N Main St","dealer_location_city":"Paris","dealer_location_state":"TX","dealer_location_zip":"75460-9354","dealer_location_phone":"90378312","color_interior":"Black","color_exterior":"Black","attributes_length":"14","attributes_width":"83","attributes_gvwr":"14999","attributes_axle_capacity":"7000","attributes_axle_count":"2","attributes_hitch_type":"Bumper","ship_date":"2\\\/22\\\/2023","description":"DTB 83\" x 14\', 2-7K Axles","comments":"ES2 - 2 - 7,000 Lb Axles Straight (2 Elec. Brakes )\n000 - 6\" I-Beam Tongue\n000 - 6\" I-Beam Frame\nS62 - 48\" 10 ga. Dump Sides\n000 - Side Step Plate\n000 - ST235\\\/80 R16 LRE 10 Ply.\n000 - Bumper Pull Adj 14k Coupler 2 5\\\/16\n000 - Diamond Plate Fenders (Weld On)\n000 - Jack Spring Loaded Drop Leg 1-10K\n000 - Full Size Front Toolbox w\\\/Pump\n000 - Scissor Hoist TH-516\nR50 - Slide-IN Ramps 16\" x 80\"\n000 - Tarp System (Front Mount)\n000 - Lighting LED (OVAL 6\")\n000 - Standard Wiring Harness\n000 - D-Rings 3\" x 5\\\/8\" Weld On (4ech) Std.\n000 - Spare Tire Mt.\nC00 - Black\nBacked by IRONCLAD warranty \u2013 3 yr structural, 2 yr component, 2 yr free roadside assistance","photos":"https:\\/\\/statics.mynorstar.com\\/Quotes\\/Cap_7_cznrc{uzitymj{cu.png","source":"NORSTAR"}}]}'
             ]
         ];
     }

@@ -57,7 +57,7 @@ class FactoryUpload
                 switch ($transaction['action']) {
                     // Add inventory unit
                     case 'addInventory':
-                        Log::channel('single')->info("{$json['code']} Import: adding inventory with VIN: " . $vin);
+                        Log::info("{$json['code']} Import: adding inventory with VIN: " . $vin);
                         $this->repository->createOrUpdate([
                             'code' => $json['code'],
                             'key' => $vin,
@@ -69,7 +69,7 @@ class FactoryUpload
 
                     // Add dealer (Leaving this here if needed in the future)
                     case 'addDealer':
-                        Log::channel('single')->info("{$json['code']} Import: adding dealer", [
+                        Log::info("{$json['code']} Import: adding dealer", [
                             'dealer' => $transaction['parameters']
                         ]);
                         $this->repository->createOrUpdate([
@@ -82,10 +82,10 @@ class FactoryUpload
                         break;
 
                     default:
-                        Log::channel('single')->warning("{$json['code']} Import: invalid action {$transaction['action']}");
+                        Log::warning("{$json['code']} Import: invalid action {$transaction['action']}");
                 }
             } else {
-                Log::channel('single')->warning("{$json['code']} importer uploader error: transaction row not valid");
+                Log::warning("{$json['code']} importer uploader error: transaction row not valid");
             }
         }
     }
