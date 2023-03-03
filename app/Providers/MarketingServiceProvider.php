@@ -4,8 +4,12 @@ namespace App\Providers;
 
 use App\Repositories\CRM\Text\VerifyRepository;
 use App\Repositories\CRM\Text\VerifyRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\BillingRepository;
+use App\Repositories\Marketing\Craigslist\BillingRepositoryInterface;
 use App\Repositories\Marketing\TunnelRedisRepository;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
+use App\Repositories\Marketing\VirtualCardRepository;
+use App\Repositories\Marketing\VirtualCardRepositoryInterface;
 use App\Repositories\Marketing\Facebook\MarketplaceRepository;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\FilterRepository;
@@ -18,8 +22,12 @@ use App\Repositories\Marketing\Facebook\ErrorRepository;
 use App\Repositories\Marketing\Facebook\ErrorRepositoryInterface;
 use App\Repositories\Marketing\Facebook\PostingRedisRepository;
 use App\Repositories\Marketing\Facebook\PostingRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\AccountRepository;
+use App\Repositories\Marketing\Craigslist\AccountRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ActivePostRepository;
 use App\Repositories\Marketing\Craigslist\ActivePostRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\DealerRepository;
+use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\InventoryRepository;
 use App\Repositories\Marketing\Craigslist\InventoryRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\SchedulerRepository;
@@ -38,6 +46,8 @@ use App\Services\Marketing\Craigslist\ValidateService;
 use App\Services\Marketing\Craigslist\ValidateServiceInterface;
 use App\Services\Dispatch\Facebook\MarketplaceService as MarketplaceDispatchService;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface as MarketplaceDispatchServiceInterface;
+use App\Services\Dispatch\Craigslist\CraigslistService as CraigslistDispatchService;
+use App\Services\Dispatch\Craigslist\CraigslistServiceInterface as CraigslistDispatchServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class MarketingServiceProvider extends ServiceProvider
@@ -56,9 +66,12 @@ class MarketingServiceProvider extends ServiceProvider
         $this->app->bind(ValidateServiceInterface::class, ValidateService::class);
 
         // Marketing Repositories
+        $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
         $this->app->bind(ActivePostRepositoryInterface::class, ActivePostRepository::class);
+        $this->app->bind(DealerRepositoryInterface::class, DealerRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(SchedulerRepositoryInterface::class, SchedulerRepository::class);
+        $this->app->bind(BillingRepositoryInterface::class, BillingRepository::class);
         $this->app->bind(MarketplaceRepositoryInterface::class, MarketplaceRepository::class);
         $this->app->bind(FilterRepositoryInterface::class, FilterRepository::class);
         $this->app->bind(ListingRepositoryInterface::class, ListingRepository::class);
@@ -66,6 +79,7 @@ class MarketingServiceProvider extends ServiceProvider
         $this->app->bind(ErrorRepositoryInterface::class, ErrorRepository::class);
         $this->app->bind(ProfileRepositoryInterface::class, ProfileRepository::class);
         $this->app->bind(VerifyRepositoryInterface::class, VerifyRepository::class);
+        $this->app->bind(VirtualCardRepositoryInterface::class, VirtualCardRepository::class);
 
         // Dispatch (Redis) Repositories
         $this->app->bind(ClientRepositoryInterface::class, ClientRedisRepository::class);
@@ -74,6 +88,7 @@ class MarketingServiceProvider extends ServiceProvider
 
         // Dispatch Services
         $this->app->bind(MarketplaceDispatchServiceInterface::class, MarketplaceDispatchService::class);
+        $this->app->bind(CraigslistDispatchServiceInterface::class, CraigslistDispatchService::class);
     }
 
 }
