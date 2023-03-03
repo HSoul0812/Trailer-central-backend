@@ -10,12 +10,14 @@ use App\Services\Import\Feed\FactoryUpload;
 use App\Repositories\Feed\FeedApiUploadsRepository;
 
 /**
- * Test for \App\Services\Import\Feed
- *
  * class App\Services\Import\Feed
- * @package Tests\Unit\Services\Import\Feed
  *
  * @coversDefaultClass \App\Services\Import\Feed\FactoryUpload
+ *
+ * @group Integrations
+ * @group FactoryFeeds
+ *
+ * @package Tests\Unit\Services\Import\Feed
  */
 class FactoryUploadTest extends TestCase
 {

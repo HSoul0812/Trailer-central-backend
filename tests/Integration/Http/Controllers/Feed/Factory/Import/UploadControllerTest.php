@@ -2,19 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Tests\Integration\Http\Controllers\Bulk\Parts;
+namespace Tests\Integration\Http\Controllers\Feed\Factory\Import;
 
 use Mockery;
 
 use App\Repositories\Feed\FeedApiUploadsRepository;
 use App\Services\Import\Feed\FactoryUpload;
-use App\Services\Import\Feed\ImporterFactory;
 
 use App\Exceptions\Common\BusyJobException;
 use App\Http\Controllers\v1\Feed\UploadController;
 use App\Http\Requests\Feed\Factory\UploadFactoryFeedUnitRequest;
 use App\Jobs\Import\Feed\DealerFeedImporterJob;
-use App\Services\Import\Feed\DealerFeedUploaderService;
 use Dingo\Api\Exception\ResourceException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
@@ -27,8 +25,14 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Queue;
 
 /**
- * @covers \App\Http\Controllers\v1\Bulk\Parts\BulkUploadController
- * @group MonitoredJobs
+ * class UploadControllerTest
+ *
+ * @covers \App\Http\Controllers\v1\Feed\UploadController
+ *
+ * @group Integrations
+ * @group FactoryFeeds
+ *
+ * @package Tests\Integration\Http\Controllers\Feed\Factory\Import
  */
 class UploadControllerTest extends IntegrationTestCase
 {
