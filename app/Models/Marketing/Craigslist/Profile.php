@@ -176,16 +176,6 @@ class Profile extends Model
     }
 
     /**
-     * Get Market
-     * 
-     * @return BelongsTo
-     */
-    public function market(): BelongsTo
-    {
-        return $this->belongsTo(Market::class, 'city_code', 'market_city');
-    }
-
-    /**
      * Get Subarea
      * 
      * @return BelongsTo
@@ -195,6 +185,33 @@ class Profile extends Model
         return $this->belongsTo(Subarea::class, 'city_location', 'name');
     }
 
+    /**
+     * Get Market
+     * 
+     * @return BelongsTo
+     */
+    public function market(): BelongsTo
+    {
+        return $this->belongsTo(Market::class, 'city_code', 'market_city');
+    }
+
+
+    /**
+     * Get Initial URL
+     * 
+     * @return string
+     */
+    public function getInitialUrlAttribute(): string {
+        var_dump($this->market_city);
+        var_dump($this->market);
+        $domain = $this->market->city_domain;
+
+        // Append Lang/CC
+        $domain .= '?lang=en&cc=us';
+
+        // Return Final URL
+        return $domain;
+    }
 
     /**
      * Get Country

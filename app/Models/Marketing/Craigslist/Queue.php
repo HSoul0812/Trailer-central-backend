@@ -171,21 +171,6 @@ class Queue extends Model
 
 
     /**
-     * Get Initial URL Profile
-     * 
-     * @return string
-     */
-    public function getInitialUrlAttribute(): string {
-        $domain = $this->profile->market->city_domain;
-
-        // Append Lang/CC
-        $domain .= '?lang=en&cc=us';
-
-        // Return Final URL
-        return $domain;
-    }
-
-    /**
      * Get Type From Parameters or Profile
      * 
      * @return string
