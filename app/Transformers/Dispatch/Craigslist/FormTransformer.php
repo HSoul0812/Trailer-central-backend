@@ -2,7 +2,7 @@
 
 namespace App\Transformers\Dispatch\Craigslist;
 
-use App\Services\Marketing\Craigslist\DTOs\ClappPost;
+use App\Services\Dispatch\Craigslist\DTOs\ClappPost;
 use League\Fractal\TransformerAbstract;
 
 /**
