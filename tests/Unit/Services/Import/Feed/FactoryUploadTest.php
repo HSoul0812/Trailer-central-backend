@@ -4,6 +4,7 @@ namespace Tests\Unit\Services\Import\Feed;
 
 use Mockery;
 use Tests\TestCase;
+use Illuminate\Support\Facades\Log;
 use App\Exceptions\PropertyDoesNotExists;
 use App\Models\Feed\Uploads\FeedApiUpload;
 use App\Services\Import\Feed\FactoryUpload;
@@ -44,23 +45,26 @@ class FactoryUploadTest extends TestCase
      *
      * @throws PropertyDoesNotExists
      */
-    public function testCanAddInventory($data) {
-        $apiUpload = $this->getEloquentMock(FeedApiUpload::class);
-
+    public function testCanAddInventory($code, $type, $vin, $data) {
         $decode = json_decode($data, true);
+        $inventory = json_encode($decode['transactions'][0]['parameters']);
 
         $this->uploadRepository
             ->shouldReceive('createOrUpdate')
             ->with([
-                'code' => $decode['code'],
-                'type' => 'inventory',
-                'data' => $data,
-            ])
-            ->once()
-            ->andReturn($apiUpload);
+                'code' => $code,
+                'key' => $vin,
+                'type' => $type,
+                'data' => $inventory,
+            ], $code, $vin)
+            ->once();
+
+        Log::shouldReceive('info')->with("{$code} Import: adding inventory with VIN: " . $vin);
 
         $upload = app(FactoryUpload::class);
-        $upload->run(json_decode($data, true));
+        $result = $upload->run(json_decode($data, true));
+
+        $this->assertNull($result);
     }
 
     /**
@@ -70,8 +74,6 @@ class FactoryUploadTest extends TestCase
      * @throws PropertyDoesNotExists
      */
     public function testCantAddInventory($data) {
-        $this->getEloquentMock(FeedApiUpload::class);
-
         $this->expectExceptionMessage('transactions invalid or not found in rawData');
 
         $upload = app(FactoryUpload::class);
@@ -82,7 +84,10 @@ class FactoryUploadTest extends TestCase
     {
         return [
             'Norstar' => [
-                '{
+                'code' => 'norstar',
+                'type' => 'inventory',
+                'vin' => '50HDB1422P1087058',
+                'data' => '{
                     "code":"norstar",
                     "transactions": [
                         {
@@ -114,10 +119,8 @@ class FactoryUploadTest extends TestCase
                                 "attributes_axle_capacity":"7000",
                                 "attributes_axle_count":"2",
                                 "attributes_hitch_type":"Bumper",
-                                "ship_date":"2\\\/22\\\/2023",
-                                "description":"DTB 83\" x 14\', 2-7K Axles",
-                                "comments":"ES2 - 2 - 7,000 Lb Axles Straight (2 Elec. Brakes )\n000 - 6\" I-Beam Tongue\n000 - 6\" I-Beam Frame\nS62 - 48\" 10 ga. Dump Sides\n000 - Side Step Plate\n000 - ST235\\\/80 R16 LRE 10 Ply.\n000 - Bumper Pull Adj 14k Coupler 2 5\\\/16\n000 - Diamond Plate Fenders (Weld On)\n000 - Jack Spring Loaded Drop Leg 1-10K\n000 - Full Size Front Toolbox w\\\/Pump\n000 - Scissor Hoist TH-516\nR50 - Slide-IN Ramps 16\" x 80\"\n000 - Tarp System (Front Mount)\n000 - Lighting LED (OVAL 6\")\n000 - Standard Wiring Harness\n000 - D-Rings 3\" x 5\\\/8\" Weld On (4ech) Std.\n000 - Spare Tire Mt.\nC00 - Black\nBacked by IRONCLAD warranty \u2013 3 yr structural, 2 yr component, 2 yr free roadside assistance",
-                                "photos":"https:\\/\\/statics.mynorstar.com\\/Quotes\\/Cap_7_cznrc{uzitymj{cu.png",
+                                "ship_date":"2/22/2023",
+                                "photos":"https://statics.mynorstar.com/Quotes/Cap_7_cznrc{uzitymj{cu.png",
                                 "source":"NORSTAR"
                             }
                         }
@@ -125,7 +128,10 @@ class FactoryUploadTest extends TestCase
                 }'
             ],
             'Lt' => [
-                '{
+                'code' => 'lt',
+                'type' => 'inventory',
+                'vin' => '4ZEDK2021N1276855',
+                'data' => '{
                     "code": "lt",
                     "transactions": [
                         {
@@ -145,8 +151,11 @@ class FactoryUploadTest extends TestCase
                 }'
             ],
             'Lgs' => [
-                '{
-                    "code": "lt",
+                'code' => 'lgs',
+                'type' => 'inventory',
+                'vin' => '5JW7A1924P7081411',
+                'data' => '{
+                    "code": "lgs",
                     "transactions": [
                         {
                             "action":"addInventory",
@@ -176,7 +185,10 @@ class FactoryUploadTest extends TestCase
     {
         return [
             'Norstar without data' => [
-                '{
+                'code' => 'norstar',
+                'type' => 'inventory',
+                'vin' => '50HDB1422P1087058',
+                'data' => '{
                     "code":"norstar",
                     "transactions": []
                 }'

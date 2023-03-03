@@ -87,13 +87,6 @@ class UploadControllerTest extends IntegrationTestCase
         // And run the factory upload once
         $this->factoryUpload->shouldReceive('run')->once();
 
-        // To finally execute the createOrUpdate method once
-        $this->uploadRepository->shouldReceive('createOrUpdate')
-            ->once()
-            ->with(
-                $request
-            );
-
         // When I call the upload action using the well-formed request
         $response = $controller->upload($request, $code);
 
