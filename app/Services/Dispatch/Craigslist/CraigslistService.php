@@ -291,7 +291,7 @@ class CraigslistService implements CraigslistServiceInterface
         }
 
         // Return Results After Checking Balance
-        return $this->validateBalance($listings, $params['balance']);
+        return $this->validateBalance($listings, $clappForm->balance);
     }
 
     /**
