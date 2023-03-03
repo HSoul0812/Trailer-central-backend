@@ -9,6 +9,8 @@ use App\Repositories\Marketing\VirtualCardRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\AccountRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\SessionRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\QueueRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
 use App\Services\Dispatch\Craigslist\DTOs\ClappPost;
 use App\Services\Dispatch\Craigslist\DTOs\ClappError;
@@ -50,6 +52,16 @@ class CraigslistService implements CraigslistServiceInterface
     protected $profiles;
 
     /**
+     * @var SessionRepositoryInterface
+     */
+    protected $sessions;
+
+    /**
+     * @var QueueRepositoryInterface
+     */
+    protected $queues;
+
+    /**
      * @var VirtualRepositoryInterface
      */
     protected $cards;
@@ -65,6 +77,8 @@ class CraigslistService implements CraigslistServiceInterface
      * @param DealerRepositoryInterface $dealers
      * @param AccountRepositoryInterface $accounts
      * @param ProfileRepositoryInterface $profiles
+     * @param SessionRepositoryInterface $sessions
+     * @param QueueRepositoryInterface $queues
      * @param VirtualCardRepositoryInterface $cards
      * @param TunnelRepositoryInterface $tunnels
      */
@@ -73,6 +87,8 @@ class CraigslistService implements CraigslistServiceInterface
         SchedulerRepositoryInterface $scheduler,
         AccountRepositoryInterface $accounts,
         ProfileRepositoryInterface $profiles,
+        SessionRepositoryInterface $sessions,
+        QueueRepositoryInterface $queues,
         VirtualCardRepositoryInterface $cards,
         TunnelRepositoryInterface $tunnels
     ) {
@@ -80,6 +96,8 @@ class CraigslistService implements CraigslistServiceInterface
         $this->scheduler = $scheduler;
         $this->accounts = $accounts;
         $this->profiles = $profiles;
+        $this->sessions = $sessions;
+        $this->queues = $queues;
         $this->cards = $cards;
         $this->tunnels = $tunnels;
 
