@@ -110,6 +110,11 @@ class ClappPost
     private $contactName;
 
     /**
+     * @var string
+     */
+    private $contactPhone;
+
+    /**
      * @var int (0 or 1)
      */
     private $contactPhoneOk;
@@ -238,6 +243,7 @@ class ClappPost
             'ask' => floor($qData->price),
             'show_phone_ok' => $qData->hasPhone(),
             'contact_name' => $qData->trimmedContactName(),
+            'contact_phone' => $qData->phone,
             'contact_phone_ok' => $qData->hasPhone(),
             'contact_phone_ext' => '',
             'geographic_area' => strtolower($qData->location),
