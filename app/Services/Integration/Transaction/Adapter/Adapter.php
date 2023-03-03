@@ -36,7 +36,8 @@ abstract class Adapter
 
     public const ADAPTER_MAPPING = [
         'Adapter_Utc_Inventory' => 'App\Services\Integration\Transaction\Adapter\Utc\Inventory',
-        'Adapter_Pj_Inventory' => 'App\Services\Integration\Transaction\Adapter\Pj\Inventory'
+        'Adapter_Pj_Inventory' => 'App\Services\Integration\Transaction\Adapter\Pj\Inventory',
+        'Adapter_Bigtex_Inventory' => 'App\Services\Integration\Transaction\Adapter\Bigtex\Inventory',
     ];
 
     /**
@@ -136,12 +137,14 @@ abstract class Adapter
             $this->conversions = $this->dealerIncomingMappingRepository->getAll(['integration_name' => $this->apiKey]);
         }
 
-        $searchArray = [
+        $searchArrayOrg = [
             [$type, $mapFrom],
             [strtolower($type), $mapFrom],
             [$type, strtolower($mapFrom)],
             [strtolower($type), strtolower($mapFrom)],
         ];
+
+        $searchArray = array_map("unserialize", array_unique(array_map("serialize", $searchArrayOrg)));
 
         foreach ($searchArray as $item) {
             /** @var DealerIncomingMapping $dealerIncomingMapping */
