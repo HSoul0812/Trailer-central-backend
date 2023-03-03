@@ -20,13 +20,17 @@ class FormTransformer extends TransformerAbstract
     {
         // Initialize Params
         return [
-            'type'     => $clapp->categoryType,
-            'category' => $clapp->qData->postCategory,
-            'subarea'  => $clapp->subarea,
-            'hood'     => $clapp->geographicArea,
-            'market'   => $clapp->market,
-            'images'   => $clapp->qData->images,
-            'post' => $this->byCategory($clapp, [
+            'inventory_id' => $clapp->queue->inventory_id,
+            'session_id'   => $clapp->queue->session_id,
+            'queue_id'     => $clapp->queue->queue_id,
+            'profile_id'   => $clapp->queue->profile_id,
+            'type'         => $clapp->categoryType,
+            'category'     => $clapp->qData->postCategory,
+            'subarea'      => $clapp->subarea,
+            'hood'         => $clapp->geographicArea,
+            'market'       => $clapp->market,
+            'images'       => $clapp->qData->images,
+            'post'         => $this->byCategory($clapp, [
                 'FromEMail'        => $clapp->fromEmail,
                 'ConfirmEMail'     => $clapp->confirmEmail,
                 'PostingTitle'     => $clapp->postingTitle,
