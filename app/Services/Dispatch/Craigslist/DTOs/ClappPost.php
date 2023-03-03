@@ -3,7 +3,7 @@
 namespace App\Services\Dispatch\Craigslist\DTOs;
 
 use App\Services\Dispatch\Craigslist\DTOs\ClappQueue;
-use App\Models\Marketing\Craigslist\Session;
+use App\Models\Marketing\Craigslist\Queue;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
@@ -40,9 +40,9 @@ class ClappPost
     private $queueData;
 
     /**
-     * @var Session
+     * @var Queue
      */
-    private $session;
+    private $queue;
 
 
     /**
@@ -189,51 +189,51 @@ class ClappPost
     /**
      * Create ClappQueue From Session/Queue Data
      * 
-     * @param Session $session
+     * @param Queue $queue
      * @return ClappPost
      */
-    public static function fill(Session $session): ClappPost {
+    public static function fill(Queue $queue): ClappPost {
         // Create ClappQueue From Session/Queue
-        $qData = ClappQueue::fill($session);
+        $qData = ClappQueue::fill($queue);
 
         // Create ClappPost Results
         return new ClappPost([
             'queue_data' => $qData,
-            'session' => $session,
-            'category' => $session->inventory->category,
-            'category_type' => $session->profile->category->grouping,
-            'subarea' => strtolower($session->profile->subarea_alt_name),
+            'session' => $queue,
+            'category' => $queue->inventory->category,
+            'category_type' => $queue->profile->category->grouping,
+            'subarea' => strtolower($queue->profile->subarea_alt_name),
             'neighborhood' => strtolower($qData->geographicArea),
             'market' => $this->profile->city_code,
-            'from_email' => $session->profile->craigslist_user,
-            'confirm_email' => $session->profile->craigslist_user,
+            'from_email' => $queue->profile->craigslist_user,
+            'confirm_email' => $queue->profile->craigslist_user,
             'posting_title' => $qData->title,
-            'privacy' => $session->profile->cl_privacy,
+            'privacy' => $queue->profile->cl_privacy,
             'ask' => floor($qData->price),
             'show_phone_ok' => $qData->hasPhone(),
             'contact_name' => $qData->trimmedContactName(),
             'contact_phone_ok' => $qData->hasPhone(),
             'contact_phone_ext' => '',
             'geographic_area' => $qData->location,
-            'cross_street1' => $session->profile->map_street,
-            'cross_street2' => $session->profile->map_cross_street,
-            'city' => $session->profile->map_city,
-            'region' => $session->profile->map_state,
-            'country' => $session->profile->country,
+            'cross_street1' => $queue->profile->map_street,
+            'cross_street2' => $queue->profile->map_cross_street,
+            'city' => $queue->profile->map_city,
+            'region' => $queue->profile->map_state,
+            'country' => $queue->profile->country,
             'postal' => $qData->postal,
             'posting_body' => $qData->trimmedBody(),
             'language' => self::LANGUAGE_DEFAULT,
-            'condition' => $this->clCondition($session->inventory->condition),
-            'see_my_other' => $session->profile->show_more_ads ? 'Y' : 'N',
-            'want_a_map' => $session->profile->use_map ? 'Y' : 'N',
-            'vin' => $session->inventory->vin,
-            'year' => $session->inventory->year,
-            'color' => $session->inventory->attributes['color'] ?? '',
-            'miles' => $session->inventory->attributes['mileage'] ?? '',
-            'fuel_type' => $session->inventory->attributes['fuel_type'] ?? '',
-            'length' => $session->inventory->length,
-            'overall_length' => $session->inventory->attributes['overall_length'] ?? 0,
-            'propulsion' => $session->inventory->attributes['propulsion'] ?? ''
+            'condition' => $this->clCondition($queue->inventory->condition),
+            'see_my_other' => $queue->profile->show_more_ads ? 'Y' : 'N',
+            'want_a_map' => $queue->profile->use_map ? 'Y' : 'N',
+            'vin' => $queue->inventory->vin,
+            'year' => $queue->inventory->year,
+            'color' => $queue->inventory->attributes['color'] ?? '',
+            'miles' => $queue->inventory->attributes['mileage'] ?? '',
+            'fuel_type' => $queue->inventory->attributes['fuel_type'] ?? '',
+            'length' => $queue->inventory->length,
+            'overall_length' => $queue->inventory->attributes['overall_length'] ?? 0,
+            'propulsion' => $queue->inventory->attributes['propulsion'] ?? ''
         ]);
     }
 

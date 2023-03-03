@@ -2,7 +2,7 @@
 
 namespace App\Services\Dispatch\Craigslist\DTOs;
 
-use App\Models\Marketing\Craigslist\Session;
+use App\Models\Marketing\Craigslist\Queue;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
@@ -107,27 +107,27 @@ class ClappQueue
     /**
      * Create ClappQueue From Session/Queue Data
      * 
-     * @param Session $session
-     * @return ClappPost
+     * @param Queue $queue
+     * @return ClappQueue
      */
-    public static function fill(Session $session): ClappPost {
+    public static function fill(Queue $queue): ClappQueue {
         // Create ClappQueue From Session/Queue
         return new ClappQueue([
-            'type' => $session->queue->type,
-            'location' => $session->profile->location,
-            'post_category' => $session->queue->category,
-            'costs' => $session->profile->costs,
-            'title' => $session->queue->title,
-            'stock' => $session->queue->stock,
-            'price' => $session->queue->price,
-            'body' => $session->queue->body,
-            'make' => $session->queue->make,
-            'model' => $session->queue->model,
-            'size' => $session->queue->size,
-            'images' => $session->queue->images,
-            'contact_name' => $session->profile->contact_name,
-            'phone' => $session->profile->phone,
-            'postal' => $session->profile->postal
+            'type' => $queue->type,
+            'location' => $profile->location,
+            'post_category' => $queue->category,
+            'costs' => $profile->costs,
+            'title' => $queue->title,
+            'stock' => $queue->stock,
+            'price' => $queue->price,
+            'body' => $queue->body,
+            'make' => $queue->make,
+            'model' => $queue->model,
+            'size' => $queue->size,
+            'images' => $queue->images,
+            'contact_name' => $profile->contact_name,
+            'phone' => $profile->phone,
+            'postal' => $profile->postal
         ]);
     }
 
