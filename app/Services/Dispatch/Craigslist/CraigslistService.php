@@ -160,6 +160,7 @@ class CraigslistService implements CraigslistServiceInterface
         ]);
 
         // Get Parameters for DealerCraigslist
+        $params['balance'] = $clapp->balance->balance;
         $dealerClapp = [
             'dealer_id'    => $clapp->dealer_id,
             'balance'      => $clapp->balance->balance,
@@ -291,7 +292,7 @@ class CraigslistService implements CraigslistServiceInterface
         }
 
         // Return Results After Checking Balance
-        return $this->validateBalance($listings, $clappForm->balance);
+        return $this->validateBalance($listings, $params['balance']);
     }
 
     /**
