@@ -35,7 +35,7 @@ class SessionRepository implements SessionRepositoryInterface {
      * @return Session
      */
     public function create($params) {
-        // Create Active Session
+        // Create Session
         return Session::create($params);
     }
 
@@ -50,13 +50,13 @@ class SessionRepository implements SessionRepositoryInterface {
     }
 
     /**
-     * Get Active Session
+     * Get Session
      * 
      * @param array $params
      * @return Session
      */
     public function get($params) {
-        // CLID Exists?
+        // Session ID Exists?
         if(isset($params['session_id']) && $params['session_id']) {
             return Session::where('session_id', $params['session_id'])->firstOrFail();
         }
@@ -66,7 +66,7 @@ class SessionRepository implements SessionRepositoryInterface {
     }
 
     /**
-     * Get All Active Sessions That Match Params
+     * Get All Sessions That Match Params
      * 
      * @param array $params
      * @return Collection<Session>
@@ -116,7 +116,7 @@ class SessionRepository implements SessionRepositoryInterface {
         $session = $this->get($params);
 
         DB::transaction(function() use (&$session, $params) {
-            // Fill Active Session Details
+            // Fill Session Details
             $session->fill($params)->save();
         });
 

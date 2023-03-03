@@ -35,7 +35,7 @@ class QueueRepository implements QueueRepositoryInterface {
      * @return Queue
      */
     public function create($params) {
-        // Create Active Queue
+        // Create Queue
         return Queue::create($params);
     }
 
@@ -56,9 +56,9 @@ class QueueRepository implements QueueRepositoryInterface {
      * @return Queue
      */
     public function get($params) {
-        // CLID Exists?
-        if(isset($params['clid']) && $params['clid']) {
-            return Queue::where('clid', $params['clid'])->firstOrFail();
+        // Queue ID Exists?
+        if(isset($params['queue_id']) && $params['queue_id']) {
+            return Queue::where('queue_id', $params['queue_id'])->firstOrFail();
         }
 
         // Find Queue By ID
@@ -66,7 +66,7 @@ class QueueRepository implements QueueRepositoryInterface {
     }
 
     /**
-     * Get All Active Queues That Match Params
+     * Get All Queues That Match Params
      * 
      * @param array $params
      * @return Collection<Queue>
@@ -116,7 +116,7 @@ class QueueRepository implements QueueRepositoryInterface {
         $queue = $this->get($params);
 
         DB::transaction(function() use (&$queue, $params) {
-            // Fill Active Session Details
+            // Fill Session Details
             $queue->fill($params)->save();
         });
 
