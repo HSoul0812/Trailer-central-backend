@@ -151,7 +151,7 @@ class ClappQueue
      *                           phone: string,
      *                           postal: string}>
      */
-    public function json(): array {
+    public function json(): string {
         return $this->clEncodeJson([
             'type' => $this->type,
             'location' => $this->location,
