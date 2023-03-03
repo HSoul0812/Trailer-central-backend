@@ -55,7 +55,7 @@ class DealerCraigslist
     /**
      * @const array<string> Craigslist Dealer Inventory Includes
      */
-    const INVENTORY_INCLUDE = [
+    const INVENTORY_INCLUDES = [
         self::INCLUDE_INVENTORY,
         self::INCLUDE_UPDATES
     ];
