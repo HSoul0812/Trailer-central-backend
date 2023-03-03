@@ -28,7 +28,6 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
             $name = $this->field->getName();
             $options = array_filter($term->getValues());
 
-
             if (empty($options)) {
                 $this->appendToQuery([
                     'bool' => [
@@ -45,7 +44,7 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
             }
 
             if (in_array($name, ['isRental', 'hasRamps'])) {
-                $options = array_map('boolval', $options);
+                $options = array_map('boolval', $term->getValues());
             }
 
             $queries = [

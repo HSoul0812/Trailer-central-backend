@@ -5,7 +5,10 @@ namespace App\Services\Dispatch\Craigslist;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
+use App\Repositories\Marketing\VirtualCardRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\AccountRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
 use App\Services\Dispatch\Craigslist\DTOs\DealerCraigslist;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -23,11 +26,36 @@ class CraigslistService implements CraigslistServiceInterface
      */
     const INTEGRATION_NAME = 'dispatch_craigslist';
 
+    /**
+     * @const array<string> Craigslist Dealer Available Includes
+     */
+    const AVAILABLE_INCLUDES = [
+        'accounts',
+        'profiles',
+        'cards',
+        'tunnels'
+    ];
+
 
     /**
      * @var DealerRepositoryInterface
      */
     protected $dealers;
+
+    /**
+     * @var AccountRepositoryInterface
+     */
+    protected $accounts;
+
+    /**
+     * @var ProfileRepositoryInterface
+     */
+    protected $profiles;
+
+    /**
+     * @var VirtualRepositoryInterface
+     */
+    protected $cards;
 
     /**
      * @var TunnelRepositoryInterface
@@ -38,13 +66,22 @@ class CraigslistService implements CraigslistServiceInterface
      * Construct Craigslist Dispatch Service
      *
      * @param DealerRepositoryInterface $dealers
+     * @param AccountRepositoryInterface $accounts
+     * @param ProfileRepositoryInterface $profiles
+     * @param VirtualCardRepositoryInterface $cards
      * @param TunnelRepositoryInterface $tunnels
      */
     public function __construct(
         DealerRepositoryInterface $dealers,
+        AccountRepositoryInterface $accounts,
+        ProfileRepositoryInterface $profiles,
+        VirtualCardRepositoryInterface $cards,
         TunnelRepositoryInterface $tunnels
     ) {
         $this->dealers = $dealers;
+        $this->accounts = $accounts;
+        $this->profiles = $profiles;
+        $this->cards = $cards;
         $this->tunnels = $tunnels;
 
         // Initialize Logger
@@ -83,66 +120,84 @@ class CraigslistService implements CraigslistServiceInterface
     /**
      * Get Craigslist Status
      *
-     * @return Coilection<DealerStatus>
-     */
-    public function status(array $params): Collection {
-        // Get All Craigslist Dealers
-        return $this->getDealers($params);
-    }
-
-
-    /**
-     * Get Dealer Inventory
-     *
-     * @param int $integrationId
      * @param array $params
-     * @return DealerFacebook
+     * @param null|float $startTime
+     * @return Collection<DealerStatus>
      */
-    /*public function dealer(int $integrationId, array $params, ?float $startTime = null): DealerFacebook {
+    public function status(array $params, ?float $startTime = null): Collection {
         // Get Integration
         if(empty($startTime)) {
             $startTime = microtime(true);
         }
-        $integration = $this->marketplace->get([
-            'id' => $integrationId
-        ]);
 
-        // Get Types
-        $type = !empty($params['type']) ? $params['type'] : CraigslistInventory::METHOD_DEFAULT;
-        if (empty(CraigslistStatus::INVENTORY_METHODS[$type])) {
-            $type = CraigslistInventory::METHOD_DEFAULT;
+        // Get All Craigslist Dealers
+        $dealers = $this->getDealers($params, $startTime);
+
+        // Log Time
+        $nowTime = microtime(true);
+        $this->log->info('Debug time after Returning Dealers Collection: ' . ($nowTime - $startTime));
+
+        // Return Dealers Collection
+        return $dealers;
+    }
+
+    /**
+     * Get Dealer Inventory
+     *
+     * @param int $dealerId
+     * @param array $params
+     * @param null|float $startTime
+     * @return DealerCraigslist
+     */
+    public function dealer(int $dealerId, array $params, ?float $startTime = null): DealerCraigslist {
+        // Get Integration
+        if(empty($startTime)) {
+            $startTime = microtime(true);
         }
 
-        // Get Facebook Dealer
-        $response = new DealerFacebook([
-            'dealer_id' => $integration->dealer_id,
-            'dealer_location_id' => $integration->dealer_location_id,
-            'dealer_name' => $integration->user->name,
-            'integration_id' => $integrationId,
-            'fb_username' => $integration->fb_username,
-            'fb_password' => $integration->fb_password,
-            'auth_username' => $integration->tfa_username,
-            'auth_password' => $integration->tfa_password,
-            'auth_code' => $integration->tfa_code,
-            'auth_type' => $integration->tfa_type,
-            'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
-            'missing' => !$integration->is_up_to_date ? $this->getInventory($integration, 'missing', $params) : null,
-            'sold' => !$integration->is_up_to_date ? $this->getInventory($integration, 'sold', $params) : null,
-            'posts_per_day' => $integration->posts_per_day ?? intval(config('marketing.fb.settings.limit.listings', 3))
-
+        // Get Craigslist Dealers
+        $clapp = $this->dealers->get([
+            'dealer_id' => $dealerId
         ]);
+
+        // Get Parameters for DealerCraigslist
+        $dealerClapp = [
+            'dealer_id'    => $clapp->dealer_id,
+            'slots'        => $clapp->slots,
+            'chrome_mode'  => $clapp->chrome_mode,
+            'since'        => $clapp->since,
+            'next'         => $clapp->next_session,
+            'dealer_name'  => $clapp->dealer->name,
+            'dealer_email' => $clapp->dealer->email,
+            'dealer_type'  => $clapp->dealer->type,
+            'dealer_state' => $clapp->dealer->state
+        ];
+
+        // Include Extra Features
+        foreach(self::AVAILABLE_INCLUDES as $include) {
+            if(!empty($params['include']) && in_array($include, $params['include'])) {
+                $dealerClapp[$include] = $this->$include->getAll(['dealer_id' => $dealerId]);
+            }
+            $nowTime = microtime(true);
+            $this->log->info('Debug time after include ' . $include . ': ' . ($nowTime - $startTime));
+        }
+        $response = new DealerCraigslist($dealerClapp);
+
+        // Log Time After Returning Results
         $nowTime = microtime(true);
         $this->log->info('Debug time after creating DealerFacebook: ' . ($nowTime - $startTime));
         return $response;
-    }*/
+    }
 
 
     /**
      * Get Dealers Signed Up with Craigslist
      *
+     * @param array $params
+     * @param null|float $startTime
      * @return Collection<DealerCraigslist>
      */
-    private function getDealers(array $params): Collection {
+    private function getDealers(array $params, ?float $startTime = null): Collection {
         // Empty Type?
         if(!isset($params['type'])) {
             $params['type'] = 'now';
@@ -157,9 +212,14 @@ class CraigslistService implements CraigslistServiceInterface
             'type' => $params['type']
         ]);
 
+        // Log Time
+        $nowTime = microtime(true);
+        $this->log->info('Debug time after Returning All CL Dealers: ' . ($nowTime - $startTime));
+
         // Loop Facebook Integrations
         $dealers = new Collection();
         foreach($dealerClapp as $clapp) {
+            // Append DealerCraigslist to Collection
             $dealers->push(new DealerCraigslist([
                 'dealer_id'    => $clapp->dealer_id,
                 'slots'        => $clapp->slots,
@@ -172,6 +232,10 @@ class CraigslistService implements CraigslistServiceInterface
                 'dealer_type'  => $clapp->dealer->type,
                 'dealer_state' => $clapp->dealer->state
             ]));
+
+            // Log Time
+            $this->log->info('Debug time after DealerCraigslist #' . $clapp->dealer_id .
+                                ': ' . (microtime(true) - $startTime));
         }
 
         // Return Dealers Collection
@@ -261,33 +325,5 @@ class CraigslistService implements CraigslistServiceInterface
                 //$this->notifySlack($msg, $psr);
             }
         }
-    }
-
-    /**
-     * Save Logs to Dispatch Logs
-     *
-     * @param CraigslistStep $step
-     * @return null|Error
-     */
-    private function reportError(CraigslistStep $step): ?Error {
-        // Create New FB Error From Returned Step Details
-        if($step->isError()) {
-            // Dismiss Existing Errors
-            $this->errors->dismissAll($step->marketplaceId, $step->inventoryId ?? 0);
-
-            // Return Error
-            return $this->errors->create([
-                'marketplace_id' => $step->marketplaceId,
-                'inventory_id' => $step->inventoryId,
-                'action' => $step->action,
-                'step' => $step->step,
-                'error_type' => $step->getErrorType(),
-                'error_message' => $step->message,
-                'expires_at' => $step->getExpiryTime()
-            ]);
-        }
-
-        // No Error, Return Null
-        return null;
     }
 }
