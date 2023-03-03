@@ -176,14 +176,15 @@ class CraigslistService implements CraigslistServiceInterface
         // Get Inventory if Needed
         foreach(DealerCraigslist::INVENTORY_INCLUDES as $include) {
             if(!empty($params['include']) && in_array($include, $params['include'])) {
-                if($params['include'] === DealerCraigslist::INCLUDE_INVENTORY) {
+                $nowTime = microtime(true);
+                if($include === DealerCraigslist::INCLUDE_INVENTORY) {
                     $dealerClapp[$include] = $this->getInventory($params, $startTime);
-                } elseif($params['include'] === DealerCraigslist::INCLUDE_UPDATES) {
+                    $this->log->info('Debug time after include ' . $include . ': ' . ($nowTime - $startTime));
+                } elseif($include === DealerCraigslist::INCLUDE_UPDATES) {
                     $dealerClapp[$include] = $this->getUpdates($params, $startTime);
+                    $this->log->info('Debug time after include ' . $include . ': ' . ($nowTime - $startTime));
                 }
             }
-            $nowTime = microtime(true);
-            $this->log->info('Debug time after include ' . $include . ': ' . ($nowTime - $startTime));
         }
 
         // Include Extra Features
