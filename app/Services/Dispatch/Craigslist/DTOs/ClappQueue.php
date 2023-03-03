@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Marketing\Craigslist\DTOs;
+namespace App\Services\Dispatch\Craigslist\DTOs;
 
 use App\Models\Marketing\Craigslist\Session;
 use App\Traits\WithConstructor;
@@ -9,7 +9,7 @@ use App\Traits\WithGetter;
 /**
  * Class ClappQueue
  * 
- * @package App\Services\Marketing\Craigslist\DTOs
+ * @package App\Services\Dispatch\Craigslist\DTOs
  */
 class ClappQueue
 {

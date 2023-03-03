@@ -3,11 +3,11 @@
 namespace App\Transformers\Dispatch\Craigslist;
 
 use App\Transformers\Dispatch\TunnelTransformer;
+use App\Transformers\Dispatch\Craigslist\FormTransformer;
+//use App\Transformers\Dispatch\Craigslist\UpdateTransformer;
 use App\Transformers\Marketing\VirtualCardTransformer;
 use App\Transformers\Marketing\Craigslist\AccountTransformer;
 use App\Transformers\Marketing\Craigslist\ProfileTransformer;
-use App\Transformers\Marketing\Craigslist\ClappFormTransformer;
-use App\Transformers\Marketing\Craigslist\ClappUpdateTransformer;
 use App\Services\Dispatch\Craigslist\DTOs\DealerCraigslist;
 use League\Fractal\TransformerAbstract;
 
@@ -24,7 +24,7 @@ class DealerTransformer extends TransformerAbstract
         'cards',
         'tunnels',
         'inventories',
-        'updates'
+        //'updates'
     ];
 
 
@@ -33,23 +33,23 @@ class DealerTransformer extends TransformerAbstract
      * @param ProfileTransformer $profileTransformer
      * @param TunnelTransformer $tunnelTransformer
      * @param VirtualCardTransformer $cardTransformer
-     * @param ClappFormTransformer $formTransformer
-     * @param ClappUpdateTransformer $updateTransformer
+     * @param FormTransformer $formTransformer
+     * @param UpdateTransformer $updateTransformer
      */
     public function __construct(
         AccountTransformer $accountTransformer,
         ProfileTransformer $profileTransformer,
         TunnelTransformer $tunnelTransformer,
         VirtualCardTransformer $cardTransformer,
-        ClappFormTransformer $formTransformer,
-        ClappUpdateTransformer $updateTransformer
+        FormTransformer $formTransformer/*,
+        UpdateTransformer $updateTransformer*/
     ) {
         $this->accountTransformer = $accountTransformer;
         $this->profileTransformer = $profileTransformer;
         $this->tunnelTransformer = $tunnelTransformer;
         $this->cardTransformer = $cardTransformer;
         $this->formTransformer = $formTransformer;
-        $this->updateTransformer = $updateTransformer;
+        //$this->updateTransformer = $updateTransformer;
     }
 
     /**
@@ -98,8 +98,8 @@ class DealerTransformer extends TransformerAbstract
         return $this->collection($dealer->inventories, $this->formTransformer);
     }
 
-    public function includeUpdates(DealerCraigslist $dealer)
+    /*public function includeUpdates(DealerCraigslist $dealer)
     {
         return $this->collection($dealer->updates, $this->updateTransformer);
-    }
+    }*/
 }

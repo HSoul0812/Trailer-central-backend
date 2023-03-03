@@ -10,6 +10,8 @@ use App\Repositories\Marketing\Craigslist\AccountRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
+use App\Services\Dispatch\Craigslist\DTOs\ClappForm;
+use App\Services\Dispatch\Craigslist\DTOs\ClappError;
 use App\Services\Dispatch\Craigslist\DTOs\DealerCraigslist;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -374,14 +376,14 @@ class CraigslistService implements CraigslistServiceInterface
      */
     private function markError(Session $session, string $error): bool {
         // Get Error Status
-        $error = ClappError::fill($error);
+        $err = ClappError::fill($error);
 
         // Update Session
         $post = $this->sessions->update([
             'session_id' => $session->session_id,
-            'status' => $error->status,
-            'state' => $error->state,
-            'text_status' => $error->textStatus
+            'status' => $err->status,
+            'state' => $err>state,
+            'text_status' => $err->textStatus
         ]);
 
         // Session Was Changed?
