@@ -222,12 +222,12 @@ trait CraigslistHelper
     /**
      * Format Length Dimensions in Feet/Inches
      * 
-     * @param int $ftput length in feet
-     * @param int $input length in inches
-     * @param string $mode feet|inches
+     * @param null|int $ftput length in feet
+     * @param null|int $input length in inches
+     * @param null|string $mode feet|inches
      * @return string of formatted result
      */
-    public function clFormatLengths(int $ftput = 0, int $input = 0, string $mode = 'feet') {
+    public function clFormatLengths(?int $ftput = 0, ?int $input = 0, ?string $mode = 'feet'): string {
         // Initialize Feet/Inches
         $feet = 0;
         $inches = 0;
@@ -252,7 +252,7 @@ trait CraigslistHelper
         if($mode === 'inches') {
             // Return 0 if 0
             if(empty($inFull)) {
-                return 0;
+                return '0';
             }
 
             // Display Inches
@@ -260,7 +260,7 @@ trait CraigslistHelper
         } else {
             // No Feet?
             if(empty($feet) && empty($inches)) {
-                return 0;
+                return '0';
             }
 
             // Inches Exist?
