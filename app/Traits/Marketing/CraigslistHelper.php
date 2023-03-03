@@ -283,12 +283,12 @@ trait CraigslistHelper
         // Json Is Array?
         if (is_array($json)) {
             foreach ($json as $k => $v) {
-                $json[$k] = $this->utf8ize($v);
+                $json[$k] = $this->clEncodeJson($v);
             }
         }
         else if(is_object($json)) {
             foreach ($json as $k => $v) {
-                $json->$k = $this->utf8ize($v);
+                $json->$k = $this->clEncodeJson($v);
             }
         }
         elseif(is_string($d)) {
