@@ -122,7 +122,7 @@ class UploadControllerTest extends IntegrationTestCase
                         {
                             "action":"addInventory",
                             "parameters": {
-                                "stock":"DTB8314072ES2R50S62BLK",+
+                                "stock":"DTB8314072ES2R50S62BLK",
                                 "vin":"50HDB1422P1087058",
                                 "model":"Dump",
                                 "year":"2022",
