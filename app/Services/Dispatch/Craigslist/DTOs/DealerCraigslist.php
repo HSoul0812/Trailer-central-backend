@@ -72,6 +72,11 @@ class DealerCraigslist
     private $dealerId;
 
     /**
+     * @var float
+     */
+    private $balance;
+
+    /**
      * @var int
      */
     private $slots;
