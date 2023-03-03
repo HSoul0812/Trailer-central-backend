@@ -203,7 +203,7 @@ class ClappPost
             'category' => $queue->inventory->category,
             'category_type' => $queue->profile->category->grouping,
             'subarea' => strtolower($queue->profile->subarea_alt_name),
-            'market' => $this->profile->city_code,
+            'market' => $queue->profile->city_code,
             'from_email' => $queue->profile->craigslist_user,
             'confirm_email' => $queue->profile->craigslist_user,
             'posting_title' => $qData->title,
