@@ -2,6 +2,7 @@
 
 namespace App\Services\Dispatch\Craigslist;
 
+use App\Models\Marketing\Craigslist\Queue;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
@@ -9,10 +10,14 @@ use App\Repositories\Marketing\VirtualCardRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\AccountRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\SessionRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\QueueRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
+use App\Services\Dispatch\Craigslist\DTOs\ClappPost;
+use App\Services\Dispatch\Craigslist\DTOs\ClappError;
 use App\Services\Dispatch\Craigslist\DTOs\DealerCraigslist;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use League\Fractal\Resource\Collection as Pagination;
 
 /**
  * Class CraigslistService
@@ -26,21 +31,16 @@ class CraigslistService implements CraigslistServiceInterface
      */
     const INTEGRATION_NAME = 'dispatch_craigslist';
 
-    /**
-     * @const array<string> Craigslist Dealer Available Includes
-     */
-    const AVAILABLE_INCLUDES = [
-        'accounts',
-        'profiles',
-        'cards',
-        'tunnels'
-    ];
-
 
     /**
      * @var DealerRepositoryInterface
      */
     protected $dealers;
+
+    /**
+     * @var SchedulerRepositoryInterface
+     */
+    protected $scheduler;
 
     /**
      * @var AccountRepositoryInterface
@@ -51,6 +51,16 @@ class CraigslistService implements CraigslistServiceInterface
      * @var ProfileRepositoryInterface
      */
     protected $profiles;
+
+    /**
+     * @var SessionRepositoryInterface
+     */
+    protected $sessions;
+
+    /**
+     * @var QueueRepositoryInterface
+     */
+    protected $queues;
 
     /**
      * @var VirtualRepositoryInterface
@@ -68,19 +78,27 @@ class CraigslistService implements CraigslistServiceInterface
      * @param DealerRepositoryInterface $dealers
      * @param AccountRepositoryInterface $accounts
      * @param ProfileRepositoryInterface $profiles
+     * @param SessionRepositoryInterface $sessions
+     * @param QueueRepositoryInterface $queues
      * @param VirtualCardRepositoryInterface $cards
      * @param TunnelRepositoryInterface $tunnels
      */
     public function __construct(
         DealerRepositoryInterface $dealers,
+        SchedulerRepositoryInterface $scheduler,
         AccountRepositoryInterface $accounts,
         ProfileRepositoryInterface $profiles,
+        SessionRepositoryInterface $sessions,
+        QueueRepositoryInterface $queues,
         VirtualCardRepositoryInterface $cards,
         TunnelRepositoryInterface $tunnels
     ) {
         $this->dealers = $dealers;
+        $this->scheduler = $scheduler;
         $this->accounts = $accounts;
         $this->profiles = $profiles;
+        $this->sessions = $sessions;
+        $this->queues = $queues;
         $this->cards = $cards;
         $this->tunnels = $tunnels;
 
@@ -161,8 +179,10 @@ class CraigslistService implements CraigslistServiceInterface
         ]);
 
         // Get Parameters for DealerCraigslist
+        $params['balance'] = $clapp->balance->balance;
         $dealerClapp = [
             'dealer_id'    => $clapp->dealer_id,
+            'balance'      => $clapp->balance->balance,
             'slots'        => $clapp->slots,
             'chrome_mode'  => $clapp->chrome_mode,
             'since'        => $clapp->since,
@@ -173,19 +193,33 @@ class CraigslistService implements CraigslistServiceInterface
             'dealer_state' => $clapp->dealer->state
         ];
 
+        // Get Inventory if Needed
+        foreach(DealerCraigslist::INVENTORY_INCLUDES as $include) {
+            if(!empty($params['include']) && in_array($include, $params['include'])) {
+                $nowTime = microtime(true);
+                if($include === DealerCraigslist::INCLUDE_INVENTORY) {
+                    $dealerClapp[$include] = $this->getInventory($params, $startTime);
+                    $this->log->info('Debug time after include ' . $include . ': ' . ($nowTime - $startTime));
+                } elseif($include === DealerCraigslist::INCLUDE_UPDATES) {
+                    $dealerClapp[$include] = $this->getUpdates($params, $startTime);
+                    $this->log->info('Debug time after include ' . $include . ': ' . ($nowTime - $startTime));
+                }
+            }
+        }
+
         // Include Extra Features
-        foreach(self::AVAILABLE_INCLUDES as $include) {
+        foreach(DealerCraigslist::AVAILABLE_INCLUDES as $include) {
             if(!empty($params['include']) && in_array($include, $params['include'])) {
                 $dealerClapp[$include] = $this->$include->getAll(['dealer_id' => $dealerId]);
+                $nowTime = microtime(true);
+                $this->log->info('Debug time after include ' . $include . ': ' . ($nowTime - $startTime));
             }
-            $nowTime = microtime(true);
-            $this->log->info('Debug time after include ' . $include . ': ' . ($nowTime - $startTime));
         }
         $response = new DealerCraigslist($dealerClapp);
 
         // Log Time After Returning Results
         $nowTime = microtime(true);
-        $this->log->info('Debug time after creating DealerFacebook: ' . ($nowTime - $startTime));
+        $this->log->info('Debug time after creating DealerCraigslist: ' . ($nowTime - $startTime));
         return $response;
     }
 
@@ -245,58 +279,143 @@ class CraigslistService implements CraigslistServiceInterface
     /**
      * Get Inventory to Post
      *
-     * @param Craigslist $integration
-     * @param string $type missing|updates|sold
      * @param array $params
-     * @return Pagination<InventoryFacebook>
+     * @param null|float $startTime
+     * @return Collection<ClappPost> | Collection<ClappUpdate>
      */
-    private function getInventory(Craigslist $integration, string $type, array $params, ?float $startTime = null): CraigslistInventory {
-        // Invalid Type? Return Empty Collection!
+    private function getInventory(array $params, ?float $startTime = null): Collection {
+        // Get Totals
         if(empty($startTime)) {
             $startTime = microtime(true);
         }
-        if(!isset(CraigslistStatus::INVENTORY_METHODS[$type])) {
-            return new Pagination();
-        }
-
-        // Get Method
-        $method = CraigslistStatus::INVENTORY_METHODS[$type];
-
-        $nowTime = microtime(true);
-        $this->log->info('Debug time BEFORE ' . $method . ': ' . ($nowTime - $startTime));
-
-        if ($type === CraigslistStatus::METHOD_MISSING) {
-            $maxListings = $integration->posts_per_day ?? config('marketing.fb.settings.limit.listings', 3);
-            $params['per_page'] = $maxListings - $this->listings->countFacebookPostings($integration);
+        if(!isset($params['per_page'])) {
+            $params['per_page'] = config('marketing.cl.settings.limit.inventories', 10);
         }
 
         // Get Inventory
-        $inventory = $this->listings->{$method}($integration, $params);
+        $queues = $this->scheduler->getReady($params);
 
+        // Log Debug on Getting Inventories or Updates
         $nowTime = microtime(true);
-        $this->log->info('Debug time after ' . $method . ': ' . ($nowTime - $startTime));
+        $this->log->info('Debug time after clapp inventories: ' . ($nowTime - $startTime));
 
         // Loop Through Inventory Items
         $listings = new Collection();
-        foreach ($inventory as $listing) {
-            if ($type === CraigslistStatus::METHOD_MISSING) {
-                $item = InventoryFacebook::getFromInventory($listing, $integration);
-            } else {
-                $item = InventoryFacebook::getFromListings($listing);
-            }
-
-            $listings->push($item);
+        foreach ($queues as $queue) {
             $nowTime = microtime(true);
-            $this->log->info('Debug time InventoryFacebook #' . $listing->inventory_id . ': ' . ($nowTime - $startTime));
+            $clappPost = ClappPost::fill($queue);
+            $this->queues->update($clappPost->getParams());
+            if($this->validatePost($queue, $clappPost)) {
+                $listings->push($clappPost);
+            }
+            $this->log->info('Debug time ClappPost #' . $queue->session_id . ': ' . ($nowTime - $startTime));
         }
 
-        // Append Paginator
-        $response = new CraigslistInventory([
-            'type' => $type,
-            'inventory' => $listings
-        ]);
-        return $response;
+        // Return Results After Checking Balance
+        return $this->validateBalance($listings, $params['balance']);
     }
+
+    /**
+     * Get Inventory to Update
+     *
+     * @param array $params
+     * @param null|float $startTime
+     * @return Collection<ClappPost> | Collection<ClappUpdate>
+     */
+    private function getUpdates(array $params, ?float $startTime = null): Collection {
+        // Get Totals
+        if(empty($startTime)) {
+            $startTime = microtime(true);
+        }
+        if(!isset($params['per_page'])) {
+            $params['per_page'] = config('marketing.cl.settings.limit.updates', 10);
+        }
+
+        // Get Inventory
+        $queues = $this->scheduler->getUpdates($params);
+
+        // Log Debug on Getting Inventories or Updates
+        $nowTime = microtime(true);
+        $this->log->info('Debug time after clapp updates: ' . ($nowTime - $startTime));
+
+        // Loop Through Inventory Items
+        $listings = new Collection();
+        foreach ($queues as $queue) {
+            $nowTime = microtime(true);
+            $listings->push(ClappUpdate::fill($queue));
+            $this->log->info('Debug time ClappUpdate #' . $queue->session_id . ': ' . ($nowTime - $startTime));
+        }
+
+        // Return Results
+        return $listings;
+    }
+
+
+    /**
+     * Check if the Current Post is Valid
+     * 
+     * @param Queue $queue
+     * @param ClappPost $clapp
+     * @return bool
+     */
+    private function validatePost(Queue $queue, ClappPost $clapp): bool {
+        return true;
+    }
+
+    /**
+     * Check if the Dealer Has Enough Balance for All Posts
+     * 
+     * @param Collection<ClappPost> $posts
+     * @param float $balance
+     * @return Collection<ClappPost>
+     */
+    private function validateBalance(Collection $posts, float $balance): Collection {
+        // Get Min Balance
+        $minBalance = (int) config('marketing.cl.settings.costs.min', 7);
+
+        // Add Costs From All Posts
+        $costs = 0;
+        $this->log->info('Checking ' . $posts->count() . ' total posts to ' .
+                        'confirm if lower than the current balance of ' . $balance);
+        $remaining = new Collection();
+        foreach($posts as $post) {
+            $costs += $post->qData->costs;
+
+            // Check Balance So Far
+            if($balance < $costs || $balance < $minBalance) {
+                $this->markError($post->queue, 'pending-billing');
+            } else {
+                $remaining->push($post);
+            }
+        }
+
+        // Return Remaining Posts
+        return $remaining;
+    }
+
+    /**
+     * Mark Error and Return Status Based on Error
+     * 
+     * @param Queue $queue
+     * @param string $error
+     * @return bool
+     */
+    private function markError(Queue $queue, string $error): bool {
+        // Get Error Status
+        $err = ClappError::fill($error);
+
+        // Update Session
+        $post = $this->sessions->update([
+            'session_id' => $queue->session_id,
+            'status' => $err->status,
+            'state' => $err>state,
+            'text_status' => $err->textStatus
+        ]);
+
+        // Session Was Changed?
+        return $post->wasChanged();
+    }
+
 
     /**
      * Save Logs to Dispatch Logs
