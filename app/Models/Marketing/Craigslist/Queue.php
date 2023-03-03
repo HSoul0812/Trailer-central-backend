@@ -8,7 +8,7 @@ use App\Models\Marketing\Craigslist\Session;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryClapp;
 use App\Models\Traits\TableAware;
-use App\Models\Traits\CraigslistHelper;
+use App\Traits\Marketing\CraigslistHelper;
 use Awobaz\Compoships\Compoships;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
