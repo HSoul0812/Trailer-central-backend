@@ -114,9 +114,9 @@ class ClappQueue
         // Create ClappQueue From Session/Queue
         return new ClappQueue([
             'type' => $queue->type,
-            'location' => $profile->location,
+            'location' => $queue->profile->location,
             'post_category' => $queue->category,
-            'costs' => $profile->costs,
+            'costs' => $queue->profile->costs,
             'title' => $queue->title,
             'stock' => $queue->stock,
             'price' => $queue->price,
@@ -125,9 +125,9 @@ class ClappQueue
             'model' => $queue->model,
             'size' => $queue->size,
             'images' => $queue->images,
-            'contact_name' => $profile->contact_name,
-            'phone' => $profile->phone,
-            'postal' => $profile->postal
+            'contact_name' => $queue->profile->contact_name,
+            'phone' => $queue->profile->phone,
+            'postal' => $queue->profile->postal
         ]);
     }
 
