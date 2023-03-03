@@ -7,11 +7,13 @@ use App\Models\User\DealerLocation;
 use App\Models\Marketing\Craigslist\City;
 use App\Models\Marketing\Craigslist\ClCity;
 use App\Models\Marketing\Craigslist\Subarea;
+use App\Models\Marketing\Craigslist\Market;
 use App\Models\Traits\TableAware;
 use Awobaz\Compoships\Compoships;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Class Profile
@@ -188,11 +190,11 @@ class Profile extends Model
     /**
      * Get Market
      * 
-     * @return BelongsTo
+     * @return HasOne
      */
-    public function market(): BelongsTo
+    public function market(): hasOne
     {
-        return $this->belongsTo(Market::class, 'city_code', 'market_city');
+        return $this->hasOne(Market::class, 'city_code', 'market_city');
     }
 
 
@@ -202,8 +204,6 @@ class Profile extends Model
      * @return string
      */
     public function getInitialUrlAttribute(): string {
-        var_dump($this->market_city);
-        var_dump($this->market);
         $domain = $this->market->city_domain;
 
         // Append Lang/CC
