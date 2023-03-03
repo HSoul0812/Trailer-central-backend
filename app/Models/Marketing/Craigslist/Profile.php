@@ -204,7 +204,7 @@ class Profile extends Model
      * @return string
      */
     public function getInitialUrlAttribute(): string {
-        $domain = $this->market->city_domain;
+        $domain = 'https://' . $this->market->city_domain;
 
         // Append Lang/CC
         $domain .= '?lang=en&cc=us';
