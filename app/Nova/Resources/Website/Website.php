@@ -7,10 +7,11 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\Boolean;
-use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Fields\Select;
 use App\Models\Website\Config\WebsiteConfig;
 
 use App\Nova\Resource;
+use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Website extends Resource
 {
@@ -41,6 +42,12 @@ class Website extends Resource
         'dealer_id'
     ];
 
+    const INVENTORY_SOURCE_MAP = [
+        "env" => 'ENV Based',
+        'es' => 'Old Elastic Way',
+        'sdk' => 'SDK',
+    ];
+
     /**
      * Get the fields displayed by the resource.
      *
@@ -49,6 +56,12 @@ class Website extends Resource
      */
     public function fields(Request $request)
     {
+        $model = $this->model();
+        $configs = $model->websiteConfigs()->get();
+        $sourceConfig = $configs->filter(function (WebsiteConfig $config) {
+            return $config->key == 'inventory/source';
+        })->first();
+
         return [
             Text::make('Website ID', 'id')->exceptOnForms(),
 
@@ -67,6 +80,9 @@ class Website extends Resource
             Boolean::make('Active', 'is_active')->sortable(),
 
             Boolean::make('Responsive', 'responsive')->sortable(),
+
+            Select::make('Inventory Source', 'inventory_source')->withMeta(['value' => $sourceConfig->value])->options(self::INVENTORY_SOURCE_MAP),
+
 
             Textarea::make('Global Filter', 'type_config')->sortable()->help(
               "Usage:<br>
@@ -157,6 +173,36 @@ class Website extends Resource
         ];
     }
 
+    public static function fillForUpdate(NovaRequest $request, $model)
+    {
+        if ($request->input('inventory_source')) {
+
+            /** @var \App\Models\Website\Website $website */
+            $website = $model;
+
+            $has_config = false;
+            foreach ( $website->websiteConfigs()->get() as $config ) {
+                if ($config->key == 'inventory/source') {
+                    $config->value = $request->input('inventory_source');
+                    $config->save();
+                    $has_config = true;
+                }
+            }
+
+            if ( $has_config == false ) {
+                $new_conf = new WebsiteConfig();
+                $new_conf->website_id = $website->id;
+                $new_conf->key = 'inventory/source';
+                $new_conf->value = $request->input('inventory_source');
+                $new_conf->save();
+            }
+
+            $request->offsetUnset('inventory_source');
+        }
+
+        return parent::fillForUpdate($request, $model);
+    }
+
     /**
      * Get the lenses available for the resource.
      *
@@ -177,7 +223,6 @@ class Website extends Resource
     public function actions(Request $request)
     {
         return [
-
         ];
     }
 }
