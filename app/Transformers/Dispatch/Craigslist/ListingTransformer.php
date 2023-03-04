@@ -8,7 +8,6 @@ use App\Transformers\Marketing\Craigslist\PostTransformer;
 use App\Transformers\Marketing\Craigslist\ActivePostTransformer;
 use App\Transformers\Marketing\Craigslist\TransactionTransformer;
 use App\Transformers\Marketing\Craigslist\SessionTransformer;
-use App\Transformers\Marketing\Craigslist\QueueTransformer;
 use League\Fractal\TransformerAbstract;
 
 /**
@@ -23,8 +22,7 @@ class ListingTransformer extends TransformerAbstract
         'post',
         'activePost',
         'transaction',
-        'session',
-        'queue'
+        'session'
     ];
 
 
@@ -44,27 +42,34 @@ class ListingTransformer extends TransformerAbstract
     protected $activePostTransformer;
 
     /**
+     * @var TransactionTransformer
+     */
+    protected $transactionTransformer;
+
+    /**
+     * @var SessionTransformer
+     */
+    protected $sessionTransformer;
+
+    /**
      * @param DraftTransformer $draftTransformer
      * @param PostTransformer $postTransformer
      * @param ActivePostTransformer $activePostTransformer
      * @param TransactionTransformer $transactionTransformer
      * @param SessionTransformer $sessionTransformer
-     * @param QueueTransformer $queueTransformer
      */
     public function __construct(
         DraftTransformer $draftTransformer,
         PostTransformer $postTransformer,
         ActivePostTransformer $activePostTransformer,
         TransactionTransformer $transactionTransformer,
-        SessionTransformer $sessionTransformer,
-        QueueTransformer $queueTransformer
+        SessionTransformer $sessionTransformer
     ) {
         $this->draftTransformer = $draftTransformer;
         $this->postTransformer = $postTransformer;
         $this->activePostTransformer = $activePostTransformer;
         $this->transactionTransformer = $transactionTransformer;
         $this->sessionTransformer = $sessionTransformer;
-        $this->queueTransformer = $queueTransformer;
     }
 
     /**
@@ -99,10 +104,5 @@ class ListingTransformer extends TransformerAbstract
     public function includeSession(ClappListing $listing)
     {
         return $this->item($listing->session, $this->sessionTransformer);
-    }
-
-    public function includeQueue(ClappListing $listing)
-    {
-        return $this->item($listing->session->queue, $this->queueTransformer);
     }
 }
