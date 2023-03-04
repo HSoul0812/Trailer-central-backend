@@ -98,7 +98,10 @@ class ListingTransformer extends TransformerAbstract
 
     public function includeTransaction(ClappListing $listing)
     {
-        return $this->item($listing->transaction, $this->transactionTransformer);
+        if(!empty($listing->transaction)) {
+            return $this->item($listing->transaction, $this->transactionTransformer);
+        }
+        return $this->null();
     }
 
     public function includeSession(ClappListing $listing)
