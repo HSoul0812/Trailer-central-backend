@@ -617,10 +617,11 @@ class CraigslistService implements CraigslistServiceInterface
      */
     private function updateBalance(ClappPost $clappPost, array $params): ?Transaction {
         // No Costs?
-        if($clappPost->qData->costs < 1 || $params['status'] === 'done') {
+        if($clappPost->qData->costs < 1 || $params['status'] !== 'done') {
             return null;
         }
 
+        // Return Existing Transaction if Exists
         $found = $this->transactions->find(['queue_id' => $params['queue_id']]);
         if(!empty($found)) {
             return $found;
