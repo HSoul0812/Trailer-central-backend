@@ -637,7 +637,7 @@ class CraigslistService implements CraigslistServiceInterface
         }
 
         // Get Current Balance
-        $balance = $this->balances->get($params['dealer_id']);
+        $balance = $this->balances->get(['dealer_id' => $params['dealer_id']]);
         $newBalance = ($balance->balance - $clappPost->qData->costs);
 
         // Create Transaction From ClappPost
