@@ -36,6 +36,12 @@ class ClappPost
 
 
     /**
+     * @const Manage URL Prefix
+     */
+    const MANAGE_URL = 'https://post.craigslist.org/manage/';
+
+
+    /**
      * @var Queue
      */
     private $queue;

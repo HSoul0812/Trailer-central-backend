@@ -290,6 +290,11 @@ class CraigslistService implements CraigslistServiceInterface
         // Get ClappPost
         $clappPost = ClappPost::fill($queue);
 
+        // No Manage URL, but CLID Exists?
+        if(!empty($params['craigslist_id']) && empty($params['manage_url'])) {
+            $params['manage_url'] = ClappPost::MANAGE_URL . $params['craigslist_id'];
+        }
+
         // Get Draft
         $params['step'] = 'update-inventory';
         $params['added'] = Carbon::now()->toDateTimeString();
