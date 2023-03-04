@@ -33,4 +33,9 @@ class ClappListing
      * @var Transaction
      */
     private $transaction;
+
+    /**
+     * @var Session
+     */
+    private $session;
 }
