@@ -269,15 +269,18 @@ class Profile extends Model
         $price = $this->prices()->where('category_id', $this->category->id)->first();
 
         // No Price?!
-        if(empty($price->price)) {
+        if(!empty($price) && empty($price->price)) {
             return 0;
         }
+
+        // Get Cost
+        $cost = !empty($price->price) ? $price->price : $this->category->price;
 
         // Get Fee
         $fee = (float) config('marketing.cl.settings.costs.fee', '0.025');
 
         // Add Fee to Cost
-        return $price->price + ($price->price * $fee);
+        return $cost + ($cost * $fee);
     }
 
 
