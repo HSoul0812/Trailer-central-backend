@@ -306,7 +306,7 @@ class ClappPost
      * @return array
      */
     public function preview(): array {
-        return $this->clJsonEncode([
+        return $this->clEncodeJson([
             'title' => $this->postingTitle,
             'price' => $this->ask,
             'body' => $this->qData->trimmedBody(),
