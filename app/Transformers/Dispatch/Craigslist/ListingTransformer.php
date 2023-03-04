@@ -103,6 +103,6 @@ class ListingTransformer extends TransformerAbstract
 
     public function includeQueue(ClappListing $listing)
     {
-        return $this->item($listing->queue, $this->queueTransformer);
+        return $this->item($listing->session->queue, $this->queueTransformer);
     }
 }
