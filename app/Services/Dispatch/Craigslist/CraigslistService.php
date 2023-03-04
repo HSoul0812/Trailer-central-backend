@@ -2,7 +2,12 @@
 
 namespace App\Services\Dispatch\Craigslist;
 
+use App\Models\Marketing\Craigslist\ActivePost;
+use App\Models\Marketing\Craigslist\Draft;
+use App\Models\Marketing\Craigslist\Post;
 use App\Models\Marketing\Craigslist\Queue;
+use App\Models\Marketing\Craigslist\Session;
+use App\Models\Marketing\Craigslist\Transaction;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
@@ -547,7 +552,7 @@ class CraigslistService implements CraigslistServiceInterface
      * @param array $params
      * @return Post
      */
-    private function getPost(ClappPost $clappPost, array $params): Draft {
+    private function getPost(ClappPost $clappPost, array $params): Post {
         // Create Post From ClappPost
         return $this->posts->createOrUpdate([
             'inventory_id' => $clappPost->queue->inventory_id,
@@ -576,9 +581,9 @@ class CraigslistService implements CraigslistServiceInterface
      * 
      * @param ClappPost $clappPost
      * @param array $params
-     * @return Post
+     * @return ActivePost
      */
-    private function getActivePost(ClappPost $clappPost, array $params): Draft {
+    private function getActivePost(ClappPost $clappPost, array $params): ActivePost {
         // Create Active Post From ClappPost
         return $this->activePosts->createOrUpdate([
             'inventory_id' => $clappPost->queue->inventory_id,
