@@ -7,6 +7,14 @@ use App\Repositories\Repository;
 
 interface TransactionRepositoryInterface extends Repository {
     /**
+     * Find Transaction
+     * 
+     * @param array $params
+     * @return null|Transaction
+     */
+    public function find(array $params): ?Transaction;
+
+    /**
      * Create OR Update Transaction
      * 
      * @param array $params

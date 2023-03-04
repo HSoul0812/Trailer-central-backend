@@ -139,6 +139,26 @@ class TransactionRepository implements TransactionRepositoryInterface {
         return $transaction;
     }
 
+
+    /**
+     * Find Transaction
+     * 
+     * @param array $params
+     * @return null|Transaction
+     */
+    public function find(array $params): ?Transaction {
+        // Find Transaction By ID
+        if(isset($params['queue_id'])) {
+            $transaction = Transaction::where('queue_id', $params['queue_id'])->first();
+            if(!empty($transaction->clapp_txn_id)) {
+                return $transaction;
+            }
+        }
+
+        // Find Transaction By ID
+        return Transaction::find($params['id']);
+    }
+
     /**
      * Create OR Update Transaction
      * 

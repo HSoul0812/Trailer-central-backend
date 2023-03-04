@@ -615,6 +615,11 @@ class CraigslistService implements CraigslistServiceInterface
             return null;
         }
 
+        $found = $this->transactions->find(['queue_id' => $params['queue_id']]);
+        if(!empty($found)) {
+            return $found;
+        }
+
         // Get Current Balance
         $balance = $this->balances->get($params['dealer_id']);
         $newBalance = ($balance->balance - $clappPost->costs);
