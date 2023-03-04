@@ -26,8 +26,12 @@ use App\Repositories\Marketing\Craigslist\AccountRepository;
 use App\Repositories\Marketing\Craigslist\AccountRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ActivePostRepository;
 use App\Repositories\Marketing\Craigslist\ActivePostRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\BalanceRepository;
+use App\Repositories\Marketing\Craigslist\BalanceRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\DealerRepository;
 use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\DraftRepository;
+use App\Repositories\Marketing\Craigslist\DraftRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\CityRepository;
 use App\Repositories\Marketing\Craigslist\CityRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\InventoryRepository;
@@ -42,6 +46,8 @@ use App\Repositories\Marketing\Craigslist\SessionRepository;
 use App\Repositories\Marketing\Craigslist\SessionRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\SubareaRepository;
 use App\Repositories\Marketing\Craigslist\SubareaRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\TransactionRepository;
+use App\Repositories\Marketing\Craigslist\TransactionRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ClientRedisRepository;
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
 use App\Services\Dispatch\Facebook\PostingHistoryService;
@@ -73,20 +79,24 @@ class MarketingServiceProvider extends ServiceProvider
         $this->app->bind(PostingHistoryServiceInterface::class, PostingHistoryService::class);
         $this->app->bind(ValidateServiceInterface::class, ValidateService::class);
 
-        // Marketing Repositories
+        // Marketing Craigslist Repositories
         $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
         $this->app->bind(ActivePostRepositoryInterface::class, ActivePostRepository::class);
+        $this->app->bind(BalanceRepositoryInterface::class, BalanceRepository::class);
         $this->app->bind(CityRepositoryInterface::class, CityRepository::class);
         $this->app->bind(DealerRepositoryInterface::class, DealerRepository::class);
+        $this->app->bind(DraftRepositoryInterface::class, DraftRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
+        $this->app->bind(PostRepositoryInterface::class, PostRepository::class);
+        $this->app->bind(ProfileRepositoryInterface::class, ProfileRepository::class);
         $this->app->bind(QueueRepositoryInterface::class, QueueRepository::class);
         $this->app->bind(SchedulerRepositoryInterface::class, SchedulerRepository::class);
         $this->app->bind(SessionRepositoryInterface::class, SessionRepository::class);
         $this->app->bind(SubareaRepositoryInterface::class, SubareaRepository::class);
-        $this->app->bind(SyncRepositoryInterface::class, SyncRepository::class);
-        $this->app->bind(PostRepositoryInterface::class, PostRepository::class);
-        $this->app->bind(ProfileRepositoryInterface::class, ProfileRepository::class);
+        $this->app->bind(TransactionRepositoryInterface::class, TransactionRepository::class);
         $this->app->bind(VerifyRepositoryInterface::class, VerifyRepository::class);
+
+        // Marketing Facebook Repositories
         $this->app->bind(MarketplaceRepositoryInterface::class, MarketplaceRepository::class);
         $this->app->bind(FilterRepositoryInterface::class, FilterRepository::class);
         $this->app->bind(ListingRepositoryInterface::class, ListingRepository::class);

@@ -182,7 +182,7 @@ class MarketplaceService implements MarketplaceServiceInterface
     }
 
     /**
-     * Login to Marketplace
+     * Create Listings for Facebook in DB
      *
      * @param array $params
      * @return Listings

@@ -2,12 +2,13 @@
 
 namespace App\Repositories\Marketing\Craigslist;
 
-use Illuminate\Support\Facades\DB;
 use App\Exceptions\NotImplementedException;
 use App\Models\Marketing\Craigslist\Post;
 use App\Models\Marketing\Craigslist\Session;
 use App\Models\Marketing\Craigslist\Profile;
 use App\Repositories\Traits\SortTrait;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PostRepository implements PostRepositoryInterface {
     use SortTrait;
@@ -51,6 +52,17 @@ class PostRepository implements PostRepositoryInterface {
      * @return Post
      */
     public function create($params) {
+        // Set Dates if Not Provided
+        if(!isset($params['added'])) {
+            $params['added'] = Carbon::now()->toDateTimeString();
+        }
+        if(!isset($params['drafted'])) {
+            $params['drafted'] = $params['added'];
+        }
+        if(!isset($params['posted'])) {
+            $params['posted'] = $params['added'];
+        }
+
         // Create Active Post
         return Post::create($params);
     }
@@ -130,14 +142,61 @@ class PostRepository implements PostRepositoryInterface {
      * @return Post
      */
     public function update($params) {
-        $post = $this->get($params);
+        $post = $this->find($params);
 
         DB::transaction(function() use (&$post, $params) {
+            // Set Dates if Not Provided
+            if(!isset($params['added']) && empty($post->added)) {
+                $params['added'] = Carbon::now()->toDateTimeString();
+            }
+            if(!isset($params['drafted']) && empty($post->drafted)) {
+                $params['drafted'] = $post->added ?? Carbon::now()->toDateTimeString();
+            }
+            if(!isset($params['posted']) && empty($post->posted)) {
+                $params['posted'] = $post->added ?? Carbon::now()->toDateTimeString();
+            }
+
             // Fill Active Post Details
             $post->fill($params)->save();
         });
 
         return $post;
+    }
+
+
+    /**
+     * Find Post
+     * 
+     * @param array $params
+     * @return null|Post
+     */
+    public function find(array $params): ?Post {
+        // CLID Exists?
+        if(isset($params['clid']) && $params['clid']) {
+            return Post::where('clid', $params['clid'])->first();
+        }
+
+        // Find Post By ID
+        return Post::find($params['id'] ?? 0);
+    }
+
+    /**
+     * Create OR Update Post
+     * 
+     * @param array $params
+     * @return Post
+     */
+    public function createOrUpdate(array $params): Post {
+        // Get Post
+        $post = $this->get($params);
+
+        // Post Exists? Update!
+        if(!empty($post->id)) {
+            return $this->update($params);
+        }
+
+        // Create Instead
+        return $this->create($params);
     }
 
     protected function getSortOrders() {

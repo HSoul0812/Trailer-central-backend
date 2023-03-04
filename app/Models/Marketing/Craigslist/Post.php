@@ -157,4 +157,57 @@ class Post extends Model
         // Can't Find One, Not Synced Correctly?
         return 0;
     }
+
+
+    /**
+     * Get Current Title
+     * 
+     * @return string
+     */
+    public function getCurrentTitleAttribute(): string {
+        // Return Title From Inventory
+        if(!empty($this->inventory) && !empty($this->inventory->title)) {
+            return $this->inventory->title;
+        }
+        return $this->title ?? '';
+    }
+
+    /**
+     * Get Current Stock
+     * 
+     * @return string
+     */
+    public function getCurrentStockAttribute(): string {
+        // Return Stock From Inventory
+        if(!empty($this->inventory) && !empty($this->inventory->stock)) {
+            return $this->inventory->stock;
+        }
+        return '';
+    }
+
+    /**
+     * Get Current Price
+     * 
+     * @return float
+     */
+    public function getCurrentPriceAttribute(): float {
+        // Return Price From Inventory
+        if(!empty($this->inventory) && !empty($this->inventory->price)) {
+            return $this->inventory->price;
+        }
+        return $this->price ?? 0;
+    }
+
+    /**
+     * Get Current Primary Image
+     * 
+     * @return string
+     */
+    public function getCurrentImageAttribute(): string {
+        // Return Primary Image Inventory
+        if(!empty($this->inventory) && !empty($this->inventory->primary_image)) {
+            return $this->inventory->primary_image->image->filename;
+        }
+        return '';
+    }
 }

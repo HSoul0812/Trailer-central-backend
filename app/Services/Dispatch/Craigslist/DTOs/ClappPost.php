@@ -36,6 +36,12 @@ class ClappPost
 
 
     /**
+     * @const Manage URL Prefix
+     */
+    const MANAGE_URL = 'https://post.craigslist.org/manage/';
+
+
+    /**
      * @var Queue
      */
     private $queue;
@@ -292,6 +298,39 @@ class ClappPost
             'parameter' => $this->qData->json(),
             'costs' => $this->qData->costs
         ];
+    }
+
+    /**
+     * Get Preview
+     * 
+     * @return string json<array{title: string,
+     *                           price: float,
+     *                           body: string,
+     *                           area: string,
+     *                           subarea: string,
+     *                           section: string,
+     *                           category: string,
+     *                           hood: string,
+     *                           condition: string,
+     *                           make_manu: string,
+     *                           model: string,
+     *                           images: int}>
+     */
+    public function preview(): string {
+        return $this->clEncodeJson([
+            'title' => $this->postingTitle,
+            'price' => $this->ask,
+            'body' => $this->qData->trimmedBody(),
+            'area' => $this->market,
+            'subarea' => $this->subarea,
+            'section' => 'for sale',
+            'category' => $this->category,
+            'hood' => $this->geographicArea,
+            'condition' => $this->condition,
+            'make_manu' => $this->qData->make,
+            'model' => $this->qData->model,
+            'images' => count($this->qData->images)
+        ]);
     }
 
 

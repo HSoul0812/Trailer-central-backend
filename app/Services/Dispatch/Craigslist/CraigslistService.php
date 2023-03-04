@@ -2,20 +2,32 @@
 
 namespace App\Services\Dispatch\Craigslist;
 
+use App\Models\Marketing\Craigslist\ActivePost;
+use App\Models\Marketing\Craigslist\Draft;
+use App\Models\Marketing\Craigslist\Post;
 use App\Models\Marketing\Craigslist\Queue;
+use App\Models\Marketing\Craigslist\Session;
+use App\Models\Marketing\Craigslist\Transaction;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Repositories\Marketing\VirtualCardRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\AccountRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\ActivePostRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\BalanceRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\DraftRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\PostRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
-use App\Repositories\Marketing\Craigslist\SessionRepositoryInterface;
-use App\Repositories\Marketing\Craigslist\QueueRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\SessionRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\TransactionRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\QueueRepositoryInterface;
 use App\Services\Dispatch\Craigslist\DTOs\ClappPost;
 use App\Services\Dispatch\Craigslist\DTOs\ClappError;
+use App\Services\Dispatch\Craigslist\DTOs\ClappListing;
 use App\Services\Dispatch\Craigslist\DTOs\DealerCraigslist;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -33,19 +45,34 @@ class CraigslistService implements CraigslistServiceInterface
 
 
     /**
+     * @var AccountRepositoryInterface
+     */
+    protected $accounts;
+
+    /**
+     * @var ActivePostRepositoryInterface
+     */
+    protected $activePosts;
+
+    /**
+     * @var BalanceRepositoryInterface
+     */
+    protected $balances;
+
+    /**
      * @var DealerRepositoryInterface
      */
     protected $dealers;
 
     /**
-     * @var SchedulerRepositoryInterface
+     * @var DraftRepositoryInterface
      */
-    protected $scheduler;
+    protected $drafts;
 
     /**
-     * @var AccountRepositoryInterface
+     * @var PostRepositoryInterface
      */
-    protected $accounts;
+    protected $posts;
 
     /**
      * @var ProfileRepositoryInterface
@@ -53,19 +80,19 @@ class CraigslistService implements CraigslistServiceInterface
     protected $profiles;
 
     /**
-     * @var SessionRepositoryInterface
-     */
-    protected $sessions;
-
-    /**
      * @var QueueRepositoryInterface
      */
     protected $queues;
 
     /**
-     * @var VirtualRepositoryInterface
+     * @var SchedulerRepositoryInterface
      */
-    protected $cards;
+    protected $scheduler;
+
+    /**
+     * @var SessionRepositoryInterface
+     */
+    protected $sessions;
 
     /**
      * @var TunnelRepositoryInterface
@@ -73,34 +100,60 @@ class CraigslistService implements CraigslistServiceInterface
     protected $tunnels;
 
     /**
+     * @var TransactionRepositoryInterface
+     */
+    protected $transactions;
+
+    /**
+     * @var VirtualRepositoryInterface
+     */
+    protected $cards;
+
+    /**
      * Construct Craigslist Dispatch Service
      *
-     * @param DealerRepositoryInterface $dealers
      * @param AccountRepositoryInterface $accounts
+     * @param ActivePostRepositoryInterface $activePosts
+     * @param BalanceRepositoryInterface $balances
+     * @param DealerRepositoryInterface $dealers
+     * @param DraftRepositoryInterface $drafts
+     * @param PostRepositoryInterface $posts
      * @param ProfileRepositoryInterface $profiles
-     * @param SessionRepositoryInterface $sessions
      * @param QueueRepositoryInterface $queues
-     * @param VirtualCardRepositoryInterface $cards
+     * @param SchedulerRepositoryInterface $scheduler
+     * @param SessionRepositoryInterface $sessions
      * @param TunnelRepositoryInterface $tunnels
+     * @param TransactionRepositoryInterface $transactions
+     * @param VirtualCardRepositoryInterface $cards
      */
     public function __construct(
-        DealerRepositoryInterface $dealers,
-        SchedulerRepositoryInterface $scheduler,
         AccountRepositoryInterface $accounts,
+        ActivePostRepositoryInterface $activePosts,
+        BalanceRepositoryInterface $balances,
+        DealerRepositoryInterface $dealers,
+        DraftRepositoryInterface $drafts,
+        PostRepositoryInterface $posts,
         ProfileRepositoryInterface $profiles,
-        SessionRepositoryInterface $sessions,
         QueueRepositoryInterface $queues,
-        VirtualCardRepositoryInterface $cards,
-        TunnelRepositoryInterface $tunnels
+        SchedulerRepositoryInterface $scheduler,
+        SessionRepositoryInterface $sessions,
+        TunnelRepositoryInterface $tunnels,
+        TransactionRepositoryInterface $transactions,
+        VirtualCardRepositoryInterface $cards
     ) {
-        $this->dealers = $dealers;
-        $this->scheduler = $scheduler;
         $this->accounts = $accounts;
+        $this->activePosts = $activePosts;
+        $this->balances = $balances;
+        $this->dealers = $dealers;
+        $this->drafts = $drafts;
+        $this->posts = $posts;
         $this->profiles = $profiles;
-        $this->sessions = $sessions;
         $this->queues = $queues;
-        $this->cards = $cards;
+        $this->scheduler = $scheduler;
+        $this->sessions = $sessions;
         $this->tunnels = $tunnels;
+        $this->transactions = $transactions;
+        $this->cards = $cards;
 
         // Initialize Logger
         $this->log = Log::channel('dispatch-cl');
@@ -221,6 +274,57 @@ class CraigslistService implements CraigslistServiceInterface
         $nowTime = microtime(true);
         $this->log->info('Debug time after creating DealerCraigslist: ' . ($nowTime - $startTime));
         return $response;
+    }
+
+    /**
+     * Create Listings for Facebook in DB
+     *
+     * @param array $params
+     * @return ClappListing
+     */
+    public function create(array $params): ClappListing {
+        // Log
+        $this->log->info('Creating Craigslist Inventory #' .
+                            $params['craigslist_id'] . ' with the TC' .
+                            ' Inventory #' . $params['inventory_id'] .
+                            ' for the CL Dealer #' . $params['dealer_id']);
+
+        // Create ClappPost From Queue
+        $queue = $this->queues->get(['queue_id' => $params['queue_id']]);
+
+        // Fix Missing Values
+        if(empty($params['session_id'])) {
+            $params['session_id'] = $queue->session_id;
+        }
+        if(empty($params['profile_id'])) {
+            $params['profile_id'] = $queue->profile_id;
+        }
+        if(empty($params['inventory_id'])) {
+            $params['inventory_id'] = $queue->inventory_id;
+        }
+
+        // Get ClappPost
+        $clappPost = ClappPost::fill($queue);
+
+        // No Manage URL, but CLID Exists?
+        if(!empty($params['craigslist_id']) && empty($params['manage_url'])) {
+            $params['manage_url'] = ClappPost::MANAGE_URL . $params['craigslist_id'];
+        }
+
+        // Get Draft
+        $params['step'] = 'update-inventory';
+        $params['added'] = Carbon::now()->toDateTimeString();
+        $draft = $this->getDraft($clappPost, $params);
+        $params['drafted'] = $draft['drafted'];
+
+        // Return Clapp Listing With Various Related Data
+        return new ClappListing([
+            'draft' => $draft,
+            'post' => $this->getPost($clappPost, $params),
+            'activePost' => $this->getActivePost($clappPost, $params),
+            'transaction' => $this->updateBalance($clappPost, $params),
+            'session' => $this->updateSession($clappPost, $params)
+        ]);
     }
 
 
@@ -398,22 +502,196 @@ class CraigslistService implements CraigslistServiceInterface
      * 
      * @param Queue $queue
      * @param string $error
-     * @return bool
+     * @param null|array $params
+     * @return Session
      */
-    private function markError(Queue $queue, string $error): bool {
+    private function markError(Queue $queue, string $error, ?array $params = []): Session {
         // Get Error Status
-        $err = ClappError::fill($error);
+        $err = ClappError::fill($error, $params);
 
         // Update Session
-        $post = $this->sessions->update([
+        $session = $this->sessions->update([
             'session_id' => $queue->session_id,
             'status' => $err->status,
-            'state' => $err>state,
+            'state' => $err->state,
             'text_status' => $err->textStatus
         ]);
 
+        // Update Queue
+        $this->queues->update([
+            'queue_id' => $queue->queue_id,
+            'status' => $err->status,
+            'state' => $err->state
+        ]);
+
         // Session Was Changed?
-        return $post->wasChanged();
+        return $session;
+    }
+
+
+    /**
+     * Get Draft From ClappPost
+     * 
+     * @param ClappPost $clappPost
+     * @param array $params
+     * @return Draft
+     */
+    private function getDraft(ClappPost $clappPost, array $params): Draft {
+        // Create Draft From ClappPost
+        return $this->drafts->createOrUpdate([
+            'session_id'   => $clappPost->queue->session_id,
+            'queue_id'     => $clappPost->queue->queue_id,
+            'inventory_id' => $clappPost->queue->inventory_id,
+            'profile_id'   => $clappPost->queue->profile_id,
+            'username'     => $clappPost->fromEmail,
+            'response'     => ($params['status'] === 'done' ? 'OK' : ''),
+            'drafted'      => $params['added'],
+            'title'        => $clappPost->postingTitle,
+            'price'        => $clappPost->ask,
+            'category'     => $clappPost->category,
+            'area'         => $clappPost->market,
+            'subarea'      => $clappPost->subarea,
+            'preview'      => $clappPost->preview()
+        ]);
+    }
+
+    /**
+     * Get Post From ClappPost
+     * 
+     * @param ClappPost $clappPost
+     * @param array $params
+     * @return Post
+     */
+    private function getPost(ClappPost $clappPost, array $params): Post {
+        // Create Post From ClappPost
+        return $this->posts->createOrUpdate([
+            'inventory_id' => $clappPost->queue->inventory_id,
+            'session_id'   => $clappPost->queue->session_id,
+            'queue_id'     => $clappPost->queue->queue_id,
+            'username'     => $clappPost->fromEmail,
+            'response'     => ($params['status'] === 'done' ? 'OK' : ''),
+            'drafted'      => $params['drafted'],
+            'posted'       => $params['added'],
+            'profile_id'   => $clappPost->queue->profile_id,
+            'title'        => $clappPost->postingTitle,
+            'price'        => $clappPost->ask,
+            'area'         => $clappPost->market,
+            'subarea'      => $clappPost->subarea,
+            'category'     => $clappPost->category,
+            'preview'      => $clappPost->preview(),
+            'clid'         => $params['craigslist_id'],
+            'cl_status'    => $params['status'],
+            'manage_url'   => $params['manage_url'],
+            'view_url'     => $params['view_url']
+        ]);
+    }
+
+    /**
+     * Get Active Post From ClappPost
+     * 
+     * @param ClappPost $clappPost
+     * @param array $params
+     * @return ActivePost
+     */
+    private function getActivePost(ClappPost $clappPost, array $params): ActivePost {
+        // Create Active Post From ClappPost
+        return $this->activePosts->createOrUpdate([
+            'inventory_id' => $clappPost->queue->inventory_id,
+            'session_id'   => $clappPost->queue->session_id,
+            'queue_id'     => $clappPost->queue->queue_id,
+            'username'     => $clappPost->fromEmail,
+            'response'     => ($params['status'] === 'done' ? 'OK' : ''),
+            'drafted'      => $params['drafted'],
+            'posted'       => $params['added'],
+            'profile_id'   => $clappPost->queue->profile_id,
+            'title'        => $clappPost->postingTitle,
+            'price'        => $clappPost->ask,
+            'area'         => $clappPost->market,
+            'subarea'      => $clappPost->subarea,
+            'category'     => $clappPost->category,
+            'preview'      => $clappPost->preview(),
+            'clid'         => $params['craigslist_id'],
+            'cl_status'    => $params['status'],
+            'manage_url'   => $params['manage_url'],
+            'view_url'     => $params['view_url']
+        ]);
+    }
+
+    /**
+     * Update Balance From ClappPost
+     * 
+     * @param ClappPost $clappPost
+     * @param array $params
+     * @return null|Transaction
+     */
+    private function updateBalance(ClappPost $clappPost, array $params): ?Transaction {
+        // No Costs?
+        if($clappPost->qData->costs < 1 || $params['status'] !== 'done') {
+            return null;
+        }
+
+        // Return Existing Transaction if Exists
+        $found = $this->transactions->find(['queue_id' => $params['queue_id']]);
+        if(!empty($found)) {
+            return $found;
+        }
+
+        // Get Current Balance
+        $balance = $this->balances->get(['dealer_id' => $params['dealer_id']]);
+        $newBalance = ($balance->balance - $clappPost->qData->costs);
+
+        // Create Transaction From ClappPost
+        $transaction = $this->transactions->create([
+            'dealer_id'    => $params['dealer_id'],
+            'ip_addr'      => $params['ip_addr'] ?? '',
+            'user_agent'   => $params['user_agent'] ?? '',
+            'session_id'   => $params['session_id'],
+            'queue_id'     => $params['queue_id'],
+            'inventory_id' => $params['inventory_id'],
+            'amount'       => $clappPost->qData->costs,
+            'balance'      => $newBalance,
+            'type'         => Transaction::TYPE_POST
+        ]);
+
+        // Update Balance
+        $this->balances->update(['dealer_id' => $params['dealer_id'], 'balance' => $newBalance]);
+
+        // Return Transaction
+        return $transaction;
+    }
+
+    /**
+     * Update Session From ClappPost
+     * 
+     * @param ClappPost $clappPost
+     * @param array $params
+     * @return null|Session
+     */
+    private function updateSession(ClappPost $clappPost, array $params): ?Session {
+        // Get Status
+        $status = $params['status'];
+        if($status === 'error') {
+            $error = $params['state'] ?? $params['status'];
+            return $this->markError($clappPost->queue, $error, $params);
+        }
+
+        // Update Session
+        $session = $this->sessions->update([
+            'session_id' => $clappPost->queue->session_id,
+            'status' => $params['status'],
+            'state' => $params['state'] ?? 'completed-ok',
+            'text_status' => $params['text_status'] ?? 'One item completed successfully!'
+        ]);
+
+        // Update Queue
+        $this->queues->update([
+            'queue_id' => $clappPost->queue->queue_id,
+            'status' => $params['status'],
+            'state' => $params['state'] ?? 'completed-ok',
+        ]);
+
+        // Session Was Changed?
+        return $session;
     }
 
 
