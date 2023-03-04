@@ -306,7 +306,7 @@ class ClappPost
      * @return array
      */
     public function preview(): array {
-        return [
+        return $this->clJsonEncode([
             'title' => $this->postingTitle,
             'price' => $this->ask,
             'body' => $this->qData->trimmedBody(),
@@ -319,7 +319,7 @@ class ClappPost
             'make_manu' => $this->qData->make,
             'model' => $this->qData->model,
             'images' => count($this->qData->images)
-        ];
+        ]);
     }
 
 
