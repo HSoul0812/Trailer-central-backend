@@ -643,8 +643,8 @@ class CraigslistService implements CraigslistServiceInterface
         // Create Transaction From ClappPost
         $transaction = $this->transactions->create([
             'dealer_id'    => $params['dealer_id'],
-            'ip_addr'      => $params['ip_addr'],
-            'user_agent'   => $params['user_agent'],
+            'ip_addr'      => $params['ip_addr'] ?? '',
+            'user_agent'   => $params['user_agent'] ?? '',
             'session_id'   => $params['session_id'],
             'queue_id'     => $params['queue_id'],
             'inventory_id' => $params['inventory_id'],
