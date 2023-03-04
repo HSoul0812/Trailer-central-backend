@@ -30,6 +30,8 @@ use App\Repositories\Marketing\Craigslist\BalanceRepository;
 use App\Repositories\Marketing\Craigslist\BalanceRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\DealerRepository;
 use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\DraftRepository;
+use App\Repositories\Marketing\Craigslist\DraftRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\CityRepository;
 use App\Repositories\Marketing\Craigslist\CityRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\InventoryRepository;
@@ -83,6 +85,7 @@ class MarketingServiceProvider extends ServiceProvider
         $this->app->bind(BalanceRepositoryInterface::class, BalanceRepository::class);
         $this->app->bind(CityRepositoryInterface::class, CityRepository::class);
         $this->app->bind(DealerRepositoryInterface::class, DealerRepository::class);
+        $this->app->bind(DraftRepositoryInterface::class, DraftRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(PostRepositoryInterface::class, PostRepository::class);
         $this->app->bind(ProfileRepositoryInterface::class, ProfileRepository::class);
