@@ -14,7 +14,7 @@ class CreateCraigslistRequest extends Request {
 
     protected $rules = [
         'dealer_id' => 'required|exists:dealer_clapp,dealer_id',
-        'queue_id' => 'required|exists:clapp_session,queue_id',
+        'queue_id' => 'required|exists:clapp_queue,queue_id',
         'session_id' => 'nullable|exists:clapp_session,session_id',
         'profile_id' => 'nullable|exists:clapp_profile,id',
         'inventory_id' => 'nullable|exists:inventory,inventory_id',
