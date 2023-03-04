@@ -25,6 +25,7 @@ class FormTransformer extends TransformerAbstract
             'queue_id'     => $clapp->queue->queue_id,
             'profile_id'   => $clapp->queue->profile_id,
             'initUrl'      => $clapp->initUrl,
+            'costs'        => $clapp->qData->costs,
             'type'         => $clapp->categoryType,
             'category'     => $clapp->qData->postCategory,
             'subarea'      => $clapp->subarea,
