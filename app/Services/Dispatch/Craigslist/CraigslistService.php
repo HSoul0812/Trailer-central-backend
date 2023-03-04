@@ -617,7 +617,7 @@ class CraigslistService implements CraigslistServiceInterface
      */
     private function updateBalance(ClappPost $clappPost, array $params): ?Transaction {
         // No Costs?
-        if($clappPost->costs < 1 || $params['status'] === 'done') {
+        if($clappPost->qData->costs < 1 || $params['status'] === 'done') {
             return null;
         }
 
@@ -628,7 +628,7 @@ class CraigslistService implements CraigslistServiceInterface
 
         // Get Current Balance
         $balance = $this->balances->get($params['dealer_id']);
-        $newBalance = ($balance->balance - $clappPost->costs);
+        $newBalance = ($balance->balance - $clappPost->qData->costs);
 
         // Create Transaction From ClappPost
         $transaction = $this->transactions->create([
@@ -638,7 +638,7 @@ class CraigslistService implements CraigslistServiceInterface
             'session_id'   => $params['session_id'],
             'queue_id'     => $params['queue_id'],
             'inventory_id' => $params['inventory_id'],
-            'amount'       => $clappPost->costs,
+            'amount'       => $clappPost->qData->costs,
             'balance'      => $newBalance,
             'type'         => Transaction::TYPE_POST
         ]);
