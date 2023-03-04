@@ -14,6 +14,7 @@ use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Repositories\Marketing\VirtualCardRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\AccountRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ActivePostRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\BalanceRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\DraftRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\PostRepositoryInterface;
@@ -52,6 +53,11 @@ class CraigslistService implements CraigslistServiceInterface
      * @var ActivePostRepositoryInterface
      */
     protected $activePosts;
+
+    /**
+     * @var BalanceRepositoryInterface
+     */
+    protected $balances;
 
     /**
      * @var DealerRepositoryInterface
@@ -108,6 +114,7 @@ class CraigslistService implements CraigslistServiceInterface
      *
      * @param AccountRepositoryInterface $accounts
      * @param ActivePostRepositoryInterface $activePosts
+     * @param BalanceRepositoryInterface $balances
      * @param DealerRepositoryInterface $dealers
      * @param DraftRepositoryInterface $drafts
      * @param PostRepositoryInterface $posts
@@ -122,6 +129,7 @@ class CraigslistService implements CraigslistServiceInterface
     public function __construct(
         AccountRepositoryInterface $accounts,
         ActivePostRepositoryInterface $activePosts,
+        BalanceRepositoryInterface $balances,
         DealerRepositoryInterface $dealers,
         DraftRepositoryInterface $drafts,
         PostRepositoryInterface $posts,
@@ -135,6 +143,7 @@ class CraigslistService implements CraigslistServiceInterface
     ) {
         $this->accounts = $accounts;
         $this->activePosts = $activePosts;
+        $this->balances = $balances;
         $this->dealers = $dealers;
         $this->drafts = $drafts;
         $this->posts = $posts;
