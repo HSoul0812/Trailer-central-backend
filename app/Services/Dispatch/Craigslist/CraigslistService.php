@@ -564,7 +564,7 @@ class CraigslistService implements CraigslistServiceInterface
             'subarea'      => $clappPost->subarea,
             'category'     => $clappPost->category,
             'preview'      => $clappPost->preview(),
-            'clID'         => $params['craigslist_id'],
+            'clid'         => $params['craigslist_id'],
             'cl_status'    => $params['status'],
             'manage_url'   => $params['manage_url'],
             'view_url'     => $params['view_url']
@@ -595,7 +595,7 @@ class CraigslistService implements CraigslistServiceInterface
             'subarea'      => $clappPost->subarea,
             'category'     => $clappPost->category,
             'preview'      => $clappPost->preview(),
-            'clID'         => $params['craigslist_id'],
+            'clid'         => $params['craigslist_id'],
             'cl_status'    => $params['status'],
             'manage_url'   => $params['manage_url'],
             'view_url'     => $params['view_url']

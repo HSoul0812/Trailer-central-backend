@@ -163,6 +163,25 @@ class PostRepository implements PostRepositoryInterface {
         return $post;
     }
 
+    /**
+     * Create OR Update Post
+     * 
+     * @param array $params
+     * @return Post
+     */
+    public function createOrUpdate(array $params): Post {
+        // Get Post
+        $post = $this->get($params);
+
+        // Post Exists? Update!
+        if(!empty($post->id)) {
+            return $this->update($params);
+        }
+
+        // Create Instead
+        return $this->create($params);
+    }
+
     protected function getSortOrders() {
         return $this->sortOrders;
     }

@@ -166,6 +166,25 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
         return $post;
     }
 
+    /**
+     * Create OR Update ActivePost
+     * 
+     * @param array $params
+     * @return ActivePost
+     */
+    public function createOrUpdate(array $params): ActivePost {
+        // Get ActivePost
+        $activePost = $this->get($params);
+
+        // ActivePost Exists? Update!
+        if(!empty($activePost->id)) {
+            return $this->update($params);
+        }
+
+        // Create Instead
+        return $this->create($params);
+    }
+
     protected function getSortOrders() {
         return $this->sortOrders;
     }
