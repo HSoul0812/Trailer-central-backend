@@ -2,12 +2,13 @@
 
 namespace App\Repositories\Marketing\Craigslist;
 
-use Illuminate\Support\Facades\DB;
 use App\Exceptions\NotImplementedException;
 use App\Models\Marketing\Craigslist\ActivePost;
 use App\Models\Marketing\Craigslist\Session;
 use App\Models\Marketing\Craigslist\Profile;
 use App\Repositories\Traits\SortTrait;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ActivePostRepository implements ActivePostRepositoryInterface {
     use SortTrait;
@@ -51,6 +52,17 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
      * @return ActivePost
      */
     public function create($params) {
+        // Set Dates if Not Provided
+        if(!isset($params['added'])) {
+            $params['added'] = Carbon::now()->toDateTimeString();
+        }
+        if(!isset($params['drafted'])) {
+            $params['drafted'] = $params['added'];
+        }
+        if(!isset($params['posted'])) {
+            $params['posted'] = $params['added'];
+        }
+
         // Create Active Post
         return ActivePost::create($params);
     }
@@ -133,6 +145,20 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
         $post = $this->get($params);
 
         DB::transaction(function() use (&$post, $params) {
+            // Set Dates if Not Provided
+            if(!isset($params['added']) && empty($post->added)) {
+                $params['added'] = Carbon::now()->toDateTimeString();
+            }
+            if(!isset($params['updated'])) {
+                $params['updated'] = Carbon::now()->toDateTimeString();
+            }
+            if(!isset($params['drafted']) && empty($post->drafted)) {
+                $params['drafted'] = $post->added ?? Carbon::now()->toDateTimeString();
+            }
+            if(!isset($params['posted']) && empty($post->posted)) {
+                $params['posted'] = $post->added ?? Carbon::now()->toDateTimeString();
+            }
+
             // Fill Active Post Details
             $post->fill($params)->save();
         });

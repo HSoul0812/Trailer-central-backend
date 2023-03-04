@@ -294,6 +294,28 @@ class ClappPost
         ];
     }
 
+    /**
+     * Get Preview
+     * 
+     * @return array
+     */
+    public function preview(): array {
+        return [
+            'title' => $this->postingTitle,
+            'price' => $this->ask,
+            'body' => $this->qData->trimmedBody(),
+            'area' => $this->market,
+            'subarea' => $this->subarea,
+            'section' => 'for sale',
+            'category' => $this->category,
+            'hood' => $this->geographicArea,
+            'condition' => $this->condition,
+            'make_manu' => $this->qData->make,
+            'model' => $this->qData->model,
+            'images' => count($this->qData->images)
+        ];
+    }
+
 
     /**
      * Get Formatted Postal Code

@@ -2,21 +2,21 @@
 
 namespace App\Transformers\Marketing\Craigslist;
 
-use App\Models\Marketing\Craigslist\ActivePost;
+use App\Models\Marketing\Craigslist\Post;
 use League\Fractal\TransformerAbstract;
 
 /**
- * Class ActivePostTransformer
+ * Class PostTransformer
  * 
  * @package App\Transformers\Marketing\Craigslist
  */
-class ActivePostTransformer extends TransformerAbstract
+class PostTransformer extends TransformerAbstract
 {
     /**
-     * @param ActivePost $post
+     * @param Post $post
      * @return array
      */
-    public function transform(ActivePost $post): array
+    public function transform(Post $post): array
     {
         return [
             'clapp_post_id' => $post->id,
@@ -27,6 +27,7 @@ class ActivePostTransformer extends TransformerAbstract
             'inventory_id' => $post->inventory_id,
             'time' => strtotime($post->added),
             'created_at' => $post->added,
+            'updated_at' => $post->updated,
             'drafted_at' => $post->drafted,
             'posted_at' => $post->posted,
             'response' => $post->response,
@@ -38,7 +39,7 @@ class ActivePostTransformer extends TransformerAbstract
             'area' => $post->area,
             'subarea' => $post->subarea,
             'category' => $post->category,
-            'status' => $post->status,
+            'status' => $post->cl_status,
             'view_url' => $post->view_url,
             'edit_url' => $post->edit_url,
             'manage_url' => $post->manage_url,
