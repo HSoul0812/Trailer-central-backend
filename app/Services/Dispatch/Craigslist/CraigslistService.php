@@ -24,6 +24,7 @@ use App\Repositories\Marketing\Craigslist\TransactionRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\QueueRepositoryInterface;
 use App\Services\Dispatch\Craigslist\DTOs\ClappPost;
 use App\Services\Dispatch\Craigslist\DTOs\ClappError;
+use App\Services\Dispatch\Craigslist\DTOs\ClappListing;
 use App\Services\Dispatch\Craigslist\DTOs\DealerCraigslist;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
