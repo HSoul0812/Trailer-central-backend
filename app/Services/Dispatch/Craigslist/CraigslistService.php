@@ -274,7 +274,7 @@ class CraigslistService implements CraigslistServiceInterface
                             ' for the CL Dealer #' . $params['dealer_id']);
 
         // Create ClappPost From Queue
-        $queue = $this->queues->get(['queue_id' => $params]);
+        $queue = $this->queues->get(['queue_id' => $params['queue_id']]);
 
         // Fix Missing Values
         if(empty($params['session_id'])) {
@@ -291,6 +291,7 @@ class CraigslistService implements CraigslistServiceInterface
         $clappPost = ClappPost::fill($queue);
 
         // Get Draft
+        $params['step'] = 'update-inventory';
         $params['added'] = Carbon::now()->toDateTimeString();
         $draft = $this->getDraft($clappPost, $params);
         $params['drafted'] = $draft['drafted'];

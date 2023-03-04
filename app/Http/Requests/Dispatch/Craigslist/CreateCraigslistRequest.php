@@ -20,6 +20,7 @@ class CreateCraigslistRequest extends Request {
         'inventory_id' => 'nullable|exists:inventory,inventory_id',
         'status' => 'required|string',
         'state' => 'nullable|string',
+        'text_status' => 'nullable|string',
         'craigslist_id' => 'nullable|string',
         'view_url' => 'nullable|string',
         'manage_url' => 'nullable|string',
