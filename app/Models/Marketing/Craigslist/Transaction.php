@@ -9,11 +9,11 @@ use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Subarea
+ * Class Transaction
  * 
  * @package App\Models\Marketing\Craigslist
  */
-class Subarea extends Model
+class Transaction extends Model
 {
     use TableAware;
 
