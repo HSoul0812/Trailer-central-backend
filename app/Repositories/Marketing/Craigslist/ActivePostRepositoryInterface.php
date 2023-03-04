@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Marketing\Craigslist;
 
+use App\Models\Marketing\Craigslist\ActivePost;
 use App\Repositories\Repository;
 
 interface ActivePostRepositoryInterface extends Repository {
