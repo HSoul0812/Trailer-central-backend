@@ -17,6 +17,16 @@ class Transaction extends Model
 {
     use TableAware;
 
+    /**
+     * @const string Type Post
+     * @const string Type Debut
+     * @const string Type 
+     */
+    const TYPE_CREDIT = 'credit';
+    const TYPE_POST = 'post';
+    const TYPE_ADJUST = 'adjustment';
+    
+
 
     // Define Table Name Constant
     const TABLE_NAME = 'clapp_transaction';
