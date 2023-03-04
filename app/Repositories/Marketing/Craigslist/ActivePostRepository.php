@@ -142,7 +142,7 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
      * @return ActivePost
      */
     public function update($params) {
-        $post = $this->get($params);
+        $post = $this->find($params);
 
         DB::transaction(function() use (&$post, $params) {
             // Set Dates if Not Provided

@@ -113,7 +113,7 @@ class DraftRepository implements DraftRepositoryInterface {
      * @return Draft
      */
     public function update($params) {
-        $draft = $this->get($params);
+        $draft = $this->find($params);
 
         DB::transaction(function() use (&$draft, $params) {
             // Fill Draft Details

@@ -80,7 +80,7 @@ class TransactionRepository implements TransactionRepositoryInterface {
      */
     public function get($params) {
         // Find Transaction By ID
-        return Transaction::findOrFail($params['id']);
+        return Transaction::findOrFail($params['id'] ?? 0);
     }
 
     /**
@@ -129,7 +129,7 @@ class TransactionRepository implements TransactionRepositoryInterface {
      * @return Transaction
      */
     public function update($params) {
-        $transaction = $this->get($params);
+        $transaction = $this->find($params);
 
         DB::transaction(function() use (&$transaction, $params) {
             // Fill Transaction Details
@@ -156,7 +156,7 @@ class TransactionRepository implements TransactionRepositoryInterface {
         }
 
         // Find Transaction By ID
-        return Transaction::find($params['id']);
+        return Transaction::find($params['id'] ?? 0);
     }
 
     /**
