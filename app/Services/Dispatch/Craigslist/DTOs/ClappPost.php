@@ -303,9 +303,20 @@ class ClappPost
     /**
      * Get Preview
      * 
-     * @return array
+     * @return string json<array{title: string,
+     *                           price: float,
+     *                           body: string,
+     *                           area: string,
+     *                           subarea: string,
+     *                           section: string,
+     *                           category: string,
+     *                           hood: string,
+     *                           condition: string,
+     *                           make_manu: string,
+     *                           model: string,
+     *                           images: int}>
      */
-    public function preview(): array {
+    public function preview(): string {
         return $this->clEncodeJson([
             'title' => $this->postingTitle,
             'price' => $this->ask,
