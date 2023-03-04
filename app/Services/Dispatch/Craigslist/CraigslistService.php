@@ -524,10 +524,10 @@ class CraigslistService implements CraigslistServiceInterface
     private function getDraft(ClappPost $clappPost, array $params): Draft {
         // Create Draft From ClappPost
         return $this->drafts->createOrUpdate([
-            'session_id'   => $clappPost->session_id,
-            'queue_id'     => $clappPost->queue_id,
-            'inventory_id' => $clappPost->inventory_id,
-            'profile_id'   => $clappPost->profile_id,
+            'session_id'   => $clappPost->queue->session_id,
+            'queue_id'     => $clappPost->queue->queue_id,
+            'inventory_id' => $clappPost->queue->inventory_id,
+            'profile_id'   => $clappPost->queue->profile_id,
             'username'     => $clappPost->username,
             'response'     => ($params['status'] === 'done' ? 'OK' : ''),
             'drafted'      => $params['added'],
@@ -550,14 +550,14 @@ class CraigslistService implements CraigslistServiceInterface
     private function getPost(ClappPost $clappPost, array $params): Draft {
         // Create Post From ClappPost
         return $this->posts->createOrUpdate([
-            'inventory_id' => $clappPost->inventory_id,
-            'session_id'   => $clappPost->session_id,
-            'queue_id'     => $clappPost->queue_id,
+            'inventory_id' => $clappPost->queue->inventory_id,
+            'session_id'   => $clappPost->queue->session_id,
+            'queue_id'     => $clappPost->queue->queue_id,
             'username'     => $clappPost->username,
             'response'     => ($params['status'] === 'done' ? 'OK' : ''),
             'drafted'      => $params['drafted'],
             'posted'       => $params['added'],
-            'profile_id'   => $clappPost->profile_id,
+            'profile_id'   => $clappPost->queue->profile_id,
             'title'        => $clappPost->postingTitle,
             'price'        => $clappPost->ask,
             'area'         => $clappPost->market,
@@ -581,14 +581,14 @@ class CraigslistService implements CraigslistServiceInterface
     private function getActivePost(ClappPost $clappPost, array $params): Draft {
         // Create Active Post From ClappPost
         return $this->activePosts->createOrUpdate([
-            'inventory_id' => $clappPost->inventory_id,
-            'session_id'   => $clappPost->session_id,
-            'queue_id'     => $clappPost->queue_id,
+            'inventory_id' => $clappPost->queue->inventory_id,
+            'session_id'   => $clappPost->queue->session_id,
+            'queue_id'     => $clappPost->queue->queue_id,
             'username'     => $clappPost->username,
             'response'     => ($params['status'] === 'done' ? 'OK' : ''),
             'drafted'      => $params['drafted'],
             'posted'       => $params['added'],
-            'profile_id'   => $clappPost->profile_id,
+            'profile_id'   => $clappPost->queue->profile_id,
             'title'        => $clappPost->postingTitle,
             'price'        => $clappPost->ask,
             'area'         => $clappPost->market,
