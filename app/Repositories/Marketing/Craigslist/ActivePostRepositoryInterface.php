@@ -7,6 +7,14 @@ use App\Repositories\Repository;
 
 interface ActivePostRepositoryInterface extends Repository {
     /**
+     * Find ActivePost
+     * 
+     * @param array $params
+     * @return null|ActivePost
+     */
+    public function find(array $params): ?ActivePost;
+
+    /**
      * Create OR Update ActivePost
      * 
      * @param array $params

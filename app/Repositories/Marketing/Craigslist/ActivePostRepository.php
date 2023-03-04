@@ -166,6 +166,23 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
         return $post;
     }
 
+
+    /**
+     * Find ActivePost
+     * 
+     * @param array $params
+     * @return null|ActivePost
+     */
+    public function find(array $params): ?ActivePost {
+        // CLID Exists?
+        if(isset($params['clid']) && $params['clid']) {
+            return ActivePost::where('clid', $params['clid'])->first();
+        }
+
+        // Find ActivePost By ID
+        return ActivePost::find($params['id'] ?? 0);
+    }
+
     /**
      * Create OR Update ActivePost
      * 
@@ -174,7 +191,7 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
      */
     public function createOrUpdate(array $params): ActivePost {
         // Get ActivePost
-        $activePost = $this->get($params);
+        $activePost = $this->find($params);
 
         // ActivePost Exists? Update!
         if(!empty($activePost->id)) {

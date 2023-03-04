@@ -123,6 +123,18 @@ class DraftRepository implements DraftRepositoryInterface {
         return $draft;
     }
 
+
+    /**
+     * Find Draft
+     * 
+     * @param array $params
+     * @return null|Draft
+     */
+    public function find(array $params): ?Draft {
+        // Find Draft By ID
+        return Draft::find($params['id'] ?? 0);
+    }
+
     /**
      * Create OR Update Draft
      * 
@@ -131,7 +143,7 @@ class DraftRepository implements DraftRepositoryInterface {
      */
     public function createOrUpdate(array $params): Draft {
         // Get Draft
-        $draft = $this->get($params);
+        $draft = $this->find($params);
 
         // Draft Exists? Update!
         if(!empty($draft->id)) {

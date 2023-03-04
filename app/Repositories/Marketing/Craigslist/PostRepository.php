@@ -163,6 +163,23 @@ class PostRepository implements PostRepositoryInterface {
         return $post;
     }
 
+
+    /**
+     * Find Post
+     * 
+     * @param array $params
+     * @return null|Post
+     */
+    public function find(array $params): ?Post {
+        // CLID Exists?
+        if(isset($params['clid']) && $params['clid']) {
+            return Post::where('clid', $params['clid'])->first();
+        }
+
+        // Find Post By ID
+        return Post::find($params['id'] ?? 0);
+    }
+
     /**
      * Create OR Update Post
      * 
