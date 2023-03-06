@@ -1,12 +1,10 @@
 <?php
 
-use App\Models\Marketing\Craigslist\Category;
-use App\Models\Marketing\Craigslist\Market;
-use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\Marketing\Craigslist\Category;
 use App\Models\Marketing\Craigslist\Market;
 use App\Models\Marketing\Craigslist\Profile;
+use App\Models\User\User;
 use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
 
