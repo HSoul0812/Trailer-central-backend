@@ -2,6 +2,7 @@
 
 namespace App\Models\Inventory;
 
+use App\Models\Marketing\Craigslist\Queue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -40,5 +41,13 @@ class InventoryClapp extends Model
     public function inventory(): BelongsTo
     {
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function queue(): BelongsTo
+    {
+        return $this->belongsTo(Queue::class, 'inventory_id', 'inventory_id');
     }
 }

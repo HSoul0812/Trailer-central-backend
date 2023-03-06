@@ -3,14 +3,14 @@
 namespace App\Repositories\Marketing\Craigslist;
 
 use App\Exceptions\NotImplementedException;
-use App\Models\Marketing\Craigslist\ActivePost;
+use App\Models\Marketing\Craigslist\Post;
 use App\Models\Marketing\Craigslist\Session;
 use App\Models\Marketing\Craigslist\Profile;
 use App\Repositories\Traits\SortTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class ActivePostRepository implements ActivePostRepositoryInterface {
+class PostRepository implements PostRepositoryInterface {
     use SortTrait;
 
     /**
@@ -28,19 +28,19 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
             'direction' => 'ASC'
         ],
         'added' => [
-            'field' => 'clapp_active_posts.added',
+            'field' => 'clapp_posts.added',
             'direction' => 'DESC'
         ],
         '-added' => [
-            'field' => 'clapp_active_posts.added',
+            'field' => 'clapp_posts.added',
             'direction' => 'ASC'
         ],
         'updated' => [
-            'field' => 'clapp_active_posts.updated',
+            'field' => 'clapp_posts.updated',
             'direction' => 'DESC'
         ],
         '-updated' => [
-            'field' => 'clapp_active_posts.updated',
+            'field' => 'clapp_posts.updated',
             'direction' => 'ASC'
         ]
     ];
@@ -49,7 +49,7 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
      * Create Facebook Page
      * 
      * @param array $params
-     * @return ActivePost
+     * @return Post
      */
     public function create($params) {
         // Set Dates if Not Provided
@@ -64,7 +64,7 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
         }
 
         // Create Active Post
-        return ActivePost::create($params);
+        return Post::create($params);
     }
 
     /**
@@ -81,27 +81,27 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
      * Get Active Post
      * 
      * @param array $params
-     * @return ActivePost
+     * @return Post
      */
     public function get($params) {
         // CLID Exists?
         if(isset($params['clid']) && $params['clid']) {
-            return ActivePost::where('clid', $params['clid'])->firstOrFail();
+            return Post::where('clid', $params['clid'])->firstOrFail();
         }
 
         // Find Page By ID
-        return ActivePost::findOrFail($params['id']);
+        return Post::findOrFail($params['id']);
     }
 
     /**
      * Get All Active Posts That Match Params
      * 
      * @param array $params
-     * @return Collection<ActivePost>
+     * @return Collection<Post>
      */
     public function getAll($params) {
-        $query = ActivePost::leftJoin(Session::getTableName(), Session::getTableName().'.session_id', '=', ActivePost::getTableName().'.session_id')
-                           ->leftJoin(Profile::getTableName(), Profile::getTableName().'.id', '=', ActivePost::getTableName().'.profile_id')
+        $query = Post::leftJoin(Session::getTableName(), Session::getTableName().'.session_id', '=', Post::getTableName().'.session_id')
+                           ->leftJoin(Profile::getTableName(), Profile::getTableName().'.id', '=', Post::getTableName().'.profile_id')
                            ->where(Profile::getTableName().'.dealer_id', '=', $params['dealer_id']);
 
         if (!isset($params['per_page'])) {
@@ -113,7 +113,7 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
         }
 
         if (isset($params['profile_id'])) {
-            $query = $query->where(ActivePost::getTableName().'.profile_id', '=', $params['profile_id']);
+            $query = $query->where(Post::getTableName().'.profile_id', '=', $params['profile_id']);
         }
 
         if (isset($params['slot_id'])) {
@@ -139,7 +139,7 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
      * Update Page
      * 
      * @param array $params
-     * @return ActivePost
+     * @return Post
      */
     public function update($params) {
         $post = $this->find($params);
@@ -148,9 +148,6 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
             // Set Dates if Not Provided
             if(!isset($params['added']) && empty($post->added)) {
                 $params['added'] = Carbon::now()->toDateTimeString();
-            }
-            if(!isset($params['updated'])) {
-                $params['updated'] = Carbon::now()->toDateTimeString();
             }
             if(!isset($params['drafted']) && empty($post->drafted)) {
                 $params['drafted'] = $post->added ?? Carbon::now()->toDateTimeString();
@@ -168,33 +165,33 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
 
 
     /**
-     * Find ActivePost
+     * Find Post
      * 
      * @param array $params
-     * @return null|ActivePost
+     * @return null|Post
      */
-    public function find(array $params): ?ActivePost {
+    public function find(array $params): ?Post {
         // CLID Exists?
         if(isset($params['clid']) && $params['clid']) {
-            return ActivePost::where('clid', $params['clid'])->first();
+            return Post::where('clid', $params['clid'])->first();
         }
 
-        // Find ActivePost By ID
-        return ActivePost::find($params['id'] ?? 0);
+        // Find Post By ID
+        return Post::find($params['id'] ?? 0);
     }
 
     /**
-     * Create OR Update ActivePost
+     * Create OR Update Post
      * 
      * @param array $params
-     * @return ActivePost
+     * @return Post
      */
-    public function createOrUpdate(array $params): ActivePost {
-        // Get ActivePost
-        $activePost = $this->find($params);
+    public function createOrUpdate(array $params): Post {
+        // Get Post
+        $post = $this->get($params);
 
-        // ActivePost Exists? Update!
-        if(!empty($activePost->id)) {
+        // Post Exists? Update!
+        if(!empty($post->id)) {
             return $this->update($params);
         }
 
