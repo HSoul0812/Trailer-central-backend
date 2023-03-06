@@ -129,7 +129,7 @@ class LeadControllerTest extends IntegrationTestCase
         ]);
 
         // create Customer
-        factory(Customer::class)->create([
+        $this->customer = factory(Customer::class)->create([
             'first_name' => $this->lead->first_name,
             'last_name' => $this->lead->last_name,
             'email' => $this->lead->email_address,
@@ -211,6 +211,57 @@ class LeadControllerTest extends IntegrationTestCase
 
         // cleanup
         LeadStatus::where('tc_lead_identifier', $leadId)->delete();
+    }
+
+    /**
+     * @group CRM
+     * @covers ::create
+     */
+    public function testCreateWithExistingCustomer()
+    {
+        $firstName = $this->faker->firstName();
+        $lastName = $this->faker->lastName();
+        $params = [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'lead_types' => $this->faker->randomElements(LeadType::TYPE_ARRAY, 2),
+            'customer_id' => $this->customer->getKey()
+        ];
+
+        $this->assertDatabaseHas(Customer::getTableName(), [
+            'id' => $this->customer->getKey(),
+            'dealer_id' => $this->dealer->getKey(),
+            'website_lead_id' => $this->lead->getKey()
+        ]);
+
+        $response = $this->json(
+            'PUT',
+            '/api/leads',
+            $params,
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        $content = json_decode($response->getContent(), true);
+        $leadId = $content['data']['id'];
+
+        $this->assertDatabaseHas(Lead::getTableName(), [
+            'identifier' => $leadId,
+            'dealer_id' => $this->dealer->getKey()
+        ]);
+
+        $this->assertDatabaseHas(Customer::getTableName(), [
+            'id' => $this->customer->getKey(),
+            'dealer_id' => $this->dealer->getKey(),
+            'website_lead_id' => $leadId
+        ]);
+
+        $this->assertDatabaseMissing(Customer::getTableName(), [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'dealer_id' => $this->dealer->getKey()
+        ]);
     }
 
     /**
@@ -720,6 +771,7 @@ class LeadControllerTest extends IntegrationTestCase
         Inventory::where('dealer_id', $this->dealer->getKey())->delete();
         $this->website->delete();
         $this->location->delete();
+        Customer::where('dealer_id', $this->dealer->getKey())->delete();
 
         $this->token->delete();
 
