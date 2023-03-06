@@ -14,7 +14,7 @@ class ShowroomGenericMapPolicy
 {
     use HandlesAuthorization;
 
-    private const VALID_ROLES = ['Admin', 'Support'];
+    private const VALID_ROLES = ['Admin', 'Support', 'DataSupport'];
 
     /**
      * Create a new policy instance.
