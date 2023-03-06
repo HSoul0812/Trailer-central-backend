@@ -3,6 +3,8 @@
 namespace App\Transformers\Dispatch\Craigslist;
 
 use App\Transformers\Dispatch\TunnelTransformer;
+use App\Transformers\Dispatch\Craigslist\FormTransformer;
+//use App\Transformers\Dispatch\Craigslist\UpdateTransformer;
 use App\Transformers\Marketing\VirtualCardTransformer;
 use App\Transformers\Marketing\Craigslist\AccountTransformer;
 use App\Transformers\Marketing\Craigslist\ProfileTransformer;
@@ -21,6 +23,8 @@ class DealerTransformer extends TransformerAbstract
         'profiles',
         'cards',
         'tunnels',
+        'inventories',
+        //'updates'
     ];
 
 
@@ -29,17 +33,23 @@ class DealerTransformer extends TransformerAbstract
      * @param ProfileTransformer $profileTransformer
      * @param TunnelTransformer $tunnelTransformer
      * @param VirtualCardTransformer $cardTransformer
+     * @param FormTransformer $formTransformer
+     * @param UpdateTransformer $updateTransformer
      */
     public function __construct(
         AccountTransformer $accountTransformer,
         ProfileTransformer $profileTransformer,
         TunnelTransformer $tunnelTransformer,
-        VirtualCardTransformer $cardTransformer
+        VirtualCardTransformer $cardTransformer,
+        FormTransformer $formTransformer/*,
+        UpdateTransformer $updateTransformer*/
     ) {
         $this->accountTransformer = $accountTransformer;
         $this->profileTransformer = $profileTransformer;
         $this->tunnelTransformer = $tunnelTransformer;
         $this->cardTransformer = $cardTransformer;
+        $this->formTransformer = $formTransformer;
+        //$this->updateTransformer = $updateTransformer;
     }
 
     /**
@@ -56,6 +66,7 @@ class DealerTransformer extends TransformerAbstract
                 'type'  => $clapp->dealerType,
                 'state' => $clapp->dealerState
             ],
+            'balance'              => $clapp->balance,
             'slots'                => $clapp->slots,
             'chrome_mode'          => $clapp->chromeMode,
             'marketing_enabled_at' => $clapp->since,
@@ -82,4 +93,14 @@ class DealerTransformer extends TransformerAbstract
     {
         return $this->collection($dealer->cards, $this->cardTransformer);
     }
+
+    public function includeInventories(DealerCraigslist $dealer)
+    {
+        return $this->collection($dealer->inventories, $this->formTransformer);
+    }
+
+    /*public function includeUpdates(DealerCraigslist $dealer)
+    {
+        return $this->collection($dealer->updates, $this->updateTransformer);
+    }*/
 }
