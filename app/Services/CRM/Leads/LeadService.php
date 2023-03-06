@@ -180,9 +180,33 @@ class LeadService implements LeadServiceInterface
             $this->updateUnitsOfInterest($lead, $params['inventory']);
         }
 
-        // Create Customer if Not Exists and BOTH First/Last Name Provided
-        if (!empty($params['first_name']) && !empty($params['last_name'])) {
-            $this->customerRepository->createFromLead($lead);
+        // Create or Update Customer
+        if (isset($params['customer_id'])) {
+
+            // Update Customer with new Lead ID
+            $this->customerRepository->update([
+                'id' => $params['customer_id'],
+                'dealer_id' => $params['dealer_id'],
+                'website_lead_id' => $params['lead_id']
+            ]);
+
+        } else {
+
+            // Create Customer if Not Exists and BOTH First/Last Name Provided
+            if (!empty($params['first_name']) && !empty($params['last_name'])) {
+                $this->customerRepository->createFromLead($lead);
+            }
+        }
+
+        // Add Interaction if Exists
+        if (isset($params['interaction']['type'])) {
+
+            $this->interactions->create([
+                'lead_id' => $params['lead_id'],
+                'interaction_type' => $params['interaction']['type'],
+                'interaction_notes' => $params['interaction']['note'],
+                'interaction_time' => $params['interaction']['time']
+            ]);
         }
 
         // Return Full Lead Details
