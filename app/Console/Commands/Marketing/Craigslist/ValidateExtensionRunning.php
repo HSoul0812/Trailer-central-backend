@@ -6,6 +6,7 @@ use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
 use App\Services\Marketing\Craigslist\ValidateServiceInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ValidateExtensionRunning
