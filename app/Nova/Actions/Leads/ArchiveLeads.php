@@ -5,8 +5,9 @@ namespace App\Nova\Actions\Leads;
 use Laravel\Nova\Actions\DestructiveAction;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Fields\ActionFields;
+use Laravel\Nova\Actions\Action;
 
-class ArchiveLeads extends DestructiveAction
+class ArchiveLeads extends Action
 {
 
   /**
@@ -30,7 +31,7 @@ class ArchiveLeads extends DestructiveAction
             $model->save();
         }
   }
-  
+
 
   /**
    * Get the fields available on the action.
@@ -39,7 +40,7 @@ class ArchiveLeads extends DestructiveAction
    */
   public function fields()
     {
-        return [            
+        return [
         ];
     }
 }
