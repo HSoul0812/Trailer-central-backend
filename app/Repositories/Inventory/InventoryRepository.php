@@ -1191,12 +1191,24 @@ class InventoryRepository implements InventoryRepositoryInterface
             'overlay_lower', 'overlay_lower_bg', 'overlay_lower_alpha', 'overlay_lower_text', 'overlay_lower_size', 'overlay_lower_margin',
             'overlay_default', Inventory::getTableName() .'.overlay_enabled', User::getTableName() .'.overlay_enabled AS dealer_overlay_enabled',
             User::getTableName() .'.name AS overlay_text_dealer', DealerLocation::getTableName() .'.phone AS overlay_text_phone',
+            DealerLocation::getTableName() .'.country',
             \DB::raw("CONCAT(".DealerLocation::getTableName() .".city, ', ',".DealerLocation::getTableName() .".region) AS overlay_text_location"))
         ->leftJoin(User::getTableName(), Inventory::getTableName() .'.dealer_id', '=', User::getTableName() .'.dealer_id')
         ->leftJoin(DealerLocation::getTableName(), Inventory::getTableName() .'.dealer_location_id', '=', DealerLocation::getTableName() .'.dealer_location_id')
         ->where(Inventory::getTableName() .'.inventory_id', $inventoryId);
 
-        return $query->first()->toArray();
+        $overlayParams = $query->first()->toArray();
+
+        if(isset($overlayParams['overlay_text_phone'])){
+            $overlayParams['overlay_text_phone'] = DealerLocation::phoneWithNationalFormat(
+                $overlayParams['overlay_text_phone'],
+                $overlayParams['country']
+            );
+
+            unset($overlayParams['country']);
+        }
+
+        return $overlayParams;
     }
 
     /**
