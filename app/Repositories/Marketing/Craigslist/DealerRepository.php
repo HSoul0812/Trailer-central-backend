@@ -63,7 +63,7 @@ class DealerRepository implements DealerRepositoryInterface
      */
     public function get($params)
     {
-        throw new NotImplementedException;
+        return DealerClapp::findOrFail($params['dealer_id']);
     }
 
     /**

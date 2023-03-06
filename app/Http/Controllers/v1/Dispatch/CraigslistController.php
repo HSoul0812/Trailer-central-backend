@@ -4,19 +4,27 @@ namespace App\Http\Controllers\v1\Dispatch;
 
 use App\Http\Controllers\RestfulControllerV2;
 use Dingo\Api\Http\Request;
+use App\Http\Requests\Dispatch\Craigslist\CreateCraigslistRequest;
 use App\Http\Requests\Dispatch\Craigslist\GetCraigslistRequest;
 use App\Http\Requests\Dispatch\Craigslist\ShowCraigslistRequest;
 use App\Http\Requests\Dispatch\Craigslist\LoginCraigslistRequest;
 use App\Services\Dispatch\Craigslist\CraigslistServiceInterface;
-use App\Transformers\Marketing\Craigslist\DealerTransformer;
+use App\Transformers\Dispatch\Craigslist\DealerTransformer;
+use App\Transformers\Dispatch\Craigslist\ListingTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
+use Illuminate\Support\Facades\Log;
 
 class CraigslistController extends RestfulControllerV2 {
     /**
      * @var DealerTransformer
      */
     private $dealerTransformer;
+
+    /**
+     * @var ListingTransformer
+     */
+    private $listingTransformer;
 
     /**
      * @var Manager
@@ -26,11 +34,13 @@ class CraigslistController extends RestfulControllerV2 {
     public function __construct(
         CraigslistServiceInterface $service,
         DealerTransformer $dealerTransformer,
+        ListingTransformer $listingTransformer,
         Manager $fractal
     ) {
         $this->service = $service;
 
         $this->dealerTransformer = $dealerTransformer;
+        $this->listingTransformer = $listingTransformer;
 
         // Fractal
         $this->fractal = $fractal;
@@ -46,10 +56,16 @@ class CraigslistController extends RestfulControllerV2 {
     public function index(Request $request)
     {
         // Handle Craigslist Request
+        $startTime = microtime(true);
         $request = new GetCraigslistRequest($request->all());
         if ($request->validate()) {
             // Get Craigslist Dealers
-            return $this->response->collection($this->service->status($request->all()), $this->dealerTransformer);
+            Log::channel('dispatch-cl')->info('Debug time after retrieving dealers list endpoint: ' . (microtime(true) - $startTime));
+            $data = $this->response->collection(
+                $this->service->status($request->all(), $startTime),
+                $this->dealerTransformer);
+            Log::channel('dispatch-cl')->info('Debug time after calling dealers list service: ' . (microtime(true) - $startTime));
+            return $data;
         }
 
         return $this->response->errorBadRequest();
@@ -61,26 +77,25 @@ class CraigslistController extends RestfulControllerV2 {
      * @param Request $request
      * @return type
      */
-    /*public function show(int $id, Request $request)
+    public function show(int $id, Request $request)
     {
         // Handle Craigslist Request
         $startTime = microtime(true);
         $requestData = $request->all();
-        $requestData['id'] = $id;
+        $requestData['dealer_id'] = $id;
         $request = new ShowCraigslistRequest($requestData);
         if ($request->validate()) {
             // Return Item Craigslist Dispatch Dealer Transformer
             Log::channel('dispatch-cl')->info('Debug time after validating FB Inventory endpoint: ' . (microtime(true) - $startTime));
             $data = $this->itemResponse(
-                $this->service->dealer($request->id, $request->all(), $startTime),
-                $this->dealerTransformer,
-                'data');
-            Log::channel('dispatch-cl')->info('Debug time after calling service: ' . (microtime(true) - $startTime));
+                $this->service->dealer($request->dealer_id, $request->all(), $startTime),
+                $this->dealerTransformer);
+            Log::channel('dispatch-cl')->info('Debug time after calling single craigslist dealer service: ' . (microtime(true) - $startTime));
             return $data;
         }
 
         return $this->response->errorBadRequest();
-    }*/
+    }
 
     /**
      * Create Craigslist Inventory
@@ -89,11 +104,11 @@ class CraigslistController extends RestfulControllerV2 {
      * @param Request $request
      * @return type
      */
-    /*public function create(int $id, Request $request)
+    public function create(int $id, Request $request)
     {
         // Handle Craigslist Request
         $requestData = $request->all();
-        $requestData['marketplace_id'] = $id;
+        $requestData['dealer_id'] = $id;
         $request = new CreateCraigslistRequest($requestData);
         if ($request->validate()) {
             // Return Auth
@@ -101,7 +116,7 @@ class CraigslistController extends RestfulControllerV2 {
         }
 
         return $this->response->errorBadRequest();
-    }*/
+    }
 
     /**
      * Log Step on Craigslist
