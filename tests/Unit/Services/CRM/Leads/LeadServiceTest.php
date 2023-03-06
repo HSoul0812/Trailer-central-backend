@@ -56,6 +56,7 @@ class LeadServiceTest extends TestCase
     const TEST_LAST_NAME = 'Johnson';
     const TEST_PHONE = '555-555-5555';
     const TEST_EMAIL = 'alegra@nowhere.com';
+    const TEST_SALES_PERSON_ID = PHP_INT_MAX - 1;
 
 
     /**
@@ -458,6 +459,65 @@ class LeadServiceTest extends TestCase
         foreach($units as $k => $single) {
             $this->assertTrue(in_array($single->inventory_id, $unitsInterest));
         }
+    }
+
+    /**
+     * @group CRM
+     * @covers ::create
+     */
+    public function testCreateWithSalespersonId()
+    {
+        // Get Model Mocks
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->id = 1;
+        $status->sales_person_id = self::TEST_SALES_PERSON_ID;
+
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->leadStatus = $status;
+
+        // Create Request Params
+        $createRequestParams = [
+            'sales_person_id' => self::TEST_SALES_PERSON_ID,
+            'preferred_contact' => '',
+        ];
+        
+        // Create Lead Params
+        $createLeadParams = $createRequestParams;
+        $createLeadParams['preferred_contact'] = 'phone';
+
+        // Create Status Params
+        $createStatusParams = $createLeadParams;
+        $createStatusParams['lead_id'] = $lead->identifier;
+
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+
+        // @var LeadServiceInterface $service
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        // Mock Create Lead
+        $this->leadRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createLeadParams)
+            ->andReturn($lead);
+
+        // Mock Status Repository
+        $this->statusRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createStatusParams)
+            ->andReturn($status);
+
+        // Create Lead
+        $result = $service->create($createRequestParams);
+
+        // Assert Match
+        $this->assertSame($result->identifier, $lead->identifier);
+        $this->assertSame($result->leadStatus->id, $status->id);
+        $this->assertSame($result->leadStatus->sales_person_id, $status->sales_person_id);
     }
 
 

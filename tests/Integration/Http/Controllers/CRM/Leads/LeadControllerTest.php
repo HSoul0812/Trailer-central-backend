@@ -21,6 +21,11 @@ use App\Models\CRM\User\Customer;
 use App\Models\User\DealerLocation;
 use App\Models\Inventory\Inventory;
 use App\Models\CRM\Leads\InventoryLead;
+use App\Models\User\DealerUser;
+use App\Models\User\DealerUserPermission;
+use App\Models\User\Interfaces\PermissionsInterface;
+use App\Nova\Permission;
+use App\Models\CRM\User\SalesPerson;
 
 /**
  * Class LeadControllerTest
@@ -146,6 +151,66 @@ class LeadControllerTest extends IntegrationTestCase
 
         // assign first 4 inventories as units of interest
         $this->lead->units()->saveMany($this->inventories->slice(0, 4));
+
+        // create a Secondary User with Salesperson Role for CRM
+        $this->salesPerson = factory(SalesPerson::class)->create([
+            'user_id' => $user->user_id,
+            'dealer_location_id' => $this->location->getKey()
+        ]);
+
+        $dealerUser = factory(DealerUser::class)->create([
+            'dealer_id' => $this->dealer->getKey(),
+        ]);
+
+        factory(DealerUserPermission::class)->create([
+            'dealer_user_id' => $dealerUser->dealer_user_id,
+            'feature' => PermissionsInterface::CRM,
+            'permission_level' => $this->salesPerson->getKey(),
+        ]);
+        
+        $this->salespersonToken = factory(AuthToken::class)->create([
+            'user_id' => $dealerUser->dealer_user_id,
+            'user_type' => AuthToken::USER_TYPE_DEALER_USER,
+            'access_token' => md5($dealerUser->dealer_user_id.uniqid())
+        ]);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::create
+     */
+    public function testCreateAsSalesperson()
+    {
+        $params = [
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'lead_types' => $this->faker->randomElements(LeadType::TYPE_ARRAY, 2)
+        ];
+
+        $response = $this->json(
+            'PUT',
+            '/api/leads',
+            $params,
+            ['access-token' => $this->salespersonToken->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        $content = json_decode($response->getContent(), true);
+        $leadId = $content['data']['id'];
+
+        $this->assertDatabaseHas(Lead::getTableName(), [
+            'identifier' => $leadId,
+            'dealer_id' => $this->dealer->getKey()
+        ]);
+
+        $this->assertDatabaseHas(LeadStatus::getTableName(), [
+            'sales_person_id' => $this->salesPerson->getKey(),
+            'tc_lead_identifier' => $leadId
+        ]);
+
+        // cleanup
+        LeadStatus::where('tc_lead_identifier', $leadId)->delete();
     }
 
     /**
@@ -657,6 +722,12 @@ class LeadControllerTest extends IntegrationTestCase
         $this->location->delete();
 
         $this->token->delete();
+
+        // Delete Secondary User Data
+        $this->salespersonToken->delete();
+        DealerUserPermission::where('permission_level', $this->salesPerson->getKey())->delete();
+        DealerUser::where('dealer_id', $this->dealer->getKey())->delete();
+        $this->salesPerson->forceDelete();
 
         // Delete CRM User Related Data
         NewDealerUser::where(['user_id' => $userId])->delete();
