@@ -202,7 +202,7 @@ class ClientRedisRepository implements ClientRepositoryInterface
         // Loop Behaviours
         $clients = new Collection();
         foreach($behaviours as $behaviour) {
-            $ignore = explode(",", config('marketing.cl.settings.warning.ignore'));
+            $ignore = explode(" ", config('marketing.cl.settings.warning.ignore'));
             if(in_array($behaviour->dealerId, $ignore)) {
                 continue;
             }
@@ -240,7 +240,7 @@ class ClientRedisRepository implements ClientRepositoryInterface
         $lastRun = $this->redis->hmget(ClientMessage::LAST_SENT_KEY, [$email]);
 
         // Check Interval
-        return (floor((time() - (int) $lastRun[0]) / 60) > $interval);
+        return (floor((time() - (int) $lastRun[0]) / 60) < $interval);
     }
 
     /**
