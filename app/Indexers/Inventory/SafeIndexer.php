@@ -157,11 +157,11 @@ class SafeIndexer
             }, __CLASS__, self::WAIT_TIME);
         }
 
+        $indexManager->purgeIndexList($indexList->toArray());
+
         if (!$itIsAlreadySwapped) {
             $indexManager->swapIndexNames(Inventory::$searchableAs, $this->indexAlias);
         }
-
-        $indexManager->purgeIndexList($indexList->toArray());
     }
 
     /**

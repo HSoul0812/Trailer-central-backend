@@ -681,6 +681,7 @@ $api->version('v1', function ($route) {
 
     $route->post('user/classified', 'App\Http\Controllers\v1\User\UserController@updateDealerClassifieds');
 
+
     /*
     |--------------------------------------------------------------------------
     | Integrations
@@ -798,6 +799,16 @@ $api->version('v1', function ($route) {
         */
         $route->get('website/{websiteId}/images', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@index')->where('websiteId', '[0-9]+');
         $route->post('website/{websiteId}/image/{imageId}', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@update')->where(['websiteId' => '[0-9]+', 'imageId' => '[0-9]+']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dealer Logos
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->post('user/logo', 'App\Http\Controllers\v1\User\DealerLogoController@store');
 
         /*
         |--------------------------------------------------------------------------
@@ -1000,6 +1011,21 @@ $api->version('v1', function ($route) {
             ], function ($route) {
                 $route->post('/', 'App\Http\Controllers\v1\Integration\CvrController@create');
                 $route->get('{token}', 'App\Http\Controllers\v1\Integration\CvrController@statusByToken');
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Transaction
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'transaction',
+                'middleware' => 'integration.access_token.validate'
+            ], function ($route) {
+                $route->post('/', 'App\Http\Controllers\v1\Integration\TransactionController@post');
             });
         });
 
@@ -1534,12 +1560,12 @@ $api->version('v1', function ($route) {
                 });
 
                 // Can See and Change is Required
-                /*$route->group([
+                $route->group([
                     'middleware' => 'integration-permission:craigslist_dispatch,can_see_and_change'
                 ], function ($route) {
-                    $route->post('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@create')->where('id', '[0-9]+');
-                    $route->put('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@update')->where('id', '[0-9]+');
-                });*/
+                    $route->put('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@create')->where('id', '[0-9]+');
+                    //$route->post('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@update')->where('id', '[0-9]+');
+                });
             });
         });
 

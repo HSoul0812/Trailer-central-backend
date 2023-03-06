@@ -109,4 +109,31 @@ class Draft extends Model
     {
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
+
+
+    /**
+     * Get Current Title
+     * 
+     * @return string
+     */
+    public function getCurrentTitleAttribute(): string {
+        // Return Title From Inventory
+        if(!empty($this->inventory) && !empty($this->inventory->title)) {
+            return $this->inventory->title;
+        }
+        return $this->title ?? '';
+    }
+
+    /**
+     * Get Current Price
+     * 
+     * @return float
+     */
+    public function getCurrentPriceAttribute(): float {
+        // Return Price From Inventory
+        if(!empty($this->inventory) && !empty($this->inventory->price)) {
+            return $this->inventory->price;
+        }
+        return $this->price ?? 0;
+    }
 }
