@@ -15,14 +15,16 @@ $factory->define(Queue::class, static function (Faker $faker, array $attributes)
     $dealerId = $user ? $user->getKey() : $attributes['dealer_id'];
 
     // Get Inventory ID
-    if(isset($attributes['inventory_id'])) {
-        if(!empty($attributes['parameter']['type']) && $attributes['parameter']['type'] === 'parts') {
-            $inventory = isset($attributes['inventory_id']) ? null : factory(Part::class)->create();
-            $inventoryId = $inventory ? $inventory->getKey() : $attributes['inventory_id'];
-        } else {
-            $inventory = isset($attributes['inventory_id']) ? null : factory(Inventory::class)->create();
-            $inventoryId = $inventory ? $inventory->getKey() : $attributes['inventory_id'];
-        }
+    if(!empty($attributes['parameter']['type']) && $attributes['parameter']['type'] === 'parts') {
+        $inventory = isset($attributes['inventory_id']) ? null : factory(Part::class)->create([
+            'dealer_id' => $dealerId
+        ]);
+        $inventoryId = $inventory ? $inventory->getKey() : $attributes['inventory_id'];
+    } else {
+        $inventory = isset($attributes['inventory_id']) ? null : factory(Inventory::class)->create([
+            'dealer_id' => $dealerId
+        ]);
+        $inventoryId = $inventory ? $inventory->getKey() : $attributes['inventory_id'];
     }
 
     // Get Profile ID
