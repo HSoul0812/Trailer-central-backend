@@ -1,0 +1,84 @@
+<?php
+
+use App\Models\Inventory\Inventory;
+use App\Models\Parts\Part;
+use App\Models\Marketing\Craigslist\Profile;
+use App\Models\Marketing\Craigslist\Session;
+use App\Models\User\User;
+use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factory;
+
+/** @var Factory $factory */
+
+$factory->define(Session::class, static function (Faker $faker, array $attributes): array {
+    // Get Dealer ID
+    $user = isset($attributes['dealer_id']) ? null : factory(User::class)->create();
+    $dealerId = $user ? $user->getKey() : $attributes['dealer_id'];
+
+    // Get Inventory ID
+    if(isset($attributes['inventory_id'])) {
+        if(!empty($attributes['parameter']['type']) && $attributes['parameter']['type'] === 'parts') {
+            $inventory = isset($attributes['inventory_id']) ? null : factory(Part::class)->create();
+            $inventoryId = $inventory ? $inventory->getKey() : $attributes['inventory_id'];
+        } else {
+            $inventory = isset($attributes['inventory_id']) ? null : factory(Inventory::class)->create();
+            $inventoryId = $inventory ? $inventory->getKey() : $attributes['inventory_id'];
+        }
+    }
+
+    // Get Profile ID
+    $profile = isset($attributes['profile_id']) ? null : factory(Profile::class)->create();
+    $profileId = $profile ? $profile->getKey() : $attributes['profile_id'];
+
+    // Get Parameters
+    $parameters = $attributes['parameter'] ?? [];
+    if(empty($parameters)) {
+        $images = [];
+        foreach($inventory->orderedImages as $image) {
+            $images[] = config('services.aws.url') . '/' . $image->image->filename;
+        }
+
+        // Create Parameters JSON
+        $parameters = json_encode([
+            'type' => $attributes['parameter']['type'] ?? 'inventory',
+            'price' => $inventory->price,
+            'location' => $profile->location,
+            'postCategory' => $profile->category->id,
+            'body' => $inventory->description_html,
+            'title' => $inventory->title,
+            'contact_name' => $profile->user->name,
+            'phone' => $profile->phone,
+            'postal' => $profile->postal,
+            'make' => $inventory->manufacturer,
+            'model' => $inventory->model,
+            'size' => '',
+            'images' => $images
+        ]);
+    } elseif(is_array($parameters)) {
+        $parameters = json_encode($parameters);
+    }
+
+    // Get Session ID
+    $sessionId = $attributes['session_id'] ?? '';
+    while(strlen($sessionId) < 32) {
+        $letter = $faker->randomElement($faker->randomDigit(), strtoupper($faker->randomDigit()));
+        $sessionId .= $faker->randomElement($faker->randomDigit(), $letter);
+    }
+
+    // Configure Return Array
+    return [
+        'session_id' => $sessionId,
+        'parent_id' => $attributes['parent_id'] ?? 0,
+        'time' => $attributes['time'] ?? time(),
+        'command' => $attributes['command'] ?? 'postAdd',
+        'parameter' => $parameters,
+        'dealer_id' => $dealerId,
+        'profile_id' => $profileId,
+        'inventory_id' => $inventoryId,
+        'status' => $attributes['status'] ?? 'new',
+        'state' => $attributes['state'] ?? 'new',
+        'img_status' => $attributes['img_status'] ?? '',
+        'costs' => $attributes['costs'] ?? 0,
+        'log' => $attributes['log'] ?? ''
+    ];
+});
