@@ -8,9 +8,8 @@ use App\Models\Marketing\Craigslist\ActivePost;
 use App\Models\Marketing\Craigslist\Queue;
 use App\Models\Marketing\Craigslist\Session;
 use App\Repositories\Traits\SortTrait;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Collection as DBCollection;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -59,9 +58,9 @@ class SchedulerRepository implements SchedulerRepositoryInterface
      *
      * @throws InvalidDealerIdException
      *
-     * @return Collection
+     * @return DBCollection
      */
-    public function scheduler($params): Collection
+    public function scheduler($params): DBCollection
     {
         // Dealer id is always required
         if (empty($params['dealer_id'])) {
