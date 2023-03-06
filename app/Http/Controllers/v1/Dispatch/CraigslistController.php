@@ -4,11 +4,13 @@ namespace App\Http\Controllers\v1\Dispatch;
 
 use App\Http\Controllers\RestfulControllerV2;
 use Dingo\Api\Http\Request;
+use App\Http\Requests\Dispatch\Craigslist\CreateCraigslistRequest;
 use App\Http\Requests\Dispatch\Craigslist\GetCraigslistRequest;
 use App\Http\Requests\Dispatch\Craigslist\ShowCraigslistRequest;
 use App\Http\Requests\Dispatch\Craigslist\LoginCraigslistRequest;
 use App\Services\Dispatch\Craigslist\CraigslistServiceInterface;
 use App\Transformers\Dispatch\Craigslist\DealerTransformer;
+use App\Transformers\Dispatch\Craigslist\ListingTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 use Illuminate\Support\Facades\Log;
@@ -20,6 +22,11 @@ class CraigslistController extends RestfulControllerV2 {
     private $dealerTransformer;
 
     /**
+     * @var ListingTransformer
+     */
+    private $listingTransformer;
+
+    /**
      * @var Manager
      */
     private $fractal;
@@ -27,11 +34,13 @@ class CraigslistController extends RestfulControllerV2 {
     public function __construct(
         CraigslistServiceInterface $service,
         DealerTransformer $dealerTransformer,
+        ListingTransformer $listingTransformer,
         Manager $fractal
     ) {
         $this->service = $service;
 
         $this->dealerTransformer = $dealerTransformer;
+        $this->listingTransformer = $listingTransformer;
 
         // Fractal
         $this->fractal = $fractal;
@@ -95,11 +104,11 @@ class CraigslistController extends RestfulControllerV2 {
      * @param Request $request
      * @return type
      */
-    /*public function create(int $id, Request $request)
+    public function create(int $id, Request $request)
     {
         // Handle Craigslist Request
         $requestData = $request->all();
-        $requestData['marketplace_id'] = $id;
+        $requestData['dealer_id'] = $id;
         $request = new CreateCraigslistRequest($requestData);
         if ($request->validate()) {
             // Return Auth
@@ -107,7 +116,7 @@ class CraigslistController extends RestfulControllerV2 {
         }
 
         return $this->response->errorBadRequest();
-    }*/
+    }
 
     /**
      * Log Step on Craigslist

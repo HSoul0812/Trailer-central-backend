@@ -10,27 +10,33 @@ use Illuminate\Database\Eloquent\Factory;
 /** @var Factory $factory */
 
 $factory->define(Session::class, static function (Faker $faker, array $attributes): array {
-    // Get Dealer
+    // Get Dealer ID
     $user = isset($attributes['session_dealer_id']) ? null : factory(User::class)->create();
-    $dealer_id = $user ? $user->getKey() : $attributes['session_dealer_id'];
+    $dealerId = $user ? $user->getKey() : $attributes['session_dealer_id'];
 
-    // Get Profile
+    // Get Profile ID
     $profile = isset($attributes['session_profile_id']) ? null : factory(Profile::class)->create(['dealer_id' => $dealer_id]);
-    $profile_id = $profile ? $profile->getKey() : $attributes['session_profile_id'];
+    $profileId = $profile ? $profile->getKey() : $attributes['session_profile_id'];
+
+    // Get UUID
+    $uuid = $attributes['uuid'] ?? 'cr';
+    while(strlen($uuid) < 16) {
+        $uuid .= $faker->randomDigit();
+    }
 
     // Configure Return Array
     return [
         'session_id' => $attributes['session_id'] ?? $faker->regexify('[A-Za-z0-9]{20}'),
-        'session_client' => $attributes['session_client'] ?? $faker->regexify('[A-Za-z0-9]{20}'),
-        'session_scheduled' => $attributes['session_scheduled'] ?? $faker->date(),
-        'session_started' => $attributes['session_started'] ?? $faker->date(),
-        'session_confirmed' => $attributes['session_confirmed'] ?? $faker->date(),
-        'session_dealer_id' => $dealer_id,
+        'session_client' => $attributes['session_client'] ?? $uuid,
+        'session_scheduled' => $attributes['session_scheduled'] ?? Carbon::now()->toDateTimeString(),
+        'session_started' => $attributes['session_started'] ?? Carbon::now()->toDateTimeString(),
+        'session_confirmed' => $attributes['session_confirmed'] ?? Carbon::now()->toDateTimeString(),
+        'session_dealer_id' => $dealerId,
         'session_slot_id' => $attributes['session_slot_id'] ?? $faker->randomNumber(2, true),
-        'session_profile_id' => $profile_id,
-        'session_last_activity' => $attributes['session_last_activity'] ?? Carbon::now(),
-        'webui_last_activity' => $attributes['dispatch_last_activity'] ?? Carbon::now(),
-        'dispatch_last_activity' => $attributes['dispatch_last_activity'] ?? Carbon::now(),
+        'session_profile_id' => $profileId,
+        'session_last_activity' => $attributes['session_last_activity'] ?? Carbon::now()->toDateTimeString(),
+        'webui_last_activity' => $attributes['webui_last_activity'] ?? Carbon::now()->toDateTimeString(),
+        'dispatch_last_activity' => $attributes['dispatch_last_activity'] ?? Carbon::now()->toDateTimeString(),
         'sound_notify' => $attributes['sound_notify'] ?? intval($faker->boolean),
         'recoverable' => $attributes['recoverable'] ?? 0,
         'status' => $attributes['status'] ?? 'pending-billing',

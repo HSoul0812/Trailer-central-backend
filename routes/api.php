@@ -1560,12 +1560,12 @@ $api->version('v1', function ($route) {
                 });
 
                 // Can See and Change is Required
-                /*$route->group([
+                $route->group([
                     'middleware' => 'integration-permission:craigslist_dispatch,can_see_and_change'
                 ], function ($route) {
-                    $route->post('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@create')->where('id', '[0-9]+');
-                    $route->put('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@update')->where('id', '[0-9]+');
-                });*/
+                    $route->put('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@create')->where('id', '[0-9]+');
+                    //$route->post('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@update')->where('id', '[0-9]+');
+                });
             });
         });
 
