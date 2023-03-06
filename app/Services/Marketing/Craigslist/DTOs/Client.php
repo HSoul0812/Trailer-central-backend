@@ -16,6 +16,12 @@ class Client
     use WithConstructor, WithGetter;
 
     /**
+     * @const int elapsed time
+     */
+    const MAX_ELAPSED = 60 * 60 * 7;
+
+
+    /**
      * @var int
      */
     private $dealerId;
