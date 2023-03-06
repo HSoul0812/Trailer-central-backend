@@ -59,12 +59,9 @@ $factory->define(Queue::class, static function (Faker $faker, array $attributes)
         $parameters = json_encode($parameters);
     }
 
-    // Get Session ID
-    $sessionId = $attributes['session_id'] ?? $faker->regexify('[A-Za-z0-9]{20}');
-
     // Configure Return Array
     return [
-        'session_id' => $attributes['session_id'] ?? $sessionId,
+        'session_id' => $attributes['session_id'] ?? $faker->regexify('[A-Za-z0-9]{20}'),
         'parent_id' => $attributes['parent_id'] ?? 0,
         'time' => $attributes['time'] ?? time(),
         'command' => $attributes['command'] ?? 'postAdd',

@@ -18,13 +18,6 @@ $factory->define(Session::class, static function (Faker $faker, array $attribute
     $profile = isset($attributes['session_profile_id']) ? null : factory(Profile::class)->create(['dealer_id' => $dealer_id]);
     $profileId = $profile ? $profile->getKey() : $attributes['session_profile_id'];
 
-    // Get Session ID
-    $sessionId = $attributes['session_id'] ?? '';
-    while(strlen($sessionId) < 32) {
-        $letter = $faker->randomElement($faker->randomDigit(), strtoupper($faker->randomDigit()));
-        $sessionId .= $faker->randomElement($faker->randomDigit(), $letter);
-    }
-
     // Get UUID
     $uuid = $attributes['uuid'] ?? 'cr';
     while(strlen($uuid) < 16) {
@@ -33,7 +26,7 @@ $factory->define(Session::class, static function (Faker $faker, array $attribute
 
     // Configure Return Array
     return [
-        'session_id' => $attributes['session_id'] ?? $sessionId,
+        'session_id' => $attributes['session_id'] ?? $faker->regexify('[A-Za-z0-9]{20}'),
         'session_client' => $attributes['session_client'] ?? $uuid,
         'session_scheduled' => $attributes['session_scheduled'] ?? Carbon::now()->toDateTimeString(),
         'session_started' => $attributes['session_started'] ?? Carbon::now()->toDateTimeString(),
