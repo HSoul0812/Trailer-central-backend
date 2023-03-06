@@ -74,7 +74,7 @@ $factory->define(Queue::class, static function (Faker $faker, array $attributes)
         'inventory_id' => $inventoryId,
         'status' => $attributes['status'] ?? 'unprocessed',
         'state' => $attributes['state'] ?? 'new',
-        'img_status' => $attributes['img_status'] ?? '',
+        'img_state' => $attributes['img_state'] ?? '',
         'costs' => $attributes['costs'] ?? 0,
         'log' => $attributes['log'] ?? ''
     ];
