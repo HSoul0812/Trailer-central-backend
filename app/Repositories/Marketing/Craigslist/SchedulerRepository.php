@@ -241,8 +241,8 @@ class SchedulerRepository implements SchedulerRepositoryInterface
             $query = $query->whereIn(Queue::getTableName().'.status', $params['q_status']);
         }
 
-        if (isset($params['q_status_not'])) {
-            $query = $query->whereNotIn(Session::getTableName().'.status', $params['q_status_not']);
+        if(isset($params['q_status_not'])) {
+            $query = $query->whereNotIn(Queue::getTableName().'.status', $params['q_status_not']);
         }
 
         // Limit within a certain range of dates
