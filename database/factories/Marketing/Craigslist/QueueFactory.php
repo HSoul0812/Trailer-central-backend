@@ -60,11 +60,7 @@ $factory->define(Queue::class, static function (Faker $faker, array $attributes)
     }
 
     // Get Session ID
-    $sessionId = $attributes['session_id'] ?? '';
-    while(strlen($sessionId) < 32) {
-        $letter = $faker->randomElement($faker->randomDigit(), strtoupper($faker->randomDigit()));
-        $sessionId .= $faker->randomElement($faker->randomDigit(), $letter);
-    }
+    $sessionId = $attributes['session_id'] ?? $faker->regexify('[A-Za-z0-9]{20}');
 
     // Configure Return Array
     return [
