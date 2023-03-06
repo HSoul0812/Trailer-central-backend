@@ -2,6 +2,7 @@
 
 use App\Models\Inventory\Inventory;
 use App\Models\Parts\Part;
+use App\Models\Marketing\Craigslist\Queue;
 use App\Models\Marketing\Craigslist\Profile;
 use App\Models\User\User;
 use Faker\Generator as Faker;
