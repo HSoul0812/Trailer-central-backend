@@ -60,6 +60,9 @@ class LeadServiceTest extends TestCase
     const TEST_SALES_PERSON_ID = PHP_INT_MAX - 1;
     const TEST_CUSTOMER_ID = PHP_INT_MAX - 2;
 
+    const TEST_NOTE = 'this is a note';
+    const TEST_TIME = '2022-10-11 11:12:13';
+
     /**
      * @var LegacyMockInterface|LeadRepositoryInterface
      */
@@ -584,6 +587,78 @@ class LeadServiceTest extends TestCase
                 'id' => self::TEST_CUSTOMER_ID,
                 'dealer_id' => $createRequestParams['dealer_id'],
                 'website_lead_id' => $lead->identifier
+            ]);
+
+        // Create Lead
+        $result = $service->create($createRequestParams);
+
+        // Assert Match
+        $this->assertSame($result->identifier, $lead->identifier);
+        $this->assertSame($result->leadStatus->id, $status->id);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::create
+     */
+    public function testCreateWithInteraction()
+    {
+        // Get Model Mocks
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->id = 1;
+
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->leadStatus = $status;
+
+        // Create Request Params
+        $createRequestParams = [
+            'interaction' => [
+                'type' => Interaction::TYPE_TASK,
+                'note' => self::TEST_NOTE,
+                'time' => self::TEST_TIME
+            ],
+            'preferred_contact' => '',
+        ];
+        
+        // Create Lead Params
+        $createLeadParams = $createRequestParams;
+        $createLeadParams['preferred_contact'] = 'phone';
+
+        // Create Status Params
+        $createStatusParams = $createLeadParams;
+        $createStatusParams['lead_id'] = $lead->identifier;
+
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+
+        // @var LeadServiceInterface $service
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        // Mock Create Lead
+        $this->leadRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createLeadParams)
+            ->andReturn($lead);
+
+        // Mock Status Repository
+        $this->statusRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createStatusParams)
+            ->andReturn($status);
+
+        // Mock Create Interaction
+        $this->interactionRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with([
+                'lead_id' => $lead->identifier,
+                'interaction_type' => Interaction::TYPE_TASK,
+                'interaction_notes' => self::TEST_NOTE,
+                'interaction_time' => self::TEST_TIME
             ]);
 
         // Create Lead

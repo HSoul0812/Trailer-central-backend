@@ -262,6 +262,57 @@ class LeadControllerTest extends IntegrationTestCase
             'last_name' => $lastName,
             'dealer_id' => $this->dealer->getKey()
         ]);
+
+        // cleanup
+        LeadStatus::where('tc_lead_identifier', $leadId)->delete();
+    }
+
+    /**
+     * @group CRM
+     * @covers ::create
+     */
+    public function testCreateWithInteraction()
+    {
+        $note = $this->faker->sentence();
+        $time = Carbon::now()->format('Y-m-d H:i:s');
+        $params = [
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'lead_types' => $this->faker->randomElements(LeadType::TYPE_ARRAY, 2),
+            'interaction' => [
+                'type' => Interaction::TYPE_TASK,
+                'note' => $note,
+                'time' => $time
+            ]
+        ];
+
+        $response = $this->json(
+            'PUT',
+            '/api/leads',
+            $params,
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        $content = json_decode($response->getContent(), true);
+        $leadId = $content['data']['id'];
+
+        $this->assertDatabaseHas(Lead::getTableName(), [
+            'identifier' => $leadId,
+            'dealer_id' => $this->dealer->getKey()
+        ]);
+
+        $this->assertDatabaseHas(Interaction::getTableName(), [
+            'tc_lead_id' => $leadId,
+            'user_id' => $this->dealer->newDealerUser->user_id,
+            'interaction_type' => Interaction::TYPE_TASK,
+            'interaction_notes' => $note,
+            'interaction_time' => $time
+        ]);
+
+        // cleanup
+        LeadStatus::where('tc_lead_identifier', $leadId)->delete();
     }
 
     /**

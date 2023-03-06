@@ -198,6 +198,17 @@ class LeadService implements LeadServiceInterface
             }
         }
 
+        // Add Interaction if Exists
+        if (isset($params['interaction']['type'])) {
+
+            $this->interactions->create([
+                'lead_id' => $params['lead_id'],
+                'interaction_type' => $params['interaction']['type'],
+                'interaction_notes' => $params['interaction']['note'],
+                'interaction_time' => $params['interaction']['time']
+            ]);
+        }
+
         // Return Full Lead Details
         return $lead;
     }
