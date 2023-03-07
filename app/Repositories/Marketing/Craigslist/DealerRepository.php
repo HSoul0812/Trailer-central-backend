@@ -85,9 +85,9 @@ class DealerRepository implements DealerRepositoryInterface
         /** @var  Builder $query */
         $query = DealerClapp::leftJoin(Dealer::GetTableName(),
                                 DealerClapp::getTableName() . '.dealer_id', '=',
-                                Dealer::getTableName() . '.dealer_id')
-                    ->whereNotNull(Dealer::getTableName() . '.stripe_id')
-                    ->where(Dealer::getTableName() . '.state', User::STATUS_ACTIVE)
+                                User::getTableName() . '.dealer_id')
+                    ->whereNotNull(User::getTableName() . '.stripe_id')
+                    ->where(User::getTableName() . '.state', User::STATUS_ACTIVE)
                     ->leftJoin(Session::GetTableName(),
                                 DealerClapp::getTableName() . '.dealer_id', '=',
                                 Session::getTableName() . '.session_dealer_id')
