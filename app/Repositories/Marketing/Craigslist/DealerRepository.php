@@ -84,7 +84,7 @@ class DealerRepository implements DealerRepositoryInterface
     public function getAll($params)
     {
         /** @var  Builder $query */
-        $query = DealerClapp::with('balance')->with('next_session')->with('dealer')
+        $query = DealerClapp::with('balance')->with('nextSession')->with('dealer')
                     ->leftJoin(User::GetTableName(),
                                 DealerClapp::getTableName() . '.dealer_id', '=',
                                 User::getTableName() . '.dealer_id')
