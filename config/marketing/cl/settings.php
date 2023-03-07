@@ -10,6 +10,28 @@ return [
     |
     */
 
+    // Truncated Max Values
+    'truncate' => [
+        'title' => env('CLAPP_TRUNCATE_TITLE', '70'),
+        'contact' => env('CLAPP_TRUNCATE_CONTACT', '31'),
+        'maxBody' => env('CLAPP_TRUNCATE_BODY_MAX', '29995'),
+        'make' => env('CLAPP_TRUNCATE_MAKE', '32'),
+        'model' => env('CLAPP_TRUNCATE_MODEL', '32')
+    ],
+
+    // Costs
+    'costs' => [
+        'min' => env('CLAPP_COSTS_MIN', '7'),
+        'fee' => env('CLAPP_COSTS_FEE', '0.025')
+    ],
+
+    // Set Daily Limits
+    'limits' => [
+        'inventories' => env('CLAPP_LIMIT_INVENTORIES', '10'),
+        'updates' => env('CLAPP_LIMIT_UPDATES', '10'),
+        'images' => env('CLAPP_LIMIT_IMAGES', '24')
+    ],
+
     // Warning
     'warning' => [
         'enabled' => env('CLAPP_WARNING_ENABLED', '1'),

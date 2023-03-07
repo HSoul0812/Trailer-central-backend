@@ -57,10 +57,12 @@ class Website extends Resource
     public function fields(Request $request)
     {
         $model = $this->model();
-        $configs = $model->websiteConfigs()->get();
-        $sourceConfig = $configs->filter(function (WebsiteConfig $config) {
-            return $config->key == 'inventory/source';
-        })->first();
+        if (!empty($model)) {
+            $configs = $model->websiteConfigs()->get();
+            $sourceConfig = $configs->filter(function (WebsiteConfig $config) {
+                return $config->key == 'inventory/source';
+            })->first();
+        }
 
         return [
             Text::make('Website ID', 'id')->exceptOnForms(),
@@ -81,7 +83,7 @@ class Website extends Resource
 
             Boolean::make('Responsive', 'responsive')->sortable(),
 
-            Select::make('Inventory Source', 'inventory_source')->withMeta(['value' => $sourceConfig->value])->options(self::INVENTORY_SOURCE_MAP),
+            Select::make('Inventory Source', 'inventory_source')->withMeta(['value' => $sourceConfig->value ?? 'env' ])->options(self::INVENTORY_SOURCE_MAP),
 
 
             Textarea::make('Global Filter', 'type_config')->sortable()->help(

@@ -1,10 +1,10 @@
 <?php
 
+use App\Models\User\DealerLocation;
 use App\Models\Marketing\Craigslist\Category;
 use App\Models\Marketing\Craigslist\Market;
-use App\Models\User\User;
-use App\Models\User\DealerLocation;
 use App\Models\Marketing\Craigslist\Profile;
+use App\Models\User\User;
 use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
 
@@ -23,12 +23,12 @@ $factory->define(Profile::class, static function (Faker $faker, array $attribute
     $postCategory = $category ? $category->category : $attributes['postCategory'];
 
     // Get Random Market
-    if (isset($attributes['market_city']) && isset($attributes['market_subarea'])) {
-        $market = Market::where('city_code', $attributes['market_city'])->where('subarea_code', $attributes['market_subarea'])->first();
-    } elseif (isset($attributes['market_city'])) {
-        $market = Market::where('city_code', $attributes['market_city'])->first();
+    if(isset($attributes['market_city']) && isset($attributes['market_subarea'])) {
+        $market = Market::has('city')->where('city_code', $attributes['market_city'])->where('subarea_code', $attributes['market_subarea'])->first();
+    } elseif(isset($attributes['market_city'])) {
+        $market = Market::has('city')->where('city_code', $attributes['market_city'])->first();
     } else {
-        $market = Market::inRandomOrder()->first();
+        $market = Market::has('city')->inRandomOrder()->first();
     }
 
     // Configure Return Array
@@ -64,6 +64,7 @@ $factory->define(Profile::class, static function (Faker $faker, array $attribute
         'autoposting_slot_id' => isset($attributes['autoposting_slot_id']) ? (int) $attributes['autoposting_slot_id'] : 1,
         'autoposting_start_at' => isset($attributes['autoposting_start_at']) ? (int) $attributes['autoposting_start_at'] : 0,
         'embed_phone' => isset($attributes['embed_phone']) ? (int) $attributes['embed_phone'] : 0,
+        'embed_dealer_name' => isset($attributes['embed_dealer_name']) ? (int) $attributes['embed_dealer_name'] : 0,
         'embed_dealer_and_phone' => isset($attributes['embed_dealer_and_phone']) ? (int) $attributes['embed_dealer_and_phone'] : 0,
         'embed_logo' => isset($attributes['embed_logo']) ? (int) $attributes['embed_logo'] : 0,
         'embed_logo_position' => isset($attributes['embed_logo_position']) ? $attributes['embed_logo_position'] : 'none',
