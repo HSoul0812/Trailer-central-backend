@@ -41,6 +41,12 @@ class UpdateSecondaryUsersRequest extends Request
             'users.*.password' => [
                 'nullable',
                 'string',
+                'min:6',
+                'max:8',
+                'regex:/[a-z]/',      // must contain at least one lowercase letter
+                'regex:/[A-Z]/',      // must contain at least one uppercase letter
+                'regex:/[0-9]/',      // must contain at least one digit
+                'regex:/[@$!%*#?&_]/', // must contain a special character
             ],
             'users.*.user_permissions' => [
                 'array',
