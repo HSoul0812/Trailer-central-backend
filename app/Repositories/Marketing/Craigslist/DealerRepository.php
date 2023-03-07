@@ -98,14 +98,6 @@ class DealerRepository implements DealerRepositoryInterface
             $params['type'] = 'now';
         }
 
-        if (isset($params['has_balance'])) {
-            $query = $query->leftJoin(Balance::GetTableName(),
-                                DealerClapp::getTableName() . '.dealer_id', '=',
-                                Balance::getTableName() . '.dealer_id')
-                           ->whereNotNull(Balance::getTableName() . '.balance')
-                           ->where(Balance::getTableName() . '.balance', '>', 0);
-        }
-
         if($params['type'] === 'now') {
             $query->where(Session::getTableName() . '.session_scheduled', '<=', DB::raw('NOW()'));
         } elseif($params['type'] === 'posted') {

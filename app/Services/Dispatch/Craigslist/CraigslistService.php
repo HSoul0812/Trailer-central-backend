@@ -232,10 +232,10 @@ class CraigslistService implements CraigslistServiceInterface
         ]);
 
         // Get Parameters for DealerCraigslist
-        $params['balance'] = $clapp->balance->balance;
+        $params['balance'] = !empty($clapp->balance->balance) ? $clapp->balance->balance : 0;
         $dealerClapp = [
             'dealer_id'    => $clapp->dealer_id,
-            'balance'      => $clapp->balance->balance,
+            'balance'      => $params['balance'],
             'slots'        => $clapp->slots,
             'chrome_mode'  => $clapp->chrome_mode,
             'since'        => $clapp->since,
@@ -347,8 +347,7 @@ class CraigslistService implements CraigslistServiceInterface
             'import_range' => config('marketing.fb.settings.limit.hours', 0),
             'skip_errors' => config('marketing.fb.settings.limit.errors', 1),
             'per_page' => $params['per_page'] ?? null,
-            'type' => $params['type'],
-            'has_balance' => true
+            'type' => $params['type']
         ]);
 
         // Log Time
