@@ -6,6 +6,7 @@ use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
 use App\Services\Marketing\Craigslist\ValidateServiceInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ValidateExtensionRunning
@@ -61,6 +62,9 @@ class ValidateExtensionRunning extends Command
      */
     public function handle()
     {
+        // Log Client
+        $log = Log::channel('cl-client');
+
         // CL Warning Enabled
         $isEnabled = config('marketing.cl.settings.warning.enabled', '0');
         if(!(int) $isEnabled) {
@@ -69,17 +73,17 @@ class ValidateExtensionRunning extends Command
 
         // Get Craigslist Poster Instances
         $clients = $this->repo->getAllInternal();
+        $log->info('Validating ' . $clients->count() . ' CL Clients are Actively Running!');
 
         // Loop Posters
         $validation = new Collection();
         foreach($clients as $client) {
-            $ignore = explode(",", config('marketing.cl.settings.warning.ignore'));
-            if(in_array($client->dealerId, $ignore)) {
-                continue;
-            }
-
             // Handle Validation
-            $validation->push($this->service->validate($client));
+            if($client instanceof Behaviour) {
+                $validation->push($this->service->expired($client));
+            } else {
+                $validation->push($this->service->validate($client));
+            }
         }
 
         // Check Client Status
@@ -87,9 +91,12 @@ class ValidateExtensionRunning extends Command
 
         // Send Slack Messages?
         if($messages->count() > 0) {
+            $log->info('Sending Slack Messages for ' . $clients->count() . ' CL Clients');
             foreach($messages as $message) {
                 $this->service->send($message);
             }
+        } else {
+            $log->info('No Slack Messages To Send for CL Clients');
         }
     }
 }

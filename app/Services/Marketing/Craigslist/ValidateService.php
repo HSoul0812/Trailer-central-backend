@@ -3,6 +3,7 @@
 namespace App\Services\Marketing\Craigslist;
 
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
+use App\Services\Marketing\Craigslist\DTOs\Behaviour;
 use App\Services\Marketing\Craigslist\DTOs\Client;
 use App\Services\Marketing\Craigslist\DTOs\ClientMessage;
 use App\Services\Marketing\Craigslist\DTOs\ClientValidate;
@@ -93,6 +94,32 @@ class ValidateService implements ValidateServiceInterface
     }
 
     /**
+     * Validate Behaviours With All Clients Expired
+     * 
+     * @param Behaviour $behaviour
+     * @return ClientValidate
+     */
+    public function expired(Behaviour $behaviour): ClientValidate {
+        // No Active Clients For The Given Behaviour, Its AUTOMATICALLY Critical
+        $level = 'critical';
+
+        // Report Log Level
+        $this->log->info('Behaviour ' . $behaviour->email . ' Has No Active Clients!');
+
+        // Return ClientValidate
+        return new ClientValidate([
+            'dealer_id' => $behaviour->dealerId,
+            'slot_id'   => $behaviour->slotId,
+            'uuid'      => $behaviour->uuid,
+            'email'     => $behaviour->email,
+            'label'     => 'Unknown',
+            'isEdit'    => $behaviour->isEdit,
+            'level'     => $level,
+            'elapsed'   => Client::MAX_ELAPSED
+        ]);
+    }
+
+    /**
      * Return Status of All Clients
      * 
      * @param Collection<ClientValidate> $validation
@@ -106,6 +133,9 @@ class ValidateService implements ValidateServiceInterface
         // Loop All Validated Clients
         foreach($validation as $client) {
             // Level is a Warning?
+            if(empty($client->email)) {
+                continue;
+            }
             if($client->isWarning()) {
                 if(!isset($warnings[$client->email])) {
                     $warnings[$client->email] = [];
