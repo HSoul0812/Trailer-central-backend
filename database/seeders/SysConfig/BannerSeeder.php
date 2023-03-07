@@ -46,6 +46,10 @@ class BannerSeeder extends Seeder
         ['banner/iron bull trailers/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-NorstarBanners-v1_Mobile-20220505-132316.png'],
         ['banner/h&h trailers/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-HHBanners-v1_Desktop-20220510-150132.png'],
         ['banner/h&h trailers/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-HHBanners-v1_Mobile-20220510-150132.png'],
+        ['banner/aluma/desktop', 'https://trailertrader.s3.amazonaws.com/banners/aluma-desktop.png'],
+        ['banner/aluma/mobile', 'https://trailertrader.s3.amazonaws.com/banners/aluma-mobile.png'],
+        ['banner/load trail/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-load-trail-desktop.png'],
+        ['banner/load trail/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-load-trail-mobile.png'],
     ];
 
     /**
