@@ -15,7 +15,7 @@ class LocationPolicy
 {
     use HandlesAuthorization;
 
-    private const VALID_ROLES = ['Admin', 'Support', 'Sales'];
+    private const VALID_ROLES = ['Admin', 'Support', 'Sales', 'DataSupport'];
 
     /**
      * Create a new policy instance.

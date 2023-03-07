@@ -2,12 +2,13 @@
 
 namespace App\Repositories\Marketing\Craigslist;
 
-use Illuminate\Support\Facades\DB;
 use App\Exceptions\NotImplementedException;
 use App\Models\Marketing\Craigslist\ActivePost;
 use App\Models\Marketing\Craigslist\Session;
 use App\Models\Marketing\Craigslist\Profile;
 use App\Repositories\Traits\SortTrait;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ActivePostRepository implements ActivePostRepositoryInterface {
     use SortTrait;
@@ -51,6 +52,17 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
      * @return ActivePost
      */
     public function create($params) {
+        // Set Dates if Not Provided
+        if(!isset($params['added'])) {
+            $params['added'] = Carbon::now()->toDateTimeString();
+        }
+        if(!isset($params['drafted'])) {
+            $params['drafted'] = $params['added'];
+        }
+        if(!isset($params['posted'])) {
+            $params['posted'] = $params['added'];
+        }
+
         // Create Active Post
         return ActivePost::create($params);
     }
@@ -130,14 +142,64 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
      * @return ActivePost
      */
     public function update($params) {
-        $post = $this->get($params);
+        $post = $this->find($params);
 
         DB::transaction(function() use (&$post, $params) {
+            // Set Dates if Not Provided
+            if(!isset($params['added']) && empty($post->added)) {
+                $params['added'] = Carbon::now()->toDateTimeString();
+            }
+            if(!isset($params['updated'])) {
+                $params['updated'] = Carbon::now()->toDateTimeString();
+            }
+            if(!isset($params['drafted']) && empty($post->drafted)) {
+                $params['drafted'] = $post->added ?? Carbon::now()->toDateTimeString();
+            }
+            if(!isset($params['posted']) && empty($post->posted)) {
+                $params['posted'] = $post->added ?? Carbon::now()->toDateTimeString();
+            }
+
             // Fill Active Post Details
             $post->fill($params)->save();
         });
 
         return $post;
+    }
+
+
+    /**
+     * Find ActivePost
+     * 
+     * @param array $params
+     * @return null|ActivePost
+     */
+    public function find(array $params): ?ActivePost {
+        // CLID Exists?
+        if(isset($params['clid']) && $params['clid']) {
+            return ActivePost::where('clid', $params['clid'])->first();
+        }
+
+        // Find ActivePost By ID
+        return ActivePost::find($params['id'] ?? 0);
+    }
+
+    /**
+     * Create OR Update ActivePost
+     * 
+     * @param array $params
+     * @return ActivePost
+     */
+    public function createOrUpdate(array $params): ActivePost {
+        // Get ActivePost
+        $activePost = $this->find($params);
+
+        // ActivePost Exists? Update!
+        if(!empty($activePost->id)) {
+            return $this->update($params);
+        }
+
+        // Create Instead
+        return $this->create($params);
     }
 
     protected function getSortOrders() {

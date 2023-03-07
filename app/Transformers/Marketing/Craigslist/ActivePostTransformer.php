@@ -27,7 +27,6 @@ class ActivePostTransformer extends TransformerAbstract
             'inventory_id' => $post->inventory_id,
             'time' => strtotime($post->added),
             'created_at' => $post->added,
-            'updated_at' => $post->updated,
             'drafted_at' => $post->drafted,
             'posted_at' => $post->posted,
             'response' => $post->response,
@@ -42,7 +41,8 @@ class ActivePostTransformer extends TransformerAbstract
             'status' => $post->status,
             'view_url' => $post->view_url,
             'edit_url' => $post->edit_url,
-            'manage_url' => $post->manage_url
+            'manage_url' => $post->manage_url,
+            'preview' => $post->preview
         ];
     }
 }

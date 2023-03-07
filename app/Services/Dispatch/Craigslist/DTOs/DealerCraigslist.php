@@ -2,6 +2,10 @@
 
 namespace App\Services\Dispatch\Craigslist\DTOs;
 
+use App\Models\Marketing\Craigslist\Account;
+use App\Models\Marketing\Craigslist\Profile;
+use App\Models\Marketing\VirtualCard;
+use App\DTO\Marketing\DealerTunnel;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
@@ -28,6 +32,36 @@ class DealerCraigslist
 
 
     /**
+     * @const array<string> Craigslist Dealer Available Includes
+     */
+    const AVAILABLE_INCLUDES = [
+        'accounts',
+        'profiles',
+        'cards',
+        'tunnels'
+    ];
+
+
+    /**
+     * @const Include Inventories
+     */
+    const INCLUDE_INVENTORY = 'inventories';
+
+    /**
+     * @const Include Updates
+     */
+    const INCLUDE_UPDATES = 'updates';
+
+    /**
+     * @const array<string> Craigslist Dealer Inventory Includes
+     */
+    const INVENTORY_INCLUDES = [
+        self::INCLUDE_INVENTORY,
+        self::INCLUDE_UPDATES
+    ];
+
+
+    /**
      * @var string - in self::DEALER_TYPES
      */
     private $type;
@@ -36,6 +70,11 @@ class DealerCraigslist
      * @var int
      */
     private $dealerId;
+
+    /**
+     * @var float
+     */
+    private $balance;
 
     /**
      * @var int
@@ -79,38 +118,33 @@ class DealerCraigslist
 
 
     /**
-     * Get Proxy Settings
-     * 
-     * @return array
+     * @var Collection<Account>
      */
-    public function getProxyConfig(): array {
-        return config('marketing.cl.settings.proxy', []);
-    }
+    private $accounts;
 
     /**
-     * Get Cookie Settings
-     * 
-     * @return array
+     * @var Collection<Profile>
      */
-    public function getCookieConfig(): array {
-        return config('marketing.cl.settings.cookie', []);
-    }
+    private $profiles;
 
     /**
-     * Get All URL's
-     * 
-     * @return array
+     * @var Collection<VirtualCard>
      */
-    public function getAllUrls(): array {
-        return config('marketing.cl.settings.urls', []);
-    }
+    private $cards;
 
     /**
-     * Get All Selectors
-     * 
-     * @return array
+     * @var Collection<DealerTunnel>
      */
-    public function getAllSelectors(): array {
-        return config('marketing.cl.selectors', []);
-    }
+    private $tunnels;
+
+
+    /**
+     * @var Collection<ClappPost>
+     */
+    private $inventories;
+
+    /**
+     * @var Collection<ClappUpdate>
+     */
+    private $updates;
 }
