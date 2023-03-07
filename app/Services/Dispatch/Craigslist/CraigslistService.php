@@ -347,7 +347,8 @@ class CraigslistService implements CraigslistServiceInterface
             'import_range' => config('marketing.fb.settings.limit.hours', 0),
             'skip_errors' => config('marketing.fb.settings.limit.errors', 1),
             'per_page' => $params['per_page'] ?? null,
-            'type' => $params['type']
+            'type' => $params['type'],
+            'has_balance' => true
         ]);
 
         // Log Time
