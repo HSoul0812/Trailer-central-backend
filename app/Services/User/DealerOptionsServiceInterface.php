@@ -95,6 +95,7 @@ interface DealerOptionsServiceInterface
     /**
      * @param int $dealerId
      * @return bool
+     * @throws Exception
      */
     public function deactivateDealer(int $dealerId): bool;
 
@@ -108,6 +109,7 @@ interface DealerOptionsServiceInterface
      * @param int $dealerId
      * @param string $status
      * @return bool
+     * @throws Exception
      */
     public function changeStatus(int $dealerId, string $status): bool;
 }

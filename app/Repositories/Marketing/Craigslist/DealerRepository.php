@@ -13,10 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Class DealerRepository
- * 
+ *
  * @package App\Repositories\Marketing
  */
-class DealerRepository implements DealerRepositoryInterface 
+class DealerRepository implements DealerRepositoryInterface
 {
     use SortTrait, Pagination;
 
@@ -59,7 +59,7 @@ class DealerRepository implements DealerRepositoryInterface
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @return mixed
      */
     public function get($params)
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Services\User;
+namespace Tests\Unit\Services\User\DealerOptionService;
 
 use App\Models\User\NewDealerUser;
 use App\Models\User\User;
@@ -18,12 +18,12 @@ use Tests\TestCase;
 /**
  * Test for App\Services\User\DealerOptionsService
  *
- * class DealerOptionsServiceTest
- * @package Tests\Unit\Services\User
+ * class ManageCrmTest
+ * @package Tests\Unit\Services\User\DealerOptionService
  *
  * @coversDefaultClass \App\Services\User\DealerOptionsService
  */
-class DealerOptionsServiceTest extends TestCase
+class ManageCrmTest extends TestCase
 {
     /**
      * @var LegacyMockInterface|UserRepositoryInterface
@@ -459,5 +459,11 @@ class DealerOptionsServiceTest extends TestCase
                 'active' => 0
             ]
         ];
+    }
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
     }
 }

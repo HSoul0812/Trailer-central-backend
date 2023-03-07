@@ -7,12 +7,11 @@ use Carbon\Carbon;
 use App\Models\User\User;
 use App\Models\User\NewUser;
 use App\Helpers\StringHelper;
-use App\Repositories\Repository;
 use App\Models\User\DealerClapp;
 use App\Models\User\NewDealerUser;
 use Illuminate\Support\Facades\Log;
 use App\Models\User\DealerAdminSetting;
-use App\Models\Website\Config\WebsiteConfig;
+use App\Repositories\GenericRepository;
 use App\Models\Integration\IntegrationDealer;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\NewUserRepositoryInterface;
@@ -22,6 +21,7 @@ use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\Website\EntityRepositoryInterface as WebsiteEntityRepositoryInterface;
 
@@ -34,27 +34,32 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     /**
      * @var string
      */
-    private const ECOMMERCE_KEY_ENABLE = "parts/ecommerce/enabled";
+    public const ECOMMERCE_KEY_ENABLE = "parts/ecommerce/enabled";
 
     /**
      * @var string
      */
-    private const TEXTRAIL_PARTS_ENTITY_TYPE = '51';
+    public const TEXTRAIL_PARTS_ENTITY_TYPE = '51';
 
     /**
      * @var int
      */
-    private const INACTIVE = 0;
+    public const INACTIVE = 0;
 
     /**
      * @var int
      */
-    private const ARCHIVED_ON = 1;
+    public const ARCHIVED_ON = 1;
 
     /**
      * @var UserRepositoryInterface
      */
     private $userRepository;
+
+    /**
+     * @var DealerRepositoryInterface
+     */
+    private $dealerRepository;
 
     /**
      * @var CrmUserRepositoryInterface
@@ -109,7 +114,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     /**
      * @var array
      */
-    private $specialSubscriptions = [
+    public $specialSubscriptions = [
         'crm',
         'cdk',
         'marketing',
@@ -122,6 +127,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     /**
      * DealerOptionsService constructor.
      * @param UserRepositoryInterface $userRepository
+     * @param DealerRepositoryInterface $dealerRepository
      * @param CrmUserRepositoryInterface $crmUserRepository
      * @param CrmUserRoleRepositoryInterface $crmUserRoleRepository
      * @param WebsiteConfigRepositoryInterface $websiteConfigRepository
@@ -135,6 +141,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      */
     public function __construct(
         UserRepositoryInterface          $userRepository,
+        DealerRepositoryInterface        $dealerRepository,
         CrmUserRepositoryInterface       $crmUserRepository,
         CrmUserRoleRepositoryInterface   $crmUserRoleRepository,
         WebsiteConfigRepositoryInterface $websiteConfigRepository,
@@ -147,6 +154,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         InventoryRepositoryInterface     $inventoryRepository
     ) {
         $this->userRepository = $userRepository;
+        $this->dealerRepository = $dealerRepository;
         $this->crmUserRepository = $crmUserRepository;
         $this->crmUserRoleRepository = $crmUserRoleRepository;
         $this->dealerPartRepository = $dealerPartRepository;
@@ -230,25 +238,36 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      */
     public function manageCdk(int $dealerId, bool $active, $sourceId = ''): bool
     {
-        $dealer = User::findOrFail($dealerId);
+        try {
+            $this->userRepository->beginTransaction();
 
-        if ($active && is_null($sourceId)) {
-            throw new \Exception('Source Id is required when activating CDK.');
+            /** @var User $user */
+            $dealer = $this->userRepository->get(['dealer_id' => $dealerId]);
+
+            if ($active && empty($sourceId)) {
+                throw new \Exception('Source Id is required when activating CDK.');
+            }
+
+            $sourceId = $active ? ($sourceId ?? '') : '';
+
+            $cdk = $dealer->adminSettings()->where([
+                'setting' => 'website_leads_cdk_source_id'
+            ])->firstOr( function() use ($dealerId, $sourceId) {
+                DealerAdminSetting::create([
+                    'dealer_id' => $dealerId,
+                    'setting' => 'website_leads_cdk_source_id',
+                    'setting_value' => ''
+                ]);
+            });
+
+            $cdk->update(['setting_value' => $sourceId]);
+            $this->userRepository->commitTransaction();
+            return true;
+        } catch (Exception $e) {
+            Log::error("CRM activation error. dealer_id - {$dealerId}", $e->getTrace());
+            $this->userRepository->rollbackTransaction();
+            throw new Exception($e->getMessage());
         }
-
-        $sourceId = $active ? ($sourceId ?? '') : '';
-
-        $cdk = $dealer->adminSettings()->where([
-            'setting' => 'website_leads_cdk_source_id'
-        ])->firstOr( function() use ($dealerId, $sourceId) {
-            return DealerAdminSetting::create([
-                'dealer_id' => $dealerId,
-                'setting' => 'website_leads_cdk_source_id',
-                'setting_value' => $sourceId
-            ]);
-        });
-
-        return $cdk->update(['setting_value' => $sourceId]);
     }
 
     /**
@@ -316,6 +335,9 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     public function manageECommerce(int $dealerId, bool $active): bool
     {
         try {
+            $this->userRepository->beginTransaction();
+
+            /** @var User $user */
             $user = $this->userRepository->get(['dealer_id' => $dealerId]);
 
             if (is_null($user->website)) {
@@ -343,6 +365,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
                     'in_nav' => 0
                 ]);
 
+                $this->userRepository->commitTransaction();
                 return true;
             }
 
@@ -353,7 +376,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             ];
 
             if (!$this->isAllowedParts($dealerId)) {
-                $this->activateParts($dealerId);
+                $this->manageParts($dealerId, true);
             }
             $this->websiteConfigRepository->create($newWebsiteConfigActiveParams);
 
@@ -369,13 +392,15 @@ class DealerOptionsService implements DealerOptionsServiceInterface
                 'meta_description' => 'Trailer parts can be added to your cart, ordered, and shipped directly to your door!',
                 'url_path_external' => 0,
                 'in_nav' => 0,
-                'is_active' => 1,
+                'is_active' => true,
                 'deleted' => 0
             ]);
 
+            $this->userRepository->commitTransaction();
             return true;
         } catch (Exception $e) {
             Log::error("E-Commerce activation error. dealer_id - {$dealerId}", $e->getTrace());
+            $this->userRepository->rollbackTransaction();
             throw new Exception($e->getMessage());
         }
     }
@@ -385,18 +410,25 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      */
     public function manageMarketing(int $dealerId, bool $active): bool
     {
-        if (!$active) {
-            $dealer = DealerClapp::where(['dealer_id' => $dealerId])->firstOrFail();
-            return $dealer->delete();
-        }
-
-        return DealerClapp::where(['dealer_id' => $dealerId])->firstOr(function () use ($dealerId) {
-            DealerClapp::create([
-                'dealer_id' => $dealerId,
-                'email' => DATE(NOW())
+        try {
+            $dealer = $this->dealerRepository->get([
+                'dealer_id' => $dealerId
             ]);
+
+            if (!$active && !empty($dealer)) {
+                $dealer->delete();
+            }
+
+            if ($active && empty($dealer)) {
+                DealerClapp::create([
+                    'dealer_id' => $dealerId
+                ]);
+            }
             return true;
-        });
+        } catch (\Exception $e) {
+            Log::error("Marketing activation error. dealer_id - {$dealerId}", $e->getTrace());
+            throw new Exception($e->getMessage());
+        }
     }
 
     /**
@@ -404,24 +436,29 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      */
     public function manageMobile(int $dealerId, bool $active): bool
     {
-        $dealer = $this->userRepository->get(['dealer_id' => $dealerId]);
+        try {
+            $this->userRepository->beginTransaction();
 
-        if (is_null($dealer->website)) {
-            throw new \Exception('There\'s no website associated to this dealer.');
-        }
+            /** @var User $user */
+            $dealer = $this->userRepository->get(['dealer_id' => $dealerId]);
 
-        $config = WebsiteConfig::where([
-            'website_id' => $dealer->website->id,
-            'key' => 'general/mobile/enabled'
-        ])->firstOr(function () use ($dealer, $active) {
-            return WebsiteConfig::create([
-                'website_id' => $dealer->website->id,
+            if (is_null($dealer->website)) {
+                throw new \Exception('There\'s no website associated to this dealer.');
+            }
+
+            $websiteConfigData = [
                 'key' => 'general/mobile/enabled',
                 'value' => $active
-            ]);
-        });
+            ];
 
-        return $config->update(['value' => $active]);
+            $this->websiteConfigRepository->createOrUpdate($dealer->website->id, $websiteConfigData);
+            $this->userRepository->commitTransaction();
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Mobile activation error. dealer_id - {$dealerId}", $e->getTrace());
+            $this->userRepository->rollbackTransaction();
+            throw new Exception($e->getMessage());
+        }
     }
 
     /**
@@ -430,17 +467,24 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     public function manageParts(int $dealerId, bool $active): bool
     {
         try {
+            $this->dealerPartRepository->beginTransaction();
+
             $dealerPartsParams = [
                 'dealer_id' => $dealerId,
                 'since' => Carbon::now()->format('Y-m-d')
             ];
 
             if (!$active) {
-               return $this->dealerPartRepository->delete($dealerPartsParams);
+                $this->dealerPartRepository->delete($dealerPartsParams);
+            } else {
+                $this->dealerPartRepository->create($dealerPartsParams);
             }
 
-            return $this->dealerPartRepository->create($dealerPartsParams);
+            $this->dealerPartRepository->commitTransaction();
+            return true;
         } catch (Exception $e) {
+            Log::error("Parts activation error. dealer_id - {$dealerId}", $e->getTrace());
+            $this->dealerPartRepository->rollbackTransaction();
             throw new Exception($e->getMessage());
         }
     }
@@ -452,10 +496,14 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     {
         try {
             $websites = $this->websiteRepository->getAll([
-                Repository::CONDITION_AND_WHERE => [
+                GenericRepository::CONDITION_AND_WHERE => [
                     ['dealer_id', '=', $dealerId]
                 ],
             ], false);
+
+            if (empty($websites)) {
+                throw new Exception('There\'s no website associated to this dealer');
+            }
 
             foreach ($websites as $website) {
                 $this->websiteConfigRepository->setValue($website->getKey(), 'general/user_accounts', $active);
@@ -547,6 +595,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      */
     public function deactivateDealer(int $dealerId): bool {
         try {
+            $this->userRepository->beginTransaction();
 
             $inventoryParams = [
                 'active' => self::INACTIVE,
@@ -557,11 +606,12 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             $this->userRepository->deactivateDealer($dealerId);
             $this->inventoryRepository->archiveInventory($dealerId, $inventoryParams);
 
+            $this->userRepository->commitTransaction();
             return true;
         } catch (Exception $e) {
             Log::error("Dealer deactivation error. dealer_id - {$dealerId}", $e->getTrace());
-
-            return false;
+            $this->userRepository->rollbackTransaction();
+            throw new Exception($e->getMessage());
         }
     }
 
@@ -579,13 +629,19 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     public function changeStatus(int $dealerId, string $status): bool
     {
         try {
-            $this->userRepository->changeStatus($dealerId, $status);
+            $this->userRepository->beginTransaction();
 
+            if (empty($status)) {
+                throw new \Exception('Status value is required to update dealer status.');
+            }
+
+            $this->userRepository->changeStatus($dealerId, $status);
+            $this->userRepository->commitTransaction();
             return true;
         } catch (\Exception $e) {
             Log::error("Change dealer status error. dealer_id - {$dealerId}", $e->getTrace());
-
-            return false;
+            $this->userRepository->rollbackTransaction();
+            throw new Exception($e->getMessage());
         }
     }
 
