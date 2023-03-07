@@ -141,6 +141,9 @@ class DealerDocumentsControllerTest extends IntegrationTestCase
      */
     public function testCreateWithoutFiles()
     {
+        $documentsSeeder = new DealerDocumentsSeeder();
+        $documentsSeeder->seed();
+
         $response = $this->json(
             'POST',
             str_replace('{leadId}', $documentsSeeder->lead->getKey(), self::API_URL),
@@ -150,6 +153,20 @@ class DealerDocumentsControllerTest extends IntegrationTestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['files']);
+
+        $response = $this->json(
+            'POST',
+            str_replace('{leadId}', $documentsSeeder->lead->getKey(), self::API_URL),
+            [
+                'files' => []
+            ],
+            ['access-token' => $documentsSeeder->authToken->access_token]
+        );
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['files']);
+
+        $documentsSeeder->cleanUp();
     }
 
     /**
