@@ -241,7 +241,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
             $query = $query->whereIn(Queue::getTableName().'.status', $params['q_status']);
         }
 
-        if(isset($params['q_status_not'])) {
+        if (isset($params['q_status_not'])) {
             $query = $query->whereNotIn(Queue::getTableName().'.status', $params['q_status_not']);
         }
 
@@ -311,7 +311,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
 
     /**
      * Get All Scheduled Posts Now Ready
-     * 
+     *
      * @param array $params
      * @return LengthAwarePaginator<Queue>
      */
@@ -338,7 +338,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
 
     /**
      * Get All Queued Updated Posts Now Ready
-     * 
+     *
      * @param array $params
      * @return LengthAwarePaginator<Queue>
      */
