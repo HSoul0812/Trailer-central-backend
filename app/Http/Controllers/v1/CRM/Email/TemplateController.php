@@ -39,7 +39,7 @@ class TemplateController extends RestfulControllerV2
         EmailBuilderServiceInterface $emailbuilder
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['test']);
-        $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'test', 'send']);
+        $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'test', 'send', 'update']);
         $this->middleware('setSalesPersonIdOnRequest')->only(['test', 'send']);
         $this->templates = $templates;
         $this->emailbuilder = $emailbuilder;
