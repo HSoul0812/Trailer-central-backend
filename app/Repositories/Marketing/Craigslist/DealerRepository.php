@@ -3,6 +3,7 @@
 namespace App\Repositories\Marketing\Craigslist;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Marketing\Craigslist\Balance;
 use App\Models\Marketing\Craigslist\Session;
 use App\Models\User\User;
 use App\Models\User\DealerClapp;
