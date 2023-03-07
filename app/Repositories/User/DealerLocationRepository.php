@@ -119,7 +119,7 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
      */
     public function update($params): bool
     {
-        $location = DealerLocation::findOrFail($this->getDealerLocationIdFromParams($params));
+        $location = DealerLocation::lockForUpdate()->findOrFail($this->getDealerLocationIdFromParams($params));
 
         return $location->fill($params)->save();
     }
