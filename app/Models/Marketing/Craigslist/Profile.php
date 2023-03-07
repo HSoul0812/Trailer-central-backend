@@ -194,7 +194,7 @@ class Profile extends Model
      */
     public function market(): hasOne
     {
-        return $this->hasOne(Market::class, 'city_code', 'market_city');
+        return $this->hasOne(Market::class, ['city_code', 'subarea_code'], ['market_city', 'market_subarea']);
     }
 
 
