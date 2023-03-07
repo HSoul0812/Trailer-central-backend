@@ -242,7 +242,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         }
 
         if (isset($params['q_status_not'])) {
-            $query = $query->whereNotIn(Session::getTableName().'.status', $params['q_status_not']);
+            $query = $query->whereNotIn(Queue::getTableName().'.status', $params['q_status_not']);
         }
 
         // Limit within a certain range of dates
@@ -311,7 +311,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
 
     /**
      * Get All Scheduled Posts Now Ready
-     * 
+     *
      * @param array $params
      * @return LengthAwarePaginator<Queue>
      */
@@ -338,7 +338,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
 
     /**
      * Get All Queued Updated Posts Now Ready
-     * 
+     *
      * @param array $params
      * @return LengthAwarePaginator<Queue>
      */
