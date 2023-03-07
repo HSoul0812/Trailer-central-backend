@@ -157,6 +157,11 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
                             ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
                             ->where('inventory.inventory_id', $inventory->inventory_id)
                             ->delete();
+
+                        InventoryImage::query()
+                            ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
+                            ->where('inventory.inventory_id', $inventory->inventory_id)
+                            ->delete();
                     });
 
                     $units += count($inventories);
@@ -209,17 +214,6 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
             $this->output->writeln(sprintf('%d inventory features were synced.', $inventoryFeaturesCounter));
 
             $inventoryImagesCounter = 0;
-
-            Image::query()
-                ->join('inventory_image', 'inventory_image.image_id', '=', 'image.image_id')
-                ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
-                ->where('inventory.dealer_id', $dealer->dealer_id)
-                ->delete();
-
-            InventoryImage::query()
-                ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
-                ->where('inventory.dealer_id', $dealer->dealer_id)
-                ->delete();
 
             Image::on('remote')
                 ->join('inventory_image', 'inventory_image.image_id', '=', 'image.image_id')
