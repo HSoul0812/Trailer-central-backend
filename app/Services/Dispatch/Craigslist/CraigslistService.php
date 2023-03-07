@@ -360,7 +360,7 @@ class CraigslistService implements CraigslistServiceInterface
             // Append DealerCraigslist to Collection
             $dealers->push(new DealerCraigslist([
                 'dealer_id'    => $clapp->dealer_id,
-                'balance'      => !empty($clapp->balance->balance) ? $clapp->balance->balance : 0,
+                'balance'      => null,//!empty($clapp->balance->balance) ? $clapp->balance->balance : 0,
                 'slots'        => $clapp->slots,
                 'chrome_mode'  => $clapp->chrome_mode,
                 'since'        => $clapp->since,
