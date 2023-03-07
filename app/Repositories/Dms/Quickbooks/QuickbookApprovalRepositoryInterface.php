@@ -18,7 +18,13 @@ interface QuickbookApprovalRepositoryInterface extends Repository {
      */
     public function getPoInvoiceApprovals($dealerId);
 
-    public function deleteByTbPrimaryId(int $tbPrimaryId, string $tableName);
+    /**
+     * @param int $tbPrimaryId
+     * @param string $tableName
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deleteByTbPrimaryId(int $tbPrimaryId, string $tableName, int $dealerId);
 
     /**
      * Create an approval object for a customer
@@ -28,5 +34,4 @@ interface QuickbookApprovalRepositoryInterface extends Repository {
      * @throws \Exception
      */
     public function createForCustomer(Customer $customer);
-
 }

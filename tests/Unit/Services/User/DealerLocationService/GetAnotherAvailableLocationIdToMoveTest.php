@@ -26,6 +26,9 @@ class GetAnotherAvailableLocationIdToMoveTest extends TestCase
     /**
      * Test that SUT will returns default location id
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @throws Exception when an unexpected exception has not been handled
      */
     public function testWillReturnsDefaultOne(): void
@@ -70,6 +73,9 @@ class GetAnotherAvailableLocationIdToMoveTest extends TestCase
 
     /**
      * Test that SUT will returns default location id
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @throws Exception when an unexpected exception has not been handled
      */
@@ -130,6 +136,9 @@ class GetAnotherAvailableLocationIdToMoveTest extends TestCase
 
     /**
      * Test that SUT will returns null
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @throws Exception when an unexpected exception has not been handled
      */

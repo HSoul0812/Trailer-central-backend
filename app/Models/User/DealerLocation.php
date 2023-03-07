@@ -6,10 +6,11 @@ use App\Helpers\GeographyHelper;
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Inventory\Inventory;
 use App\Models\Region;
-use App\Models\Observers\User\DealerLocationObserver;
+use App\Observers\User\DealerLocationObserver;
 use App\Models\Traits\TableAware;
 use App\Models\CRM\Text\Number;
 use App\Models\User\Location\QboLocationMapping;
+use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $dealer_location_id
  * @property int $dealer_id
  * @property string $name
+ * @property string $identifier
  * @property string $contact
  * @property string $website
  * @property string $email
@@ -131,10 +133,12 @@ class DealerLocation extends Model
         "pac_amount",
         "pac_type",
         'sales_tax_item_column_titles',
-        'location_id'
+        'location_id',
+        'google_business_store_code'
     ];
 
     protected $casts = [
+        'is_default' => 'boolean',
         'sales_tax_item_column_titles' => 'array'
     ];
 
@@ -195,6 +199,16 @@ class DealerLocation extends Model
     public function salesTaxItemsV1(): HasMany
     {
         return $this->HasMany(DealerLocationSalesTaxItemV1::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    /**
+     * Returns location identifier
+     *
+     * @return false|string
+     */
+    public function getIdentifierAttribute()
+    {
+        return CompactHelper::shorten($this->dealer_location_id);
     }
 
     /**

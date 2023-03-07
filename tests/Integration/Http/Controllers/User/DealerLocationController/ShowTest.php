@@ -21,6 +21,9 @@ class ShowTest extends AbstractDealerLocationController
     /**
      * @dataProvider invalidParametersProvider
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @param array $params
      * @param string $expectedException
      * @param string $expectedExceptionMessage
@@ -76,6 +79,9 @@ class ShowTest extends AbstractDealerLocationController
     }
 
     /**
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @throws Exception when an unexpected exception has not been handled
      */
     public function testWithValidParameter(): void

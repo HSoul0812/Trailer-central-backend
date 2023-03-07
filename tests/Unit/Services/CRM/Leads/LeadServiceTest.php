@@ -9,6 +9,7 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\User\NewDealerUser;
+use App\Models\Inventory\Inventory;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
@@ -30,6 +31,9 @@ use Illuminate\Support\Facades\Log;
 use Mockery;
 use Mockery\LegacyMockInterface;
 use Tests\TestCase;
+use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
+use Faker\Factory as Faker;
+use App\Models\CRM\User\Customer;
 
 /**
  * Test for App\Services\CRM\Leads\LeadService
@@ -53,7 +57,11 @@ class LeadServiceTest extends TestCase
     const TEST_LAST_NAME = 'Johnson';
     const TEST_PHONE = '555-555-5555';
     const TEST_EMAIL = 'alegra@nowhere.com';
+    const TEST_SALES_PERSON_ID = PHP_INT_MAX - 1;
+    const TEST_CUSTOMER_ID = PHP_INT_MAX - 2;
 
+    const TEST_NOTE = 'this is a note';
+    const TEST_TIME = '2022-10-11 11:12:13';
 
     /**
      * @var LegacyMockInterface|LeadRepositoryInterface
@@ -120,6 +128,11 @@ class LeadServiceTest extends TestCase
      */
     private $customerRepositoryMock;
 
+    /**
+     * @var LegacyMockInterface|TrackingRepositoryInterface
+     */
+    private $trackingRepositoryMock;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -162,6 +175,11 @@ class LeadServiceTest extends TestCase
 
         $this->customerRepositoryMock = Mockery::mock(CustomerRepositoryInterface::class);
         $this->app->instance(CustomerRepositoryInterface::class, $this->customerRepositoryMock);
+
+        $this->trackingRepositoryMock = Mockery::mock(TrackingRepositoryInterface::class);
+        $this->app->instance(TrackingRepositoryInterface::class, $this->trackingRepositoryMock);
+
+        $this->faker = Faker::create();
     }
 
 
@@ -204,7 +222,9 @@ class LeadServiceTest extends TestCase
             'inventory_id' => 1,
             'lead_type' => LeadType::TYPE_INVENTORY,
             'preferred_contact' => '',
-            'lead_source' => self::TEST_SOURCE
+            'lead_source' => self::TEST_SOURCE,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName()
         ];
 
         // Create Lead Params
@@ -253,6 +273,12 @@ class LeadServiceTest extends TestCase
             ->once()
             ->with($createSourceParams)
             ->andReturn($source);
+
+        // Mock Customer Repository
+        $this->customerRepositoryMock
+            ->shouldReceive('createFromLead')
+            ->once()
+            ->with($lead);
 
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
@@ -342,7 +368,9 @@ class LeadServiceTest extends TestCase
             'inventory' => $unitsInterest,
             'lead_types' => $leadTypes,
             'preferred_contact' => '',
-            'lead_source' => self::TEST_SOURCE
+            'lead_source' => self::TEST_SOURCE,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName()
         ];
 
         // Create Lead Params
@@ -392,6 +420,12 @@ class LeadServiceTest extends TestCase
             ->with($createSourceParams)
             ->andReturn($source);
 
+        // Mock Customer Repository
+        $this->customerRepositoryMock
+            ->shouldReceive('createFromLead')
+            ->once()
+            ->with($lead);
+
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
              ->twice()
@@ -431,7 +465,209 @@ class LeadServiceTest extends TestCase
         }
     }
 
+    /**
+     * @group CRM
+     * @covers ::create
+     */
+    public function testCreateWithSalespersonId()
+    {
+        // Get Model Mocks
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->id = 1;
+        $status->sales_person_id = self::TEST_SALES_PERSON_ID;
 
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->leadStatus = $status;
+
+        // Create Request Params
+        $createRequestParams = [
+            'sales_person_id' => self::TEST_SALES_PERSON_ID,
+            'preferred_contact' => '',
+        ];
+        
+        // Create Lead Params
+        $createLeadParams = $createRequestParams;
+        $createLeadParams['preferred_contact'] = 'phone';
+
+        // Create Status Params
+        $createStatusParams = $createLeadParams;
+        $createStatusParams['lead_id'] = $lead->identifier;
+
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+
+        // @var LeadServiceInterface $service
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        // Mock Create Lead
+        $this->leadRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createLeadParams)
+            ->andReturn($lead);
+
+        // Mock Status Repository
+        $this->statusRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createStatusParams)
+            ->andReturn($status);
+
+        // Create Lead
+        $result = $service->create($createRequestParams);
+
+        // Assert Match
+        $this->assertSame($result->identifier, $lead->identifier);
+        $this->assertSame($result->leadStatus->id, $status->id);
+        $this->assertSame($result->leadStatus->sales_person_id, $status->sales_person_id);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::create
+     */
+    public function testCreateWithCustomerId()
+    {
+        // Get Model Mocks
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->id = 1;
+
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->leadStatus = $status;
+
+        // Create Request Params
+        $createRequestParams = [
+            'dealer_id' => 1,
+            'customer_id' => self::TEST_CUSTOMER_ID,
+            'first_name' => self::TEST_FIRST_NAME,
+            'last_name' => self::TEST_LAST_NAME, 
+            'preferred_contact' => '',
+        ];
+        
+        // Create Lead Params
+        $createLeadParams = $createRequestParams;
+        $createLeadParams['preferred_contact'] = 'phone';
+
+        // Create Status Params
+        $createStatusParams = $createLeadParams;
+        $createStatusParams['lead_id'] = $lead->identifier;
+
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+
+        // @var LeadServiceInterface $service
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        // Mock Create Lead
+        $this->leadRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createLeadParams)
+            ->andReturn($lead);
+
+        // Mock Status Repository
+        $this->statusRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createStatusParams)
+            ->andReturn($status);
+
+        // Mock Customer Repository
+        $this->customerRepositoryMock
+            ->shouldReceive('createFromLead')
+            ->never();
+
+        $this->customerRepositoryMock
+            ->shouldReceive('update')
+            ->with([
+                'id' => self::TEST_CUSTOMER_ID,
+                'dealer_id' => $createRequestParams['dealer_id'],
+                'website_lead_id' => $lead->identifier
+            ]);
+
+        // Create Lead
+        $result = $service->create($createRequestParams);
+
+        // Assert Match
+        $this->assertSame($result->identifier, $lead->identifier);
+        $this->assertSame($result->leadStatus->id, $status->id);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::create
+     */
+    public function testCreateWithInteraction()
+    {
+        // Get Model Mocks
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->id = 1;
+
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->leadStatus = $status;
+
+        // Create Request Params
+        $createRequestParams = [
+            'interaction' => [
+                'type' => Interaction::TYPE_TASK,
+                'note' => self::TEST_NOTE,
+                'time' => self::TEST_TIME
+            ],
+            'preferred_contact' => '',
+        ];
+        
+        // Create Lead Params
+        $createLeadParams = $createRequestParams;
+        $createLeadParams['preferred_contact'] = 'phone';
+
+        // Create Status Params
+        $createStatusParams = $createLeadParams;
+        $createStatusParams['lead_id'] = $lead->identifier;
+
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+
+        // @var LeadServiceInterface $service
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        // Mock Create Lead
+        $this->leadRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createLeadParams)
+            ->andReturn($lead);
+
+        // Mock Status Repository
+        $this->statusRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($createStatusParams)
+            ->andReturn($status);
+
+        // Mock Create Interaction
+        $this->interactionRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with([
+                'lead_id' => $lead->identifier,
+                'interaction_type' => Interaction::TYPE_TASK,
+                'interaction_notes' => self::TEST_NOTE,
+                'interaction_time' => self::TEST_TIME
+            ]);
+
+        // Create Lead
+        $result = $service->create($createRequestParams);
+
+        // Assert Match
+        $this->assertSame($result->identifier, $lead->identifier);
+        $this->assertSame($result->leadStatus->id, $status->id);
+    }
 
     /**
      * @group CRM
@@ -439,14 +675,21 @@ class LeadServiceTest extends TestCase
      *
      * @throws BindingResolutionException
      */
-    /*public function testUpdateSingleType()
+    public function testUpdateSingleType()
     {
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->id = 1;
+        $status->source = self::TEST_SOURCE;
+
+        $newDealerUser = $this->getEloquentMock(NewDealerUser::class);
+        $newDealerUser->id = 1;
+        $newDealerUser->user_id = 1;
+
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
         $lead->identifier = 1;
-
-        $status = $this->getEloquentMock(LeadStatus::class);
-        $status->source_name = self::TEST_SOURCE;
+        $lead->leadStatus = $status;
+        $lead->newDealerUser = $newDealerUser;
 
         $source = $this->getEloquentMock(LeadSource::class);
         $source->source_name = self::TEST_SOURCE;
@@ -464,7 +707,8 @@ class LeadServiceTest extends TestCase
             'id' => $lead->identifier,
             'inventory_id' => 1,
             'lead_type' => LeadType::TYPE_INVENTORY,
-            'preferred_contact' => ''
+            'preferred_contact' => '',
+            'lead_source' => self::TEST_SOURCE
         ];
 
         // Create Lead Params
@@ -483,21 +727,21 @@ class LeadServiceTest extends TestCase
             'source_name' => $source->source_name
         ];
 
-
         // Lead Relations
         $lead->shouldReceive('setRelation')->passthru();
         $lead->shouldReceive('belongsTo')->passthru();
         $lead->shouldReceive('leadStatus')->passthru();
         $lead->shouldReceive('newDealerUser')->passthru();
 
-        // Turn DB Into Mock
-        DB::spy();
+        // Get Lead Types
+        $lead->shouldReceive('getLeadTypesAttribute')
+            ->twice()
+            ->andReturn([LeadType::TYPE_INVENTORY]);
 
-        // Pass Through Transaction
-        DB::shouldReceive('transaction')->passthru();
-
-        // @var LeadServiceInterface $service
-        $service = $this->app->make(LeadServiceInterface::class);
+        DB::shouldReceive('beginTransaction')->once();
+        DB::shouldReceive('commit')->once();
+        DB::shouldReceive('rollback')->never();
+        Log::shouldReceive('error')->never();
 
         // Mock Create Lead
         $this->leadRepositoryMock
@@ -526,19 +770,25 @@ class LeadServiceTest extends TestCase
         // Mock Lead Types
         $this->mockLeadTypes($lead, $types);
 
+        // Mock Update Customer
+        $this->mockUpdateCustomer($lead, $updateRequestParams);
+
+        // @var LeadServiceInterface $service
+        $service = $this->app->make(LeadServiceInterface::class);
+
         // Validate Update Catalog Result
         $result = $service->update($updateRequestParams);
 
+        $this->assertInstanceOf(Lead::class, $result);
 
         // Assert Match
-        $this->assertSame($result->identifier, (int) $lead->identifier);
+        $this->assertSame($result->identifier, $lead->identifier);
 
         // Assert Match
         $this->assertSame($result->leadStatus->id, $status->id);
 
         // Assert Match
         $this->assertSame($result->leadStatus->source, $source->source_name);
-
 
         // Match All Types
         $this->assertSame(count($result->leadTypes), $types->count());
@@ -551,7 +801,7 @@ class LeadServiceTest extends TestCase
         foreach($units as $k => $single) {
             $this->assertSame($result->units[$k]->inventory_id, $single->inventory_id);
         }
-    }*/
+    }
 
     /**
      * @group CRM
@@ -559,14 +809,14 @@ class LeadServiceTest extends TestCase
      *
      * @throws BindingResolutionException
      */
-    /*public function testUpdateMultiTypes()
+    public function testUpdateMultiTypes()
     {
         // Get Dealer ID
         $dealerId = self::getTestDealerId();
         $dealerLocationId = self::getTestDealerLocationId();
         $websiteId = self::getTestWebsiteRandom();
-        $dealer = NewDealerUser::find($dealerId);
-        $userId = $dealer->user_id;
+        $newDealerUser = NewDealerUser::find($dealerId);
+        $userId = $newDealerUser->user_id;
 
         // Create Dummy Inventory
         $units = factory(Inventory::class, 5)->create([
@@ -668,9 +918,13 @@ class LeadServiceTest extends TestCase
             'source_name' => $updateRequestParams['lead_source']
         ];
 
-
         // @var LeadServiceInterface $service
         $service = $this->app->make(LeadServiceInterface::class);
+
+        DB::shouldReceive('beginTransaction')->once();
+        DB::shouldReceive('commit')->once();
+        DB::shouldReceive('rollback')->never();
+        Log::shouldReceive('error')->never();
 
         // Mock Create Lead
         $this->leadRepositoryMock
@@ -699,13 +953,14 @@ class LeadServiceTest extends TestCase
         // Mock Lead Types
         $this->mockLeadTypes($lead, $types);
 
+        // Mock updateCustomer()
+        $this->mockUpdateCustomer($lead, $updateRequestParams);
 
         // Validate Update Catalog Result
         $result = $service->update($updateRequestParams);
 
-
         // Assert Match
-        $this->assertSame($result->identifier, (int) $lead->identifier);
+        $this->assertSame($result->identifier, $lead->identifier);
 
         // Assert Match
         $this->assertSame($result->leadStatus->id, $status->id);
@@ -725,16 +980,149 @@ class LeadServiceTest extends TestCase
         foreach($units as $k => $single) {
             $this->assertTrue(in_array($single->inventory_id, $unitsInterest));
         }
-    }*/
-
+    }
 
     /**
      * @group CRM
-     * @covers ::merge
+     * @covers ::update
      *
      * @throws BindingResolutionException
      */
-    public function testMerge()
+    public function testUpdateAppendInventory()
+    {
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->id = 1;
+        $status->source = self::TEST_SOURCE;
+
+        $newDealerUser = $this->getEloquentMock(NewDealerUser::class);
+        $newDealerUser->id = 1;
+        $newDealerUser->user_id = 1;
+
+        // Get Model Mocks
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->leadStatus = $status;
+        $lead->newDealerUser = $newDealerUser;
+
+        $units = collect([]);
+        $unitsInterest = [];
+        for($i = 3; $i <= 6; $i++) {
+            $unit = $this->getEloquentMock(Unit::class);
+            $unit->inventory_id = $i;
+            $units->push($unit);
+            $unitsInterest[] = $i;
+        }
+
+        $existingUnits = collect([]);
+        $existingUnitIds = [];
+        for($i = 1; $i <= 4; $i++) {
+            $unit = $this->getEloquentMock(Unit::class);
+            $unit->inventory_id = $i;
+            $existingUnits->push($unit);
+            $existingUnitIds[] = $i;
+        }
+
+        $missingUnits = collect([]);
+        for($i = 5; $i <= 6; $i++) {
+            $unit = $this->getEloquentMock(Unit::class);
+            $unit->inventory_id = $i;
+            $missingUnits->push($unit);
+        }
+
+        $allUnits = collect([]);
+        for($i = 1; $i <= 6; $i++) {
+            $unit = $this->getEloquentMock(Unit::class);
+            $unit->inventory_id = $i;
+            $allUnits->push($unit);
+        }
+
+        $updateRequestParams = [
+            'id' => $lead->identifier,
+            'preferred_contact' => 'phone',
+            'append_inventory' => $unitsInterest
+        ];
+
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+        $lead->shouldReceive('newDealerUser')->passthru();
+
+        DB::shouldReceive('beginTransaction')->once();
+        DB::shouldReceive('commit')->once();
+        DB::shouldReceive('rollback')->never();
+        Log::shouldReceive('error')->never();
+
+        // Mock Update Lead
+        $this->leadRepositoryMock
+            ->shouldReceive('update')
+            ->once()
+            ->with($updateRequestParams)
+            ->andReturn($lead);
+
+        // Mock Sales Person Repository
+        $this->statusRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->once($status);
+
+        // Mock Source Repository
+        $this->sourceRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->never();
+
+        // Mock appendUnitsOfInterest()
+        $this->unitRepositoryMock->shouldReceive('delete')->never();
+
+        $this->unitRepositoryMock->shouldReceive('getUnitIds')
+            ->once()
+            ->with($lead->identifier)
+            ->andReturn($existingUnitIds);
+        
+        foreach ($missingUnits as $unit) {
+
+            $this->unitRepositoryMock->shouldReceive('create')
+                ->once()->with([
+                    'inventory_id' => $unit->inventory_id,
+                    'website_lead_id' => $lead->identifier
+                ])->andReturn($unit);
+        }
+
+        $this->inventoryRepositoryMock->shouldReceive('getAll')->once()
+            ->andReturn($allUnits);
+        // end Mock appendUnitsOfInterest()
+
+        // Mock updateLeadTypes()
+        $this->typeRepositoryMock->shouldNotReceive('delete');
+        $this->typeRepositoryMock->shouldNotReceive('create');
+
+        // Mock updateCustomer()
+        $this->mockUpdateCustomer($lead, $updateRequestParams);
+
+        // @var LeadServiceInterface $service
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        // Validate Update
+        $result = $service->update($updateRequestParams);
+
+        $this->assertInstanceOf(Lead::class, $result);
+
+        // Assert Match
+        $this->assertSame($result->identifier, $lead->identifier);
+
+        // Match All Inventory Leads
+        $this->assertSame($result->units->count(), $allUnits->count());
+        foreach($allUnits as $index => $unit) {
+            $this->assertSame($result->units[$index]->inventory_id, $unit->inventory_id);
+        }
+    }
+
+    /**
+     * @group CRM
+     * @covers ::mergeInquiry
+     *
+     * @throws BindingResolutionException
+     */
+    public function testMergeInquiry()
     {
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
@@ -793,7 +1181,7 @@ class LeadServiceTest extends TestCase
 
 
         // Validate Send Inquiry Result
-        $result = $service->merge($lead, $mergeLeadParams);
+        $result = $service->mergeInquiry($lead, $mergeLeadParams);
 
         // Match Merged Lead Details
         $this->assertSame($result->interaction_id, $interaction->interaction_id);
@@ -801,9 +1189,9 @@ class LeadServiceTest extends TestCase
 
     /**
      * @group CRM
-     * @covers ::mergeLeads
+     * @covers ::mergeLeadData
      */
-    public function testMergeLeads()
+    public function testMergeLeadData()
     {
         $leadId = PHP_INT_MAX;
         $mergesLeadId = PHP_INT_MAX - 1;
@@ -849,23 +1237,66 @@ class LeadServiceTest extends TestCase
             ->with($customerParams)
             ->once();
 
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->with(['id' => $leadId])
+            ->once()
+            ->andReturn($this->getEloquentMock(Lead::class));
+
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->with(['id' => $mergesLeadId])
+            ->once()
+            ->andReturn($this->getEloquentMock(Lead::class));
+
+        $this->interactionRepositoryMock
+            ->shouldReceive('batchUpdate')
+            ->with(['tc_lead_id' => $leadId], ['tc_lead_id' => $mergesLeadId])
+            ->once();
+
+        $this->interactionRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->andReturn($this->getEloquentMock(Interaction::class));
+
+        $this->trackingRepositoryMock
+            ->shouldReceive('batchUpdate')
+            ->with(['lead_id' => $leadId], ['lead_id' => $mergesLeadId])
+            ->once();
+
+        $this->unitRepositoryMock
+            ->shouldReceive('getUnitIds')
+            ->with($leadId)
+            ->once();
+
+        $this->unitRepositoryMock
+            ->shouldReceive('getUnitIds')
+            ->with($mergesLeadId)
+            ->once();
+
         DB::shouldReceive('commit')
             ->once();
 
         Log::shouldReceive('info')
-            ->with('leads has been successfully merged', ['leadId' => $leadId, 'mergesLeadId' => $mergesLeadId])
+            ->with('leads has been successfully merged', ['leadId' => $leadId, 'oldLeadId' => $mergesLeadId])
             ->once();
 
-        $result = $service->mergeLeads($leadId, $mergesLeadId);
+        Log::shouldReceive('error')
+            ->never();
+
+        DB::shouldReceive('rollback')
+            ->never();
+
+        $result = $service->mergeLeadData($leadId, $mergesLeadId);
 
         $this->assertTrue($result);
     }
 
     /**
      * @group CRM
-     * @covers ::mergeLeads
+     * @covers ::mergeLeadData
      */
-    public function testMergeLeadsWithError()
+    public function testMergeLeadDataWithError()
     {
         $leadId = PHP_INT_MAX;
         $mergesLeadId = PHP_INT_MAX - 1;
@@ -908,6 +1339,16 @@ class LeadServiceTest extends TestCase
             ->shouldReceive('bulkUpdate')
             ->never();
 
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->with(['id' => $leadId])
+            ->andReturn($this->getEloquentMock(Lead::class));
+
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->with(['id' => $mergesLeadId])
+            ->never();
+
         DB::shouldReceive('rollback')
             ->once();
 
@@ -916,7 +1357,138 @@ class LeadServiceTest extends TestCase
 
         $this->expectException(MergeLeadsException::class);
 
-        $service->mergeLeads($leadId, $mergesLeadId);
+        $service->mergeLeadData($leadId, $mergesLeadId);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::mergeLeads
+     */
+    public function testMergeLeads()
+    {
+        $leadId = PHP_INT_MAX;
+        $mergeLeadIds = [PHP_INT_MAX - 1, PHP_INT_MAX - 2];
+
+        $this->leadRepositoryMock
+            ->shouldReceive('getNotesBetweenLeads')
+            ->once();
+
+        $this->leadRepositoryMock
+            ->shouldReceive('getMinSubmittedDateBetweenLeads')
+            ->once();
+
+        $this->leadRepositoryMock
+            ->shouldReceive('update')
+            ->once();
+
+        $this->leadRepositoryMock
+            ->shouldReceive('getMaxContactDateBetweenLeads')
+            ->once();
+
+        $this->statusRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->once();
+
+        $this->leadRepositoryMock
+            ->shouldReceive('delete')
+            ->times(count($mergeLeadIds));
+
+
+        // Mocking @mergeLeadData
+
+        $this->emailHistoryRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->times(count($mergeLeadIds));
+
+        $this->facebookRepositoryMock
+            ->shouldReceive('bulkUpdateFbLead')
+            ->times(count($mergeLeadIds));
+
+        $this->textRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->times(count($mergeLeadIds));
+
+        $this->quoteRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->times(count($mergeLeadIds));
+
+        $this->customerRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->times(count($mergeLeadIds));
+
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->with(['id' => $leadId])
+            ->times(count($mergeLeadIds))
+            ->andReturn($this->getEloquentMock(Lead::class));
+
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->times(count($mergeLeadIds))
+            ->andReturn($this->getEloquentMock(Lead::class));
+
+        $this->interactionRepositoryMock
+            ->shouldReceive('batchUpdate')
+            ->times(count($mergeLeadIds));
+
+        $this->interactionRepositoryMock
+            ->shouldReceive('create')
+            ->times(count($mergeLeadIds))
+            ->andReturn($this->getEloquentMock(Interaction::class));
+
+        $this->trackingRepositoryMock
+            ->shouldReceive('batchUpdate')
+            ->times(count($mergeLeadIds));
+
+        $this->unitRepositoryMock
+            ->shouldReceive('getUnitIds')
+            ->with($leadId)
+            ->times(count($mergeLeadIds));
+
+        $this->unitRepositoryMock
+            ->shouldReceive('getUnitIds')
+            ->times(count($mergeLeadIds));
+    
+
+        /** @var LegacyMockInterface|LeadServiceInterface $service */
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        $service->mergeLeads($leadId, $mergeLeadIds);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::mergeUnits
+     */
+    public function testMergeUnits()
+    {
+        $leadId = PHP_INT_MAX;
+        $mergeLeadId = PHP_INT_MAX - 1;
+
+        $this->unitRepositoryMock
+            ->shouldReceive('getUnitIds')
+            ->with($leadId)
+            ->once()
+            ->andReturn([1, 2]);
+
+        $this->unitRepositoryMock
+            ->shouldReceive('getUnitIds')
+            ->with($mergeLeadId)
+            ->once()
+            ->andReturn([2, 3]);
+
+        $this->unitRepositoryMock
+            ->shouldReceive('create')
+            ->with([
+                'inventory_id' => 3,
+                'website_lead_id' => $leadId
+            ])
+            ->once();
+
+        /** @var LegacyMockInterface|LeadServiceInterface $service */
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        $service->mergeUnits($leadId, $mergeLeadId);
     }
 
     /**
@@ -990,6 +1562,38 @@ class LeadServiceTest extends TestCase
                     'lead_type' => $type->lead_type
                 ])
                 ->andReturn($type);
+        }
+    }
+
+    /**
+     * Mock Update Customer
+     *
+     * @param Lead $lead
+     * @param array $params
+     * @return void
+     */
+    private function mockUpdateCustomer(Lead $lead, array $params)
+    {
+        $customerParams = [];
+        foreach ($params as $key => $value) {
+
+            if (in_array($key, array_keys(Lead::CUSTOMER_FIELDS))) {
+                $customerParams[Lead::CUSTOMER_FIELDS[$key]] = $value;
+            }
+        }
+
+        if (count($customerParams) > 0) {
+            $this->customerRepositoryMock->shouldReceive('bulkUpdate')
+                ->with(array_merge($customerParams, [
+                    'search' => [
+                        'website_lead_id' => $lead->identifier
+                    ],
+
+                ]))
+                ->once();
+        } else {
+            $this->customerRepositoryMock->shouldReceive('bulkUpdate')
+                ->never();
         }
     }
 }

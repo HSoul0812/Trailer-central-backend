@@ -11,11 +11,14 @@ use App\Services\Pos\PosService;
 use App\Transformers\Inventory\InventoryTransformerV2;
 use App\Transformers\Parts\PartsTransformer;
 use App\Transformers\Pos\PosProductTransformer;
+use App\Transformers\Pos\QuoteTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
+use Illuminate\Http\Request as IlluminateRequest;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Collection;
+use App\Http\Requests\Pos\CreatePosQuoteRequest;
 
 class PosController extends RestfulControllerV2
 {
@@ -25,10 +28,16 @@ class PosController extends RestfulControllerV2
      */
     private $fractal;
 
-    public function __construct(Manager $fractal)
+    /**
+     * @var PosService
+     */
+    private $posService;
+
+    public function __construct(Manager $fractal, PosService $posService)
     {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'search', 'update']);
         $this->fractal = $fractal;
+        $this->posService = $posService;
     }
 
     /**
@@ -77,5 +86,24 @@ class PosController extends RestfulControllerV2
             return $this->response->errorBadRequest();
         }
 
+    }
+
+    /**
+     * Creating a POS Quote.
+     * 
+     * @param  IlluminateRequest  $request
+     * 
+     * @return \App\Models\Pos\Quote|void
+     */
+    public function createPosQuote(IlluminateRequest $request) 
+    {
+        $requestData = $request->all();
+        $request = new CreatePosQuoteRequest($requestData);
+        if ( $request->validate() ) {
+            return $this->response->item(
+                $this->posService->createQuote($requestData), new QuoteTransformer()
+            );
+        }
+        return $this->response->errorBadRequest();
     }
 }

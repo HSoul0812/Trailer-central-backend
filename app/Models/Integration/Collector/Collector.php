@@ -47,7 +47,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $unarchive_sold_items
  * @property string $cdk_password
  * @property string $cdk_username
+ * @property string $cdk_dealer_cmfs
  * @property bool $use_factory_mapping
+ * @property bool is_mfg_brand_mapping_enabled
  * @property string $skip_categories
  * @property string $skip_locations
  * @property string|null $ids_token
@@ -72,12 +74,30 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $api_params
  * @property string|null $api_max_records
  * @property string|null $api_pagination
+ *
+ * @property Collection<CollectorLog> $collectorLogs
  * @property Collection<CollectorSpecification> $specifications
+ *
  * @property User $dealers
  * @property DealerLocation $dealerLocation
  * @property bool $ignore_manually_added_units
  * @property bool $is_bdv_enabled
  * @property bool $show_on_auction123
+ * @property string|null $motility_username
+ * @property string|null $motility_password
+ * @property string|null $motility_account_no
+ * @property string|null $motility_integration_id
+ * @property string|null $local_image_directory_address
+ * @property string|null $video_source_fields
+ * @property int $override_images
+ * @property int $override_all
+ * @property int $override_video
+ * @property int $override_prices
+ * @property int $override_attributes
+ * @property int $override_descriptions
+ * @property \DateTime|null $last_run
+ * @property \DateTime|null $scheduled_for
+ *
  */
 class Collector extends Model implements Filterable
 {
@@ -85,6 +105,7 @@ class Collector extends Model implements Filterable
         self::FILE_FORMAT_XML,
         self::FILE_FORMAT_CSV,
         self::FILE_FORMAT_CDK,
+        self::FILE_FORMAT_CDK_MULTIPLE,
         self::FILE_FORMAT_IDS,
         self::FILE_FORMAT_XML_URL,
         self::FILE_FORMAT_PIPE_DELIMITED,
@@ -96,6 +117,7 @@ class Collector extends Model implements Filterable
     ];
 
     public const FILE_FORMAT_CDK = 'cdk';
+    public const FILE_FORMAT_CDK_MULTIPLE = 'cdk_multiple';
     public const FILE_FORMAT_XML = 'xml';
     public const FILE_FORMAT_CSV = 'csv';
     public const FILE_FORMAT_IDS = 'ids';
@@ -109,6 +131,10 @@ class Collector extends Model implements Filterable
 
     public const MSRP_ZEROED_OUT_ON_USED = 1;
     public const MSRP_NOT_ZEROED_OUT_ON_USED = 0;
+
+    public const OVERRIDE_NOT_SET = 0;
+    public const OVERRIDE_UNLOCKED = 1;
+    public const OVERRIDE_LOCKED = 2;
 
     public const MEASURE_FORMATS = [
         'Feet' => 'feet',
@@ -131,6 +157,7 @@ class Collector extends Model implements Filterable
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'id',
         'dealer_location_id',
         'dealer_id',
         'process_name',
@@ -163,11 +190,13 @@ class Collector extends Model implements Filterable
         'unarchive_sold_items',
         'cdk_password',
         'cdk_username',
+        'cdk_dealer_cmfs',
         'motility_username',
         'motility_password',
         'motility_account_no',
         'motility_integration_id',
         'use_factory_mapping',
+        'is_mfg_brand_mapping_enabled',
         'skip_categories',
         'skip_locations',
         'zero_msrp',
@@ -188,11 +217,29 @@ class Collector extends Model implements Filterable
         'last_run',
         'run_errors',
         'show_on_auction123',
+        'video_source_fields',
+        'override_images',
+        'override_all',
+        'override_video',
+        'override_prices',
+        'override_attributes',
+        'override_descriptions'
     ];
 
     protected $casts = [
         'last_run' => 'datetime',
+        'scheduled_for' => 'datetime',
+        'overridable_fields' => 'array'
     ];
+
+    public function getOverridableFieldsListAttribute(): string
+    {
+        $overridable_fields = array_keys(array_filter($this->overridable_fields, function ($v) {
+            return $v;
+        }));
+
+        return implode(",", $overridable_fields);
+    }
 
     public function dealers(): BelongsTo
     {
@@ -209,8 +256,23 @@ class Collector extends Model implements Filterable
         return $this->hasMany(CollectorSpecification::class);
     }
 
+    public function collectorLogs(): HasMany
+    {
+        return $this->hasMany(CollectorLog::class);
+    }
+
     public function jsonApiFilterableColumns(): ?array
     {
         return ['*'];
+    }
+
+    public function collectorChangeReports()
+    {
+        return $this->hasMany(CollectorChangeReport::class);
+    }
+
+    public function collectorAdminNotes()
+    {
+        return $this->hasMany(CollectorAdminNote::class);
     }
 }

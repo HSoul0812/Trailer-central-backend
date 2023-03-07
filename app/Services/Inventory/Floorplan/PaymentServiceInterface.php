@@ -4,10 +4,11 @@ namespace App\Services\Inventory\Floorplan;
 
 use Illuminate\Support\Collection;
 
-interface PaymentServiceInterface {
+interface PaymentServiceInterface
+{
     /**
      * Validate an UUID before creating a floorplan payment
-     * 
+     *
      * @param int $dealerId
      * @param string $paymentUUID
      * @return boolean
@@ -16,7 +17,7 @@ interface PaymentServiceInterface {
 
     /**
      * Set a payment UUID for a dealer
-     * 
+     *
      * @param int $dealerId
      * @param string $paymentUUID
      */
@@ -24,21 +25,29 @@ interface PaymentServiceInterface {
 
     /**
      * Create bulk floorplan payments for a dealer
-     * 
+     *
      * @param int $dealerId
      * @param array $payments
      * @param string $paymentUUID
-     * 
+     *
      * @return Collection
      */
     public function createBulk(int $dealerId, array $payments, string $paymentUUID);
 
     /**
      * Create a check expense for floorplan payments
-     * 
+     *
      * @param array $params
-     * 
+     *
      * @return Collection
      */
     public function create(array $params);
+
+    /**
+     * @param int $dealerId
+     * @param string $checkNumber
+     *
+     * @return bool
+     */
+    public function checkNumberExists(int $dealerId, string $checkNumber): bool;
 }

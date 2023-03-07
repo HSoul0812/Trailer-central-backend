@@ -25,6 +25,9 @@ class MoveAndDeleteTest extends TestCase
     /**
      * Test that SUT will thrown a not found exception
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @throws Exception when an unexpected exception has been thrown instead of the desired exception
      */
     public function testWillThrowAModelNotFoundException(): void
@@ -73,6 +76,9 @@ class MoveAndDeleteTest extends TestCase
     /**
      * Test that SUT will not move any related record, because it has not any related record, but it will delete one
      * dealer location
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @throws Exception when an unexpected exception has not been handled
      */
@@ -125,6 +131,9 @@ class MoveAndDeleteTest extends TestCase
 
     /**
      * Test that SUT will move all related records and it will delete one dealer location
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @throws Exception when an unexpected exception has not been handled
      */

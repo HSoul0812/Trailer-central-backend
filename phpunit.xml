@@ -11,6 +11,16 @@
         <testsuite name="Feature">
             <directory suffix="Test.php">./tests/Feature</directory>
         </testsuite>
+
+        <testsuite name="Integration">
+            <directory suffix="Test.php">./tests/Integration</directory>
+        </testsuite>
+
+        <testsuite name="Lead">
+            <file>./tests/Integration/Http/Controllers/CRM/Leads/LeadControllerTest.php</file>
+            <file>./tests/Unit/Services/CRM/Leads/LeadServiceTest.php</file>
+            <file>./tests/Unit/Services/CRM/Leads/InquiryServiceTest.php</file>
+        </testsuite>
     </testsuites>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
@@ -27,5 +37,6 @@
         <server name="QUEUE_CONNECTION" value="sync"/>
         <server name="SESSION_DRIVER" value="array"/>
         <server name="SENTRY_LARAVEL_DSN" value=""/>
+        <server name="ADF_IMPORT_MOVE_LABEL" value="1"/>
     </php>
 </phpunit>

@@ -22,7 +22,8 @@ class UpdateWebsiteImageRequest extends Request
             'sort_order' => 'nullable|integer',
             'is_active' => 'nullable|integer',
             'promo_id' => 'nullable|integer',
-            'expires_at' => 'nullable|date_format:Y-m-d H:i:s'
+            'expires_at' => 'nullable|date_format:Y-m-d H:i:s',
+            'starts_from' => 'nullable|date_format:Y-m-d H:i:s'
         ];
     }
 }

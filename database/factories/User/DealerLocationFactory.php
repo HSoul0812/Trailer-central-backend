@@ -33,7 +33,7 @@ $factory->define(DealerLocation::class, static function (Faker $faker, array $at
         'city' => $attributes['city'] ?? $faker->city,
         'county' => $attributes['county'] ?? $faker->city,
         'region' => $attributes['region'] ?? $faker->stateAbbr,
-        'postalcode' => $attributes['postalcode'] ?? $faker->postcode,
+        'postalcode' => $attributes['postalcode'] ?? substr($faker->postcode, 0, 5),
         'country' => $attributes['country'] ?? $faker->country,
         'latitude' => $attributes['latitude'] ?? $faker->latitude,
         'longitude' => $attributes['longitude'] ?? $faker->longitude,

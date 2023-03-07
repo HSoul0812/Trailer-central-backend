@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\CRM\User;
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\CRM\User\ConfigSalesPeopleRequest;
 use App\Http\Requests\CRM\User\GetSalesPeopleRequest;
+use App\Http\Requests\CRM\User\GetSalesPersonRequest;
 use App\Http\Requests\CRM\User\ValidateSalesPeopleRequest;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\User\DTOs\SalesPersonConfig;
@@ -20,6 +21,7 @@ use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
+use App\Http\Requests\CRM\User\DeleteSalesPersonRequest;
 
 class SalesPersonController extends RestfulController {
 
@@ -98,6 +100,25 @@ class SalesPersonController extends RestfulController {
         );
     }
 
+    /**
+     * Get Sales Person
+     * 
+     * @param int $id
+     * @return type
+     */
+    public function show(int $id)
+    {
+        // Handle Auth Sales People Request
+        $requestData = ['sales_person_id' => $id];
+        $request = new GetSalesPersonRequest($requestData);
+        if ($request->validate()) {
+            // Return Auth
+            return $this->response->item($this->salesPerson->get($request->all()), $this->salesPersonTransformer);
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
     public function salesReport(Request $request)
     {
         $result = $this->salesPerson->salesReport($request->all());
@@ -131,5 +152,28 @@ class SalesPersonController extends RestfulController {
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Delete Sales Person
+     * 
+     * @param int $id
+     * @return type
+     */
+    public function destroy(int $id)
+    {
+        $requestData = ['id' => $id];
+        $request = new DeleteSalesPersonRequest($requestData);
+
+        if ($request->validate()) {
+           
+            $deleted = $this->salesPerson->delete($request->all());
+
+            return $this->response->array([
+                'deleted' => $deleted
+            ]);
+        }
+
+        $this->response->errorBadRequest();
     }
 }

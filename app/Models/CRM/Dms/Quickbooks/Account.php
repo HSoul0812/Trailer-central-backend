@@ -49,9 +49,17 @@ class Account extends Model
 
     const FLOORING_DEBT_PREFIX = 'Flooring Debt - ';
 
-    protected $table = 'qb_accounts';
+    public const TABLE_NAME = 'qb_accounts';
+
+    protected $table = self::TABLE_NAME;
 
     protected $guarded = ['qb_id'];
+
+    protected $casts = [
+        'sub_account' => 'integer',
+        'current_balance' => 'decimal: 2',
+        'current_balance_with_subaccounts' => 'decimal: 2',
+    ];
 
     public function parent()
     {

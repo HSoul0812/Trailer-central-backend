@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\CRM\Text;
 
-use App\Exceptions\CRM\Text\NoLeadsDeliverCampaignException;
+use App\Exceptions\CRM\Text\NoLeadsProcessCampaignException;
 use App\Services\CRM\Text\TwilioServiceInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
@@ -16,6 +16,16 @@ use App\Models\CRM\Text\Template;
 use App\Models\User\NewDealerUser;
 use Faker\Factory as Faker;
 use Tests\TestCase;
+use Illuminate\Support\Facades\Artisan;
+use App\Models\Observers\CRM\Interactions\TextLogObserver;
+use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Models\User\NewUser;
+use App\Models\User\User;
+use App\Models\User\CrmUser;
+use App\Models\Website\Website;
+use App\Repositories\User\NewDealerUserRepositoryInterface;
+use App\Repositories\CRM\User\CrmUserRepositoryInterface;
+use App\Models\User\DealerLocation;
 
 class ProcessCampaignTest extends TestCase
 {
@@ -34,9 +44,19 @@ class ProcessCampaignTest extends TestCase
     protected $faker;
 
     /**
+     * App\Models\User\User $dealer
+     */
+    protected $dealer;
+
+    /**
      * @const int
      */
     const ENTITY_TYPE_ID = 1;
+
+    /**
+     * 
+     */
+    const FROM_SMS_NUMBER = 'FROM_SMS_NUMBER';
 
     /**
      * Set Up Test
@@ -52,6 +72,67 @@ class ProcessCampaignTest extends TestCase
 
         // Create Faker
         $this->faker = Faker::create();
+
+        // create new dealer
+        $this->dealer = factory(User::class)->create();
+
+        /**
+         * necessary data for dealer
+         */
+        $user = factory(NewUser::class)->create();
+        $newDealerUserRepo = app(NewDealerUserRepositoryInterface::class);
+        $newDealerUser = $newDealerUserRepo->create([
+            'user_id' => $user->user_id,
+            'salt' => md5((string)$user->user_id), // random string
+            'auto_import_hide' => 0,
+            'auto_msrp' => 0
+        ]);
+        $this->dealer->newDealerUser()->save($newDealerUser);
+        $crmUserRepo = app(CrmUserRepositoryInterface::class);
+        $crmUserRepo->create([
+            'user_id' => $user->user_id,
+            'logo' => '',
+            'first_name' => '',
+            'last_name' => '',
+            'display_name' => '',
+            'dealer_name' => $this->dealer->name,
+            'active' => 1
+        ]);
+        // END
+
+        factory(DealerLocation::class, 3)->create([
+            'dealer_id' => $this->dealer->getKey()
+        ]);
+
+        $website = factory(Website::class)->create();
+        $this->dealer->website()->save($website);
+    }
+
+    public function tearDown(): void
+    {
+        Campaign::where('user_id', $this->dealer->newDealerUser->user_id)->each(function($campaign) {
+            $campaign->categories()->delete();
+            $campaign->brands()->delete();
+            $campaign->sent()->delete();
+        });
+        Campaign::where('user_id', $this->dealer->newDealerUser->user_id)->delete();
+        Template::where('user_id', $this->dealer->newDealerUser->user_id)->delete();
+
+        Lead::where('dealer_id', $this->dealer->getKey())->each(function($lead) {
+            $lead->textLogs()->delete();
+        });
+        Lead::where('dealer_id', $this->dealer->getKey())->delete();
+        Inventory::where('dealer_id', $this->dealer->getKey());
+
+        DealerLocation::where('dealer_id', $this->dealer->getKey())->delete();
+        Website::where('dealer_id', $this->dealer->getKey())->delete();
+
+        CrmUser::destroy($this->dealer->getKey());
+        NewDealerUser::destroy($this->dealer->getKey());
+        NewUser::destroy($this->dealer->getKey());
+        User::destroy($this->dealer->getKey());
+
+        parent::tearDown();
     }
 
     /**
@@ -67,20 +148,23 @@ class ProcessCampaignTest extends TestCase
     public function testSimpleCampaign()
     {
         // Get Dealer
-        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+        $dealer = NewDealerUser::findOrFail($this->dealer->getKey());
 
         // Refresh Leads
         $this->refreshCampaigns($dealer->user_id);
 
-
         // Build Generic Template
         $template = Template::where('user_id', $dealer->user_id)->first();
         if(empty($template->id)) {
-            factory(Template::class)->create();
+            factory(Template::class)->create([
+                'user_id' => $dealer->user_id
+            ]);
         }
 
         // Build Generic Campaign
-        $campaign = factory(Campaign::class)->create();
+        $campaign = factory(Campaign::class)->create([
+            'user_id' => $dealer->user_id
+        ]);
         $unused = $this->refreshLeads($campaign->id);
 
         // Get Campaigns for Dealer
@@ -91,23 +175,40 @@ class ProcessCampaignTest extends TestCase
         }
         $leads = $campaign->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsDeliverCampaignException();
+            throw new NoLeadsProcessCampaignException();
         }
 
+        // skip elasticsearch for now
+        $this->mock(TextLogObserver::class, function ($mock) use ($leads) {
+
+            $mock->shouldReceive('created')
+                ->times(count($leads));
+        });
+
+        // Mock CampaignService@getFromNumber
+        $from_number = $campaign->from_sms_number ?? self::FROM_SMS_NUMBER;
+
+        $this->mock(DealerLocationRepositoryInterface::class, function ($mock) use ($from_number, $dealer, $campaign, $leads) {
+
+            $mock->shouldReceive('findDealerSmsNumber')
+                ->withArgs([$dealer->id])
+                ->andReturn($from_number);
+        });
+
         // Mock Text Service
-        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign) {
+        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign, $from_number) {
+
+            $mock->shouldReceive('isValidPhoneNumber')
+                ->with($from_number)
+                ->andReturn(true);
+
             // Loop Leads to Mock Text Sent
             foreach($leads as $lead) {
-                // Get From Number
-                $from_number = $campaign->from_sms_number;
-                if(empty($from_number)) {
-                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                }
 
                 // Get Text Message
                 $textMessage = $this->templates->fillTemplate($campaign->template->template, [
                     'lead_name' => $lead->full_name,
-                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'title_of_unit_of_interest' => $lead->inventory_title,
                     'dealer_name' => $dealer->user->name
                 ]);
 
@@ -119,16 +220,11 @@ class ProcessCampaignTest extends TestCase
 
             // Loop Leads to Mock Text NOT Sent
             foreach($unused as $lead) {
-                // Get From Number
-                $from_number = $campaign->from_sms_number;
-                if(empty($from_number)) {
-                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                }
 
                 // Get Text Message
                 $textMessage = $this->templates->fillTemplate($campaign->template->template, [
                     'lead_name' => $lead->full_name,
-                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'title_of_unit_of_interest' => $lead->inventory_title,
                     'dealer_name' => $dealer->user->name
                 ]);
 
@@ -140,16 +236,10 @@ class ProcessCampaignTest extends TestCase
         });
 
         // Call Leads Assign Command
-        $this->artisan('text:process-campaign ' . self::getTestDealerId())->assertExitCode(0);
-
+        $this->artisan('text:process-campaign ' . $this->dealer->getKey())->assertExitCode(0);
 
         // Loop Leads
         foreach($leads as $lead) {
-            // Get From Number
-            $from_number = $campaign->from_sms_number;
-            if(empty($from_number)) {
-                $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-            }
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('dealer_texts_log', [
@@ -180,7 +270,7 @@ class ProcessCampaignTest extends TestCase
     public function testPurchasesCampaign()
     {
         // Get Dealer
-        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+        $dealer = NewDealerUser::findOrFail($this->dealer->getKey());
 
         // Refresh Leads
         $this->refreshCampaigns($dealer->user_id);
@@ -189,12 +279,15 @@ class ProcessCampaignTest extends TestCase
         // Build Generic Template
         $template = Template::where('user_id', $dealer->user_id)->first();
         if(empty($template->id)) {
-            factory(Template::class)->create();
+            factory(Template::class)->create([
+                'user_id' => $dealer->user_id
+            ]);
         }
 
         // Build Generic Campaign
         $campaign = factory(Campaign::class)->create([
-            'action' => 'purchased'
+            'action' => 'purchased',
+            'user_id' => $dealer->user_id
         ]);
         $unused = $this->refreshLeads($campaign->id, [
             'action' => 'purchased'
@@ -208,23 +301,40 @@ class ProcessCampaignTest extends TestCase
         }
         $leads = $campaign->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsDeliverCampaignException();
+            throw new NoLeadsProcessCampaignException();
         }
 
+        // skip elasticsearch for now
+        $this->mock(TextLogObserver::class, function ($mock) use ($leads) {
+
+            $mock->shouldReceive('created')
+                ->times(count($leads));
+        });
+
+        // Mock CampaignService@getFromNumber
+        $from_number = $campaign->from_sms_number ?? self::FROM_SMS_NUMBER;
+
+        $this->mock(DealerLocationRepositoryInterface::class, function ($mock) use ($from_number, $dealer, $campaign, $leads) {
+
+            $mock->shouldReceive('findDealerSmsNumber')
+                ->withArgs([$dealer->id])
+                ->andReturn($from_number);
+        });
+
         // Mock Text Service
-        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign) {
+        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign, $from_number) {
+
+            $mock->shouldReceive('isValidPhoneNumber')
+                ->with($from_number)
+                ->andReturn(true);
+
             // Loop Leads to Mock Text Sent
             foreach($leads as $lead) {
-                // Get From Number
-                $from_number = $campaign->from_sms_number;
-                if(empty($from_number)) {
-                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                }
 
                 // Get Text Message
                 $textMessage = $this->templates->fillTemplate($campaign->template->template, [
                     'lead_name' => $lead->full_name,
-                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'title_of_unit_of_interest' => $lead->inventory_title,
                     'dealer_name' => $dealer->user->name
                 ]);
 
@@ -236,16 +346,11 @@ class ProcessCampaignTest extends TestCase
 
             // Loop Leads to Mock Text NOT Sent
             foreach($unused as $lead) {
-                // Get From Number
-                $from_number = $campaign->from_sms_number;
-                if(empty($from_number)) {
-                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                }
 
                 // Get Text Message
                 $textMessage = $this->templates->fillTemplate($campaign->template->template, [
                     'lead_name' => $lead->full_name,
-                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'title_of_unit_of_interest' => $lead->inventory_title,
                     'dealer_name' => $dealer->user->name
                 ]);
 
@@ -257,16 +362,10 @@ class ProcessCampaignTest extends TestCase
         });
 
         // Call Leads Assign Command
-        $this->artisan('text:process-campaign ' . self::getTestDealerId())->assertExitCode(0);
-
+        $this->artisan('text:process-campaign ' . $this->dealer->getKey())->assertExitCode(0);
 
         // Loop Leads
         foreach($leads as $lead) {
-            // Get From Number
-            $from_number = $campaign->from_sms_number;
-            if(empty($from_number)) {
-                $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-            }
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('dealer_texts_log', [
@@ -297,7 +396,7 @@ class ProcessCampaignTest extends TestCase
     public function testLocationSpecificCampaign()
     {
         // Get Dealer
-        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+        $dealer = NewDealerUser::findOrFail($this->dealer->getKey());
 
         // Refresh Leads
         $this->refreshCampaigns($dealer->user_id);
@@ -306,17 +405,20 @@ class ProcessCampaignTest extends TestCase
         // Build Generic Template
         $template = Template::where('user_id', $dealer->user_id)->first();
         if(empty($template->id)) {
-            factory(Template::class)->create();
+            factory(Template::class)->create([
+                'user_id' => $dealer->user_id
+            ]);
         }
 
         // Build Random Factory Salespeople
-        $locationIds = TestCase::getTestDealerLocationIds();
+        $locationIds = DealerLocation::where('dealer_id', $this->dealer->getKey())->get()->pluck('id')->toArray();
         $locationId = reset($locationIds);
         $lastLocationId = end($locationIds);
 
         // Build Generic Campaign
         $campaign = factory(Campaign::class)->create([
-            'location_id' => $locationId
+            'location_id' => $locationId,
+            'user_id' => $dealer->user_id
         ]);
         $unused = $this->refreshLeads($campaign->id, [
             'location_id' => $locationId,
@@ -331,23 +433,40 @@ class ProcessCampaignTest extends TestCase
         }
         $leads = $campaign->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsDeliverCampaignException();
+            throw new NoLeadsProcessCampaignException();
         }
 
+        // skip elasticsearch for now
+        $this->mock(TextLogObserver::class, function ($mock) use ($leads) {
+
+            $mock->shouldReceive('created')
+                ->times(count($leads));
+        });
+
+        // Mock CampaignService@getFromNumber
+        $from_number = $campaign->from_sms_number ?? self::FROM_SMS_NUMBER;
+
+        $this->mock(DealerLocationRepositoryInterface::class, function ($mock) use ($from_number, $dealer, $campaign, $leads) {
+
+            $mock->shouldReceive('findDealerSmsNumber')
+                ->withArgs([$dealer->id])
+                ->andReturn($from_number);
+        });
+
         // Mock Text Service
-        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign) {
+        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign, $from_number) {
+
+            $mock->shouldReceive('isValidPhoneNumber')
+                ->with($from_number)
+                ->andReturn(true);
+
             // Loop Leads to Mock Text Sent
             foreach($leads as $lead) {
-                // Get From Number
-                $from_number = $campaign->from_sms_number;
-                if(empty($from_number)) {
-                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                }
 
                 // Get Text Message
                 $textMessage = $this->templates->fillTemplate($campaign->template->template, [
                     'lead_name' => $lead->full_name,
-                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'title_of_unit_of_interest' => $lead->inventory_title,
                     'dealer_name' => $dealer->user->name
                 ]);
 
@@ -359,16 +478,11 @@ class ProcessCampaignTest extends TestCase
 
             // Loop Leads to Mock Text NOT Sent
             foreach($unused as $lead) {
-                // Get From Number
-                $from_number = $campaign->from_sms_number;
-                if(empty($from_number)) {
-                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                }
 
                 // Get Text Message
                 $textMessage = $this->templates->fillTemplate($campaign->template->template, [
                     'lead_name' => $lead->full_name,
-                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'title_of_unit_of_interest' => $lead->inventory_title,
                     'dealer_name' => $dealer->user->name
                 ]);
 
@@ -380,16 +494,10 @@ class ProcessCampaignTest extends TestCase
         });
 
         // Call Leads Assign Command
-        $this->artisan('text:process-campaign ' . self::getTestDealerId())->assertExitCode(0);
-
+        $this->artisan('text:process-campaign ' . $this->dealer->getKey())->assertExitCode(0);
 
         // Loop Leads
         foreach($leads as $lead) {
-            // Get From Number
-            $from_number = $campaign->from_sms_number;
-            if(empty($from_number)) {
-                $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-            }
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('dealer_texts_log', [
@@ -420,7 +528,7 @@ class ProcessCampaignTest extends TestCase
     public function testArchivedCampaign()
     {
         // Get Dealer
-        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+        $dealer = NewDealerUser::findOrFail($this->dealer->getKey());
 
         // Refresh Leads
         $this->refreshCampaigns($dealer->user_id);
@@ -429,12 +537,15 @@ class ProcessCampaignTest extends TestCase
         // Build Generic Template
         $template = Template::where('user_id', $dealer->user_id)->first();
         if(empty($template->id)) {
-            factory(Template::class)->create();
+            factory(Template::class)->create([
+                'user_id' => $dealer->user_id
+            ]);
         }
 
         // Build Generic Campaign
         $campaign = factory(Campaign::class)->create([
-            'include_archived' => 1
+            'include_archived' => 1,
+            'user_id' => $dealer->user_id
         ]);
         $unused = $this->refreshLeads($campaign->id, [
             'is_archived' => 1
@@ -448,23 +559,40 @@ class ProcessCampaignTest extends TestCase
         }
         $leads = $campaign->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsDeliverCampaignException();
+            throw new NoLeadsProcessCampaignException();
         }
 
+        // skip elasticsearch for now
+        $this->mock(TextLogObserver::class, function ($mock) use ($leads) {
+
+            $mock->shouldReceive('created')
+                ->times(count($leads));
+        });
+
+        // Mock CampaignService@getFromNumber
+        $from_number = $campaign->from_sms_number ?? self::FROM_SMS_NUMBER;
+
+        $this->mock(DealerLocationRepositoryInterface::class, function ($mock) use ($from_number, $dealer, $campaign, $leads) {
+
+            $mock->shouldReceive('findDealerSmsNumber')
+                ->withArgs([$dealer->id])
+                ->andReturn($from_number);
+        });
+
         // Mock Text Service
-        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign) {
+        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign, $from_number) {
+
+            $mock->shouldReceive('isValidPhoneNumber')
+                ->with($from_number)
+                ->andReturn(true);
+
             // Loop Leads to Mock Text Sent
             foreach($leads as $lead) {
-                // Get From Number
-                $from_number = $campaign->from_sms_number;
-                if(empty($from_number)) {
-                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                }
 
                 // Get Text Message
                 $textMessage = $this->templates->fillTemplate($campaign->template->template, [
                     'lead_name' => $lead->full_name,
-                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'title_of_unit_of_interest' => $lead->inventory_title,
                     'dealer_name' => $dealer->user->name
                 ]);
 
@@ -476,16 +604,11 @@ class ProcessCampaignTest extends TestCase
 
             // Loop Leads to Mock Text NOT Sent
             foreach($unused as $lead) {
-                // Get From Number
-                $from_number = $campaign->from_sms_number;
-                if(empty($from_number)) {
-                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                }
 
                 // Get Text Message
                 $textMessage = $this->templates->fillTemplate($campaign->template->template, [
                     'lead_name' => $lead->full_name,
-                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'title_of_unit_of_interest' => $lead->inventory_title,
                     'dealer_name' => $dealer->user->name
                 ]);
 
@@ -497,16 +620,10 @@ class ProcessCampaignTest extends TestCase
         });
 
         // Call Leads Assign Command
-        $this->artisan('text:process-campaign ' . self::getTestDealerId())->assertExitCode(0);
-
+        $this->artisan('text:process-campaign ' . $this->dealer->getKey())->assertExitCode(0);
 
         // Loop Leads
         foreach($leads as $lead) {
-            // Get From Number
-            $from_number = $campaign->from_sms_number;
-            if(empty($from_number)) {
-                $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-            }
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('dealer_texts_log', [
@@ -537,16 +654,17 @@ class ProcessCampaignTest extends TestCase
     public function testBrandCampaign()
     {
         // Get Dealer
-        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+        $dealer = NewDealerUser::findOrFail($this->dealer->getKey());
 
         // Refresh Leads
         $this->refreshCampaigns($dealer->user_id);
 
-
         // Build Generic Template
         $template = Template::where('user_id', $dealer->user_id)->first();
         if(empty($template->id)) {
-            factory(Template::class)->create();
+            factory(Template::class)->create([
+                'user_id' => $dealer->user_id
+            ]);
         }
 
         // Get Random Brands
@@ -554,7 +672,9 @@ class ProcessCampaignTest extends TestCase
         $unusedBrands = Manufacturers::whereNotIn('name', $brands)->inRandomOrder()->take(3)->pluck('name')->toArray();
 
         // Build Generic Campaign
-        $campaign = factory(Campaign::class)->create();
+        $campaign = factory(Campaign::class)->create([
+            'user_id' => $dealer->user_id
+        ]);
         $campaign->each(function ($campaign) use($brands) {
             // Add Campaign Brands
             foreach($brands as $brand) {
@@ -576,23 +696,40 @@ class ProcessCampaignTest extends TestCase
         }
         $leads = $campaign->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsDeliverCampaignException();
+            throw new NoLeadsProcessCampaignException();
         }
 
+        // skip elasticsearch for now
+        $this->mock(TextLogObserver::class, function ($mock) use ($leads) {
+
+            $mock->shouldReceive('created')
+                ->times(count($leads));
+        });
+
+        // Mock CampaignService@getFromNumber
+        $from_number = $campaign->from_sms_number ?? self::FROM_SMS_NUMBER;
+
+        $this->mock(DealerLocationRepositoryInterface::class, function ($mock) use ($from_number, $dealer, $campaign, $leads) {
+
+            $mock->shouldReceive('findDealerSmsNumber')
+                ->withArgs([$dealer->id])
+                ->andReturn($from_number);
+        });
+
         // Mock Text Service
-        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign) {
+        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign, $from_number) {
+
+            $mock->shouldReceive('isValidPhoneNumber')
+                ->with($from_number)
+                ->andReturn(true);
+
             // Loop Leads to Mock Text Sent
             foreach($leads as $lead) {
-                // Get From Number
-                $from_number = $campaign->from_sms_number;
-                if(empty($from_number)) {
-                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                }
 
                 // Get Text Message
                 $textMessage = $this->templates->fillTemplate($campaign->template->template, [
                     'lead_name' => $lead->full_name,
-                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'title_of_unit_of_interest' => $lead->inventory_title,
                     'dealer_name' => $dealer->user->name
                 ]);
 
@@ -604,16 +741,11 @@ class ProcessCampaignTest extends TestCase
 
             // Loop Leads to Mock Text NOT Sent
             foreach($unused as $lead) {
-                // Get From Number
-                $from_number = $campaign->from_sms_number;
-                if(empty($from_number)) {
-                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                }
 
                 // Get Text Message
                 $textMessage = $this->templates->fillTemplate($campaign->template->template, [
                     'lead_name' => $lead->full_name,
-                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'title_of_unit_of_interest' => $lead->inventory_title,
                     'dealer_name' => $dealer->user->name
                 ]);
 
@@ -625,16 +757,10 @@ class ProcessCampaignTest extends TestCase
         });
 
         // Call Leads Assign Command
-        $this->artisan('text:process-campaign ' . self::getTestDealerId())->assertExitCode(0);
-
+        $this->artisan('text:process-campaign ' . $this->dealer->getKey())->assertExitCode(0);
 
         // Loop Leads
         foreach($leads as $lead) {
-            // Get From Number
-            $from_number = $campaign->from_sms_number;
-            if(empty($from_number)) {
-                $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-            }
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('dealer_texts_log', [
@@ -665,7 +791,7 @@ class ProcessCampaignTest extends TestCase
     public function testCategoryCampaign()
     {
         // Get Dealer
-        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+        $dealer = NewDealerUser::findOrFail($this->dealer->getKey());
 
         // Refresh Leads
         $this->refreshCampaigns($dealer->user_id);
@@ -674,7 +800,9 @@ class ProcessCampaignTest extends TestCase
         // Build Generic Template
         $template = Template::where('user_id', $dealer->user_id)->first();
         if(empty($template->id)) {
-            factory(Template::class)->create();
+            factory(Template::class)->create([
+                'user_id' => $dealer->user_id
+            ]);
         }
 
         // Get Random Categories
@@ -682,11 +810,13 @@ class ProcessCampaignTest extends TestCase
         $unusedCategories = Category::where('entity_type_id', self::ENTITY_TYPE_ID)->whereNotIn('legacy_category', $categories)->inRandomOrder()->take(3)->pluck('legacy_category')->toArray();
 
         // Build Generic Campaign
-        $campaign = factory(Campaign::class)->create();
+        $campaign = factory(Campaign::class)->create([
+            'user_id' => $dealer->user_id
+        ]);
         $campaign->each(function ($campaign) use($categories) {
             // Add Campaign Categories
             foreach($categories as $cat) {
-                $campaign->brands()->save(factory(CampaignCategory::class)->make([
+                $campaign->categories()->save(factory(CampaignCategory::class)->make([
                     'category' => $cat
                 ]));
             }
@@ -705,23 +835,40 @@ class ProcessCampaignTest extends TestCase
         }
         $leads = $campaign->leads;
         if(count($leads) < 1) {
-            throw new NoLeadsDeliverCampaignException();
+            throw new NoLeadsProcessCampaignException();
         }
 
+        // Mock CampaignService@getFromNumber
+        $from_number = $campaign->from_sms_number ?? self::FROM_SMS_NUMBER;
+
+        $this->mock(DealerLocationRepositoryInterface::class, function ($mock) use ($from_number, $dealer, $campaign, $leads) {
+
+            $mock->shouldReceive('findDealerSmsNumber')
+                ->withArgs([$dealer->id])
+                ->andReturn($from_number);
+        });
+
+        // skip elasticsearch for now
+        $this->mock(TextLogObserver::class, function ($mock) use ($leads) {
+
+            $mock->shouldReceive('created')
+                ->times(count($leads));
+        });
+
         // Mock Text Service
-        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign) {
+        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $campaign, $from_number) {
+                
+            $mock->shouldReceive('isValidPhoneNumber')
+                ->with($from_number)
+                ->andReturn(true);
+
             // Loop Leads to Mock Text Sent
             foreach($leads as $lead) {
-                // Get From Number
-                $from_number = $campaign->from_sms_number;
-                if(empty($from_number)) {
-                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                }
 
                 // Get Text Message
                 $textMessage = $this->templates->fillTemplate($campaign->template->template, [
                     'lead_name' => $lead->full_name,
-                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'title_of_unit_of_interest' => $lead->inventory_title,
                     'dealer_name' => $dealer->user->name
                 ]);
 
@@ -733,16 +880,11 @@ class ProcessCampaignTest extends TestCase
 
             // Loop Leads to Mock Text NOT Sent
             foreach($unused as $lead) {
-                // Get From Number
-                $from_number = $campaign->from_sms_number;
-                if(empty($from_number)) {
-                    $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-                }
 
                 // Get Text Message
                 $textMessage = $this->templates->fillTemplate($campaign->template->template, [
                     'lead_name' => $lead->full_name,
-                    'title_of_unit_of_interest' => $lead->inventory->title,
+                    'title_of_unit_of_interest' => $lead->inventory_title,
                     'dealer_name' => $dealer->user->name
                 ]);
 
@@ -754,16 +896,10 @@ class ProcessCampaignTest extends TestCase
         });
 
         // Call Leads Assign Command
-        $this->artisan('text:process-campaign ' . self::getTestDealerId())->assertExitCode(0);
-
+        $this->artisan('text:process-campaign ' . $this->dealer->getKey())->assertExitCode(0);
 
         // Loop Leads
         foreach($leads as $lead) {
-            // Get From Number
-            $from_number = $campaign->from_sms_number;
-            if(empty($from_number)) {
-                $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-            }
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('dealer_texts_log', [
@@ -785,7 +921,6 @@ class ProcessCampaignTest extends TestCase
     /**
      * Refresh Campaigns in DB
      *
-     * @group CRM
      * @param int $userId
      * @return void
      */
@@ -799,7 +934,6 @@ class ProcessCampaignTest extends TestCase
     /**
      * Refresh Campaign Leads in DB
      *
-     * @group CRM
      * @param int $campaignId
      * @param array $filters
      * @return array of leads outside of range
@@ -809,7 +943,7 @@ class ProcessCampaignTest extends TestCase
         $campaign = Campaign::find($campaignId);
 
         // Get Website ID
-        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+        $dealer = NewDealerUser::findOrFail($this->dealer->getKey());
         $websiteId = $dealer->website->id;
 
         // Loop Leads
@@ -831,7 +965,7 @@ class ProcessCampaignTest extends TestCase
             // Insert With Manufacturer or Category
             if(isset($filters['brands']) || isset($filters['categories'])) {
                 // Initialize Lead Params
-                $leadParams = [];
+                $leadParams = ['dealer_id' => $dealer->getKey()];
 
                 // Insert With Manufacturer
                 if(isset($filters['brands'])) {
@@ -877,7 +1011,6 @@ class ProcessCampaignTest extends TestCase
             // Add Done Status
             if(isset($filters['action']) && $filters['action'] === 'purchased') {
                 factory(LeadStatus::class)->create([
-                    'dealer_id' => self::getTestDealerId(),
                     'tc_lead_identifier' => $lead->identifier,
                     'status' => Lead::STATUS_WON_CLOSED
                 ]);
@@ -896,7 +1029,7 @@ class ProcessCampaignTest extends TestCase
             // Insert With Manufacturer or Category
             if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {
                 // Initialize Lead Params
-                $leadParams = [];
+                $leadParams = ['dealer_id' => $dealer->getKey()];
 
                 // Insert With Manufacturer
                 if(isset($filters['unused_brands'])) {
@@ -958,7 +1091,7 @@ class ProcessCampaignTest extends TestCase
             // Insert With Manufacturer or Category
             if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {
                 // Initialize Lead Params
-                $leadParams = [];
+                $leadParams = ['dealer_id' => $dealer->getKey()];
 
                 // Insert With Manufacturer
                 if(isset($filters['unused_brands'])) {

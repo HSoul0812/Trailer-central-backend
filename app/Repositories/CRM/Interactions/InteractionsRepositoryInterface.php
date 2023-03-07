@@ -29,5 +29,14 @@ interface InteractionsRepositoryInterface extends Repository {
      * @return Collection
      */
     public function getFirst10(array $params) : Collection;
+
+    /**
+     * Batch Update Records
+     * 
+     * @param array $data
+     * @param array $where
+     * @return int
+     */
+    public function batchUpdate(array $data, array $where);
     
 }

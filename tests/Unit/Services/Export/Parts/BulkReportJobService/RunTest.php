@@ -27,6 +27,9 @@ class RunTest extends TestCase
     use WithFaker;
 
     /**
+     * @group DMS
+     * @group DMS_BULK_REPORT
+     *
      * @throws Throwable  when Uuid::uuid4()->toString() could not generate a uuid
      */
     public function testWillThrowAnExceptionBecauseGetData(): void
@@ -85,6 +88,9 @@ class RunTest extends TestCase
     }
 
     /**
+     * @group DMS
+     * @group DMS_BULK_REPORT
+     *
      * @throws Throwable  when Uuid::uuid4()->toString() could not generate a uuid
      */
     public function testWillThrowAnExceptionBecauseGetExporter(): void
@@ -144,6 +150,9 @@ class RunTest extends TestCase
     }
 
     /**
+     * @group DMS
+     * @group DMS_BULK_REPORT
+     *
      * @throws Throwable  when Uuid::uuid4()->toString() could not generate a uuid
      */
     public function testWillExportTheFile(): void

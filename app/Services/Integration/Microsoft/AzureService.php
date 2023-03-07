@@ -159,7 +159,6 @@ class AzureService implements AzureServiceInterface
         } catch (\Exception $e) {
             // Log Error
             $this->log->error('Exception returned on getting azure profile email; ' . $e->getMessage());
-            throw new CannotReceiveAzureProfileException;
         }
 
         // Return Azure Token
@@ -199,7 +198,7 @@ class AzureService implements AzureServiceInterface
             $this->log->info('Got ' . $folders->count() . ' mail folders from graph');
         } catch (\Exception $e) {
             // Log Error
-            $this->log->error('Exception returned on getting azure profile email; ' . $e->getMessage());
+            $this->log->error('Exception returned on getting azure folders email; ' . $e->getMessage());
             throw new CannotReceiveAzureFoldersException;
         }
 

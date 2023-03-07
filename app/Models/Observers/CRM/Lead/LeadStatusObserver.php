@@ -56,23 +56,4 @@ class LeadStatusObserver
 
         $this->interactionMessageService->bulkSearchable($params);
     }
-
-    /**
-     * @param LeadStatus $leadStatus
-     * @return void
-     */
-    public function updating(LeadStatus $leadStatus)
-    {
-        if ($leadStatus->isDirty('status')) {
-
-            if (in_array($leadStatus->status, [LeadStatus::STATUS_WON, LeadStatus::STATUS_WON_CLOSED, LeadStatus::STATUS_LOST])) {
-        
-                $leadStatus->closed_at = date('Y-m-d H:i:s');
-
-            } else {
-
-                $leadStatus->closed_at = null;
-            }
-        }
-    }
 }

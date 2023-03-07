@@ -2,14 +2,26 @@
 
 namespace App\Models\CRM\Dealer;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Marketing\Facebook\Error as FBError;
 
 class DealerFBMOverview extends Model
 {
-    protected $table = 'dealer_fbm_overview';
+    use TableAware;
+
+    const TABLE_NAME = 'dealer_fbm_overview';
+
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = self::TABLE_NAME;
 
     protected $dates = [
-        'last_run_ts'
+        'last_attempt_ts',
+        'last_success_ts',
+        'last_known_error_ts',
     ];
 }

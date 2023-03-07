@@ -12,6 +12,7 @@
         "php": "^7.2.0",
         "ext-json": "*",
         "algolia/algoliasearch-client-php": "^2.4",
+        "anaseqal/nova-import": "^0.0.6",
         "awobaz/compoships": "^2.1",
         "aws/aws-sdk-php": "^3.0",
         "babenkoivan/elastic-migrations": "^1.2",
@@ -23,7 +24,8 @@
         "darkaonline/swagger-lume": "6.*",
         "dingo/api": "^2.4",
         "doctrine/dbal": "^2.9",
-        "epartment/nova-dependency-container": "^1.2",
+        "epartment/nova-dependency-container": "^1.2 <=1.3.2",
+        "erusev/parsedown": "^1.7",
         "facebook/php-business-sdk": "5.0.5",
         "feed/edit-mapping": "*",
         "fideloper/proxy": "^4.0",
@@ -36,6 +38,7 @@
         "illuminate/redis": "^6.3",
         "illuminate/support": "^6.0",
         "inspheric/nova-defaultable": "^1.2",
+        "josiasmontag/laravel-redis-mock": "^1.3",
         "laravel/cashier": "^12.0",
         "laravel/framework": "^6.0",
         "laravel/horizon": "~3.0",
@@ -46,7 +49,9 @@
         "league/commonmark": "^1.3",
         "league/csv": "~9.7.4",
         "league/flysystem-aws-s3-v3": "^1.0",
+        "league/html-to-markdown": "^5.1",
         "league/oauth2-client": "^2.6",
+        "maatwebsite/laravel-nova-excel": "1.2.*",
         "microsoft/microsoft-graph": "^1.34",
         "phenx/php-svg-lib": "0.3.3",
         "php-ews/php-ews": "~1.0",
@@ -57,19 +62,22 @@
         "psr/container": "1.1.1",
         "psr/log": "^1.0",
         "sentry/sentry-laravel": "^2.11",
+        "showroom/bulkconfiguration": "*",
         "spatie/browsershot": "~3.40.0",
         "spatie/image": "^1.10",
+        "spatie/laravel-permission": "^3.0",
         "spatie/laravel-sitemap": "^5.7",
         "staudenmeir/belongs-to-through": "^2.5",
         "stripe/stripe-php": "^7.100",
         "swiftmailer/swiftmailer": "^6.0",
         "symfony/css-selector": "^5.1",
         "symfony/dom-crawler": "^5.1",
+        "tcentral/qbo-sdk": "^1.0",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
+        "trailercentral/passwordless-login-url": "*",
         "twilio/sdk": "^5.31",
-        "webklex/laravel-imap": "~2.4",
-        "showroom/bulkconfiguration": "*",
-        "trailercentral/passwordless-login-url": "*"
+        "vyuldashev/nova-permission": "^2.11",
+        "webklex/laravel-imap": "^3.0"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
@@ -137,6 +145,10 @@
         {
             "type": "path",
             "url": "./nova-components/PasswordlessLoginUrl"
+        },
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:tcentral/qbo-sdk.git"
         }
     ],
     "minimum-stability": "dev",

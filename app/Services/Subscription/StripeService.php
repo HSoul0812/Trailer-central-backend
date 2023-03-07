@@ -11,6 +11,10 @@ use Dingo\Api\Http\Request;
 use App\Models\User\User;
 use Stripe\StripeClient;
 
+/**
+ * Class StripeService
+ * @package App\Services\Subscription
+ */
 class StripeService implements StripeServiceInterface
 {
     /**
@@ -19,57 +23,53 @@ class StripeService implements StripeServiceInterface
     private $stripe;
 
     /**
-     * @var $customer
+     * Create a new StripeClient instance.
      */
-    private $customer;
-
-    /**
-     * @var $user
-     */
-    private $user;
-
-    public function __construct($user) {
-        $this->user = $user;
-        $this->customer = $user->createOrGetStripeCustomer();
+    public function __construct() {
         $this->stripe = new StripeClient(config('services.stripe.secret_key'));
     }
 
     /**
-     * Retrieves a customer with subscriptions and card information
-     *
-     * @param Request $request
-     * @return object
+     * @inheritDoc
      */
-    public function getCustomer(Request $request): object
+    public function getCustomerByDealerId($dealerId, int $transactions_limit = 0): object
     {
-        $customer = $this->customer;
-        $customer["card"] = $this->user->defaultPaymentMethod()->card;
-        $transactions = isset($request->transactions_limit) ? $this->getTransactions($request->transactions_limit) : $this->getTransactions();
+        $user = User::find($dealerId);
+        $customer = $user->createOrGetStripeCustomer();
+
+        if ($user->defaultPaymentMethod()) {
+            // Sometimes the card comes nested and sometimes it doesn't
+            $customer["card"] = $user->defaultPaymentMethod()->card ?? $user->defaultPaymentMethod();
+        }
+
+        $per_page = $request->transactions_limit ?? 0;
+        $transactions = $this->getTransactionsByDealerId($dealerId, $per_page);
         $customer["transactions"] = $transactions["data"];
 
-        return $this->customer;
+        return $customer;
     }
 
     /**
-     * Retrieves all subscriptions from a given user
-     *
-     * @return object
+     * @inheritDoc
      */
-    public function getSubscriptions(): object
+    public function getSubscriptionsByDealerId($dealerId): object
     {
-        return $this->customer->subscriptions;
+        $user = User::find($dealerId);
+        $customer = $user->createOrGetStripeCustomer();
+
+        return $customer->subscriptions;
     }
 
     /**
-     * Retrieves all the customer transactions
-     *
-     * @param $per_page
-     * @return object
+     * @inheritDoc
      */
-    public function getTransactions($per_page = null): object
+    public function getTransactionsByDealerId($dealerId, $per_page): object
     {
+        $user = User::find($dealerId);
+        $customer = $user->createOrGetStripeCustomer();
+
         $params = [
-            'customer' => $this->customer->id
+            'customer' => $customer->id
         ];
 
         if ($per_page) {
@@ -80,11 +80,9 @@ class StripeService implements StripeServiceInterface
     }
 
     /**
-     * Retrieves all existing plans
-     *
-     * @return array
+     * @inheritDoc
      */
-    public function getPlans(): array
+    public function getExistingPlans(): array
     {
         $plansRaw = $this->stripe->plans->all();
         $plans = $plansRaw->data;
@@ -100,76 +98,38 @@ class StripeService implements StripeServiceInterface
     }
 
     /**
-     * Subscribe to a selected plan
-     *
-     * @param Request $request
-     * @return array
+     * @inheritDoc
      */
-    public function subscribe(Request $request): array
+    public function subscribeToPlanByDealerId($dealerId, $planId)
     {
-        try {
-            if ($this->user->hasPaymentMethod()) {
-                $paymentMethod = $this->user->defaultPaymentMethod();
+        $user = User::find($dealerId);
+        $customer = $user->createOrGetStripeCustomer();
 
-                $this->user
-                    ->newSubscription('default', $request->plan)
-                    ->create($paymentMethod->id, [
-                        'email' => $this->customer->email,
-                    ]);
-            } else {
-                return [
-                    'response' => [
-                        'status' => 'error',
-                        'message' => 'No payment method for this customer.'
-                    ]
-                ];
-            }
+        $paymentMethod = $user->defaultPaymentMethod();
 
-            return [
-                'response' => [
-                    'status' => 'success',
-                    'message' => 'Customer subscription successfully.'
-                ]
-            ];
-        } catch (Exception $e) {
-            return [
-                'response' => [
-                    'status' => 'error',
-                    'message' => $e->getMessage()
-                ]
-            ];
+        if ($paymentMethod) {
+            return $user->newSubscription('default', $planId)
+                ->create($paymentMethod->id, [
+                    'email' => $customer->email,
+                ]);
+        } else {
+            return false;
         }
     }
 
     /**
-     * Updates a customer card
-     *
-     * @param Request $request
-     * @return array
+     * @inheritDoc
      */
-    public function updateCard(Request $request): array
+    public function updateCardByDealerId($dealerId, $token): object
     {
-        try {
-            $paymentMethod = $this->stripe->customers->createSource(
-                $this->customer->id,
-                ['source' => $request->token]
-            );
+        $user = User::find($dealerId);
+        $customer = $user->createOrGetStripeCustomer();
 
-            $this->user->updateDefaultPaymentMethod($paymentMethod->id);
+        $paymentMethod = $this->stripe->customers->createSource(
+            $customer->id,
+            ['source' => $token]
+        );
 
-            return [
-                'response' => [
-                    'status' => 'success',
-                    'message' => 'Customer card updated successfully.'
-                ]
-            ];
-        } catch (Exception $e) {
-            return [
-                'response' => [
-                    'status' => 'error',
-                    'message' => $e->getMessage()
-                ]
-            ];
-        }
+        return $user->updateDefaultPaymentMethod($paymentMethod->id);
     }
 }

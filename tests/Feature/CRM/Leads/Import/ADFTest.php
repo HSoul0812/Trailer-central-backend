@@ -11,10 +11,14 @@ use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\System\Email;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
+use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
-use Tests\TestCase;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Artisan;
 use Mockery;
+use Tests\TestCase;
+use Tests\database\seeds\CRM\Leads\ADFSeeder;
 
 class ADFTest extends TestCase
 {
@@ -50,12 +54,14 @@ class ADFTest extends TestCase
      */
     public function testADFImport(): void
     {
+        $seeder = new ADFSeeder;
+        $seeder->seed();
         // Get Dealer
-        $dealer = User::findOrFail(self::getTestDealerId());
-        $websiteId = $dealer->website->id;
+        $dealer = $seeder->dealer;
+        $websiteId = $seeder->website->getKey();
 
         // Create Dealer Location
-        $location = DealerLocation::findOrFail(self::getTestDealerLocationId());
+        $location = $seeder->location;
 
         // Get System Email
         $systemEmail = $this->getSystemEmail();
@@ -127,21 +133,22 @@ class ADFTest extends TestCase
         $messages = [];
         $parsed = [];
         $id = 0;
+        $toAddress = $dealer->getKey() . '@' . config('adf.imports.gmail.domain');
         foreach($leadsVehicleLocation as $lead) {
             $body = $this->getAdfXml($lead, $dealer, $location, $vehicles[$lead->inventory_id]);
-            $parsed[] = $this->getParsedEmail($id, $location->email, $body);
+            $parsed[] = $this->getParsedEmail($id, $location->email, $body, $toAddress);
             $messages[] = $id;
             $id++;
         }
         foreach($leadsVehicleNoLocation as $lead) {
             $body = $this->getAdfXml($lead, $dealer, null, $vehicles[$lead->inventory_id]);
-            $parsed[] = $this->getParsedEmail($id, $dealer->email, $body);
+            $parsed[] = $this->getParsedEmail($id, $dealer->email, $body, $toAddress);
             $messages[] = $id;
             $id++;
         }
         foreach($leadsNoVehicle as $lead) {
             $body = $this->getAdfXml($lead, $dealer);
-            $parsed[] = $this->getParsedEmail($id, $dealer->email, $body);
+            $parsed[] = $this->getParsedEmail($id, $dealer->email, $body, $toAddress);
             $messages[] = $id;
             $id++;
         }
@@ -153,19 +160,22 @@ class ADFTest extends TestCase
         }
         foreach($leadsInvalidAdf as $lead) {
             $body = $this->getNoAdfXml($lead, $dealer);
-            $parsed[] = $this->getParsedEmail($id, $dealer->email, $body);
+            $parsed[] = $this->getParsedEmail($id, $dealer->email, $body, $toAddress);
             $messages[] = $id;
             $id++;
         }
         foreach($leadsInvalidXml as $lead) {
-            $parsed[] = $this->getParsedEmail($id, $dealer->email, $lead->comments);
+            $parsed[] = $this->getParsedEmail($id, $dealer->email, $lead->comments, $toAddress);
             $messages[] = $id;
             $id++;
         }
 
-
         // Mock Gmail Service
         $this->mock(GoogleServiceInterface::class, function ($mock) use($systemEmail) {
+            
+            $mock->shouldReceive('setKey')
+                ->once();
+
             // Should Receive Messages With Args Once Per Folder!
             $mock->shouldReceive('validate')
                  ->with(Mockery::on(function($accessToken) use($systemEmail) {
@@ -175,11 +185,11 @@ class ADFTest extends TestCase
                     return false;
                  }))
                  ->once()
-                 ->andReturn([
+                 ->andReturn(new ValidateToken([
                     'is_valid' => true,
                     'is_expired' => false,
-                    'new_token' => []
-                 ]);
+                    'new_token' => [],
+                 ]));
         });
 
         // Mock Gmail Service
@@ -205,7 +215,9 @@ class ADFTest extends TestCase
         });
 
         // Call Import ADF Leads
-        $this->artisan('leads:import')->assertExitCode(0);
+        $this->withoutMockingConsoleOutput()->artisan('leads:import');
+        $output = Artisan::output();
+        $this->assertStringContainsString("Imported 6 leads from import service", $output);
 
         // Assert Leads Exist
         foreach($leadsVehicleLocation as $lead) {
@@ -292,25 +304,14 @@ class ADFTest extends TestCase
                 'phone_number' => $lead->phone_number
             ]);
         }
+
+        $seeder->cleanUp();
     }
-
-    /**
-     * Test Importing ADF Email and Inserting Lead Source
-     *
-     * @group CRM
-     * @covers App\Console\Commands\CRM\Leads\Import\ADF
-     * @return void
-     */
-    /*public function testADFImportWithSource(): void
-    {
-
-    }*/
 
 
     /**
      * Get ADF Formatted XML Data
      *
-     * @group CRM
      * @param Lead $lead
      * @param User $dealer
      * @param DealerLocation || null $location
@@ -374,7 +375,6 @@ class ADFTest extends TestCase
     /**
      * Get Non-ADF Formatted XML Data
      *
-     * @group CRM
      * @param Lead $lead
      * @param User $dealer
      * @param DealerLocation || null $location
@@ -437,7 +437,6 @@ class ADFTest extends TestCase
     /**
      * Get Parsed Email
      *
-     * @group CRM
      * @param int $id
      * @param string $from
      * @param string $body
@@ -470,7 +469,6 @@ class ADFTest extends TestCase
     /**
      * Get System Email
      *
-     * @group CRM
      * @return Email
      */
     private function getSystemEmail(): Email {
@@ -499,7 +497,6 @@ class ADFTest extends TestCase
     /**
      * Get Access Token
      *
-     * @group CRM
      * @param int $emailId
      * @return AccessToken
      */

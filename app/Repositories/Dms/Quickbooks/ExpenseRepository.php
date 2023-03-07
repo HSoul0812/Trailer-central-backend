@@ -8,9 +8,10 @@ use App\Models\CRM\Dms\Quickbooks\Expense;
 /**
  * @author Marcel
  */
-class ExpenseRepository implements ExpenseRepositoryInterface {
-
-    public function create($params) {
+class ExpenseRepository implements ExpenseRepositoryInterface
+{
+    public function create($params)
+    {
         $categories = $params['categories'];
         unset($params['categories']);
         $expense = Expense::create($params);
@@ -36,4 +37,20 @@ class ExpenseRepository implements ExpenseRepositoryInterface {
         throw new NotImplementedException;
     }
 
+    /**
+     * @param int $dealerId
+     * @param string $checkNumber
+     * @param array $params
+     *
+     * @return bool
+     */
+    public function checkNumberExists(int $dealerId, string $checkNumber, array $params = []): bool
+    {
+        return Expense::query()
+            ->where([
+                'dealer_id' => $dealerId,
+                'doc_num' => $checkNumber,
+            ] + $params)
+            ->exists();
+    }
 }

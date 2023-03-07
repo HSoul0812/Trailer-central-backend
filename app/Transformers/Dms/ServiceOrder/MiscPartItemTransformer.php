@@ -19,6 +19,7 @@ class MiscPartItemTransformer extends TransformerAbstract
             'unit_price' => (float)$item->unit_price,
             'quantity' => (int)$item->quantity,
             'notes' => $item->notes,
+            'mpi_taxable' => $item->taxable,
         ];
     }
 }

@@ -15,6 +15,9 @@ class RefundControllerTest extends TestCase
 {
     /**
      * @covers ::index
+     *
+     * @group DMS
+     * @group DMS_REFUND
      */
     public function testIndex()
     {
@@ -52,6 +55,9 @@ class RefundControllerTest extends TestCase
 
     /**
      * @covers ::show
+     *
+     * @group DMS
+     * @group DMS_REFUND
      */
     public function testShow()
     {
@@ -82,6 +88,9 @@ class RefundControllerTest extends TestCase
 
     /**
      * @covers ::show
+     *
+     * @group DMS
+     * @group DMS_REFUND
      */
     public function testShowWrongId()
     {
@@ -101,6 +110,9 @@ class RefundControllerTest extends TestCase
 
     /**
      * @covers ::index
+     *
+     * @group DMS
+     * @group DMS_REFUND
      */
     public function testIndexWithoutAccessToken()
     {
@@ -110,6 +122,9 @@ class RefundControllerTest extends TestCase
 
     /**
      * @covers ::show
+     *
+     * @group DMS
+     * @group DMS_REFUND
      */
     public function testShowWithoutAccessToken()
     {

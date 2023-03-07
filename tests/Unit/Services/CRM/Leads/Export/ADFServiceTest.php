@@ -2,140 +2,132 @@
 
 namespace Tests\Unit\Repositories\CRM\Leads\Export;
 
+use App\Exceptions\CRM\Leads\Export\InvalidToEmailAddressException;
+use App\Exceptions\PropertyDoesNotExists;
 use App\Jobs\CRM\Leads\Export\ADFJob;
+use App\Mail\CRM\Leads\Export\ADFEmail;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\Export\LeadEmail;
 use App\Models\Inventory\Inventory;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
+use App\Repositories\CRM\Leads\Export\LeadEmailRepository;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
-use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\User\DealerLocationRepository;
 use App\Repositories\User\DealerLocationRepositoryInterface;
-use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\Export\ADFService;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Mockery;
+use Mockery\LegacyMockInterface;
+use Psr\Log\LoggerInterface;
 use Tests\TestCase;
 
+/**
+ * Test for App\Services\CRM\Leads\Export\ADFService
+ *
+ * Class ADFServiceTest
+ * @package Tests\Unit\Services\CRM\Leads\Export
+ *
+ * @coversDefaultClass \App\Services\CRM\Leads\Export\ADFService
+ */
 class ADFServiceTest extends TestCase
-{       
-    const TEST_EMAIL = 'noreply@trailercentral.com';
-    const TEST_SUBJECT_EMAIL = 'You have a request from your website';
-    const ADF_REQUIRED_BODY_STRING = 'You received a new unit inquiry from your website. The details of the request are below';
-    
+{
+    public const TEST_EMAIL = 'No Reply TC <noreply@trailercentral.com>';
+    public const TEST_EXPECTED_EMAIL = 'noreply@trailercentral.com';
+    public const TEST_INVALID_EMAIL_01 = ' ';
+    public const TEST_INVALID_EMAIL_02 = 'notevenanemail?';
+    public const TEST_LEAD_TYPE = 'general';
+    public const ADF_REQUIRED_BODY_STRING = 'You received a new unit inquiry from your website. The details of the request are below';
+
     /**
-     * @var App\Services\CRM\Leads\Export\ADFService
+     * @var ADFService
      */
     private $adfService;
-    
+
     /**
-     * @var App\Repositories\CRM\Leads\Export\LeadEmailRepository
+     * @var LeadEmailRepository
      */
     private $leadEmailRepository;
 
     /**
-     * @var App\Repositories\Inventory\InventoryRepository
-     */
-    private $inventoryRepository;
-
-    /**
-     * @var App\Repositories\User\UserRepository
-     */
-    private $userRepository;
-
-    /**
-     * @var App\Repositories\User\DealerLocationRepository
+     * @var DealerLocationRepository
      */
     private $dealerLocationRepository;
-    
+
+    /**
+     * @var LoggerInterface|LegacyMockInterface
+     */
+    protected $logMock;
+
     public function setUp(): void
     {
         parent::setUp();
 
         $this->adfService = Mockery::mock(ADFServiceInterface::class);
         $this->app->instance(ADFServiceInterface::class, $this->adfService);
-        
+
         $this->leadEmailRepository = Mockery::mock(LeadEmailRepositoryInterface::class);
         $this->app->instance(LeadEmailRepositoryInterface::class, $this->leadEmailRepository);
-        
-        $this->inventoryRepository = Mockery::mock(InventoryRepositoryInterface::class);
-        $this->app->instance(InventoryRepositoryInterface::class, $this->inventoryRepository);
-        
-        $this->userRepository = Mockery::mock(UserRepositoryInterface::class);
-        $this->app->instance(UserRepositoryInterface::class, $this->userRepository);
-        
+
         $this->dealerLocationRepository = Mockery::mock(DealerLocationRepositoryInterface::class);
         $this->app->instance(DealerLocationRepositoryInterface::class, $this->dealerLocationRepository);
+
+        $this->logMock = Mockery::mock(LoggerInterface::class);
     }
 
     /**
      * @group CRM
-     * @covers ::handle
+     * @covers ::export
      *
+     * @dataProvider validDataProvider
+     *
+     * @throws PropertyDoesNotExists
      * @throws BindingResolutionException
      */
-    public function testExportADFLead()
+    public function testExport($dealerId, $dealerLocationId, $websiteId, $inventoryId, $leadId, $emails, $expectedEmails)
     {
+        Mail::fake();
+        Queue::fake();
+
         $dealer = $this->getEloquentMock(User::class);
         $dealerLocation = $this->getEloquentMock(DealerLocation::class);
-
         $lead = $this->getEloquentMock(Lead::class);
         $leadEmail = $this->getEloquentMock(LeadEmail::class);
         $website = $this->getEloquentMock(Website::class);
         $inventory = $this->getEloquentMock(Inventory::class);
-        $inquiry = $this->getEloquentMock(InquiryLead::class);
-        $mail = Mockery::mock('Swift_Mailer');
-        $this->app['mailer']->setSwiftMailer($mail);
 
-        $dealer->dealer_id = 1;
+        $dealer->dealer_id = $dealerId;
+        $dealerLocation->dealer_location_id = $dealerLocationId;
 
-        $dealerLocation->dealer_location_id = 1;
+        $website->id = $websiteId;
+        $inventory->inventory_id = $inventoryId;
 
-        $website->id = 1;
+        $lead->identifier = $leadId;
+        $lead->dealer_location_id = $dealerLocationId;
+        $lead->dealer_id = $dealerId;
+        $lead->website_id = $websiteId;
+        $lead->inventory = $inventory;
+        $lead->lead_type = self::TEST_LEAD_TYPE;
 
-        $lead->identifier = 1;
-        $lead->dealer_location_id = 1;
-        $lead->dealer_id = 1;
-        $lead->website_id = 1;
-        
-        $leadEmail->dealer_location_id = 1;
-        $leadEmail->dealer_id = 1;
+        $leadEmail->dealer_location_id = $dealerLocationId;
+        $leadEmail->dealer_id = $dealerId;
         $leadEmail->export_format = LeadEmail::EXPORT_FORMAT_ADF;
 
-        $inventory->inventory_id = 1;
+        $this->initBelongsToRelation($lead, 'dealerLocation', $dealerLocation);
+        $this->initBelongsToRelation($lead, 'inventory', $inventory);
+        $this->initBelongsToRelation($lead, 'website', $website);
+        $this->initBelongsToRelation($lead, 'user', $dealer);
 
-        $inquiry->dealerId = 1;
-        $inquiry->dealerLocationId = 1;
-        $inquiry->inventory = [1];
-        
-        $lead->shouldReceive('setRelation')->passthru();
-        $lead->shouldReceive('belongsTo')->passthru();
-        $lead->shouldReceive('dealerLocation')->passthru();
-        $lead->shouldReceive('inventory')->passthru();
-        $lead->shouldReceive('website')->passthru();
-        
         $this->leadEmailRepository
                 ->shouldReceive('find')
                 ->once()
                 ->with($leadEmail->dealer_id, $leadEmail->dealer_location_id)
                 ->andReturn($leadEmail);
-        
-        $inquiry->shouldReceive('getSubject')
-                ->once()
-                ->andReturn(self::TEST_SUBJECT_EMAIL);
-
-        $this->inventoryRepository
-                ->shouldReceive('get')
-                ->once()
-                ->andReturn($inventory);
-
-        $this->userRepository
-                ->shouldReceive('get')
-                ->once()
-                ->andReturn($dealer);
 
         $this->dealerLocationRepository
                 ->shouldReceive('get')
@@ -144,43 +136,168 @@ class ADFServiceTest extends TestCase
 
         $leadEmail->shouldReceive('getToEmailsAttribute')
                 ->once()
-                ->andReturn([]);
+                ->andReturn($emails);
 
         $leadEmail->shouldReceive('getCopiedEmailsAttribute')
                 ->once()
-                ->andReturn([]);
-        
-        $mail->shouldReceive('send')
-            ->andReturnUsing(function($msg) {
-                $this->assertEquals(self::TEST_SUBJECT_EMAIL, $msg->getSubject());
-                $this->assertEquals(self::TEST_EMAIL, $msg->getFrom());
-                $this->assertContains('Some string', $msg->getBody());
-            });
-        
-        Log::shouldReceive('info')
+                ->andReturn($emails);
+
+        Log::shouldReceive('channel')
+            ->with('leads-export')->andReturn($this->logMock);
+
+        $this->logMock->shouldReceive('info')
+            ->once()
             ->with('Mailing ADF Lead', ['lead' => $lead->identifier]);
-        
-        Log::shouldReceive('info')
+
+        $this->logMock->shouldReceive('info')
+            ->once()
             ->with('ADF Lead Mailed Successfully', ['lead' => $lead->identifier]);
-        
-    
-        $this->expectsJobs(ADFJob::class);
-        
-        $this->adfService
-            ->shouldReceive('export')
-            ->with($inquiry, $lead)
-            ->andReturn(true);
-        
+
+        $lead->shouldReceive('save')->once();
+
         $service = $this->app->make(ADFService::class);
 
-        $result = $service->export($inquiry, $lead);
+        $result = $service->export($lead);
+
+        Queue::assertPushedOn('inquiry', ADFJob::class, function ($job) use ($expectedEmails) {
+            $job->handle();
+            return $this->getFromPrivateProperty($job, 'toEmails') == $expectedEmails
+            && $this->getFromPrivateProperty($job, 'copiedEmails') == $expectedEmails;
+        });
+        Mail::assertSent(ADFEmail::class, function($mail) {
+            $mail->build();
+            return $mail->subject == self::TEST_LEAD_TYPE && $mail->hasTo(self::TEST_EXPECTED_EMAIL);
+        });
 
         $this->assertTrue($result);
     }
-    
+
+    /**
+     * @group CRM
+     * @covers ::export
+     *
+     * @dataProvider invalidDataProvider
+     *
+     * @throws PropertyDoesNotExists
+     * @throws BindingResolutionException
+     */
+    public function textExportWithInvalidData($dealerId, $dealerLocationId, $websiteId, $inventoryId, $leadId, $emails)
+    {
+        Mail::fake();
+        Queue::fake();
+
+        $dealer = $this->getEloquentMock(User::class);
+        $dealerLocation = $this->getEloquentMock(DealerLocation::class);
+        $lead = $this->getEloquentMock(Lead::class);
+        $leadEmail = $this->getEloquentMock(LeadEmail::class);
+        $website = $this->getEloquentMock(Website::class);
+        $inventory = $this->getEloquentMock(Inventory::class);
+
+        $dealer->dealer_id = $dealerId;
+        $dealerLocation->dealer_location_id = $dealerLocationId;
+
+        $website->id = $websiteId;
+        $inventory->inventory_id = $inventoryId;
+
+        $lead->identifier = $leadId;
+        $lead->dealer_location_id = $dealerLocationId;
+        $lead->dealer_id = $dealerId;
+        $lead->website_id = $websiteId;
+        $lead->inventory = $inventory;
+        $lead->lead_type = self::TEST_LEAD_TYPE;
+
+        $leadEmail->dealer_location_id = $dealerLocationId;
+        $leadEmail->dealer_id = $dealerId;
+        $leadEmail->export_format = LeadEmail::EXPORT_FORMAT_ADF;
+
+        $this->initBelongsToRelation($lead, 'dealerLocation', $dealerLocation);
+        $this->initBelongsToRelation($lead, 'inventory', $inventory);
+        $this->initBelongsToRelation($lead, 'website', $website);
+        $this->initBelongsToRelation($lead, 'user', $dealer);
+
+        $this->leadEmailRepository
+                ->shouldReceive('find')
+                ->once()
+                ->with($leadEmail->dealer_id, $leadEmail->dealer_location_id)
+                ->andReturn($leadEmail);
+
+        $this->dealerLocationRepository
+                ->shouldReceive('get')
+                ->once()
+                ->andReturn($dealerLocation);
+
+        $leadEmail->shouldReceive('getToEmailsAttribute')
+                ->once()
+                ->andReturn($emails);
+
+        $leadEmail->shouldReceive('getCopiedEmailsAttribute')
+                ->once()
+                ->andReturn($emails);
+
+        Log::shouldReceive('channel')
+            ->with('leads-export')->andReturn($this->logMock);
+
+        $this->logMock->shouldReceive('info')
+            ->once()
+            ->with('Mailing ADF Lead', ['lead' => $lead->identifier]);
+
+        $this->logMock->shouldReceive('error')
+            ->once();
+
+        $service = $this->app->make(ADFService::class);
+
+        $this->expectException(InvalidToEmailAddressException::class);
+
+        $result = $service->export($lead);
+
+        Queue::assertPushedOn('inquiry', ADFJob::class, function($job) {
+            $job->handle();
+            return true;
+        });
+        Mail::assertNothingSent();
+
+        $this->assertTrue($result);
+    }
+
+    public function validDataProvider(): array
+    {
+        return [
+            'Valid information' => [
+                'dealer_id' => 1,
+                'dealer_location_id' => 1,
+                'website_id' => 1,
+                'inventory_id' => 1,
+                'lead_id' => 1,
+                'emails' => [ self::TEST_EMAIL ],
+                'expectedEmails' => [ self::TEST_EXPECTED_EMAIL ]
+            ]
+        ];
+    }
+
+    public function invalidDataProvider(): array
+    {
+        return [
+            'One space email' => [
+                'dealer_id' => 1,
+                'dealer_location_id' => 1,
+                'website_id' => 1,
+                'inventory_id' => 1,
+                'lead_id' => 1,
+                'emails' => [ self::TEST_INVALID_EMAIL_01 ]
+            ],
+            'Invalid email' => [
+                'dealer_id' => 1,
+                'dealer_location_id' => 1,
+                'website_id' => 1,
+                'inventory_id' => 1,
+                'lead_id' => 1,
+                'emails' => [ self::TEST_INVALID_EMAIL_02 ]
+            ],
+        ];
+    }
+
     public function tearDown(): void
     {
-        Mockery::close(); 
+        Mockery::close();
     }
-    
 }

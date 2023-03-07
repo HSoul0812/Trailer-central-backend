@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\User\Integration;
 
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,13 +40,20 @@ class DealerIntegration extends Model
 
     protected $table = 'integration_dealer';
 
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'integration_dealer_id';
+
     protected $fillable = [
         'integration_id',
         'dealer_id',
         'last_run_at',
         'msg_date',
         'active',
-        'settings ',
+        'settings',
         'filters',
         'location_ids',
         'msg_title',
@@ -64,6 +72,11 @@ class DealerIntegration extends Model
         return $this->belongsTo(Integration::class, 'integration_id', 'integration_id');
     }
 
+    public function dealer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
     /**
      * To avoid mutations and break something
      *
@@ -71,7 +84,7 @@ class DealerIntegration extends Model
      */
     public function decodeSettings(): \Illuminate\Support\Collection
     {
-        return collect($this->settings ? unserialize($this->settings, ['allowed_classes' => false]) : []);
+        return collect(!empty($this->settings) ? (@unserialize($this->settings) ? unserialize($this->settings, ['allowed_classes' => false]) : []) : []);
     }
 
     /**
@@ -84,7 +97,7 @@ class DealerIntegration extends Model
         $settingValues = $this->decodeSettings();
 
         $settingValueMapper = static function (array $setting) use ($settingValues): array {
-            return $setting + ['value' => $settingValues->get($setting['name'])];
+            return $setting + ['value' => isset($setting['name']) ? $settingValues->get($setting['name']) : ''];
         };
 
         return $this->integration->decodeSettings()->keyBy('name')->map($settingValueMapper);

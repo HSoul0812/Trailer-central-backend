@@ -2,63 +2,46 @@
 
 namespace App\Http\Controllers\v1\Subscription;
 
-use App\Repositories\Subscription\SubscriptionRepository;
-use App\Repositories\Subscription\SubscriptionRepositoryInterface;
-use Exception;
+use App\Http\Requests\Subscriptions\GetCustomerByDealerIdRequest;
+use App\Http\Requests\Subscriptions\GetExistingPlansRequest;
+use App\Http\Requests\Subscriptions\SubscribeToPlanByDealerIdRequest;
+use App\Http\Requests\Subscriptions\UpdateCardByDealerIdRequest;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 use App\Services\Subscription\StripeService;
-use App\Services\Subscription\StripeServiceInterface;
 
-use http\Env;
 use Illuminate\Support\Facades\Auth;
 use App\Transformers\Subscription\CustomerTransformer;
+use App\Repositories\Subscription\SubscriptionRepositoryInterface;
 
 use App\Http\Controllers\RestfulControllerV2;
 
 /**
- * Class BulkUpdateController
- * @package App\Http\Controllers\v1\Manufacturer
+ * Class SubscriptionController
+ * @package App\Http\Controllers\v1\Subscription
  */
 class SubscriptionController extends RestfulControllerV2
 {
 
     /**
-     * @var StripeService
+     * @var StripeService $stripe
      */
     protected $stripe;
-    private $user;
+
+    /**
+     * @var SubscriptionRepositoryInterface $subscriptionRepository
+     */
     private $subscriptionRepository;
 
 
     /**
      * Create a new controller instance.
-     *
+     * @param SubscriptionRepositoryInterface $subscriptionRepository
      */
-    public function __construct()
+    public function __construct(SubscriptionRepositoryInterface $subscriptionRepository)
     {
-        $this->middleware(function ($request, $next) {
-            $this->user = Auth::user();
-            $this->subscriptionRepository = new SubscriptionRepository($this->user);
-
-            return $next($request);
-        });
-    }
-
-    /**
-     * @OA\Get(
-     *     path="/api/subscriptions/list",
-     *     description="Retrieves all subscriptions from auth user",
-     *     tags={"Subscriptions"},
-     *     @OA\Response(
-     *         response="200",
-     *         description="Retrieves all subscriptions from auth user",
-     *         @OA\JsonContent()
-     *     )
-     * )
-     */
-    public function getAll(Request $request) {
-        return $this->response->array($this->subscriptionRepository->getAll());
+        $this->middleware('validateDealerIdOnRequest');
+        $this->subscriptionRepository = $subscriptionRepository;
     }
 
     /**
@@ -80,8 +63,21 @@ class SubscriptionController extends RestfulControllerV2
      *     )
      * )
      */
-    public function getCustomer(Request $request) {
-        return $this->response->item($this->subscriptionRepository->getCustomer($request), new CustomerTransformer());
+    public function getCustomerByDealerId(Request $request): Response {
+        $request = new GetCustomerByDealerIdRequest(
+            $request->all()
+        );
+
+        if ($request->validate()) {
+            return $this->response->item(
+                $this->subscriptionRepository->getCustomerByDealerId(
+                    $request->dealer_id
+                ),
+                new CustomerTransformer()
+            );
+        }
+
+        return $this->response->errorBadRequest();
     }
 
     /**
@@ -96,9 +92,19 @@ class SubscriptionController extends RestfulControllerV2
      *     )
      * )
      */
-    public function getPlans(Request $request): Response
+    public function getExistingPlans(Request $request): Response
     {
-        return $this->response->array($this->subscriptionRepository->getPlans());
+        $request = new GetExistingPlansRequest(
+            $request->all()
+        );
+
+        if ($request->validate()) {
+            return $this->response->array(
+                $this->subscriptionRepository->getExistingPlans()
+            );
+        }
+
+        return $this->response->errorBadRequest();
     }
 
     /**
@@ -113,9 +119,26 @@ class SubscriptionController extends RestfulControllerV2
      *     )
      * )
      */
-    public function subscribe(Request $request): Response
+    public function subscribeToPlanByDealerId(Request $request): Response
     {
-        return $this->response->array($this->subscriptionRepository->subscribe($request));
+        $request = new SubscribeToPlanByDealerIdRequest(
+            $request->all()
+        );
+
+        if ($request->validate() &&
+            $this->subscriptionRepository->subscribeToPlanByDealerId(
+                $request->dealer_id,
+                $request->plan
+            )
+        ) {
+            return $this->response->array([
+                'response' => [
+                    'status' => 'success'
+                ]
+            ]);
+        }
+
+        return $this->response->errorBadRequest();
     }
 
     /**
@@ -130,8 +153,27 @@ class SubscriptionController extends RestfulControllerV2
      *     )
      * )
      */
-    public function updateCard(Request $request): Response
+    public function updateCardByDealerId(Request $request): Response
     {
-        return $this->response->array($this->subscriptionRepository->updateCard($request));
+        $request = new UpdateCardByDealerIdRequest(
+            $request->all()
+        );
+
+        if ($request->validate() &&
+           $this->response->array(
+                $this->subscriptionRepository->updateCardByDealerId(
+                    $request->dealer_id,
+                    $request->token
+                )->toArray()
+            )
+        ) {
+            return $this->response->array([
+                'response' => [
+                    'status' => 'success'
+                ]
+            ]);
+        }
+
+        return $this->response->errorBadRequest();
     }
 }

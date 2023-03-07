@@ -32,6 +32,9 @@ class StockRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group DMS
+     * @group DMS_STOCK
+     *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      */
     public function testServiceBindingIsWorking(): void
@@ -45,6 +48,9 @@ class StockRepositoryTest extends TestCase
      * Test that SUT is throwing a PDOException when some constraint is not being satisfied
      *
      * @covers ::financialReport
+     *
+     * @group DMS
+     * @group DMS_STOCK
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      */
@@ -68,6 +74,9 @@ class StockRepositoryTest extends TestCase
      * @dataProvider queryParametersAndSummariesProvider
      *
      * @covers ::financialReport
+     *
+     * @group DMS
+     * @group DMS_STOCK
      *
      * @param array $params list of query parameters
      * @param callable|int|string $numberOfRowsExpected

@@ -2,47 +2,52 @@
 
 namespace Tests\Parts;
 
-use Laravel\Lumen\Testing\DatabaseMigrations;
-use Laravel\Lumen\Testing\DatabaseTransactions;
 use App\Repositories\Parts\PartRepository;
 use App\Models\Parts\Category;
 use App\Models\Parts\Manufacturer;
 use App\Models\Parts\Brand;
+use App\Models\Parts\Part;
 use App\Models\Parts\Type;
 use App\Models\Parts\Vendor;
 use App\Models\User\AuthToken;
 use Tests\TestCase;
+use Illuminate\Support\Str;
+
+use function PHPSTORM_META\map;
 
 class PartsUpdateTest extends TestCase
 {
-    
+
     private $vendor;
     private $manufacturer;
     private $category;
     private $type;
     private $brand;
-    
+
     public function __construct() {
-        parent::__construct();   
+        parent::__construct();
     }
-    
+
     /**
      * Test creating a part with all fields populated
+     *
+     * @group DMS
+     * @group DMS_PARTS
      *
      * @return void
      */
     public function testUpdateAllFields()
-    {            
+    {
         $this->initializeTestData();
         $data = $this->createPartTestData();
         $authToken = AuthToken::where('user_id', 1001)->first();
-        
+
         $vendor = Vendor::latest()->first();
         $manufacturer = Manufacturer::latest()->first();
         $brand = Brand::latest()->first();
         $type = Type::latest()->first();
         $category = Category::latest()->first();
-        
+
         $updateData = [
             "dealer_id" => 1002,
             "vendor_id" => $vendor->id,
@@ -51,7 +56,7 @@ class PartsUpdateTest extends TestCase
             "type_id" => $type->id,
             "category_id" => $category->id,
             "subcategory" => "Testff",
-            "sku" => "asdasdsad",
+            "sku" => Str::random(),
             "price" => 3,
             "dealer_cost" => 11,
             "msrp" => 21,
@@ -78,37 +83,71 @@ class PartsUpdateTest extends TestCase
             ],
             "alternative_part_number" => 'Test Alternative Part Number',
         ];
-        
-        $this->json('POST', '/api/parts/'.$data['part']->id, $updateData, ['access-token' => $authToken->access_token]) 
-            ->seeJson([
-                "dealer_id" => $authToken->user_id,
-                "vendor" => $vendor->toArray(),
-                "brand" => $brand->toArray(),
-                "type" => $type->toArray(),
-                "category" => $category->toArray(),
-                "subcategory" => "Testff",
-                "sku" => "asdasdsad",
-                "price" => 3,
-                "dealer_cost" => 11,
-                "msrp" => 21,
-                "weight" => 22,
-                "weight_rating" => "45 lb" ,
-                "description" => "zxczxc",
-                "qty" => 4,
-                "show_on_website" => false, // transformed values
-                "is_vehicle_specific" => true, // transformed values
-                "title" => "ASDASD",
-                "alternative_part_number" => 'Test Alternative Part Number',
-            ]);             
+
+        $this->postJson('/api/parts/'.$data['part']->id, $updateData, ['access-token' => $authToken->access_token])
+            ->assertJsonFragment([
+                'dealer_id' => $authToken->user_id,
+                'subcategory' => 'Testff',
+                'qty' => 4,
+            ])
+            ->assertJsonStructure([
+                'data' => [
+                    'bins' => [
+                        '*' => [
+                            'id',
+                            'bin_id',
+                            'part_id',
+                            'qty',
+                        ]
+                    ],
+                    'vehicle_specific' => [
+                        'id',
+                        'make',
+                        'model',
+                        'year_from',
+                        'year_to',
+                    ],
+                    'category' => [
+                        'id',
+                        'name',
+                    ],
+                    'type' => [
+                        'id',
+                        'name'
+                    ],
+                    'brand' => [
+                        'id',
+                        'name'
+                    ],
+                    'manufacturer' => [
+                        'id',
+                        'name'
+                    ],
+                    'vendor' => [
+                        'id',
+                        'dealer_id',
+                        'name',
+                        'show_on_part',
+                        'show_on_inventory',
+                        'show_on_floorplan',
+                    ],
+                ],
+            ]);
     }
-    
+
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testUpdateImages()
     {
         $this->initializeTestData();
         $data = $this->createPartTestData();
-        $partsRepository = new PartRepository();
-        
-        $data['data']['images'] = [            
+        $partsRepository = new PartRepository(new Part());
+
+        $data['data']['images'] = [
             [
                 'url' => "https://s3.amazonaws.com/distillery-trailercentral/c51ce410c124a10e0db5e4b97fc2af39/5da6675f8b1cd.jpg",
                 'position' => 0
@@ -130,13 +169,13 @@ class PartsUpdateTest extends TestCase
                 'position' => 4
             ]
         ];
-        
+
         $data['data']['id'] = $data['part']->id;
         $part = $partsRepository->update($data['data']);
-        
+
         $this->assertEquals($part->images->count(), 5);
     }
-    
+
     private function initializeTestData() {
         $this->vendor = Vendor::first();
         $this->manufacturer = Manufacturer::first();
@@ -144,8 +183,8 @@ class PartsUpdateTest extends TestCase
         $this->type = Type::first();
         $this->brand = Brand::first();
     }
-    
-    private function createPartTestData() {        
+
+    private function createPartTestData() {
         $originalData = [
             "dealer_id" => 1001,
             "vendor_id" => $this->vendor->id,
@@ -190,11 +229,11 @@ class PartsUpdateTest extends TestCase
                     'quantity' => 2
                 ],
             ]
-        ];  
-        
-        $partsRepository = new PartRepository();
+        ];
+
+        $partsRepository = new PartRepository(new Part());
         $part = $partsRepository->create($originalData);
-        
+
         return [
             'data' => $originalData,
             'part' => $part

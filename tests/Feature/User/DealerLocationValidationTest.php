@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use App\Models\User\User;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Models\User\AuthToken;
+use App\Models\User\DealerLocation;
 
 class DealerLocationValidationTest extends TestCase {
 
@@ -33,7 +34,7 @@ class DealerLocationValidationTest extends TestCase {
             'type' => User::TYPE_DEALER,
             'state' => User::STATUS_ACTIVE
         ]);
-        
+
         $this->token = factory(AuthToken::class)->create([
             'user_id' => $this->dealer->dealer_id,
             'user_type' => AuthToken::USER_TYPE_DEALER,
@@ -42,6 +43,12 @@ class DealerLocationValidationTest extends TestCase {
         $this->dealerLocationRepo = app(DealerLocationRepositoryInterface::class);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
+     * @return void
+     */
     public function testDealerLocation()
     {
         // PUT /api/user/dealer-location
@@ -59,11 +66,19 @@ class DealerLocationValidationTest extends TestCase {
         ];
 
         $response = $this->withHeaders(['access-token' => $this->token->access_token])
-            ->json('PUT', self::apiEndpoint, $formData)
-            ->assertStatus(200)
-            ->assertJsonMissingValidationErrors();
-
-        $this->assertDatabaseHas('dealer_location', $formData);
+            ->putJson(self::apiEndpoint, $formData)
+            ->assertSuccessful()
+            ->assertJsonFragment([
+                'name' => $formData['name'],
+                'contact' => $formData['contact'],
+                'address' => $formData['address'],
+                'city' => $formData['city'],
+                'county' => $formData['county'],
+                'region' => $formData['region'],
+                'country' => $formData['country'],
+                'phone' => $formData['phone'],
+                'dealer_id' => $formData['dealer_id'],
+            ]);
 
         $this->dealerLocationId = $response->decodeResponseJson()['data']['id'];
 
@@ -84,13 +99,18 @@ class DealerLocationValidationTest extends TestCase {
         ];
 
         $response = $this->withHeaders(['access-token' => $this->token->access_token])
-            ->json('POST', self::apiEndpoint .'/'. $this->dealerLocationId, $updatingFormData)
-            ->assertStatus(200)
-            ->assertJsonMissingValidationErrors();
-
-        $updatingFormData['sms_phone'] = '+19793252092';
-
-        $this->assertDatabaseHas('dealer_location', $updatingFormData);
+            ->postJson(self::apiEndpoint .'/'. $this->dealerLocationId, $updatingFormData)
+            ->assertSuccessful()
+            ->assertJsonFragment([
+                'name' => $updatingFormData['name'],
+                'contact' => $updatingFormData['contact'],
+                'address' => $updatingFormData['address'],
+                'city' => $updatingFormData['city'],
+                'county' => $updatingFormData['county'],
+                'region' => $updatingFormData['region'],
+                'country' => $updatingFormData['country'],
+                'sms_phone' => '+19793252092',
+            ]);
     }
 
     public function validationDataProvider()
@@ -149,6 +169,9 @@ class DealerLocationValidationTest extends TestCase {
 
     /**
      * @dataProvider validationDataProvider
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      */
     public function testValidation($testFormData, $failedValidationField)
     {

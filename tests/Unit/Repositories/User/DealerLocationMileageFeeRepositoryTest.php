@@ -35,6 +35,9 @@ class DealerLocationMileageFeeRepositoryTest extends TestCase
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION_MILEAGE_FEE
      */
     public function testCreate() {
         $params = [
@@ -53,6 +56,9 @@ class DealerLocationMileageFeeRepositoryTest extends TestCase
 
     /**
      * @covers ::delete
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION_MILEAGE_FEE
      */
     public function testDelete() {
         $params = ['id' => 1];
@@ -69,6 +75,9 @@ class DealerLocationMileageFeeRepositoryTest extends TestCase
 
     /**
      * @covers ::get
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION_MILEAGE_FEE
      */
     public function testGet() {
         $params = [

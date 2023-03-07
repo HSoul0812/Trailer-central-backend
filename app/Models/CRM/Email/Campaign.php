@@ -2,15 +2,37 @@
 
 namespace App\Models\CRM\Email;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Email Campaign
  *
  * @package App\Models\CRM\Email
+ *
+ * @property int $drip_campaigns_id
+ * @property int $email_template_id
+ * @property int|null $location_id
+ * @property int $send_after_days
+ * @property string $action
+ * @property string|null $unit_category
+ * @property string $campaign_name
+ * @property int $user_id
+ * @property string|null $from_email_address
+ * @property string $campaign_subject
+ * @property int|null $include_archived
+ * @property bool|null $is_enabled
+ *
+ * @property CrmUser $crmUser
+ * @property NewDealerUser $newDealerUser
+ * @property Template $template
+ * @property Collection<CampaignBrand> $brands
+ * @property Collection<CampaignCategory> $categories
+ * @property CampaignFactory $factory
  */
 class Campaign extends Model
 {
@@ -71,7 +93,7 @@ class Campaign extends Model
     /**
      * Get CRM User
      */
-    public function crmUser()
+    public function crmUser(): BelongsTo
     {
         return $this->belongsTo(CrmUser::class, 'user_id', 'user_id');
     }
@@ -79,14 +101,14 @@ class Campaign extends Model
     /**
      * Get Dealer User
      */
-    public function newDealerUser()
+    public function newDealerUser(): BelongsTo
     {
         return $this->belongsTo(NewDealerUser::class, 'user_id', 'user_id');
     }
 
     /**
      * Get Template
-     * 
+     *
      * @return BelongsTo
      */
     public function template(): BelongsTo
@@ -97,7 +119,7 @@ class Campaign extends Model
     /**
      * @return HasMany
      */
-    public function brands()
+    public function brands(): HasMany
     {
         return $this->hasMany(CampaignBrand::class, 'email_campaign_id');
     }
@@ -105,7 +127,7 @@ class Campaign extends Model
     /**
      * @return HasMany
      */
-    public function categories()
+    public function categories(): HasMany
     {
         return $this->hasMany(CampaignCategory::class, 'email_campaign_id');
     }
@@ -113,7 +135,7 @@ class Campaign extends Model
     /**
      * @return belongsTo
      */
-    public function factory()
+    public function factory(): BelongsTo
     {
         return $this->belongsTo(CampaignFactory::class, 'drip_campaigns_id');
     }

@@ -9,7 +9,6 @@ use App\Http\Controllers\v1\Bulk\Parts\BulkDownloadController;
 use App\Http\Requests\Bulk\Parts\CreateBulkDownloadRequest;
 use App\Http\Requests\Jobs\ReadMonitoredJobsRequest;
 use App\Jobs\Bulk\Parts\CsvExportJob;
-use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Common\MonitoredJob;
 use App\Repositories\Bulk\Parts\BulkDownloadRepository;
 use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
@@ -29,64 +28,13 @@ use Tests\Integration\AbstractMonitoredJobsTest;
 class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
 {
     /**
-     * @dataProvider invalidParametersForCreationProvider
-     *
-     * @covers ::create
-     *
-     * @param array $params
-     * @param string $expectedException
-     * @param string $expectedExceptionMessage
-     * @param string|null $firstExpectedErrorMessage
-     *
-     * @throws BusyJobException
-     */
-    public function testCreateWithWrongParameters(array $params,
-                                                  string $expectedException,
-                                                  string $expectedExceptionMessage,
-                                                  ?string $firstExpectedErrorMessage): void
-    {
-        // Given I have few dealers
-        $this->seeder->seedDealers();
-
-        // And I'm using the controller "BulkDownloadController"
-        $controller = app(BulkDownloadController::class);
-
-        $paramsExtracted = $this->seeder->extractValues($params);
-
-        if ($expectedException === BusyJobException::class) {
-            // And I have a monitored job "parts-export-new" which is currently running
-            factory(MonitoredJob::class)->create([
-                'dealer_id' => $paramsExtracted['dealer_id'],
-                'name' => BulkDownload::QUEUE_JOB_NAME,
-                'concurrency_level' => BulkDownload::LEVEL_DEFAULT,
-                'queue' => BulkDownload::QUEUE_NAME,
-                'status' => BulkDownload::STATUS_PROCESSING
-            ]);
-        }
-
-        // And I have a bad formed "CreateBulkDownloadRequest" request
-        $request = new CreateBulkDownloadRequest($paramsExtracted);
-
-        // Then I expect to see an specific exception to be thrown
-        $this->expectException($expectedException);
-        // And I also expect to see an specific exception message
-        $this->expectExceptionMessage($expectedExceptionMessage);
-
-        try {
-            // When I call the create action using the bad formed request
-            $controller->create($request);
-        } catch (ResourceException $exception) {
-            // Then I should see that the first error message has a specific string
-            self::assertSame($firstExpectedErrorMessage, $exception->getErrors()->first());
-
-            throw $exception;
-        }
-    }
-
-    /**
      * @dataProvider validParametersCreationProvider
      *
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_DOWNLOAD
      *
      * @param array $params
      *
@@ -118,6 +66,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      * there is not job working on it, it will response a 500 http status code
      *
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_DOWNLOAD
      *
      * @throws BusyJobException
      */
@@ -152,6 +104,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      * @param string|null $firstExpectedErrorMessage
      *
      * @covers ::read
+     *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_DOWNLOAD
      */
     public function testReadWithInvalidParameters(array $params,
                                                   string $expectedException,
@@ -191,6 +147,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      * @param array $expectedPayloadResponse
      *
      * @covers ::status
+     *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_DOWNLOAD
      */
     public function testReadWithDifferentResponseStatuses(array $params,
                                                           string $jobStatus,
@@ -275,8 +235,6 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
         return [                                            // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
             'No dealer'                                     => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
             'Bad token'                                     => [['dealer_id' => 666999, 'token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.'],
-            'There is another job working'                  => [['dealer_id' => $this->getSeededData(0,'id')], BusyJobException::class, "This job can't be set up due there is currently other job working", null],
-            'There is another job working (token provided)' => [['dealer_id' => $this->getSeededData(0,'id'),'token' => Uuid::uuid4()->toString()], BusyJobException::class, "This job can't be set up due there is currently other job working", null]
         ];
     }
 

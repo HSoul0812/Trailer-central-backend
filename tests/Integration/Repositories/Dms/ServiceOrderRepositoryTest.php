@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Repositories\Dms;
+namespace Tests\Integration\Repositories\Dms;
 
 use App\Models\Inventory\Category;
 use App\Repositories\Dms\ServiceOrderRepositoryInterface;
@@ -39,11 +39,16 @@ class ServiceOrderRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
+     *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
      */
     public function testIoCForServiceOrderRepositoryIsWorking(): void
     {
+        $this->seeder->seed();
+
         $concreteRepository = $this->getConcreteRepository();
 
         self::assertInstanceOf(ServiceOrderRepository::class, $concreteRepository);
@@ -51,6 +56,9 @@ class ServiceOrderRepositoryTest extends TestCase
     
     /**
      * @covers ::update
+     *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
      */
     public function testUpdateServiceOrderStatus(): void 
     {

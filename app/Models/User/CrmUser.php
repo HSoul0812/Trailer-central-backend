@@ -84,4 +84,13 @@ class CrmUser extends Model
     public function getDealerTimezoneAttribute(): string {
         return $this->timezone ?: env('DB_TIMEZONE');
     }
+
+
+    /**
+     * Get the NewDealerUser
+     */
+    public function newDealerUser()
+    {
+        return $this->belongsTo(NewDealerUser::class, 'user_id', 'user_id');
+    }
 }

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\CRM\Email;
 
+use DateTime;
+use DateTimeZone;
+use Exception;
 use Illuminate\Console\Command;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\CRM\Email\ScrapeRepliesServiceInterface;
@@ -25,12 +28,12 @@ class ScrapeReplies extends Command
     protected $description = 'Process scraping email replies from a sales person\'s email account for leads belonging to sales person\'s dealer.';
 
     /**
-     * @var App\Services\CRM\Email\ScrapeRepliesServiceInterface
+     * @var ScrapeRepliesServiceInterface
      */
     protected $service;
 
     /**
-     * @var App\Repositories\User\UserRepositoryInterface
+     * @var UserRepositoryInterface
      */
     protected $users;
 
@@ -47,23 +50,9 @@ class ScrapeReplies extends Command
     protected $boundUpper = 0;
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
+     * @var DateTime
      */
-    public function __construct(UserRepositoryInterface $users,
-                                ScrapeRepliesServiceInterface $service)
-    {
-        parent::__construct();
-
-        $this->service = $service;
-        $this->users = $users;
-
-        date_default_timezone_set(env('DB_TIMEZONE'));
-
-        $this->datetime = new \DateTime();
-        $this->datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
-    }
+    private $datetime;
 
     /**
      * Execute the console command.
@@ -72,6 +61,14 @@ class ScrapeReplies extends Command
      */
     public function handle()
     {
+        $this->service = resolve(ScrapeRepliesServiceInterface::class);
+        $this->users = resolve(UserRepositoryInterface::class);
+
+        date_default_timezone_set(config('app.db_timezone'));
+
+        $this->datetime = new DateTime();
+        $this->datetime->setTimezone(new DateTimeZone(config('app.db_timezone')));
+
         // Get Dealer ID
         $this->dealerId = $this->argument('dealer');
 
@@ -103,7 +100,7 @@ class ScrapeReplies extends Command
                     $this->info($this->command . ' skipped importing emails on dealer #' . $dealer->id);
                 }
             }
-        } catch(\Exception $e) {
+        } catch(Exception $e) {
             $this->error($this->command . ' exception returned ' . $e->getMessage());
         }
 
@@ -111,8 +108,8 @@ class ScrapeReplies extends Command
         sleep(1);
 
         // Log End
-        $datetime = new \DateTime();
-        $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
+        $datetime = new DateTime();
+        $datetime->setTimezone(new DateTimeZone(config('app.db_timezone')));
         $this->info("{$this->command} finished on " . $datetime->format("l, F jS, Y H:i:s"));
     }
 }

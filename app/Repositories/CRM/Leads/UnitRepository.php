@@ -3,6 +3,7 @@
 namespace App\Repositories\CRM\Leads;
 
 use App\Models\CRM\Leads\InventoryLead;
+use App\Models\CRM\Leads\Lead;
 use App\Repositories\RepositoryAbstract;
 use Illuminate\Support\Collection;
 
@@ -65,5 +66,25 @@ class UnitRepository extends RepositoryAbstract implements UnitRepositoryInterfa
         }
 
         return $query->get();
+    }
+
+    /**
+     * Get Inventory IDs of selected lead
+     * 
+     * @param int $leadId
+     * @return array
+     */
+    public function getUnitIds(int $leadId): array
+    {
+        $unitIds = InventoryLead::select('inventory_id')->where('website_lead_id', $leadId)
+            ->pluck('inventory_id')->toArray();
+
+        $inventoryId = Lead::find($leadId)->inventory_id;
+
+        if (!empty($inventoryId)) {
+            $unitIds[] = $inventoryId;
+        }
+
+        return $unitIds;
     }
 }

@@ -38,11 +38,4 @@ class InventoryRepositoryTest extends TestCase
         $this->inventoryMock = $this->getEloquentMock(Inventory::class);
         $this->app->instance(Inventory::class, $this->inventoryMock);
     }
-
-    /**
-     * @covers ::getAll
-     */
-    public function testGetAllDefault(): void
-    {
-    }
 }

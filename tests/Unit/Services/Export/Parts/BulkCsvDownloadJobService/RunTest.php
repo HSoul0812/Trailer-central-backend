@@ -25,6 +25,9 @@ class RunTest extends TestCase
     use WithFaker;
 
     /**
+     * @group DMS
+     * @group DMS_BULK_DOWNLOAD
+     *
      * @throws Exception
      */
     public function testWillThrowAnException(): void
@@ -92,6 +95,9 @@ class RunTest extends TestCase
     }
 
     /**
+     * @group DMS
+     * @group DMS_BULK_DOWNLOAD
+     *
      * @throws Exception
      */
     public function testWillExport(): void

@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Services\CRM\Leads\Import;
 
-use App\Exceptions\CRM\Leads\Import\MissingAdfEmailAccessTokenException;
+use App\Exceptions\CRM\Leads\Import\MissingEmailAccessTokenException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\System\Email;
@@ -13,17 +13,19 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\CRM\Leads\Import\ADFService;
 use App\Services\CRM\Leads\Import\HtmlService;
+use App\Services\CRM\Leads\Import\HtmlServices\BoatsCom;
 use App\Services\CRM\Leads\Import\ImportService;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Services\Integration\Google\GmailServiceInterface;
+use App\Services\Integration\Google\GoogleService;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
-use Mockery;
 use Mockery\LegacyMockInterface;
+use Psr\Log\LoggerInterface;
 use Tests\TestCase;
 
 /**
@@ -82,6 +84,16 @@ class ImportServiceTest extends TestCase
      */
     protected $htmlService;
 
+    /**
+     * @var BoatsCom|LegacyMockInterface
+     */
+    protected $boatsCom;
+
+    /**
+     * @var LoggerInterface|LegacyMockInterface
+     */
+    protected $logMock;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -94,6 +106,10 @@ class ImportServiceTest extends TestCase
         $this->instanceMock('leadService', LeadServiceInterface::class);
         $this->instanceMock('adfService', ADFService::class);
         $this->instanceMock('htmlService', HtmlService::class);
+        $this->instanceMock('logMock', LoggerInterface::class);
+        $this->instanceMock('boatsCom', BoatsCom::class);
+
+        Config::set('adf.imports.gmail.move', true);
     }
 
     /**
@@ -125,11 +141,23 @@ class ImportServiceTest extends TestCase
         $adfLead->setRequestDate((new Carbon())->toDateTimeString());
         $adfLead->setVendorProvider('some_provider');
 
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock
+            ->shouldReceive('info');
+
         $this->emailRepository
             ->shouldReceive('find')
             ->once()
             ->with(['email' => config('adf.imports.gmail.email')])
             ->andReturn($systemEmail);
+
+        $this->googleService
+            ->shouldReceive('setKey')
+            ->with(GoogleService::AUTH_TYPE_SYSTEM)
+            ->once();
 
         $this->googleService
             ->shouldReceive('validate')
@@ -150,16 +178,16 @@ class ImportServiceTest extends TestCase
             ->andReturn($email);
 
         $this->htmlService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
-            ->andReturn(true);
+            ->andReturn($this->boatsCom);
 
         $this->adfService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
-            ->andReturn(false);
+            ->andReturn(null);
 
         $this->userRepository
             ->shouldReceive('get')
@@ -167,7 +195,7 @@ class ImportServiceTest extends TestCase
             ->once()
             ->andReturn($dealer);
 
-        $this->htmlService
+        $this->boatsCom
             ->shouldReceive('getLead')
             ->with($dealer, $email)
             ->once()
@@ -202,8 +230,6 @@ class ImportServiceTest extends TestCase
             ->once()
             ->andReturn($lead);
 
-        Log::shouldReceive('info');
-
         $this->gmailService
             ->shouldReceive('move')
             ->with($accessToken, $messages[0], [config('adf.imports.gmail.processed')], [config('adf.imports.gmail.inbox')])
@@ -225,11 +251,26 @@ class ImportServiceTest extends TestCase
      */
     public function testImportWithException($systemEmail, $accessToken, $validateToken, $messages, $email)
     {
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock
+            ->shouldReceive('info');
+
+        $this->logMock
+            ->shouldReceive('error');
+
         $this->emailRepository
             ->shouldReceive('find')
             ->once()
             ->with(['email' => config('adf.imports.gmail.email')])
             ->andReturn($systemEmail);
+
+        $this->googleService
+            ->shouldReceive('setKey')
+            ->with(GoogleService::AUTH_TYPE_SYSTEM)
+            ->once();
 
         $this->googleService
             ->shouldReceive('validate')
@@ -250,7 +291,7 @@ class ImportServiceTest extends TestCase
             ->andReturn($email);
 
         $this->adfService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
             ->andThrow(new \Exception());
@@ -262,8 +303,6 @@ class ImportServiceTest extends TestCase
         $this->leadService
             ->shouldReceive('create')
             ->never();
-
-        Log::shouldReceive('error');
 
         /** @var ImportService $service */
         $service = $this->app->make(ImportService::class);
@@ -281,11 +320,26 @@ class ImportServiceTest extends TestCase
      */
     public function testImportWithInvalidDealerId($systemEmail, $accessToken, $validateToken, $messages, $email)
     {
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock
+            ->shouldReceive('info');
+
+        $this->logMock
+            ->shouldReceive('error');
+
         $this->emailRepository
             ->shouldReceive('find')
             ->once()
             ->with(['email' => config('adf.imports.gmail.email')])
             ->andReturn($systemEmail);
+
+        $this->googleService
+            ->shouldReceive('setKey')
+            ->with(GoogleService::AUTH_TYPE_SYSTEM)
+            ->once();
 
         $this->googleService
             ->shouldReceive('validate')
@@ -306,16 +360,16 @@ class ImportServiceTest extends TestCase
             ->andReturn($email);
 
         $this->htmlService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
-            ->andReturn(true);
+            ->andReturn($this->boatsCom);
 
         $this->adfService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
-            ->andReturn(false);
+            ->andReturn(null);
 
         $this->userRepository
             ->shouldReceive('get')
@@ -331,8 +385,6 @@ class ImportServiceTest extends TestCase
         $this->leadService
             ->shouldReceive('create')
             ->never();
-
-        Log::shouldReceive('error');
 
         /** @var ImportService $service */
         $service = $this->app->make(ImportService::class);
@@ -350,11 +402,26 @@ class ImportServiceTest extends TestCase
      */
     public function testImportWithWrongFormat($systemEmail, $accessToken, $validateToken, $messages, $email)
     {
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock
+            ->shouldReceive('info');
+
+        $this->logMock
+            ->shouldReceive('error');
+
         $this->emailRepository
             ->shouldReceive('find')
             ->once()
             ->with(['email' => config('adf.imports.gmail.email')])
             ->andReturn($systemEmail);
+
+        $this->googleService
+            ->shouldReceive('setKey')
+            ->with(GoogleService::AUTH_TYPE_SYSTEM)
+            ->once();
 
         $this->googleService
             ->shouldReceive('validate')
@@ -375,16 +442,16 @@ class ImportServiceTest extends TestCase
             ->andReturn($email);
 
         $this->htmlService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
-            ->andReturn(false);
+            ->andReturn($this->boatsCom);
 
         $this->adfService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
-            ->andReturn(false);
+            ->andReturn(null);
 
         $this->gmailService
             ->shouldReceive('move')
@@ -394,8 +461,6 @@ class ImportServiceTest extends TestCase
         $this->leadService
             ->shouldReceive('create')
             ->never();
-
-        Log::shouldReceive('error');
 
         /** @var ImportService $service */
         $service = $this->app->make(ImportService::class);
@@ -415,11 +480,23 @@ class ImportServiceTest extends TestCase
     {
         $messages = [];
 
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock
+            ->shouldReceive('info');
+
         $this->emailRepository
             ->shouldReceive('find')
             ->once()
             ->with(['email' => config('adf.imports.gmail.email')])
             ->andReturn($systemEmail);
+
+        $this->googleService
+            ->shouldReceive('setKey')
+            ->with(GoogleService::AUTH_TYPE_SYSTEM)
+            ->once();
 
         $this->googleService
             ->shouldReceive('validate')
@@ -452,19 +529,15 @@ class ImportServiceTest extends TestCase
     public function testImportWithoutGoogleToken()
     {
         $systemEmail = $this->getEloquentMock(Email::class);
-        $hasOne = Mockery::mock(HasOne::class);
 
-        $systemEmail->shouldReceive('setRelation')->passthru();
-        $systemEmail->shouldReceive('googleToken')->andReturn($hasOne);
-
-        $hasOne->shouldReceive('getResults')->andReturn(null);
+        $this->initHasOneRelation($systemEmail, 'googleToken', null);
 
         $this->emailRepository
             ->shouldReceive('find')
             ->once()
             ->andReturn($systemEmail);
 
-        $this->expectException(MissingAdfEmailAccessTokenException::class);
+        $this->expectException(MissingEmailAccessTokenException::class);
 
         /** @var ImportService $service */
         $service = $this->app->make(ImportService::class);

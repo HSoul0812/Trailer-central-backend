@@ -22,7 +22,8 @@ class DealerTransformer extends TransformerAbstract
 
     protected $defaultIncludes = [
         'tunnels',
-        'inventory'
+        'missing',
+        'sold'
     ];
 
     public function __construct(
@@ -40,6 +41,7 @@ class DealerTransformer extends TransformerAbstract
             'locationId' => $dealer->dealerLocationId,
             'name' => $dealer->dealerName,
             'integration' => $dealer->integrationId,
+            'posts_per_day' => $dealer->posts_per_day,
             'fb' => [
                 'username' => $dealer->fbUsername,
                 'password' => $dealer->fbPassword
@@ -47,8 +49,10 @@ class DealerTransformer extends TransformerAbstract
             'auth' => [
                 'type' => $dealer->authType,
                 'username' => $dealer->authUsername,
-                'password' => $dealer->authPassword
-            ]
+                'password' => $dealer->authPassword,
+                'code' => $dealer->authCode
+            ],
+            'last_attempt_ts' => $dealer->last_attempt_ts
         ];
     }
 
@@ -57,10 +61,18 @@ class DealerTransformer extends TransformerAbstract
         return $this->collection($dealer->tunnels, $this->tunnelTransformer);
     }
 
-    public function includeInventory(DealerFacebook $dealer)
+    public function includeMissing(DealerFacebook $dealer)
     {
-        if($dealer->inventory) {
-            return $this->item($dealer->inventory, $this->paginatorTransformer);
+        if ($dealer->missing) {
+            return $this->item($dealer->missing, $this->paginatorTransformer);
+        }
+        return $this->null();
+    }
+    
+    public function includeSold(DealerFacebook $dealer)
+    {
+        if ($dealer->sold) {
+            return $this->item($dealer->sold, $this->paginatorTransformer);
         }
         return $this->null();
     }

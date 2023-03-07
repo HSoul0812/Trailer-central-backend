@@ -27,6 +27,6 @@ return [
     'redirectUri'     => env('GOOGLE_REDIRECT_URI', 'https://crm.trailercentral.com/oauth-result/google'),
 
     // Required Scopes
-    'scopes'          => env('GOOGLE_OAUTH_SCOPES', 'openid profile offline_access email https://mail.google.com/'),
+    'scopes'          => env('GOOGLE_OAUTH_SCOPES', 'openid profile offline_access email https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.readonly'),
     'discovery'       => env('GOOGLE_OAUTH_DISCOVERY', 'https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest')
 ];

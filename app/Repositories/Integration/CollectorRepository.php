@@ -3,7 +3,8 @@
 
 namespace App\Repositories\Integration;
 
-use App\Exceptions\NotImplementedException;
+use App\Exceptions\RepositoryInvalidArgumentException;
+use App\Models\Integration\Collector\Collector;
 use App\Repositories\RepositoryAbstract;
 use App\Utilities\JsonApi\WithRequestQueryable;
 use Illuminate\Database\Eloquent\Builder;
@@ -34,5 +35,23 @@ class CollectorRepository extends RepositoryAbstract implements CollectorReposit
         }]);
 
         return $query->get();
+    }
+
+    /**
+     * @param $params
+     * @return Collector
+     */
+    public function update($params): Collector
+    {
+        if (!isset($params['id'])) {
+            throw new RepositoryInvalidArgumentException('id has been missed. Params - ' . json_encode($params));
+        }
+
+        /** @var Collector $collector */
+        $collector = Collector::findOrFail($params['id']);
+
+        $collector->fill($params)->save();
+
+        return $collector;
     }
 }

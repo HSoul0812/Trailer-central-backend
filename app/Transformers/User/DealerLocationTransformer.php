@@ -59,7 +59,8 @@ class DealerLocationTransformer extends TransformerAbstract
             'meta' => [
                 'number_of_inventories' => $dealerLocation->inventoryCount(),
                 'number_of_references' => $dealerLocation->referenceCount()
-            ]
+            ],
+            'google_business_store_code' => $dealerLocation->google_business_store_code
         ];
     }
 
@@ -120,8 +121,13 @@ class DealerLocationTransformer extends TransformerAbstract
      */
     private function getSalesTaxItemColumnTitles(DealerLocation $dealerLocation): array
     {
-        return !empty($dealerLocation->sales_tax_item_column_titles)
-            ? $dealerLocation->sales_tax_item_column_titles
-            : [DealerLocation::DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES];
+        // @note we are not using model mutator to avoid any unexpected change elsewhere
+        if (!empty($dealerLocation->sales_tax_item_column_titles)) {
+            return is_string($dealerLocation->sales_tax_item_column_titles) ?
+                json_decode($dealerLocation->sales_tax_item_column_titles, true) :
+                $dealerLocation->sales_tax_item_column_titles;
+        }
+
+        return [DealerLocation::DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES];
     }
 }

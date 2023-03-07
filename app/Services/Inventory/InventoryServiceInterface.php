@@ -2,7 +2,10 @@
 
 namespace App\Services\Inventory;
 
+use App\Models\Inventory\File;
 use App\Models\Inventory\Inventory;
+use App\Models\User\DealerLocation;
+use App\Models\Inventory\InventoryImage;
 
 /**
  * Interface InventoryServiceInterface
@@ -21,6 +24,12 @@ interface InventoryServiceInterface
      * @return Inventory
      */
     public function update(array $params): Inventory;
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function massUpdate(array $params): bool;
 
     /**
      * @param int $inventoryId
@@ -47,13 +56,33 @@ interface InventoryServiceInterface
     public function deliveryPrice(int $inventoryId, string $toZip): float;
 
     /**
+     * @param int $inventoryId
+     * @param array $params
+     * @return InventoryImage
+     */
+    public function createImage(int $inventoryId, array $params): InventoryImage;
+
+    /**
+     * @param int $inventoryId
+     * @param array $params
+     * @return File
+     */
+    public function createFile(int $inventoryId, array $params): File;
+
+    /**
      * Deletes the inventory images from the DB and the filesystem
      *
      * @param int $inventoryId
      * @param int[] $imageIds
      * @return bool
      */
-    public function imageBulkDelete(int $inventoryId, array $imageIds): bool;
+    public function imageBulkDelete(int $inventoryId, array $imageIds = null): bool;
+
+    /**
+     * @param int $inventoryId
+     * @return bool
+     */
+    public function fileBulkDelete(int $inventoryId): bool;
 
     /**
      * Exports an inventory and returns the url to the export
@@ -63,4 +92,23 @@ interface InventoryServiceInterface
      * @return string
      */
     public function export(int $inventoryId, string $format): string;
+
+    /**
+     * @param string $markDown
+     * @return string
+     */
+    public function convertMarkdown(string $markDown): string;
+
+    public function invalidateCacheAndReindexByDealerIds(array $dealerIds): void;
+
+    public function invalidateCacheAndReindexByDealerLocation(DealerLocation $dealerLocation): void;
+
+    /**
+     * - Will try to index for a given inventory only when ES indexation is enabled
+     * - Will try invalidate inventory cache for a given inventory only when cache invalidation is enabled
+     *
+     * @param  Inventory  $inventory
+     * @return void
+     */
+    public function tryToIndexAndInvalidateInventory(Inventory $inventory): void;
 }

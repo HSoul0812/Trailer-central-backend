@@ -7,6 +7,12 @@ use Tests\TestCase;
 
 class SettingsTest extends TestCase
 {
+    /**
+     * @group DMS
+     * @group DMS_SETTINGS
+     *
+     * @return void
+     */
     public function testMetaCanSaveByDotNotation()
     {
         /** @var Settings $settings */

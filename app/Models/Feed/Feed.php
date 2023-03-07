@@ -20,7 +20,8 @@ class Feed extends Model
     protected $primaryKey = 'id';
 
     protected $casts = [
-        'last_run_at' => 'datetime',
+        'last_run_start' => 'datetime',
+        'last_run_end' => 'datetime',
         'filters' => 'json',
         'settings' => 'json',
     ];

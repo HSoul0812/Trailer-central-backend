@@ -12,6 +12,9 @@ class InventoryCsvExporterTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
      * @note IntegrationTestCase
@@ -24,6 +27,9 @@ class InventoryCsvExporterTest extends TestCase
     }
 
     /**
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @return void
      * @throws BindingResolutionException
      */

@@ -98,8 +98,15 @@ class InteractionsController extends RestfulControllerV2
      *                     type="string",
      *                 ),
      *                 @OA\Property(
+     *                     required=false,
      *                     property="lead_id",
      *                     description="Lead ID.",
+     *                     type="string",
+     *                 ),
+     *                 @OA\Property(
+     *                     required=false,
+     *                     property="quote_id",
+     *                     description="Quote ID.",
      *                     type="string",
      *                 ),
      *                 @OA\Property(
@@ -206,7 +213,7 @@ class InteractionsController extends RestfulControllerV2
      *      ),
      * )
      */
-    public function sendEmail(int $leadId, Request $request)
+    public function sendEmail(Request $request)
     {
         $params = $request->all();
 
@@ -216,7 +223,7 @@ class InteractionsController extends RestfulControllerV2
 
         if ( $request->validate()) {
             // Get Results
-            $result = $this->service->email($leadId, $params, $files);
+            $result = $this->service->email($params, $files);
             
             // Send Email Response
             return $this->response->item($result, $this->interactionTransformer);

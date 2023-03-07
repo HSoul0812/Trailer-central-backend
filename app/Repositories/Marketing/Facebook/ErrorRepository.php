@@ -247,7 +247,8 @@ class ErrorRepository implements ErrorRepositoryInterface {
         return Error::leftJoin(Marketplace::getTableName(), Marketplace::getTableName() . '.id',
                                         '=', Error::getTableName() . '.marketplace_id')
                     ->where(Marketplace::getTableName() . '.dealer_id', '=', $dealerId)
-                    ->where('dismissed', 0)->whereNull('inventory_id')->get();
+                    ->where('dismissed', 0)->whereNull('inventory_id')
+                    ->where('expires_at', '>', DB::raw('NOW()'))->get();
     }
 
     protected function getSortOrders() {

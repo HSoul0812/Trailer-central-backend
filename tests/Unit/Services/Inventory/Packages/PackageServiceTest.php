@@ -34,6 +34,9 @@ class PackageServiceTest extends TestCase
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testCreate()
     {
@@ -70,6 +73,9 @@ class PackageServiceTest extends TestCase
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testCreateWithException()
     {
@@ -113,6 +119,9 @@ class PackageServiceTest extends TestCase
 
     /**
      * @covers ::update
+     *
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testUpdate()
     {
@@ -154,6 +163,9 @@ class PackageServiceTest extends TestCase
 
     /**
      * @covers ::update
+     *
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testUpdateWithException()
     {
@@ -203,6 +215,9 @@ class PackageServiceTest extends TestCase
 
     /**
      * @covers ::delete
+     *
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testDelete()
     {
@@ -239,6 +254,9 @@ class PackageServiceTest extends TestCase
 
     /**
      * @covers ::delete
+     *
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testDeleteWithException()
     {

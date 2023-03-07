@@ -3,8 +3,11 @@
 namespace App\Nova\Resources\Integration;
 
 use App\Models\Integration\Collector\CollectorSpecificationRule as CollectorSpecificationRuleModel;
+use App\Nova\Actions\Exports\CollectorSpecificationRuleExport;
+use App\Nova\Actions\Importer\CollectorSpecificationRuleImporter;
 use App\Nova\Resource;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 
@@ -14,7 +17,7 @@ use Laravel\Nova\Fields\Text;
  */
 class CollectorSpecificationRule extends Resource
 {
-    public static $group = 'Integration';
+    public static $group = 'Collector';
 
     /**
      * The model the resource corresponds to.
@@ -44,6 +47,12 @@ class CollectorSpecificationRule extends Resource
     public function fields(Request $request): array
     {
         return [
+            BelongsTo::make('Specification For', 'collectorSpecification', CollectorSpecification::class)
+                ->showOnIndex()
+                ->showOnDetail()
+                ->sortable()
+                ->rules('required'),
+
             Select::make('Condition', 'condition')
                 ->options(CollectorSpecificationRuleModel::CONDITION_FORMATS)
                 ->displayUsingLabels()
@@ -59,7 +68,9 @@ class CollectorSpecificationRule extends Resource
                 ->sortable()
                 ->rules('required')
                 ->help(
-                    'For example, "Category". If it\'s needed, the path can be specified (for instance, Details/Category)'
+                    'For example, "Category". If it\'s needed, the path can be specified (for instance, Details/Category)<br>
+                    Service fields:<br>
+                    ###service_data_url### - relevant when several files from different sources are specified for one collector'
                 ),
 
             Text::make('Incoming Value', 'value')
@@ -108,14 +119,9 @@ class CollectorSpecificationRule extends Resource
      */
     public function actions(Request $request): array
     {
-        return [];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public static function availableForNavigation(Request $request): bool
-    {
-        return false;
+        return [
+            (new CollectorSpecificationRuleExport())->withHeadings()->askForFilename(),
+            new CollectorSpecificationRuleImporter()
+        ];
     }
 }

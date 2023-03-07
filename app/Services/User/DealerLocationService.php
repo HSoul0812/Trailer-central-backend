@@ -70,23 +70,28 @@ class DealerLocationService implements DealerLocationServiceInterface
     {
         if (isset($params['with_linked_accounts'])) {
             $website = Website::where('dealer_id', $params['dealer_id'])->first();
-            $typeConfig = $website->getOriginal('type_config');
-            $dealerIds = [$params['dealer_id']];
 
-            if (substr($typeConfig, 0, 2) === 'a:') {
-                $filter = unserialize($typeConfig);
+            if (!empty($website)) {
+                $typeConfig = $website->getOriginal('type_config');
+                $dealerIds = [$params['dealer_id']];
 
-                // Return Just Default Dealer ID
-                if (isset($filter['dealer_id'])) {
-                    // Add Dealer ID's
-                    if (is_array($filter['dealer_id'])) {
-                        foreach ($filter['dealer_id'] as $dealer_id) {
-                            $dealerIds[] = $dealer_id;
+                if (substr($typeConfig, 0, 2) === 'a:') {
+                    $filter = unserialize($typeConfig);
+
+                    // Return Just Default Dealer ID
+                    if (isset($filter['dealer_id'])) {
+                        // Add Dealer ID's
+                        if (is_array($filter['dealer_id'])) {
+                            foreach ($filter['dealer_id'] as $dealer_id) {
+                                $dealerIds[] = $dealer_id;
+                            }
+                        } else {
+                            $dealerIds[] = $filter['dealer_id'];
                         }
-                    } else {
-                        $dealerIds[] = $filter['dealer_id'];
                     }
                 }
+            } else {
+                $dealerIds[] = $params['dealer_id'];
             }
 
             $params['dealer_ids'] = $dealerIds;
@@ -120,9 +125,16 @@ class DealerLocationService implements DealerLocationServiceInterface
 
             $salesTaxItemColumnTitles = $this->encodeTaxColumnTitles($params['sales_tax_item_column_titles'] ?? []);
 
-            $location = $this->locationRepo->create(
-                $params + ['sales_tax_item_column_titles' => $salesTaxItemColumnTitles, 'dealer_id' => $dealerId]
-            );
+            $locationParams = $params + [
+                'sales_tax_item_column_titles' => $salesTaxItemColumnTitles,
+                'dealer_id' => $dealerId,
+            ];
+
+            if (empty($params['location_id'])) {
+                $locationParams['location_id'] = '';
+            }
+
+            $location = $this->locationRepo->create($locationParams);
 
             $locationRelDefinition = ['dealer_location_id' => $location->dealer_location_id];
 

@@ -2,12 +2,15 @@
 
 namespace App\Rules\CRM\Email;
 
-use Illuminate\Contracts\Validation\Rule;
 use App\Models\CRM\Email\Template;
+use Illuminate\Contracts\Validation\Rule;
 
+/**
+ * Class TemplateExists
+ * @package App\Rules\CRM\Email
+ */
 class TemplateExists implements Rule
 {
-
     /**
      * Determine if the validation rule passes.
      *
@@ -17,7 +20,9 @@ class TemplateExists implements Rule
      */
     public function passes($attribute, $value): bool
     {
-        return Template::where('id', $value)->count() > 0;
+        $userId = app('request')->get('user_id');
+
+        return Template::query()->where('id', $value)->where('user_id', $userId)->exists();
     }
 
     /**

@@ -2,14 +2,42 @@
 
 namespace App\Models\Inventory\Manufacturers;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 class Manufacturers extends Model
 {
+    use TableAware;
+
+    /**
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
     protected $table = 'manufacturers';
 
-    protected $primaryKey = 'id';
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'logo',
+        'logo_highres',
+        'description',
+    ];
 
-    public $timestamps = false;
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'id';
 
 }

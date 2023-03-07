@@ -16,6 +16,9 @@ class ReportsControllerTest extends TestCase
 {
     /**
      * @covers ::monthly
+     *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
      */
     public function testMonthly()
     {
@@ -76,6 +79,9 @@ class ReportsControllerTest extends TestCase
 
     /**
      * @covers ::monthly
+     *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
      */
     public function testMonthlyWithoutAccessToken()
     {

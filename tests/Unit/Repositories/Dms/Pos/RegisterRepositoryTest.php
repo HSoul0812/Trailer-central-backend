@@ -9,6 +9,12 @@ use Tests\TestCase;
 
 class RegisterRepositoryTest extends TestCase
 {
+    /**
+     * @group DMS
+     * @group DMS_POS
+     *
+     * @return void
+     */
     public function testGetAllByDealerId()
     {
         $registers = [

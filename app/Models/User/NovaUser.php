@@ -10,9 +10,12 @@ use Laravel\Nova\Authorizable;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Notifications\Notifiable;
 
+use Spatie\Permission\Traits\HasRoles;
+
 class NovaUser extends User
 {
-    use Notifiable;
+    use HasRoles,
+        Notifiable;
 
     protected $table = 'users';
 

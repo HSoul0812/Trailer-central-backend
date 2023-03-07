@@ -13,16 +13,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $image_id,
  * @property int $inventory_id,
  * @property bool $is_default,
- * @property bool $is_secondary,
+ * @property int $is_secondary,
  * @property int $position,
  * @property string $showroom_image,
  * @property bool $was_manually_added,
  * @property bool $is_stock,
  *
  * @property Image $image
+ * @property Inventory $inventory
  */
-class InventoryImage extends Model {
+class InventoryImage extends Model
+{
     use TableAware;
+
+    /** @var int to make the sorting consistent across ES worker, Legacy API and New API */
+    public const LAST_IMAGE_POSITION = 100;
+
+    /** @var int to make the sorting consistent across ES worker, Legacy API and New API */
+    public const FIRST_IMAGE_POSITION = -1;
 
     /**
      * The table associated with the model.
@@ -50,5 +58,20 @@ class InventoryImage extends Model {
     public function image(): BelongsTo
     {
         return $this->belongsTo(Image::class, 'image_id', 'image_id');
+    }
+
+    public function inventory(): BelongsTo
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
+    }
+
+    public function isDefault(): bool
+    {
+        return (bool)$this->is_default;
+    }
+
+    public function isSecondary(): bool
+    {
+        return (bool)$this->is_secondary;
     }
 }

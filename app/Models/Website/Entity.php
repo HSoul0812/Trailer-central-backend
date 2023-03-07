@@ -31,7 +31,8 @@ class Entity extends Model {
         'is_active',
         'deleted',
         'meta_description',
-        'meta_keywords'
+        'meta_keywords',
+        'entity_config'
     ];
 
     public function website()

@@ -184,12 +184,14 @@ return [
          * Package Service Providers...
          */
         Laravel\Cashier\CashierServiceProvider::class,
+        Lunaweb\RedisMock\Providers\RedisMockServiceProvider::class,
 
         /*
          * Application Service Providers...
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
+        App\Providers\BusServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\HorizonServiceProvider::class,
@@ -210,6 +212,10 @@ return [
         App\Providers\MarketingServiceProvider::class,
         App\Providers\EcommerceProvider::class,
         App\Providers\FavoritesExportServiceProvider::class,
+        App\Providers\SubscriptionServiceProvider::class,
+        App\Providers\StripeServiceProvider::class,
+        App\Providers\ElasticScoutProvider::class,
+        App\Providers\SpatialServiceProvider::class,
         /*
          * 3rd party stuff
          */
@@ -218,11 +224,10 @@ return [
         \Dingo\Api\Provider\LaravelServiceProvider::class,
         Spatie\Sitemap\SitemapServiceProvider::class,
         ElasticClient\ServiceProvider::class,
-        ElasticScoutDriver\ServiceProvider::class,
         ElasticScoutDriverPlus\ServiceProvider::class,
         ElasticMigrations\ServiceProvider::class,
-        App\Providers\SpatialServiceProvider::class,
         Barryvdh\Snappy\ServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
 
         /*
          * Nova stuff

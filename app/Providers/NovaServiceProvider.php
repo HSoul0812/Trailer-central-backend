@@ -2,13 +2,15 @@
 
 namespace App\Providers;
 
+use App\Nova\Resources\Dealer\Dealer;
 use Feed\EditMapping\EditMapping;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
 use Showroom\BulkConfiguration\BulkConfiguration;
-use App\Nova\Resources\Dealer\Dealer;
+
+use Anaseqal\NovaImport\NovaImport;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
@@ -61,7 +63,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     protected function cards()
     {
         return [
-            new Help,
+            new Help(),
         ];
     }
 
@@ -83,7 +85,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function tools()
     {
         return [
-            new BulkConfiguration(),
+            new NovaImport(),
+            (new BulkConfiguration())->canSee(function ($request) {
+                return $request->user()->hasAnyRole('Admin', 'Support');
+            }),
             new EditMapping()
         ];
     }
@@ -95,7 +100,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      */
     public function register()
     {
-        //
+        Nova::sortResourcesBy(function ($resource) {
+            return $resource::$priority ?? 99999;
+        });
     }
 
     protected function resources()

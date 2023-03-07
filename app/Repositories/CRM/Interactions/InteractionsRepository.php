@@ -54,10 +54,12 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     }
     
     public function create($params) {
-        // Get User ID
-        $lead = Lead::findOrFail($params['lead_id']);
-        $params['tc_lead_id'] = $lead->identifier;
-        $params['user_id'] = $lead->newDealerUser->user_id;
+        if (!empty($params['lead_id'])) {
+            // Get User ID
+            $lead = Lead::findOrFail($params['lead_id']);
+            $params['tc_lead_id'] = $lead->identifier;
+            $params['user_id'] = $lead->newDealerUser->user_id;
+        }
 
         // Create Interaction
         return Interaction::create($params);
@@ -151,6 +153,16 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     }
 
     /**
+     * @param array $data Data to replace
+     * @param array $where Condition
+     * @return int Total data affected
+     */
+    public function batchUpdate(array $data, array $where) {
+        
+        return Interaction::where($where)->update($data);
+    }
+
+    /**
      * Create or Update Interaction
      * 
      * @param array $params
@@ -195,6 +207,9 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $query->where(Interaction::getTableName(). ".is_closed", 0);
         $query->where(Lead::getTableName(). ".is_archived", 0);
         
+        if(empty($sort)) {
+            $sort = '-created_at';
+        }
         $query = $this->addSortQuery($query, $sort);
 
         return $query->paginate($perPage)->appends(['per_page' => $perPage]);       
@@ -217,6 +232,9 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $query->where(Interaction::getTableName(). ".is_closed", 0);
         $query->where(Lead::getTableName(). ".is_archived", 0);
 
+        if(empty($sort)) {
+            $sort = '-created_at';
+        }
         $query = $this->addSortQuery($query, $sort);
         
         return $query->paginate($perPage)->appends(['per_page' => $perPage]);  
@@ -261,5 +279,16 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
 
         // Initialize TextLog Query
         return $query->union($textLog);
+    }
+
+    public function getInteractionByTime(int $leadId, string $interactionTime)
+    {
+        $query = Interaction::select('*');
+
+        $query->where('tc_lead_id', $leadId);
+        $query->where('interaction_time', $interactionTime);
+        $query->orderBy('interaction_id', 'DESC');
+
+        return $query->first() ?? [];
     }
 }

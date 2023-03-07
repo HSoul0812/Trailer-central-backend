@@ -5,17 +5,24 @@ namespace App\Http\Controllers\v1\Inventory;
 use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\Inventory\MassUpdateInventoryRequest;
 use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\ExistsInventoryRequest;
 use App\Http\Requests\Inventory\ExportInventoryRequest;
+use App\Http\Requests\Inventory\FindByStockRequest;
 use App\Http\Requests\Inventory\GetAllInventoryTitlesRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Http\Requests\Inventory\GetInventoryItemRequest;
+use App\Http\Requests\Inventory\SearchInventoryRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
+use App\Models\Inventory\Inventory;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
+use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Transformers\Inventory\InventoryElasticSearchOutputTransformer;
 use App\Transformers\Inventory\SaveInventoryTransformer;
 use App\Transformers\Inventory\InventoryHistoryTransformer;
 use Dingo\Api\Exception\ResourceException;
@@ -26,6 +33,7 @@ use Dingo\Api\Http\Response;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Services\ElasticSearch\Inventory\InventoryServiceInterface as InventoryElasticSearchServiceInterface;
 
 /**
  * Class InventoryController
@@ -49,32 +57,55 @@ class InventoryController extends RestfulControllerV2
     protected $inventoryHistoryRepository;
 
     /**
+     * @var InventoryElasticSearchServiceInterface
+     */
+    protected $inventoryElasticSearchService;
+
+    /**
+     * @var ResponseCacheKeyInterface
+     */
+    protected $responseCacheKey;
+
+    /**
+     * @var InventoryResponseCacheInterface
+     */
+    public $inventoryResponseCache;
+
+    /**
      * Create a new controller instance.
      *
-     * @param  InventoryServiceInterface  $inventoryService
-     * @param  InventoryRepositoryInterface  $inventoryRepository
-     * @param  InventoryHistoryRepositoryInterface  $inventoryHistoryRepository
+     * @param InventoryServiceInterface $inventoryService
+     * @param InventoryRepositoryInterface $inventoryRepository
+     * @param InventoryHistoryRepositoryInterface $inventoryHistoryRepository
+     * @param InventoryElasticSearchServiceInterface $inventoryElasticSearchService
+     * @param InventoryResponseCacheInterface $inventoryResponseCache
+     * @param ResponseCacheKeyInterface $responseCacheKey
      */
     public function __construct(
-        InventoryServiceInterface $inventoryService,
-        InventoryRepositoryInterface $inventoryRepository,
-        InventoryHistoryRepositoryInterface $inventoryHistoryRepository
+        InventoryServiceInterface              $inventoryService,
+        InventoryRepositoryInterface           $inventoryRepository,
+        InventoryHistoryRepositoryInterface    $inventoryHistoryRepository,
+        InventoryElasticSearchServiceInterface $inventoryElasticSearchService,
+        InventoryResponseCacheInterface        $inventoryResponseCache,
+        ResponseCacheKeyInterface              $responseCacheKey
     )
     {
         $this->middleware('setDealerIdOnRequest')
-            ->only(['index', 'create', 'update', 'destroy', 'exists', 'getAllTitles']);
+            ->only(['index', 'create', 'update', 'destroy', 'exists', 'getAllTitles', 'findByStock', 'massUpdate']);
         $this->middleware('inventory.create.permission')->only(['create', 'update']);
 
         $this->inventoryService = $inventoryService;
         $this->inventoryRepository = $inventoryRepository;
         $this->inventoryHistoryRepository = $inventoryHistoryRepository;
+        $this->inventoryElasticSearchService = $inventoryElasticSearchService;
+        $this->responseCacheKey = $responseCacheKey;
+        $this->inventoryResponseCache = $inventoryResponseCache;
     }
 
     /**
      * @OA\Get(
      *     path="/api/inventory",
      *     description="Retrieve a list of inventory",
-
      *     tags={"Inventory"},
      *     @OA\Parameter(
      *         name="per_page",
@@ -206,7 +237,16 @@ class InventoryController extends RestfulControllerV2
 
         $data = $this->inventoryRepository->getAndIncrementTimesViewed($request->all());
 
-        return $this->itemResponse($data, new InventoryTransformer());
+        $response = $this->itemResponse($data, new InventoryTransformer());
+
+        if (Inventory::isCacheEnabledByFeatureFlag()) {
+            $this->inventoryResponseCache->set(
+                $this->responseCacheKey->single($data->inventory_id, $data->dealer_id),
+                $response->morph('json')->getContent()
+            );
+        }
+
+        return $response;
     }
 
     /**
@@ -252,6 +292,23 @@ class InventoryController extends RestfulControllerV2
         }
 
         return $this->updatedResponse($inventory->inventory_id);
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function massUpdate(Request $request): Response
+    {
+        $bulkRequest = new MassUpdateInventoryRequest($request->all());
+
+        if (!$bulkRequest->validate() || !$this->inventoryService->massUpdate($bulkRequest->all())) {
+            return $this->response->errorBadRequest();
+        }
+
+        return $this->updatedResponse();
     }
 
     /**
@@ -345,7 +402,7 @@ class InventoryController extends RestfulControllerV2
      *     ),
      * )
      *
-     * @param  int $inventoryId
+     * @param int $inventoryId
      * @param Request $request
      * @return Response
      *
@@ -375,7 +432,7 @@ class InventoryController extends RestfulControllerV2
      * @param Request $request
      * @return Response
      */
-    public function deliveryPrice(int $inventoryId, Request $request):Response
+    public function deliveryPrice(int $inventoryId, Request $request): Response
     {
         $toZipcode = $request->input('tozip');
         return $this->response->array([
@@ -390,7 +447,6 @@ class InventoryController extends RestfulControllerV2
      * @OA\Get(
      *     path="/api/inventory/get_all_titles",
      *     description="Retrieve a list of inventory without defaults",
-
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of inventory titles",
@@ -456,5 +512,67 @@ class InventoryController extends RestfulControllerV2
                 'url' => $this->inventoryService->export($inventoryExportRequest->get('inventory_id'), $inventoryExportRequest->get('format'))
             ]
         ]);
+    }
+
+    /**
+     * @param Request $request
+     * @return Response|void
+     *
+     * @throws ResourceException when there were some validation error
+     */
+    public function search(Request $request): Response
+    {
+        $searchRequest = new SearchInventoryRequest($request->all());
+
+        if ($searchRequest->validate()) {
+
+            $result = $this->inventoryElasticSearchService->search(
+                $searchRequest->dealerIds(),
+                $searchRequest->terms(),
+                $searchRequest->geolocation(),
+                $searchRequest->sort(),
+                $searchRequest->pagination(),
+                $searchRequest->getESQuery()
+            );
+
+            $response = $this->response
+                ->collection($result->hints, new InventoryElasticSearchOutputTransformer())
+                ->addMeta('aggregations', $result->aggregations)
+                ->addMeta('total', $result->total);
+            if ($searchRequest->getESQuery()) {
+                $response->addMeta('x_qa_req', $result->getEncodedESQuery());
+            }
+
+            //Cache only if there are results
+            // @todo we need to find a way to setup cache even in search with zero results
+            if (Inventory::isCacheEnabledByFeatureFlag() && $result->hints->count()) {
+                $this->inventoryResponseCache->set(
+                    $this->responseCacheKey->collection($searchRequest->requestId(), $result),
+                    $response->morph('json')->getContent()
+                );
+            }
+
+            return $response;
+        }
+
+        $this->response->errorBadRequest();
+    }
+
+    /**
+     * @throws NoObjectTypeSetException
+     * @throws NoObjectIdValueSetException
+     */
+    public function findByStock(string $stock, Request $request)
+    {
+        $findByStockRequest = new FindByStockRequest($request->all() + ['stock' => $stock]);
+
+        $findByStockRequest->validate();
+
+        $data = $this->inventoryRepository->findByStock(
+            $findByStockRequest->input('dealer_id'),
+            $stock
+        );
+
+        return $this->itemResponse($data, new InventoryTransformer());
     }
 }

@@ -23,6 +23,12 @@ class QuoteFeatureTest extends TestCase
     // use a known sample ID from the database with valid values
     protected $dealerId = 1001;
 
+    /**
+     * @group DMS
+     * @group DMS_QUOTE
+     *
+     * @return void
+     */
     public function testListHttpOk()
     {
         $response = $this
@@ -32,6 +38,12 @@ class QuoteFeatureTest extends TestCase
         $response->assertStatus(200);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_QUOTE
+     *
+     * @return void
+     */
     public function testBulkUpdateMissingAccessToken()
     {
         $response = $this
@@ -40,6 +52,12 @@ class QuoteFeatureTest extends TestCase
         $response->assertStatus(403);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_QUOTE
+     *
+     * @return void
+     */
     public function testBulkUpdateMissingRequiredData()
     {
         $this
@@ -51,6 +69,12 @@ class QuoteFeatureTest extends TestCase
             );
     }
 
+    /**
+     * @group DMS
+     * @group DMS_QUOTE
+     *
+     * @return void
+     */
     public function testBulkUpdateInvalidDataType()
     {
         $this
@@ -73,6 +97,12 @@ class QuoteFeatureTest extends TestCase
         ]);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_QUOTE
+     *
+     * @return void
+     */
     public function testBulkUpdateValidData()
     {
         $quote = $this->makeQuotes();

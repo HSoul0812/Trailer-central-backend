@@ -4,6 +4,7 @@ namespace App\Models\Website;
 
 use App\Models\Traits\TableAware;
 use App\Models\Website\Config\WebsiteConfig;
+use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Website\Blog\Post;
 use App\Models\User\User;
@@ -82,12 +83,28 @@ class Website extends Model
       }
     }
 
+    /**
+     * Get the value for a specific type config
+     * @param string $filter
+     * @return mixed
+     */
+    public function getFilterValue(string $filter){
+        $serializedData = $this->getOriginal('type_config');
+        if (strpos($serializedData, ':') !== 0) {
+            $filters = unserialize($serializedData, ['allowed_classes' => true]);
+            if (isset($filters[$filter])) {
+                return $filters[$filter];
+            }
+        }
+        return null;
+    }
+
     public function unserializeDealerFilter(array $dealer_ids): string
     {
         $printData = '';
 
         foreach ($dealer_ids as $dealer_id) {
-            $printData = 'dealer_id|eq|' . $dealer_id . PHP_EOL;
+            $printData .= 'dealer_id|eq|' . $dealer_id . PHP_EOL;
         }
 
         return $printData;
@@ -192,5 +209,16 @@ class Website extends Model
     public function websiteConfigByKey(string $key)
     {
         return $this->websiteConfigs()->where('key', $key)->take(1)->value('value');
+    }
+
+
+    /**
+     * Get website shorten identifier
+     *
+     * @return false|string
+     */
+    public function getIdentifierAttribute()
+    {
+        return CompactHelper::shorten($this->id);
     }
 }

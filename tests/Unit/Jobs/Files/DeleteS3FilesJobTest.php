@@ -3,8 +3,10 @@
 namespace Tests\Unit\Jobs\Files;
 
 use App\Jobs\Files\DeleteS3FilesJob;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Str;
 use Tests\TestCase;
 
 /**
@@ -19,6 +21,9 @@ class DeleteS3FilesJobTest extends TestCase
 {
     /**
      * @covers ::handle
+     *
+     * @group DMS
+     * @group DMS_FILES
      */
     public function testHandle()
     {
@@ -43,18 +48,34 @@ class DeleteS3FilesJobTest extends TestCase
 
     /**
      * @covers ::handle
+     *
+     * @group DMS
+     * @group DMS_FILES
      */
     public function testHandleWithException()
     {
-        $files = [new \stdClass()];
+        $files = [ Str::random() . '.txt' ];
         $deleteS3FilesJob = new DeleteS3FilesJob($files);
 
-        Storage::fake('s3');
+        $storage = Storage::fake('s3');
+
+        Storage::shouldReceive('disk')
+            ->with('s3')
+            ->andReturn($storage)
+            ->shouldReceive('delete')
+            ->andThrow(new Exception('File does not exists.'));
+
+        Log::shouldReceive('error')
+            ->andReturn()
+            ->shouldReceive('info')
+            ->andReturn();
 
         $deleteS3FilesJob->handle();
 
-        Log::shouldReceive('error');
-
-        Storage::fake('s3');
+        // If the code gets to this point, it means that all the mocked
+        // expectations are passed, we want PHPUnit to do an assertion here,
+        // so it doesn't show the R result in the test output
+        // R means there is no assertion in this test case
+        $this->assertTrue(true);
     }
 }

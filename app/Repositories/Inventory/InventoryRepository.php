@@ -16,12 +16,19 @@ use App\Models\Inventory\InventoryImage;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Traits\Repository\Transaction;
 use App\Repositories\Traits\SortTrait;
+use Dingo\Api\Exception\ResourceException;
+use Grimzy\LaravelMysqlSpatial\Types\Point;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Grimzy\LaravelMysqlSpatial\Eloquent\Builder as GrimzyBuilder;
+use Illuminate\Support\Arr;
+use Illuminate\Support\LazyCollection;
+use App\Models\User\User;
+use App\Models\User\DealerLocation;
 
 /**
  * Class InventoryRepository
@@ -192,6 +199,12 @@ class InventoryRepository implements InventoryRepositoryInterface
         $inventoryImageObjs = $this->createImages($params['new_images'] ?? []);
         $inventoryFilesObjs = $this->createFiles($params['new_files'] ?? []);
 
+        // Set Geolocation if Not Exists
+        if(empty($params['geolocation'])) {
+            $params['geolocation'] = DB::raw('POINT(0, 0)');
+        }
+
+        // Unset Unneeded Params
         unset($params['attributes']);
         unset($params['features']);
         unset($params['new_images']);
@@ -204,6 +217,14 @@ class InventoryRepository implements InventoryRepositoryInterface
         // so the cronjob can create the add bill approval record and also the
         // bill category record, allowing the dealer to update the bill later on
         $item->send_to_quickbooks = !empty($item->bill_id);
+
+        // when the geolocation is not setup as Point, it will use a default Point
+        if (empty($params['geolocation']) || !($params['geolocation'] instanceof Point)) {
+            // Try to get the geolocation point class from the existing method and use it here
+            $geolocation = $item->geolocationPoint();
+
+            $item->geolocation = new Point($geolocation->latitude, $geolocation->longitude);
+        }
 
         $item->save();
 
@@ -256,6 +277,13 @@ class InventoryRepository implements InventoryRepositoryInterface
         // We'll note down this variable for now, we need this information, so we know
         // if we need to delete the bill approval record
         $firstTimeAttachBill = empty($item->bill_id) && !empty(data_get($params, 'bill_id'));
+
+        $hasFloorplanInfo = !empty(data_get($params, 'true_cost'))
+            && !empty(data_get($params, 'fp_vendor'))
+            && !empty(data_get($params, 'fp_balance'));
+
+        // We also note this down for now, we'll use it later
+        $firstTimeAttachFloorplan = empty($item->is_floorplan_bill) && $hasFloorplanInfo;
 
         $inventoryImageObjs = $this->createImages($params['new_images'] ?? []);
 
@@ -328,15 +356,42 @@ class InventoryRepository implements InventoryRepositoryInterface
         // bill category record, allowing the dealer to update the bill later on
         $item->send_to_quickbooks = !empty($item->bill_id);
 
+        // when the geolocation is not setup as Point, it will use a Point which is build
+        // either from inventory coordinates or dealer location coordinates as fallback
+        if (empty($params['geolocation']) || !($params['geolocation'] instanceof Point)) {
+            // Try to get the geolocation point class from the existing method and use it here
+            $geolocation = $item->geolocationPoint();
+
+            $item->geolocation = new Point($geolocation->latitude, $geolocation->longitude);
+        }
+
         $item->save();
 
         // We only want to delete the bill approval record if this is the
         // first time that we attach the bill to this inventory
-        $this->handleFloorplanAndBill($item, $firstTimeAttachBill);
+        $this->handleFloorplanAndBill($item, $firstTimeAttachBill || $firstTimeAttachFloorplan);
 
         $this->updateQbInvoiceItems($item);
 
         return $item;
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function massUpdate(array $params): bool
+    {
+        if (!isset($params['dealer_id'])) {
+            throw new RepositoryInvalidArgumentException('dealer_id has been missed. Params - ' . json_encode($params));
+        }
+
+        $dealerId = $params['dealer_id'];
+        unset($params['dealer_id']);
+
+        Inventory::query()->where('dealer_id', $dealerId)->update($params);
+
+        return true;
     }
 
     /**
@@ -389,6 +444,10 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query->where('dealer_id', $params['dealer_id']);
         }
 
+        if (isset($params['vin'])) {
+            $query->where('vin', $params['vin']);
+        }
+
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query->where($params[self::CONDITION_AND_WHERE]);
         }
@@ -401,6 +460,10 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         if (in_array('features', $include)) {
             $query = $query->with('inventoryFeatures.featureList');
+        }
+
+        if (in_array('activeListings', $include)) {
+            $query = $query->with('activeListings');
         }
 
         return $query->firstOrFail();
@@ -467,15 +530,52 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @param bool $paginated
      * @return Collection|LengthAwarePaginator
      */
-    public function getAll($params, bool $withDefault = true, bool $paginated = false)
+    public function getAll($params, bool $withDefault = true, bool $paginated = false, $select = ['inventory.*'])
     {
         if ($paginated) {
             return $this->getPaginatedResults($params, $withDefault);
         }
 
-        $query = $this->buildInventoryQuery($params, $withDefault);
+        $query = $this->buildInventoryQuery($params, $withDefault, $select);
 
         return $query->get();
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @param array $newImages
+     * @return array
+     */
+    public function createInventoryImages(Inventory $inventory, array $newImages): array
+    {
+        $inventoryImageObjs = $this->createImages($newImages);
+        $inventory->inventoryImages()->saveMany($inventoryImageObjs);
+
+        return $inventoryImageObjs;
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @param array $newFiles
+     * @return array
+     */
+    public function createInventoryFiles(Inventory $inventory, array $newFiles): array
+    {
+        $inventoryFileObjs = $this->createFiles($newFiles);
+        $inventory->inventoryFiles()->saveMany($inventoryFileObjs);
+
+        return $inventoryFileObjs;
+    }
+
+    /**
+     * Gets the query cursor to avoid memory leaks
+     *
+     * @param array $params
+     * @return LazyCollection
+     */
+    public function getAllAsCursor(array $params): LazyCollection
+    {
+        return $this->buildInventoryQuery($params)->cursor();
     }
 
     /**
@@ -506,10 +606,38 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
-     * @param $params
-     * @return Collection
+     * Gets the query cursor to avoid memory leaks
+     *
+     * @param array $params
+     * @return LazyCollection
      */
-    public function getFloorplannedInventory($params)
+    public function getFloorplannedInventoryAsCursor(array $params): LazyCollection
+    {
+        return $this->getFloorplannedQuery($params)->cursor();
+    }
+
+    /**
+     * @param $params
+     * @return Collection|\Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getFloorplannedInventory($params, $paginate = true)
+    {
+        if ($paginate && !isset($params['per_page'])) {
+            $params['per_page'] = 15;
+        } else if (!$paginate && isset($params['per_page'])) {
+            unset($params['per_page']);
+        }
+
+        $query = $this->getFloorplannedQuery($params);
+
+        if ($paginate) {
+            return $query->paginate($params['per_page'])->appends($params);
+        }
+
+        return $query->get();
+    }
+
+    private function getFloorplannedQuery(array $params): GrimzyBuilder
     {
         $query = Inventory::select('*');
 
@@ -525,10 +653,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
 
-        if (!isset($params['per_page'])) {
-            $params['per_page'] = 15;
-        }
-
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
@@ -538,8 +662,8 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['search_term'])) {
-            if(preg_match(self::DIMENSION_SEARCH_TERM_PATTERN, $params['search_term'])){
-                $params['search_term'] = floatval(trim($params['search_term'],' \'"'));
+            if (preg_match(self::DIMENSION_SEARCH_TERM_PATTERN, $params['search_term'])) {
+                $params['search_term'] = floatval(trim($params['search_term'], ' \'"'));
                 $query = $query->where(function ($q) use ($params) {
                     $q->where('length', $params['search_term'])
                         ->orWhere('width', $params['search_term'])
@@ -548,10 +672,19 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->orWhere('width_inches', $params['search_term'])
                         ->orWhere('height_inches', $params['search_term']);
                 });
-            }else {
+            } else {
+                /**
+                 * This converts strings like 4 Star Trailers to 4%Star%Trailers
+                 * so it matches inventories with all words included in the search query
+                 * with this, inventories with titles like `2023 4-Star Trailers dd BBQ Trailer`
+                 * can be found with `Star BBQ Trailer` because Star%BBQ%Trailer would match.
+                 */
+                $params['search_term'] = preg_replace('/\s+/', '%', $params['search_term']);
+
                 $query = $query->where(function ($q) use ($params) {
                     $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('manufacturer', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhereHas('floorplanVendor', function ($query) use ($params) {
@@ -570,7 +703,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             }
         }
 
-        return $query->paginate($params['per_page'])->appends($params);
+        return $query;
     }
 
     /**
@@ -605,11 +738,22 @@ class InventoryRepository implements InventoryRepositoryInterface
     ) : GrimzyBuilder {
         /** @var Builder $query */
         $query = Inventory::query()
-            ->select($select)
-            ->where('inventory.inventory_id', '>', 0);
+            ->select($select);
+
+        if (isset($params['dealer_id'])) {
+            // having this applied filter here will make faster the query
+            $query = $query->where('inventory.dealer_id', $params['dealer_id']);
+        }
+
+        $query = $query->where('inventory.inventory_id', '>', 0);
 
         if (isset($params['include']) && is_string($params['include'])) {
             $query = $query->with(explode(',', $params['include']));
+        }
+
+        if (isset($params['is_archived'])) {
+            $withDefault = false;
+            $query = $query->where('inventory.is_archived', $params['is_archived']);
         }
 
         $attributesEmpty = true;
@@ -637,23 +781,28 @@ class InventoryRepository implements InventoryRepositoryInterface
             });
         }
 
-        if ($withDefault) {
-            $query = $query->where(function ($q) {
-                $q->where('status', '<>', Inventory::STATUS_QUOTE)
-                   ->orWhere('status', '=', Inventory::STATUS_NULL);
-            });
-        }
-
         if (isset($params['status'])) {
             $query = $query->where('status', $params['status']);
         }
 
-        if (isset($params['condition'])) {
-            $query = $query->where('condition', $params['condition']);
+        if (!empty($params['exclude_status_ids'])) {
+            $query->where(function (EloquentBuilder $query) use ($params) {
+                $query
+                    ->whereNotIn('status', Arr::wrap($params['exclude_status_ids']))
+                    ->orWhereNull('status');
+            });
+        } else {
+            // By default, we don't want to fetch the quote inventory
+            // however, we'll keep fetching the inventory with status = null
+            $query->where(function (EloquentBuilder $query) {
+                $query
+                    ->where('status', '!=', Inventory::STATUS_QUOTE)
+                    ->orWhereNull('status');
+            });
         }
 
-        if (isset($params['dealer_id'])) {
-            $query = $query->where('inventory.dealer_id', $params['dealer_id']);
+        if (isset($params['condition'])) {
+            $query = $query->where('condition', $params['condition']);
         }
 
         if (isset($params['dealer_location_id'])) {
@@ -670,11 +819,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             } else if ($params['units_with_true_cost'] == self::DO_NOT_SHOW_UNITS_WITH_TRUE_COST) {
                 $query = $query->where('true_cost', 0);
             }
-        }
-
-        if (isset($params['is_archived'])) {
-            $withDefault = false;
-            $query = $query->where('inventory.is_archived', $params['is_archived']);
         }
 
         if ($withDefault) {
@@ -715,9 +859,18 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->orWhere('height_inches', $params['search_term']);
                 });
             }else{
+                /**
+                 * This converts strings like 4 Star Trailers to 4%Star%Trailers
+                 * so it matches inventories with all words included in the search query
+                 * with this, inventories with titles like `2023 4-Star Trailers dd BBQ Trailer`
+                 * can be found with `Star BBQ Trailer` because Star%BBQ%Trailer would match.
+                 */
+                $params['search_term'] = preg_replace('/\s+/', '%', $params['search_term']);
+
                 $query = $query->where(function ($q) use ($params) {
                     $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('manufacturer', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('price', 'LIKE', '%' . $params['search_term'] . '%')
@@ -734,7 +887,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         } elseif (isset($params['images_less_than'])) {
             $query->havingRaw('image_count <= '. $params['images_less_than']);
         } else {
-            $query->select(['inventory.*']);
+            $query->select($select);
         }
 
         if (isset($params['sort'])) {
@@ -750,6 +903,10 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->leftJoin('inventory_image', 'inventory_image.inventory_id', '=', 'inventory.inventory_id');
             $query->selectRaw('count(inventory_image.inventory_id) as image_count');
             $query->groupBy('inventory.inventory_id');
+        }
+
+        if (isset($params['is_publishable_classified'])) {
+            $query = $query->where('show_on_website', $params['is_publishable_classified']);
         }
 
         return $query;
@@ -791,6 +948,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         $inventoryImageObjs = [];
 
         foreach ($newImages as $newImage) {
+            if(empty($newImage['filename'])) {
+                throw new ResourceException("Validation Failed", 'Filename cant be blank');
+            }
             $imageObj = new Image($newImage);
             $imageObj->save();
 
@@ -921,7 +1081,9 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         $inventory = $this->get($params);
         $inventory->times_viewed += 1;
-        $inventory->save();
+        $inventory->timestamps = false;
+        //we need to disable the events so the observer method doesn't trigger
+        $inventory->saveQuietly();
         return $inventory;
     }
 
@@ -961,8 +1123,10 @@ class InventoryRepository implements InventoryRepositoryInterface
         // approval record if the inventory has the bill attached to it
         // 2. In the update inventory case, we only want to delete the bill
         // approval record if the inventory has the bill attached for the first time
+        // we do this because more than one inventory can use the same bill, if we don't do this
+        // then the cronjob won't create a new bill approval record
         if ($deleteBillApproval) {
-            resolve(QuickbookApprovalRepositoryInterface::class)->deleteByTbPrimaryId($inventory->bill_id, Bill::getTableName());
+            resolve(QuickbookApprovalRepositoryInterface::class)->deleteByTbPrimaryId($inventory->bill_id, Bill::getTableName(), $inventory->dealer_id);
         }
 
         // We only want to process floorplan data if the inventory
@@ -994,5 +1158,59 @@ class InventoryRepository implements InventoryRepositoryInterface
         $inventory->bill()->update([
             'status' => Bill::STATUS_PAID,
         ]);
+    }
+
+
+    /**
+     * @param int $dealerId
+     * @param array $params
+     * @return int
+     */
+    public function archiveInventory(int $dealerId, array $inventoryParams): int {
+        return Inventory::where('dealer_id', $dealerId)->update($inventoryParams);
+    }
+
+    /**
+     * Find the inventory by stock
+     *
+     * @param int $dealerId
+     * @param string $stock
+     * @return Inventory|null
+     */
+    public function findByStock(int $dealerId, string $stock): ?Inventory
+    {
+        return Inventory::where('dealer_id', $dealerId)->where('stock', $stock)->first();
+    }
+
+    /**
+     * Get necessary parameters to generate overlays
+     *
+     * @param int $inventoryId
+     * @return array
+     */
+    public function getOverlayParams(int $inventoryId)
+    {
+        $query = Inventory::select(User::getTableName() .'.dealer_id', 'inventory_id', 'overlay_logo', 'overlay_logo_position', 'overlay_logo_width', 'overlay_logo_height',
+            'overlay_upper', 'overlay_upper_bg', 'overlay_upper_alpha', 'overlay_upper_text', 'overlay_upper_size', 'overlay_upper_margin',
+            'overlay_lower', 'overlay_lower_bg', 'overlay_lower_alpha', 'overlay_lower_text', 'overlay_lower_size', 'overlay_lower_margin',
+            'overlay_default', Inventory::getTableName() .'.overlay_enabled', User::getTableName() .'.overlay_enabled AS dealer_overlay_enabled',
+            User::getTableName() .'.name AS overlay_text_dealer', DealerLocation::getTableName() .'.phone AS overlay_text_phone',
+            \DB::raw("CONCAT(".DealerLocation::getTableName() .".city, ', ',".DealerLocation::getTableName() .".region) AS overlay_text_location"))
+        ->leftJoin(User::getTableName(), Inventory::getTableName() .'.dealer_id', '=', User::getTableName() .'.dealer_id')
+        ->leftJoin(DealerLocation::getTableName(), Inventory::getTableName() .'.dealer_location_id', '=', DealerLocation::getTableName() .'.dealer_location_id')
+        ->where(Inventory::getTableName() .'.inventory_id', $inventoryId);
+
+        return $query->first()->toArray();
+    }
+
+    /**
+     * @param int $inventoryId
+     * @return Collection
+     */
+    public function getInventoryImages(int $inventoryId)
+    {
+        $inventory = $this->get(['id' => $inventoryId]);
+
+        return $inventory->inventoryImages()->get();
     }
 }

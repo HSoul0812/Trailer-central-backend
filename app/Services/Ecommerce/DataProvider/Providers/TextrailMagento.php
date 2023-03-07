@@ -22,6 +22,7 @@ class TextrailMagento implements DataProviderInterface,
     private const TEXTRAIL_CATEGORY_LIST_URL = 'rest/V1/categories/list/';
     private const TEXTRAIL_ATTRIBUTES_MANUFACTURER_URL = 'rest/V1/products/attributes/manufacturer/options/';
     private const TEXTRAIL_ATTRIBUTES_BRAND_NAME_URL = 'rest/V1/products/attributes/brand_name/options/';
+    private const TEXTRAIL_ATTRIBUTES_GENERIC_URL = 'rest/V1/products/attributes/';
     private const TEXTRAIL_ATTRIBUTES_MEDIA_URL = 'media/catalog/product';
     private const TEXTRAIL_ATTRIBUTES_PLACEHOLDER_URL = 'placeholder/default/TexTrail-LogoVertical_4_3.png';
     private const TEXTRAIL_DUMP_STOCK_URL = 'rest/:view/V1/inventory/dump-stock-index-data/website/trailer_central_t1';
@@ -55,6 +56,8 @@ class TextrailMagento implements DataProviderInterface,
 
     /** @var array */
     private $parentMemory = [];
+
+    private $partAttributes = [];
 
     public function __construct()
     {
@@ -388,24 +391,36 @@ class TextrailMagento implements DataProviderInterface,
           $brand_id = '';
           $images = [];
 
+          $customAttributes = [];
+
+          $isCustomAttribute = true;
           foreach ($item->custom_attributes as $custom_attribute) {
 
             if ($custom_attribute->attribute_code == 'short_description') {
               $description = $custom_attribute->value;
+                $isCustomAttribute = false;
             }
 
             if ($custom_attribute->attribute_code == 'category_ids' && !empty($custom_attribute->value[0])) {
               $category_id = $custom_attribute->value[0];
+                $isCustomAttribute = false;
             }
 
             if ($custom_attribute->attribute_code == 'manufacturer' && ($custom_attribute->value  > 0)) {
               $manufacturer_id = $custom_attribute->value;
+                $isCustomAttribute = false;
             }
 
             if ($custom_attribute->attribute_code == 'brand_name' && ($custom_attribute->value  > 0)) {
               $brand_id = $custom_attribute->value;
+                $isCustomAttribute = false;
             }
 
+            if ($isCustomAttribute) {
+                $customAttributes[$custom_attribute->attribute_code] = $custom_attribute->value;
+            }
+
+              $isCustomAttribute = true;
           }
 
           foreach ($item->media_gallery_entries as $img) {
@@ -423,7 +438,8 @@ class TextrailMagento implements DataProviderInterface,
             'manufacturer_id' =>  isset($manufacturer_id) ? $manufacturer_id : '',
             'brand_id' => $brand_id,
             'show_on_website' => 1,
-            'images' => $images
+            'images' => $images,
+            'custom_attributes' => $customAttributes
           ]);
           array_push($Allparts, $dtoTextrail);
         }
@@ -679,6 +695,16 @@ class TextrailMagento implements DataProviderInterface,
         }
 
         return $availableStocks;
+    }
+
+    public function getAttributes(): array
+    {
+        return json_decode($this->httpClient->get(self::TEXTRAIL_ATTRIBUTES_GENERIC_URL . '?searchCriteria[page_size]=1000&fields=items[attribute_code,default_frontend_label,is_visible_on_front,frontend_input,options],total_count&searchCriteria[currentPage]=1', ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
+    }
+
+    public function getAttribute(string $code): array
+    {
+        return json_decode($this->httpClient->get(self::TEXTRAIL_ATTRIBUTES_GENERIC_URL . $code, ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
     }
 
     public function getTextrailCategories(): array

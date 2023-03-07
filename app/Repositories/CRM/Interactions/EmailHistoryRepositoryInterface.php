@@ -18,9 +18,10 @@ interface EmailHistoryRepositoryInterface extends Repository {
      *
      * @param string $fromEmail
      * @param string $leadId
+     * @param int $quoteId
      * @return EmailHistory
      */
-    public function findEmailDraft($fromEmail, $leadId);
+    public function findEmailDraft($fromEmail, $leadId, $quoteId);
 
     /**
      * Create Email Attachments

@@ -12,6 +12,6 @@ $factory->define(QuickbookApprovalDeleted::class, function (Faker $faker, array 
         'dealer_id' => $dealer_id,
         'created_at' => new DateTime(),
         'removed_by' => $dealer_id,
-        'deleted_at' => $attributes['deleted_at']
+        'deleted_at' => $attributes['deleted_at'] ?? now()->subMinute()
     ];
 });

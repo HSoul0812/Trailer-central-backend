@@ -7,10 +7,10 @@ use App\Models\CRM\Dms\UnitSale;
 use App\Models\CRM\Dms\UnitSaleLabor;
 use Faker\Generator as Faker;
 
-$factory->define(UnitSaleLabor::class, function (Faker $faker) {
+$factory->define(UnitSaleLabor::class, function (Faker $faker, array $attributes = []) {
     return [
-        'unit_sale_id' => function () {
-            return factory(UnitSale::class)->create()->id;
+        'unit_sale_id' => $attributes['unit_sale_id'] ?? function () {
+            return factory(UnitSale::class)->create()->getKey();
         },
         'quantity' => 1,
         'unit_price' => 123.00,

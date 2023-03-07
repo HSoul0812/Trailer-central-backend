@@ -8,6 +8,12 @@ use Tests\TestCase;
 
 class SettingsRepositoryTest extends TestCase
 {
+    /**
+     * @group DMS
+     * @group DMS_SETTINGS
+     *
+     * @return void
+     */
     public function testGetByDealerIdReturnsDmsSettings()
     {
         /** @var SettingsRepository $repository */
@@ -17,6 +23,12 @@ class SettingsRepositoryTest extends TestCase
         $this->assertInstanceOf(Settings::class, $settings);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_SETTINGS
+     *
+     * @return void
+     */
     public function testGetByDealerIdReturnsCorrectDealerSetting()
     {
         /** @var SettingsRepository $repository */

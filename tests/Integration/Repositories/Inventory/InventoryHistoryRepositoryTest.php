@@ -24,6 +24,9 @@ class InventoryHistoryRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group DMS
+     * @group DMS_INVENTORY_HISTORY
+     *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      * @note IntegrationTestCase
      */
@@ -42,6 +45,9 @@ class InventoryHistoryRepositoryTest extends TestCase
      *
      * @param array $params  list of query parameters
      * @param int $expectedTotal
+     *
+     * @group DMS
+     * @group DMS_INVENTORY_HISTORY
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
@@ -73,6 +79,9 @@ class InventoryHistoryRepositoryTest extends TestCase
      * @param  int  $expectedTotal
      * @param  int  $expectedLastPage
      * @param  string|null  $expectedCustomerName
+     *
+     * @group DMS
+     * @group DMS_INVENTORY_HISTORY
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *

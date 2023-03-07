@@ -30,7 +30,7 @@ class QuickbookApprovalDeletedSeeder extends Seeder
 
     public function seed(): void
     {
-        $latestDeleted = QuickbookApprovalDeleted::orderBy('id', 'desc')->first();
+        $latestDeleted = factory(QuickbookApprovalDeleted::class)->create();
         $this->qbApprovalDeleted = factory(QuickbookApprovalDeleted::class)->create([
             'id' => $latestDeleted->id + 2,
             'dealer_id' => 1001,

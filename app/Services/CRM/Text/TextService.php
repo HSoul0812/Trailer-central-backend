@@ -151,9 +151,16 @@ class TextService implements TextServiceInterface
                 $this->numberRepository->delete(['id' => $activeNumber->id]);
             }
 
+            // If there was no status, or it was uncontacted, set to medium, otherwise, don't change.
+            if (empty($lead->leadStatus) || $lead->leadStatus->status === Lead::STATUS_UNCONTACTED) {
+                $status = Lead::STATUS_MEDIUM;
+            } else {
+                $status = $lead->leadStatus->status;
+            }
+
             $this->statusRepository->createOrUpdate([
                 'lead_id' => $lead->identifier,
-                'status' => Lead::STATUS_MEDIUM,
+                'status' => $status,
                 'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
             ]);
 

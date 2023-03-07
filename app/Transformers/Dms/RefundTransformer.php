@@ -19,6 +19,7 @@ class RefundTransformer extends TransformerAbstract
         'invoice',
         'receipt',
         'customer',
+        'unitSale',
     ];
 
     /**
@@ -78,10 +79,23 @@ class RefundTransformer extends TransformerAbstract
      */
     public function includeCustomer(Refund $refund): ?Item
     {
-        if (!$refund->invoice || !$refund->invoice->customer) {
+        if (optional($refund->invoice)->customer) {
+            return $this->item($refund->invoice->customer, new CustomerTransformer());
+        }
+
+        if (optional($refund->unitSale)->customer) {
+            return $this->item($refund->unitSale->customer, new CustomerTransformer());
+        }
+
+        return null;
+    }
+
+    public function includeUnitSale(Refund $refund): ?Item
+    {
+        if (!$refund->unitSale) {
             return null;
         }
 
-        return $this->item($refund->invoice->customer, new CustomerTransformer());
+        return $this->item($refund->unitSale, new QuoteTransformer());;
     }
 }

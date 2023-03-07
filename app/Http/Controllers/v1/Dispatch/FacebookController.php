@@ -19,9 +19,13 @@ use App\Transformers\Dispatch\Facebook\DealerTransformer;
 use App\Transformers\Dispatch\Facebook\StatusTransformer;
 use App\Transformers\Dispatch\Facebook\StepTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use Illuminate\Http\Resources\Json\JsonResource;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\Dispatch\Facebook\UpdateMarketplaceMetricsRequest;
+use App\Models\Marketing\Facebook\MarketplaceMetric;
+use App\Http\Resources\FacebookIntegrationResource;
 
 class FacebookController extends RestfulControllerV2 {
     /**
@@ -92,18 +96,11 @@ class FacebookController extends RestfulControllerV2 {
      * Get Facebook Marketplace Integrations
      *
      * @param Request $request
-     * @return type
+     * @return JsonResource
      */
     public function index(Request $request)
     {
-        // Handle Facebook Marketplace Request
-        $request = new GetMarketplaceRequest($request->all());
-        if ($request->validate()) {
-            // Get Marketplaces
-            return $this->response->item($this->service->status(), $this->statusTransformer);
-        }
-
-        return $this->response->errorBadRequest();
+        return FacebookIntegrationResource::collection($this->repository->getAllIntegrations($request->all()));
     }
 
     /**
@@ -122,8 +119,10 @@ class FacebookController extends RestfulControllerV2 {
         if ($request->validate()) {
             // Return Item Facebook Dispatch Dealer Transformer
             Log::channel('dispatch-fb')->info('Debug time after validating FB Inventory endpoint: ' . (microtime(true) - $startTime));
-            $data = $this->itemResponse($this->service->dealer($request->id, $request->all(), $startTime),
-                                $this->dealerTransformer, 'data');
+            $data = $this->itemResponse(
+                $this->service->dealer($request->id, $request->all(), $startTime),
+                $this->dealerTransformer,
+                'data');
             Log::channel('dispatch-fb')->info('Debug time after calling service: ' . (microtime(true) - $startTime));
             return $data;
         }
@@ -206,6 +205,26 @@ class FacebookController extends RestfulControllerV2 {
                                                 $request->ip_address,
                                                 $request->version)
             ]);
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    public function metrics(int $id, Request $request)
+    {
+        $metricRequest = new UpdateMarketplaceMetricsRequest($request->all());
+        if ($metricRequest->validate()) {
+            MarketplaceMetric::updateOrCreate(
+                [
+                    'marketplace_id' => $id,
+                    'category' => $request->category ?? '',
+                    'name' => $request->name
+                ],
+                [
+                    'value' => $request->value
+                ]
+            );
+            return $this->successResponse();
         }
 
         return $this->response->errorBadRequest();

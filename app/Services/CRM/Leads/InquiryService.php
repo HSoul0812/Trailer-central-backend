@@ -10,12 +10,10 @@ use App\Models\User\User;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
-use App\Repositories\User\UserRepository;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
-use App\Services\CRM\Leads\InquiryServiceInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
 use App\Services\CRM\Leads\Export\IDSServiceInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
@@ -160,10 +158,11 @@ class InquiryService implements InquiryServiceInterface
      * @return array{data: Lead,
      *               merge: null|Interaction}
      */
-    public function create(array $params): array {
+    public function create(array $params): array
+    {
         // Fix Units of Interest
         $params['inventory'] = isset($params['inventory']) ? $params['inventory'] : [];
-        if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
+        if (!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
             $params['inventory'][] = $params['item_id'];
         }
 
@@ -182,10 +181,11 @@ class InquiryService implements InquiryServiceInterface
      * @return array{data: Lead,
      *               merge: null|Interaction}
      */
-    public function send(array $params): array {
+    public function send(array $params): array
+    {
         // Fix Units of Interest
         $params['inventory'] = isset($params['inventory']) ? $params['inventory'] : [];
-        if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
+        if (!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
             $params['inventory'][] = $params['item_id'];
         }
 
@@ -206,11 +206,13 @@ class InquiryService implements InquiryServiceInterface
      * @param array $params
      * @return array{data: Lead,
      *               merge: null|Interaction}
+     * @throws \App\Exceptions\PropertyDoesNotExists
      */
-    public function text(array $params): array {
+    public function text(array $params): array
+    {
         // Fix Units of Interest
         $params['inventory'] = isset($params['inventory']) ? $params['inventory'] : [];
-        if(!empty($params['inventory_id'])) {
+        if (!empty($params['inventory_id'])) {
             $params['inventory'][] = $params['inventory_id'];
         }
 
@@ -245,7 +247,8 @@ class InquiryService implements InquiryServiceInterface
      * @return array{data: Lead,
      *               merge: null|Interaction}
      */
-    public function mergeOrCreate(InquiryLead $inquiry, array $params): array {
+    public function mergeOrCreate(InquiryLead $inquiry, array $params): array
+    {
         // Lead Type is NOT Financing?
         $interaction = null;
 
@@ -253,7 +256,7 @@ class InquiryService implements InquiryServiceInterface
         $dealer = $this->userRepo->get(['dealer_id' => (int)$inquiry->dealerId]);
         $isCrmActive = $dealer && $dealer->isCrmActive; // when the dealer does not have active the CRM, then it should not merge leads
 
-        if($isCrmActive && !in_array(LeadType::TYPE_FINANCING, $params['lead_types'])) {
+        if ($isCrmActive && !in_array(LeadType::TYPE_FINANCING, $params['lead_types'])) {
             // Check merge is enabled for given website.
             $configData = $this->webConfigService->getConfigByWebsite($params['website_id'], WebsiteConfig::LEADS_MERGE_ENABLED);
             if (!empty($configData[WebsiteConfig::LEADS_MERGE_ENABLED]) && $configData[WebsiteConfig::LEADS_MERGE_ENABLED] === "1") {
@@ -266,26 +269,28 @@ class InquiryService implements InquiryServiceInterface
                 // Merge Lead!
                 if (!empty($lead->identifier)) {
                     $this->log->info('Merged lead inquiry into #' . $lead->identifier);
-                    $interaction = $this->leads->merge($lead, $params);
+                    $interaction = $this->leads->mergeInquiry($lead, $params);
 
                     // Update Existing Lead
                     $lead = $this->leads->update([
                         'id' => $lead->identifier,
                         'inventory' => array_merge($lead->inventory_ids, $params['inventory']),
-                        'lead_types' => array_merge($lead->lead_types, $params['lead_types'])
+                        'lead_types' => array_merge($lead->lead_types, $params['lead_types']),
+                        'is_archived' => Lead::NOT_ARCHIVED,
+                        'status' => Lead::STATUS_NEW_INQUIRY,
                     ]);
                 }
             }
         }
 
         // Create Lead!
-        if(empty($lead->identifier)) {
+        if (empty($lead->identifier)) {
             $lead = $this->leads->create($params);
             $this->log->info('Created new lead #' . $lead->identifier);
         }
 
         // Lead Exists?!
-        if(!empty($lead->identifier)) {
+        if (!empty($lead->identifier)) {
             // Queue Up Inquiry Jobs
             $this->log->info('Handling jobs on lead #' . $lead->identifier);
             $this->queueInquiryJobs($lead, $inquiry);
@@ -304,14 +309,15 @@ class InquiryService implements InquiryServiceInterface
      * @return array{data: Lead,
      *               merge: null|Interaction}
      */
-    private function response(Lead $lead, ?Interaction $interaction = null) {
+    private function response(Lead $lead, ?Interaction $interaction = null)
+    {
         // Convert Lead to Array
         $leadData = new Item($lead, $this->leadTransformer, 'data');
         $response = $this->fractal->createData($leadData)->toArray();
 
         // Convert Interaction to Array
         $response['merge'] = null;
-        if(!empty($interaction->interaction_id)) {
+        if (!empty($interaction->interaction_id)) {
             $interactionData = new Item($interaction, $this->interactionTransformer, 'data');
             $interactionResponse = $this->fractal->createData($interactionData)->toArray();
             $response['merge'] = $interactionResponse['data'];
@@ -328,9 +334,10 @@ class InquiryService implements InquiryServiceInterface
      * @param Lead $lead
      * @param InquiryLead $inquiry
      */
-    private function queueInquiryJobs(Lead $lead, InquiryLead $inquiry) {
+    private function queueInquiryJobs(Lead $lead, InquiryLead $inquiry)
+    {
         // Create Auto Assign Job
-        if(empty($lead->leadStatus->sales_person_id)) {
+        if (empty($lead->leadStatus->sales_person_id)) {
             // Dispatch Auto Assign Job
             $this->log->info('Handling auto assign on lead #' . $lead->identifier);
             $job = new AutoAssignJob($lead);
@@ -338,22 +345,22 @@ class InquiryService implements InquiryServiceInterface
         }
 
         // Export ADF if Possible
-        if(!in_array(LeadType::TYPE_FINANCING, $inquiry->leadTypes)) {
+        if (!in_array(LeadType::TYPE_FINANCING, $inquiry->leadTypes)) {
             $this->log->info('Handling ADF export on lead #' . $lead->identifier);
-            $this->adf->export($inquiry, $lead);
+            $this->adf->export($lead);
 
             $this->log->info('Handling IDS export on lead #' . $lead->identifier);
             $this->ids->exportInquiry($lead);
         }
 
         // Tracking Cookie Exists?
-        if($inquiry->cookieSessionId) {
+        if ($inquiry->cookieSessionId) {
             // Set Tracking to Current Lead
             $this->log->info('Handling lead tracking on lead #' . $lead->identifier);
             $this->tracking->updateTrackLead($inquiry->cookieSessionId, $lead->identifier);
 
             // Mark Track Unit as Inquired for Unit
-            if($inquiry->itemId) {
+            if ($inquiry->itemId) {
                 $this->trackingUnit->markUnitInquired($inquiry->cookieSessionId, $inquiry->itemId, $inquiry->getUnitType());
             }
         }
@@ -366,13 +373,15 @@ class InquiryService implements InquiryServiceInterface
      * @param Collection<Lead> $matches
      * @param array $params
      * @return null|Lead
+     * @throws \App\Exceptions\PropertyDoesNotExists
      */
-    private function chooseMatch(Collection $matches, array $params): ?Lead {
+    private function chooseMatch(Collection $matches, array $params): ?Lead
+    {
         // Sort Leads Into Standard or With Status
         $status = new Collection();
         $chosen = null;
-        foreach($matches as $lead) {
-            if(!empty($lead->leadStatus)) {
+        foreach ($matches as $lead) {
+            if (!empty($lead->leadStatus)) {
                 $status->push($lead);
             }
         }
@@ -381,12 +390,12 @@ class InquiryService implements InquiryServiceInterface
         $inquiry = new InquiryLead($params);
 
         // Find By Status!
-        if(!empty($status) && count($status) > 0) {
+        if (!empty($status) && count($status) > 0) {
             $chosen = $this->filterMatch($status, $inquiry);
         }
 
         // Still Not Chosen? Find Any!
-        if(empty($chosen)) {
+        if (empty($chosen)) {
             $chosen = $this->filterMatch($matches, $inquiry);
         }
 
@@ -401,27 +410,28 @@ class InquiryService implements InquiryServiceInterface
      * @param InquiryLead $inquiry
      * @return null|Lead
      */
-    private function filterMatch(Collection $leads, InquiryLead $inquiry): ?Lead {
+    private function filterMatch(Collection $leads, InquiryLead $inquiry): ?Lead
+    {
         // Loop Status
         $chosen = null;
         $matches = new Collection();
-        foreach($leads as $lead) {
+        foreach ($leads as $lead) {
             // Find All Matches Between Both
             $matched = $inquiry->findMatches($lead);
 
             // Matched All 3
-            if($matched > InquiryLead::MERGE_MATCH_COUNT) {
+            if ($matched > InquiryLead::MERGE_MATCH_COUNT) {
                 $chosen = $lead;
                 break;
             }
             // Matched At Least 2
-            elseif($matched >= InquiryLead::MERGE_MATCH_COUNT) {
+            elseif ($matched >= InquiryLead::MERGE_MATCH_COUNT) {
                 $matches->push($lead);
             }
         }
 
         // Get First Match
-        if(empty($chosen) && $matches->count() > 0) {
+        if (empty($chosen) && $matches->count() > 0) {
             $chosen = $matches->first();
         }
 

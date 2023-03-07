@@ -3,8 +3,12 @@
 namespace App\Models\CRM\Dms\Quickbooks;
 
 use App\Models\Inventory\Inventory;
+use App\Models\Parts\Vendor;
+use App\Models\User\DealerLocation;
 use App\Models\Traits\TableAware;
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -29,20 +33,29 @@ class Bill extends Model
     const STATUS_DUE = 'due';
     const STATUS_PAID = 'paid';
 
-    protected $table = 'qb_bills';
+    public const TABLE_NAME = 'qb_bills';
+
+    protected $table = self::TABLE_NAME;
 
     public $timestamps = false;
 
     protected $fillable = [
         'dealer_id',
-        'total',
+        'dealer_location_id',
         'vendor_id',
-        'status',
         'doc_num',
+        'total',
         'received_date',
         'due_date',
         'memo',
-        'dealer_location_id'
+        'packing_list_no',
+        'status',
+        'qb_id',
+    ];
+
+    protected $dates = [
+        'received_date',
+        'due_date',
     ];
 
     public function items(): HasMany
@@ -64,11 +77,26 @@ class Bill extends Model
     {
         return $this->hasMany(Inventory::class, 'bill_id', 'id');
     }
-    
+
     public function approvals(): HasMany
     {
         return $this
             ->hasMany(QuickbookApproval::class, 'tb_primary_id', 'id')
             ->where('tb_name', $this->table);
+    }
+
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(Vendor::class);
+    }
+
+    public function dealerLocation(): BelongsTo
+    {
+        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    public function dealer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 }

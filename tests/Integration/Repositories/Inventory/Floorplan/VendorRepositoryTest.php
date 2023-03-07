@@ -4,82 +4,76 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Repositories\Inventory\Floorplan;
 
-use App\Models\Inventory\Floorplan\Vendor;
+use App\Models\Parts\Vendor;
 use App\Repositories\Inventory\Floorplan\VendorRepository;
 use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Tests\TestCase;
 
 class VendorRepositoryTest extends TestCase
 {
     /**
-     * Test that SUT is properly bound by the application
+     * @group DMS
+     * @group DMS_INVENTORY_FLOORPLAN
      *
-     * @throws BindingResolutionException when there is a problem with resolution
-     *                                    of concreted class
      * @note IntegrationTestCase
      */
-    public function testIoCForTheRepositoryInterfaceIsWorking(): void
+    public function testGetAllIsPaginatingAndFilteringAsExpected(): void
     {
-        $concreteRepository = $this->getConcreteRepository();
+        $fakeVendors = $this->getFakeVendors();
 
-        self::assertInstanceOf(VendorRepository::class, $concreteRepository);
+        $vendorRepository = resolve(VendorRepositoryInterface::class);
+
+        $this->assertInstanceOf(VendorRepository::class, $vendorRepository);
+
+        $this->getTestParams()->each(function(array $param) use ($vendorRepository){
+            // /** @var LengthAwarePaginator $vendors */
+            $vendors = $vendorRepository->getAll($param[0]);
+
+            $this->assertInstanceOf(LengthAwarePaginator::class, $vendors);
+            $this->assertTrue($vendors->contains('name', $param[1]));
+            $this->assertFalse($vendors->contains('name', $param[2]));
+        });
+
+        $fakeVendors->each(function (Vendor $vendor) {
+            $vendor->forceDelete();
+        });
     }
 
     /**
-     * @dataProvider queryParametersAndSummariesForShowOnFloorPlanProvider
+     * Get the fake vendors
      *
-     * @param  array  $params  list of query parameters
-     * @param  int  $expectedTotal
-     * @param  int  $expectedLastPage
-     * @param  string|null  $expectedName
-     * @throws BindingResolutionException when there is a problem with resolution of concreted class
-     * @note IntegrationTestCase
+     * @return Collection
      */
-    public function testGetAllIsPaginatingAndFilteringAsExpected(
-        array $params,
-        int $expectedTotal,
-        int $expectedLastPage,
-        ?string $expectedName
-    ): void {
-        /** @var LengthAwarePaginator $vendors */
-        $vendors = $this->getConcreteRepository()->getAll($params);
+    private function getFakeVendors(): Collection
+    {
+        $fakeVendors = collect([]);
 
-        /** @var Vendor $firstRecord */
-        $firstRecord = $vendors->first();
+        $fakeVendors->push(factory(Vendor::class)->create([
+            'name' => 'Non Dealer Vendor Unit Test',
+            'show_on_floorplan' => 1,
+        ]));
 
-        self::assertInstanceOf(LengthAwarePaginator::class, $vendors);
-        self::assertSame($expectedTotal, $vendors->total());
-        self::assertSame($expectedLastPage, $vendors->lastPage());
-        self::assertSame($firstRecord ? $firstRecord->name: $firstRecord, $expectedName);
+        $fakeVendors->push(factory(Vendor::class)->create([
+            'dealer_id' => 1001,
+            'name' => 'Dealer 1001 Vendor Unit Test',
+            'show_on_floorplan' => 1,
+        ]));
+
+        return $fakeVendors;
     }
 
     /**
-     * Examples of parameters, expected total and last page numbers, and first category label.
+     * Get test params
      *
-     * @return array[]
+     * @return Collection
      */
-    public function queryParametersAndSummariesForShowOnFloorPlanProvider(): array
+    private function getTestParams(): Collection
     {
-        return [                                          // array $parameters, int $expectedTotal, int $expectedLastPage, string $expectedName
-            'No parameters'                               => [['show_on_floorplan' => 1], 3, 1, 'Stonegate Industries'],
-            'None dealer and filtered with matches'       => [['show_on_floorplan' => 1, 'search_term' => 'to remove'], 1, 1, 'Test Vendor To Remove'],
-            'Dummy test dealer and filtered with matches' => [['show_on_floorplan' => 1, 'dealer_id' => 1001, 'search_term' => 'curb'], 1, 1, 'Curbed'],
-            'None dealer filtered with no matches'        => [['show_on_floorplan' => 1, 'search_term' => 'acme'], 0, 1, null],
-            'Dummy test dealer and paged by 3'            => [['show_on_floorplan' => 1, 'dealer_id' => 1001, 'per_page' => 3], 6, 2, 'Big Tex Trailers']
-        ];
-    }
-
-    /**
-     * @return VendorRepositoryInterface
-     *
-     * @throws BindingResolutionException when there is a problem with resolution
-     *                                    of concreted class
-     *
-     */
-    protected function getConcreteRepository(): VendorRepositoryInterface
-    {
-        return $this->app->make(VendorRepositoryInterface::class);
+        return collect([
+            [['show_on_floorplan' => 1, 'search_term' => 'Non Dealer Vendor Unit Test'], 'Non Dealer Vendor Unit Test', 'Dealer 1001 Vendor Unit Test'],
+            [['show_on_floorplan' => 1, 'dealer_id' => 1001, 'search_term' => 'Dealer 1001 Vendor Unit Test'], 'Dealer 1001 Vendor Unit Test', 'Non Dealer Vendor Unit Test'],
+        ]);
     }
 }

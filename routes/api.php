@@ -49,15 +49,22 @@ $api->version('v1', function ($route) {
     // Utils
     $route->group([
         'prefix' => 'utils',
-    ], function($route) {
+    ], function ($route) {
         $route->get('/ip', 'App\Http\Controllers\v1\Marketing\Utils\NetworkController@getIp');
+    });
+
+    // Tunnel Operations
+    $route->group([
+        'prefix' => 'tunnels',
+    ], function ($route) {
+        $route->post('/check', 'App\Http\Controllers\v1\Marketing\Tunnels\TunnelsController@check');
     });
 
     $route->group(['middleware' => 'textrail.webhook.validate'], function ($route) {
         $route->post('ecommerce/orders/{textrail_order_id}/approve', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@markAsApproved')->where('textrail_order_id', '[0-9]+');
-        $route->post('ecommerce/cancellation/{textrail_order_id}','App\Http\Controllers\v1\Ecommerce\RefundController@cancelOrder')->where('textrail_order_id', '[0-9]+');
-        $route->post('ecommerce/returns/{rma}','App\Http\Controllers\v1\Ecommerce\RefundController@updateReturnStatus')->where('rma', '[0-9]+');
-        $route->post('ecommerce/orders/{textrail_order_id}/returns','App\Http\Controllers\v1\Ecommerce\RefundController@create')->where('textrail_order_id', '[0-9]+');
+        $route->post('ecommerce/cancellation/{textrail_order_id}', 'App\Http\Controllers\v1\Ecommerce\RefundController@cancelOrder')->where('textrail_order_id', '[0-9]+');
+        $route->post('ecommerce/returns/{rma}', 'App\Http\Controllers\v1\Ecommerce\RefundController@updateReturnStatus')->where('rma', '[0-9]+');
+        $route->post('ecommerce/orders/{textrail_order_id}/returns', 'App\Http\Controllers\v1\Ecommerce\RefundController@create')->where('textrail_order_id', '[0-9]+');
     });
 
     /**
@@ -82,6 +89,10 @@ $api->version('v1', function ($route) {
                 'bulk/payments',
                 'App\Http\Controllers\v1\Inventory\Floorplan\Bulk\PaymentController@create'
             );
+            $route->get(
+                'payments/check-number-exists',
+                'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@checkNumberExists'
+            );
 
             $route->group([
                 'prefix' => 'vendors',
@@ -95,6 +106,11 @@ $api->version('v1', function ($route) {
                 $route->delete('{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@destroy')
                     ->where('id', '[0-9]+');
             });
+
+            $route->get(
+                'download/csv',
+                'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@downloadCsv'
+            );
         });
     });
 
@@ -114,7 +130,8 @@ $api->version('v1', function ($route) {
     $route->get('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@show')->where('id', '[0-9]+');
     $route->post('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@update')->where('id', '[0-9]+');
     $route->delete('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@destroy')->where('id', '[0-9]+');
-    $route->post('reports/financials-stock-export', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financialsExport');
+    $route->post('reports/financials-stock-export/pdf', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financialsExportPdf');
+    $route->post('reports/financials-stock-export/csv', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financialsExportCsv');
     $route->post('reports/financials-stock', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financials');
     $route->get('reports/read', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@read');
 
@@ -202,7 +219,7 @@ $api->version('v1', function ($route) {
     $route->get('parts', 'App\Http\Controllers\v1\Parts\PartsController@index');
     $route->put('parts', 'App\Http\Controllers\v1\Parts\PartsController@create');
     $route->get('parts/search', 'App\Http\Controllers\v1\Parts\PartsController@search');
-    $route->get('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@show')->where('id', '[0-9]+');
+    $route->get('parts/{part}', 'App\Http\Controllers\v1\Parts\PartsController@display')->where('id', '[0-9]+');
     $route->post('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@update')->where('id', '[0-9]+');
     $route->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy')->where('id', '[0-9]+');
 
@@ -229,6 +246,15 @@ $api->version('v1', function ($route) {
     $route->get('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@show');
     $route->put('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@update');
     $route->delete('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@destroy');
+
+    /**
+     * Inventory Bulk download
+     */
+    $route->post('inventory/bulk/create', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@create');
+    $route->get('inventory/bulk/output/{token}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@readByToken');
+    $route->get('inventory/bulk/output', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@read');
+    $route->get('inventory/bulks', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@index');
+    $route->get('inventory/bulk/status/{token}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@statusByToken');
 
     /**
      * Inventory Overlay
@@ -295,14 +321,23 @@ $api->version('v1', function ($route) {
     $route->get('inventory/get_all_titles', 'App\Http\Controllers\v1\Inventory\InventoryController@getAllTitles');
     $route->put('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@create');
     $route->get('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@show')->where('id', '[0-9]+');
+    $route->get('inventory/stocks/{stock}', 'App\Http\Controllers\v1\Inventory\InventoryController@findByStock');
     $route->post('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@update')->where('id', '[0-9]+');
+    $route->post('inventory/mass', 'App\Http\Controllers\v1\Inventory\InventoryController@massUpdate');
     $route->delete('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')->where('id', '[0-9]+');
     $route->get('inventory/exists', 'App\Http\Controllers\v1\Inventory\InventoryController@exists');
     $route->post('inventory/{id}/export', 'App\Http\Controllers\v1\Inventory\InventoryController@export')->where('id', '[0-9]+');
+    $route->post('inventory/search', 'App\Http\Controllers\v1\Inventory\InventoryController@search');
     /**
      * Inventory images
      */
+    $route->put('inventory/{id}/images', 'App\Http\Controllers\v1\Inventory\ImageController@create')->where('id', '[0-9]+');
     $route->delete('inventory/{id}/images', 'App\Http\Controllers\v1\Inventory\ImageController@bulkDestroy')->where('id', '[0-9]+');
+    /**
+     * Inventory files
+     */
+    $route->put('inventory/{id}/files', 'App\Http\Controllers\v1\Inventory\FileController@create')->where('id', '[0-9]+');
+    $route->delete('inventory/{id}/files', 'App\Http\Controllers\v1\Inventory\FileController@bulkDestroy')->where('id', '[0-9]+');
 
     /*
     |--------------------------------------------------------------------------
@@ -317,6 +352,11 @@ $api->version('v1', function ($route) {
     $route->put('inventory/packages', 'App\Http\Controllers\v1\Inventory\PackageController@create');
     $route->post('inventory/packages/{id}', 'App\Http\Controllers\v1\Inventory\PackageController@update');
     $route->delete('inventory/packages/{id}', 'App\Http\Controllers\v1\Inventory\PackageController@destroy');
+
+    /*
+     * Cache
+     */
+    $route->post('inventory/cache/invalidate/dealer', 'App\Http\Controllers\v1\Inventory\InventoryCacheController@invalidateByDealer');
 
     /*
     |--------------------------------------------------------------------------
@@ -384,13 +424,10 @@ $api->version('v1', function ($route) {
     /**
      * Website Payment Calculator Settings
      */
-    $route->group(['middleware' => 'website.validate'], function ($route) {
-        $route->get('website/{websiteId}/payment-calculator/settings', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@index')->where('websiteId', '[0-9]+');
-        $route->put('website/{websiteId}/payment-calculator/settings', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@create')->where('websiteId', '[0-9]+');
-        $route->get('website/{websiteId}/payment-calculator/settings/{id}', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@show')->where('websiteId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('website/{websiteId}/payment-calculator/settings/{id}', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@update')->where('websiteId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('website/{websiteId}/payment-calculator/settings/{id}', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@destroy')->where('websiteId', '[0-9]+')->where('id', '[0-9]+');
-    });
+     $route->get('website/{websiteId}/payment-calculator/settings', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@index')->where('websiteId', '[0-9]+');
+     $route->put('website/{websiteId}/payment-calculator/settings', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@create')->where('websiteId', '[0-9]+');
+     $route->post('website/{websiteId}/payment-calculator/settings/{id}', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@update')->where('websiteId', '[0-9]+')->where('id', '[0-9]+');
+     $route->delete('website/{websiteId}/payment-calculator/settings/{id}', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@destroy')->where('websiteId', '[0-9]+')->where('id', '[0-9]+');
 
     /**
      * Website Towing Capacity
@@ -462,13 +499,12 @@ $api->version('v1', function ($route) {
      * Interactions
      */
     $route->group(['middleware' => 'interaction.validate'], function ($route) {
-        // TO DO: Need a Send Email endpoint that doesn't Require Lead ID By Default
-        //$route->post('leads/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail');
         $route->get('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@index')->where('leadId', '[0-9]+');
         $route->put('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@create')->where('leadId', '[0-9]+');
-        $route->post('leads/{leadId}/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail')->where('leadId', '[0-9]+');
         $route->get('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@show')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@update')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail');
+        $route->get('leads/{leadId}/contact-date', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@getContactDate');
     });
 
     /**
@@ -570,9 +606,11 @@ $api->version('v1', function ($route) {
         $route->get('user', 'App\Http\Controllers\v1\User\SignInController@details');
         $route->post('user/check-admin-password', 'App\Http\Controllers\v1\User\SignInController@checkAdminPassword');
 
-        $route->get('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@index');
-        $route->post('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@create');
-        $route->put('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@updateBulk');
+        $route->group(['middleware' => 'accounts.manage.permission'], function ($route) {
+            $route->get('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@index');
+            $route->post('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@create');
+            $route->put('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@updateBulk');
+        });
 
         $route->put('user/password/update', 'App\Http\Controllers\v1\User\SignInController@updatePassword');
 
@@ -615,6 +653,7 @@ $api->version('v1', function ($route) {
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
     $route->get('leads/sort-fields/crm', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFieldsCrm');
     $route->get('leads/unique-full-names', 'App\Http\Controllers\v1\CRM\Leads\LeadController@uniqueFullNames');
+    $route->get('leads/filters', 'App\Http\Controllers\v1\CRM\Leads\LeadController@filters');
     $route->get('crm/states', 'App\Http\Controllers\v1\CRM\StatesController@index');
 
     /*
@@ -638,6 +677,23 @@ $api->version('v1', function ($route) {
     $route->get('users', 'App\Http\Controllers\v1\User\UserController@index');
     $route->post('users', 'App\Http\Controllers\v1\User\UserController@create');
 
+    $route->get('users-by-name', 'App\Http\Controllers\v1\User\UserController@listByName')->middleware('integration-permission:get_dealers_by_name,can_see');
+
+    $route->post('user/classified', 'App\Http\Controllers\v1\User\UserController@updateDealerClassifieds');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Integrations
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    $route->get('integrations', 'App\Http\Controllers\v1\Integration\IntegrationController@index');
+    $route->get('integrations/{id}', 'App\Http\Controllers\v1\Integration\IntegrationController@show');
+
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         /*
         |--------------------------------------------------------------------------
@@ -657,6 +713,22 @@ $api->version('v1', function ($route) {
         $route->post('leads/find-matches', 'App\Http\Controllers\v1\CRM\Leads\LeadController@getMatches');
         $route->post('leads/{id}/merge', 'App\Http\Controllers\v1\CRM\Leads\LeadController@mergeLeads');
         $route->get('leads/output', 'App\Http\Controllers\v1\CRM\Leads\LeadController@output');
+        $route->delete('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dealer Documents
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group(['prefix' => 'leads/{leadId}/documents'], function ($route) {
+
+            $route->get('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
+            $route->post('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@create');
+            $route->delete('/{documentId}', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@destroy');
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -668,7 +740,18 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
         $route->put('user/quotes/bulk-archive', 'App\Http\Controllers\v1\Dms\UnitSaleController@bulkArchive');
-        
+        $route->put('user/quotes/setting', 'App\Http\Controllers\v1\Dms\Quote\QuoteSettingController@updateDealerSetting');
+
+        /*
+        |--------------------------------------------------------------------------
+        | POS Quotes
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->post('pos-quotes', 'App\Http\Controllers\v1\Pos\PosController@createPosQuote');
+
         /*
         |--------------------------------------------------------------------------
         | Quotes Refunds
@@ -719,13 +802,26 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | Dealer Logos
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->post('user/logo', 'App\Http\Controllers\v1\User\DealerLogoController@store');
+
+        /*
+        |--------------------------------------------------------------------------
         | Dealer integrations
         |--------------------------------------------------------------------------
         |
         |
         |
         */
+        $route->get('user/integrations', 'App\Http\Controllers\v1\User\DealerIntegrationController@index');
         $route->get('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@show');
+        $route->post('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@update');
+        $route->delete('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@delete');
 
         /*
         |--------------------------------------------------------------------------
@@ -817,16 +913,25 @@ $api->version('v1', function ($route) {
             |
             */
             $route->get('products', 'App\Http\Controllers\v1\CRM\Leads\ProductController@index');
+        });
 
-            /*
-            |--------------------------------------------------------------------------
-            | Lead Trades
-            |--------------------------------------------------------------------------
-            |
-            |
-            |
-            */
-            $route->get('trades', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@index');
+        /*
+        |--------------------------------------------------------------------------
+        | Lead Trades
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'leads/{leadId}/trades',
+            'middleware' => 'leads.trade.validate'
+        ], function ($route) {
+            $route->get('/', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@index');
+            $route->post('/', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@create');
+            $route->post('{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@update')->where('id', '[0-9]+');
+            $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@destroy')->where('id', '[0-9]+');
+            $route->get('{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@show')->where('id', '[0-9]+');
         });
 
         $route->group([
@@ -906,6 +1011,21 @@ $api->version('v1', function ($route) {
             ], function ($route) {
                 $route->post('/', 'App\Http\Controllers\v1\Integration\CvrController@create');
                 $route->get('{token}', 'App\Http\Controllers\v1\Integration\CvrController@statusByToken');
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Transaction
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'transaction',
+                'middleware' => 'integration.access_token.validate'
+            ], function ($route) {
+                $route->post('/', 'App\Http\Controllers\v1\Integration\TransactionController@post');
             });
         });
 
@@ -988,6 +1108,7 @@ $api->version('v1', function ($route) {
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@destroy')->where('id', '[0-9]+');
                     $route->post('{id}/send', 'App\Http\Controllers\v1\CRM\Email\TemplateController@send')->where('id', '[0-9]+');
+                    $route->post('test', 'App\Http\Controllers\v1\CRM\Email\TemplateController@test');
                 });
 
                 // Email Builder Campaign
@@ -996,10 +1117,10 @@ $api->version('v1', function ($route) {
                     'middleware' => 'emailbuilder.campaign.validate'
                 ], function ($route) {
                     $route->get('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@index');
-                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@create');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@update')->where('id', '[0-9]+');
-                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@destroy')->where('id', '[0-9]+');*/
+                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@destroy')->where('id', '[0-9]+');
                     $route->post('{id}/send', 'App\Http\Controllers\v1\CRM\Email\CampaignController@send')->where('id', '[0-9]+');
                 });
 
@@ -1009,10 +1130,10 @@ $api->version('v1', function ($route) {
                     'middleware' => 'emailbuilder.blast.validate'
                 ], function ($route) {
                     $route->get('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@index');
-                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@create');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@update')->where('id', '[0-9]+');
-                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');*/
+                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');
                 });
             });
 
@@ -1065,16 +1186,6 @@ $api->version('v1', function ($route) {
                     $route->post('{id}/sent', 'App\Http\Controllers\v1\CRM\Text\BlastController@sent')->where('id', '[0-9]+');
                 });
             });
-
-            /*
-            |--------------------------------------------------------------------------
-            | Dealer Documents
-            |--------------------------------------------------------------------------
-            |
-            |
-            |
-            */
-            $route->get('documents', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
         });
 
         /*
@@ -1099,15 +1210,17 @@ $api->version('v1', function ($route) {
                     $route->get('/', 'App\Http\Controllers\v1\Marketing\Craigslist\InventoryController@index');
                 });
 
+                // Scheduler
+                $route->get('scheduler', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@index');
+                $route->get('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
+                $route->get('billing', 'App\Http\Controllers\v1\Marketing\Craigslist\BillingController@index');
+
                 // Posts
                 $route->group([
                     'prefix' => 'posts'
                 ], function ($route) {
                     $route->get('/', 'App\Http\Controllers\v1\Marketing\Craigslist\ActivePostController@index');
                 });
-
-                // Upcoming Scheduler Posts
-                $route->get('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
 
                 // Profile
                 $route->group([
@@ -1352,6 +1465,17 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | QZ Tray
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('qz-tray/digital-cert', 'App\Http\Controllers\v1\Dms\QzTray\QzTrayController@digitalCert');
+        $route->post('qz-tray/signature', 'App\Http\Controllers\v1\Dms\QzTray\QzTrayController@signature');
+
+        /*
+        |--------------------------------------------------------------------------
         | Others
         |--------------------------------------------------------------------------
         |
@@ -1375,6 +1499,7 @@ $api->version('v1', function ($route) {
     |
     */
     $route->get('integration/collectors', 'App\Http\Controllers\v1\Integration\CollectorController@index');
+    $route->post('integration/collectors/{id}', 'App\Http\Controllers\v1\Integration\CollectorController@update');
     $route->get('integration/collector/fields', 'App\Http\Controllers\v1\Integration\CollectorFieldsController@index');
 
     /*
@@ -1415,6 +1540,35 @@ $api->version('v1', function ($route) {
     $route->group([
         'prefix' => 'dispatch'
     ], function ($route) {
+        // Craigslist Extension
+        $route->group([
+            'prefix' => 'craigslist'
+        ], function ($route) {
+            // Login to Craigslist Dispatch
+            $route->post('/', 'App\Http\Controllers\v1\Dispatch\CraigslistController@login');
+
+            // Craigslist
+            $route->group([
+                'middleware' => 'dispatch.craigslist'
+            ], function ($route) {
+                // Can See is Required
+                $route->group([
+                    'middleware' => 'integration-permission:craigslist_dispatch,can_see'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\Dispatch\CraigslistController@index');
+                    $route->get('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@show')->where('id', '[0-9]+');
+                });
+
+                // Can See and Change is Required
+                $route->group([
+                    'middleware' => 'integration-permission:craigslist_dispatch,can_see_and_change'
+                ], function ($route) {
+                    $route->put('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@create')->where('id', '[0-9]+');
+                    //$route->post('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@update')->where('id', '[0-9]+');
+                });
+            });
+        });
+
         // Facebook Marketplace Extension
         $route->group([
             'prefix' => 'facebook'
@@ -1431,6 +1585,7 @@ $api->version('v1', function ($route) {
                 $route->get('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@create')->where('id', '[0-9]+');
                 $route->put('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@update')->where('id', '[0-9]+');
+                $route->post('{id}/metrics', 'App\Http\Controllers\v1\Dispatch\FacebookController@metrics')->where('id', '[0-9]+');
             });
         });
     });
@@ -1454,22 +1609,22 @@ $api->version('v1', function ($route) {
     ], function ($route) {
         $route->get(
             'customer',
-            'App\Http\Controllers\v1\Subscription\SubscriptionController@getCustomer'
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@getCustomerByDealerId'
         );
 
         $route->get(
             'plans',
-            'App\Http\Controllers\v1\Subscription\SubscriptionController@getPlans'
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@getExistingPlans'
         );
 
         $route->post(
             'subscribe',
-            'App\Http\Controllers\v1\Subscription\SubscriptionController@subscribe'
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@subscribeToPlanByDealerId'
         );
 
         $route->post(
             'update-card',
-            'App\Http\Controllers\v1\Subscription\SubscriptionController@updateCard'
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@updateCardByDealerId'
         );
     });
 

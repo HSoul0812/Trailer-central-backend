@@ -55,4 +55,10 @@ interface CampaignRepositoryInterface extends Repository {
      * @return bool
      */
     public function wasLeadSent(int $campaignId, int $leadId): bool;
+
+    public function beginTransaction(): void;
+
+    public function commitTransaction(): void;
+
+    public function rollbackTransaction(): void;
 }

@@ -29,6 +29,8 @@ use App\Services\Website\WebsiteDealerUrlServiceInterface;
 use App\Services\Website\WebsiteUserService;
 use App\Services\Website\WebsiteUserServiceInterface;
 use Illuminate\Support\ServiceProvider;
+use League\HTMLToMarkdown\HtmlConverter;
+use League\HTMLToMarkdown\HtmlConverterInterface;
 
 class WebsiteServiceProvider extends ServiceProvider
 {
@@ -64,6 +66,9 @@ class WebsiteServiceProvider extends ServiceProvider
         // Blog
         $this->app->bind('App\Repositories\Website\Blog\BulkRepositoryInterface', 'App\Repositories\Website\Blog\BulkRepository');
         $this->app->bind('App\Services\Import\Blog\CsvImportServiceInterface', 'App\Services\Import\Blog\CsvImportService');
+
+        // Helpers
+        $this->app->bind(HtmlConverterInterface::class, HtmlConverter::class);
     }
 
 }

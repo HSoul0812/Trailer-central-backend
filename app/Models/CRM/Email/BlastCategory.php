@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Model;
  * Class Email Blast Category
  *
  * @package App\Models\CRM\Email
+ *
+ * @property int $id
+ * @property string $unit_category
+ * @property int $email_blast_id
  */
 class BlastCategory extends Model
 {
@@ -25,15 +29,6 @@ class BlastCategory extends Model
      */
     protected $fillable = [
         'email_blast_id',
-        'category'
+        'unit_category'
     ];
-
-    /**
-     * @param int $blastId
-     * @return array
-     */
-    public static function deleteByBlast(int $blastId)
-    {
-        return self::whereEmailBlastId($blastId)->delete();
-    }
 }

@@ -22,6 +22,27 @@ use Illuminate\Support\Facades\Log;
 class GoogleService implements GoogleServiceInterface
 {
     /**
+     * @const array<string>
+     */
+    const AUTH_TYPES = ['google', 'system'];
+
+    /**
+     * @const string
+     */
+    const AUTH_TYPE_DEFAULT = 'google';
+    
+    /**
+     * @const string
+     */
+    const AUTH_TYPE_SYSTEM = 'system';
+
+
+    /**
+     * @var string
+     */
+    protected $type;
+
+    /**
      * @var GmailServiceInterface
      */
     protected $gmail;
@@ -44,16 +65,19 @@ class GoogleService implements GoogleServiceInterface
      * @return Google_Client
      */
     public function getClient(): Google_Client {
+        // Get Type?
+        $type = $this->type ?? self::AUTH_TYPE_DEFAULT;
+
         // No Client ID?!
-        if(empty(config('oauth.google.app.id'))) {
+        if(empty(config('oauth.' . $type . '.app.id'))) {
             throw new MissingGapiClientIdException;
         }
 
         // Initialize Client
         $client = new Google_Client();
-        $client->setApplicationName(config('oauth.google.app.name'));
-        $client->setClientId(config('oauth.google.app.id'));
-        $client->setClientSecret(config('oauth.google.app.secret'));
+        $client->setApplicationName(config('oauth.' . $type . '.app.name'));
+        $client->setClientId(config('oauth.' . $type . '.app.id'));
+        $client->setClientSecret(config('oauth.' . $type . '.app.secret'));
         if(empty($client)) {
             throw new FailedConnectGapiClientException;
         }
@@ -73,13 +97,16 @@ class GoogleService implements GoogleServiceInterface
      * @return LoginUrlToken
      */
     public function login(?string $redirectUrl = null, ?array $scopes = null): LoginUrlToken {
+        // Get Type?
+        $type = $this->type ?? self::AUTH_TYPE_DEFAULT;
+
         // Set Redirect URL
         $client = $this->getClient();
-        $client->setRedirectUri($redirectUrl ?? config('oauth.google.redirectUri'));
+        $client->setRedirectUri($redirectUrl ?? config('oauth.' . $type . '.redirectUri'));
 
         // Return Auth URL for Login
         if(empty($scopes)) {
-            $scopes = explode(" ", config('oauth.google.scopes'));
+            $scopes = explode(" ", config('oauth.' . $type . '.scopes'));
         }
         $url = $client->createAuthUrl($scopes);
 
@@ -140,6 +167,7 @@ class GoogleService implements GoogleServiceInterface
             // Valid/Expired
             $isValid = $this->validateIdToken($accessToken->id_token);
             $isExpired = $client->isAccessTokenExpired();
+            $this->log->info("Value ID token? {$isValid} | Token Expired? {$isExpired}");
 
             // Try to Refresh Access Token!
             if(!empty($accessToken->refresh_token) && (!$isValid || $isExpired)) {
@@ -147,13 +175,18 @@ class GoogleService implements GoogleServiceInterface
                 if($refresh->exists()) {
                     $isValid = $this->validateIdToken($refresh->idToken);
                     $isExpired = false;
+                    $this->log->info("Successfully refreshed access token for {$accessToken->relation_type} #{$accessToken->relation_id}");
+                } else {
+                    $this->log->error("Failed to refresh access token for {$accessToken->relation_type} #{$accessToken->relation_id}");
                 }
             }
+
+            // Not Valid? Mark Expired
             if(empty($isValid)) {
                 $isExpired = true;
             }
         } catch (\Exception $e) {
-            Log::channel('google')->error('Exception returned validating google oauth: ' . $e->getMessage());
+            $this->log->error('Exception returned validating custom google oauth: ' . $e->getMessage());
             $isValid = false;
             $isExpired = true;
         }
@@ -186,10 +219,12 @@ class GoogleService implements GoogleServiceInterface
                 'created' => $accessToken->getIssuedUnix()
             ]);
             $client->setScopes($accessToken->getScope());
+            $accessTokenString = json_encode($accessToken);
 
             // Valid/Expired
             $isValid = $this->validateIdToken($accessToken->getIdToken());
             $isExpired = $client->isAccessTokenExpired();
+            $this->log->info("Value ID token? {$isValid} | Token Expired? {$isExpired}");
 
             // Try to Refresh Access Token!
             if(!empty($accessToken->getRefreshToken()) && (!$isValid || $isExpired)) {
@@ -197,17 +232,19 @@ class GoogleService implements GoogleServiceInterface
                 if($refresh->exists()) {
                     $isValid = $this->validateIdToken($refresh->idToken);
                     $isExpired = false;
+                    $this->log->info("Successfully refreshed access token for $accessTokenString");
+                } else {
+                    $this->log->error("Failed to refresh access token for $accessTokenString");
                 }
             }
             if(!$isValid) {
                 $isExpired = true;
             }
         } catch (\Exception $e) {
-            Log::channel('google')->error('Exception returned validating custom google oauth: ' . $e->getMessage());
+            $this->log->error('Exception returned validating custom google oauth: ' . $e->getMessage());
             $isValid = false;
             $isExpired = true;
         }
-
         // Return Payload Results
         return new ValidateToken([
             'new_token' => $refresh ?? null,
@@ -215,6 +252,22 @@ class GoogleService implements GoogleServiceInterface
             'is_expired' => $isExpired,
             'message' => $this->getValidateMessage($isValid, $isExpired)
         ]);
+    }
+
+    /**
+     * Set Key for Google Service
+     * 
+     * @param string $key
+     * @return string
+     */
+    public function setKey(string $key = ''): string {
+        // Key Type is Valid?
+        if(!in_array($key, self::AUTH_TYPES)) {
+            return self::AUTH_TYPE_DEFAULT;
+        }
+
+        // Set Key on Google App
+        return $this->type = $key;
     }
 
 
@@ -264,6 +317,8 @@ class GoogleService implements GoogleServiceInterface
             $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
             if(!empty($newToken) && isset($newToken['access_token'])) {
                 $emailToken = EmailToken::fillFromArray($newToken);
+            } elseif(isset($newToken['error'])) {
+                $this->log->error('FATAL ERROR refreshing access token: ' . $newToken['error_description']);
             }
         } catch (\Exception $e) {
             // We actually just want to verify this is true or false

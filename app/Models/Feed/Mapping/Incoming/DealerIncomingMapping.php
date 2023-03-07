@@ -5,6 +5,17 @@ namespace App\Models\Feed\Mapping\Incoming;
 use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class DealerIncomingMapping
+ * @package App\Models\Feed\Mapping\Incoming
+ *
+ * @property int $id
+ * @property string $map_from
+ * @property string $map_to
+ * @property string $type
+ * @property string $integration_name
+ * @property int $dealer_id
+ */
 class DealerIncomingMapping extends Model {
 
     protected $table = 'dealer_incoming_mappings';
@@ -65,11 +76,20 @@ class DealerIncomingMapping extends Model {
         self::PROPULSION => 'Propulsion',
     ];
 
+    const PJ_INTEGRATION_NAME = 'pj';
+    const UTC_INTEGRATION_NAME = 'utc';
+
+    const INTEGRATION_NAMES = [
+        self::PJ_INTEGRATION_NAME,
+        self::UTC_INTEGRATION_NAME
+    ];
+
     protected $fillable = [
         'dealer_id',
         'map_from',
         'map_to',
-        'type'
+        'type',
+        'integration_name'
     ];
 
     public function dealers()

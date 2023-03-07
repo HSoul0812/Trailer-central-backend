@@ -18,12 +18,17 @@ class TfaType
     /**
      * Username Field
      */
-    const FIELD_USER = 'username';
+    const FIELD_USER = 'tfa_username';
 
     /**
      * Username Field
      */
-    const FIELD_PASS = 'password';
+    const FIELD_PASS = 'tfa_password';
+
+    /**
+     * Code Field
+     */
+    const FIELD_CODE = 'tfa_code';
 
 
     /**
@@ -36,12 +41,22 @@ class TfaType
      */
     const TYPE_SMS = 'sms';
 
+    /**
+     * Type Code
+     */
+    const TYPE_CODE = 'code';
+
+    /**
+     * Default Type
+     */
+    const TYPE_DEFAULT = self::TYPE_CODE;
+
 
     /**
      * @const array<array<string>> TFA Input Methods
      */
     const TFA_FIELDS = [
-        'default' => [
+        self::TYPE_AUTHY => [
             self::FIELD_USER => [
                 'label' => 'Username',
                 'method' => 'text'
@@ -51,27 +66,37 @@ class TfaType
                 'method' => 'password'
             ]
         ],
-        'sms' => [
+        self::TYPE_SMS => [
             self::FIELD_USER => [
                 'label' => 'SMS Number',
                 'method' => 'autocomplete'
             ],
             self::FIELD_PASS => [
                 'label' => 'TFA Number',
-                'method' => 'locked'
+                'method' => 'password'
             ]
-        ]
+        ],
+        self::TYPE_CODE => [
+            self::FIELD_CODE => [
+                'label' => '2FA Code',
+                'method' => 'text',
+            ]
+        ],
     ];
 
     /**
      * @const array<string> TFA Input Methods
      */
     const TFA_NOTES = [
-        'authy' => '',
-        'sms' => 'Enter a phone number or choose an already existing one. ' .
+        self::TYPE_AUTHY => '',
+        self::TYPE_SMS => 'Enter a phone number or choose an already existing one. ' .
                     'A new phone number will be returned in the second field. ' .
                     'Please set up your Facebook account to use two-factor ' .
-                    'authentication using this phone number as an sms number.'
+                    'authentication using this phone number as an sms number.',
+        self::TYPE_CODE => 'Some Facebook accounts require Two Factor Authentication ' .
+                    'to be enabled. If the account you are using requires 2FA, you can ' .
+                    'find the 32 character code within the Security Settings of your ' .
+                    'Facebook Account.'
     ];
 
 
@@ -125,7 +150,7 @@ class TfaType
         }
 
         // Return Default
-        return self::TFA_FIELDS['default'];
+        return self::TFA_FIELDS[self::TYPE_DEFAULT];
     }
 
     /**

@@ -2,33 +2,102 @@
 
 namespace App\Nova\Policies;
 
-use App\User;
+use App\Models\CRM\Leads\LeadAssign;
+use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class LeadAssignPolicy {
-    
+/**
+ * Class LeadAssignPolicy
+ * @package App\Nova\Policies
+ */
+class LeadAssignPolicy
+{
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support'];
+
     /**
-     * Determine whether the user can update the post.
+     * Create a new policy instance.
      *
-     * @param  \App\User  $user
-     * @param  \App\Post  $post
-     * @return mixed
+     * @return void
      */
-    public function update(User $user)
-    {
+    public function __construct() {
+        //
+    }
+
+    /**
+     * Determine whether the user can view any lead.
+     *
+     * @param NovaUser $user
+     * @return bool
+     */
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
+    }
+
+    /**
+     * Determine whether the user can view the lead.
+     *
+     * @param NovaUser|null $user
+     * @param LeadAssign $lead
+     * @return bool
+     */
+    public function view(?NovaUser $user, LeadAssign $lead): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
+    }
+
+    /**
+     * Determine whether the user can create leads.
+     *
+     * @param NovaUser $user
+     * @return bool
+     */
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
+    }
+
+    /**
+     * Determine whether the user can update the lead.
+     *
+     * @param NovaUser $user
+     * @param LeadAssign $lead
+     * @return bool
+     */
+    public function update(NovaUser $user, LeadAssign $lead): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
+    }
+
+    /**
+     * Determine whether the user can delete the lead.
+     *
+     * @param NovaUser $user
+     * @param LeadAssign $lead
+     * @return bool
+     */
+    public function delete(NovaUser $user, LeadAssign $lead): bool {
         return false;
     }
-    
-    public function create(User $user)
-    {
-        return false;
+
+    /**
+     * Determine whether the user can restore the lead.
+     *
+     * @param NovaUser $user
+     * @param LeadAssign $lead
+     * @return void
+     */
+    public function restore(NovaUser $user, LeadAssign $lead): void {
+        //
     }
-    
-    public function delete(User $user)
-    {
-        return false;
+
+    /**
+     * Determine whether the user can permanently delete the lead.
+     *
+     * @param NovaUser $user
+     * @param LeadAssign $lead
+     * @return void
+     */
+    public function forceDelete(NovaUser $user, LeadAssign $lead): void {
+        //
     }
-    
 }
+

@@ -2,7 +2,14 @@
 
 namespace App\Models\User;
 
+use App\Models\Integration\Collector\Collector;
+use App\Models\Integration\Integration;
+use App\Models\Integration\IntegrationDealer;
+use App\Models\Inventory\Inventory;
+use App\Models\CRM\Dms\Quote\QuoteSetting;
+use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\Parts\Bin;
+use App\Models\Parts\Part;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Traits\Models\HasPermissionsStub;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -12,6 +19,7 @@ use App\Models\CRM\Leads\LeadType;
 use App\Models\Website\Website;
 use App\Models\Website\Config\WebsiteConfig;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\CRM\Dms\Printer\Settings;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
@@ -33,11 +41,17 @@ use Laravel\Cashier\Billable;
  * @property string $name
  * @property string $email
  *
+ * @property bool $clsf_active;
  * @property bool $isCrmActive
  * @property bool $is_dms_active
+ * @property bool $is_scheduler_active
+ * @property bool|null $use_description_in_feed
+ * @property string|null $default_description
+ * @property string|null $import_config
  * @property string $identifier
  * @property integer $showroom
  * @property string $showroom_dealers a PHP serialized object
+ * @property int $auto_import_hide
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */
@@ -101,6 +115,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     public const OVERLAY_UPPER_DEALER_LOCATION_NAME = 'location';
 
+    public const CLASSIFIED_ACTIVE = 1;
+
     public const TYPES = [
         self::TYPE_DEALER,
         self::TYPE_MANUFACTURER,
@@ -142,6 +158,12 @@ class User extends Model implements Authenticatable, PermissionsInterface
         self::OVERLAY_UPPER_DEALER_LOCATION_NAME
     ];
 
+    public const OVERLAY_TEXT_SETTINGS = [
+        self::OVERLAY_UPPER_DEALER_NAME,
+        self::OVERLAY_UPPER_DEALER_PHONE,
+        self::OVERLAY_UPPER_DEALER_LOCATION_NAME
+    ];
+
     /**
      * The table associated with the model.
      *
@@ -178,6 +200,10 @@ class User extends Model implements Authenticatable, PermissionsInterface
     protected $casts = [
         'autoresponder_enable' => 'boolean',
         'is_dms_active' => 'boolean',
+        'is_scheduler_active' => 'boolean',
+        'clsf_active' => 'boolean',
+        'is_quote_manager_active' => 'boolean',
+        'google_feed_active' => 'boolean'
     ];
 
     /**
@@ -193,11 +219,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
     {
         parent::boot();
 
-        self::created(function($model){
+        self::created(function ($model) {
             AuthToken::create([
                 'user_id' => $model->dealer_id,
                 'user_type' => 'dealer',
-                'access_token' => md5($model->dealer_id.uniqid())
+                'access_token' => md5($model->dealer_id . uniqid())
             ]);
         });
     }
@@ -207,7 +233,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
      *
      * @return string
      */
-    public function getAuthIdentifierName() {
+    public function getAuthIdentifierName()
+    {
         return $this->name;
     }
 
@@ -216,7 +243,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
      *
      * @return mixed
      */
-    public function getAuthIdentifier() {
+    public function getAuthIdentifier()
+    {
         return $this->dealer_id;
     }
 
@@ -225,30 +253,43 @@ class User extends Model implements Authenticatable, PermissionsInterface
      *
      * @return string
      */
-    public function getAuthPassword() {}
+    public function getAuthPassword()
+    {
+    }
 
     /**
      * Get the token value for the "remember me" session.
      *
      * @return string
      */
-    public function getRememberToken() {}
+    public function getRememberToken()
+    {
+    }
 
     /**
      * Set the token value for the "remember me" session.
      *
-     * @param  string  $value
+     * @param string $value
      * @return void
      */
-    public function setRememberToken($value) {}
+    public function setRememberToken($value)
+    {
+    }
 
     /**
      * Get the column name for the "remember me" token.
      *
      * @return string
      */
-    public function getRememberTokenName() {}
+    public function getRememberTokenName()
+    {
+    }
 
+    /**
+     * Get dealer shorten identifier
+     *
+     * @return false|string
+     */
     public function getIdentifierAttribute()
     {
         return CompactHelper::shorten($this->dealer_id);
@@ -283,9 +324,19 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOne(DealerPart::class, 'dealer_id', 'dealer_id');
     }
 
+    public function parts(): HasMany
+    {
+        return $this->hasMany(Part::class, 'dealer_id', 'dealer_id');
+    }
+
     public function dealerClapp(): HasOne
     {
         return $this->hasOne(DealerClapp::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function marketplaceIntegrations(): HasMany
+    {
+        return $this->hasMany(Marketplace::class, 'dealer_id', 'dealer_id');
     }
 
     public function authToken(): HasOne
@@ -295,10 +346,33 @@ class User extends Model implements Authenticatable, PermissionsInterface
             ->where('user_type', 'dealer');
     }
 
+    public function quoteSetting(): HasOne
+    {
+        return $this->hasOne(QuoteSetting::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function getIsCdkActiveAttribute(): bool
+    {
+        return (bool)$this->getCdkAttribute();
+    }
+
+    public function getCdkAttribute()
+    {
+        $cdk = $this->adminSettings()->where([
+            ['setting', '=', 'website_leads_cdk_source_id']
+        ])->first();
+
+        if ($cdk) {
+            return $cdk->setting_value;
+        } else {
+            return false;
+        }
+    }
+
     public function getIsCrmActiveAttribute(): bool
     {
         $crmUser = $this->crmUser()->first();
-        return $crmUser instanceof CrmUser ? (bool)$crmUser->active : false;
+        return $crmUser instanceof CrmUser && $crmUser->active;
     }
 
     public function getIsPartsActiveAttribute(): bool
@@ -311,22 +385,63 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return !empty($this->dealerClapp);
     }
 
+    public function getIsFmeActiveAttribute(): bool
+    {
+        return $this->is_marketing_active && boolval(count($this->marketplaceIntegrations));
+    }
+
+    public function getIsMobileActiveAttribute(): bool
+    {
+        if (isset($this->website)) {
+            return (bool)$this->website->websiteConfigByKey(WebsiteConfig::MOBILE_KEY_ENABLED);
+        } else {
+            return false;
+        }
+    }
+
     public function getIsEcommerceActiveAttribute(): bool
     {
-        $website = $this->website;
-
-        if ($website) {
-          $isWebsiteConfigEcommerce = WebsiteConfig::where('website_id', $website->id)->where('key', WebsiteConfig::ECOMMERCE_KEY_ENABLE)->where('value', 1)->exists();
+        if (isset($this->website)) {
+            return (bool)$this->website->websiteConfigByKey(WebsiteConfig::ECOMMERCE_KEY_ENABLE);
         } else {
-          $isWebsiteConfigEcommerce = false;
+            return false;
         }
-        return $isWebsiteConfigEcommerce;
+    }
+
+    public function getIsAutoConxActiveAttribute(): bool
+    {
+        $integration = $this->integrations()->where('integration.integration_id', 33)->first();
+        return $integration ? $integration->pivot->active : false;
+    }
+
+    public function getIsCarbaseActiveAttribute(): bool
+    {
+        $integration = $this->integrations()->where('integration.integration_id', 50)->first();
+        return $integration ? $integration->pivot->active : false;
+    }
+
+    public function getIsDP360ActiveAttribute(): bool
+    {
+        $integration = $this->integrations()->where('integration.integration_id', 62)->first();
+        return $integration ? $integration->pivot->active : false;
+    }
+
+    public function getIsTrailerUsaActiveAttribute(): bool
+    {
+        $integration = $this->integrations()->where('integration.integration_id', 31)->first();
+        return $integration ? $integration->pivot->active : false;
+    }
+
+    public function getIsELeadsActiveAttribute(): bool
+    {
+        $integration = $this->integrations()->where('integration.integration_id', 54)->first();
+        return $integration ? $integration->pivot->active : false;
     }
 
     public function getIsUserAccountsActiveAttribute(): ?bool
     {
-        if(isset($this->website)) {
-            return $this->website->websiteConfigByKey('general/user_accounts');
+        if (isset($this->website)) {
+            return (bool)$this->website->websiteConfigByKey(WebsiteConfig::USER_ACCOUNTS_KEY);
         } else {
             return false;
         }
@@ -340,9 +455,14 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasMany(DealerUser::class, 'dealer_id', 'dealer_id');
     }
 
-    public function locations() : HasMany
+    public function locations(): HasMany
     {
         return $this->hasMany(DealerLocation::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function adminSettings(): HasMany
+    {
+        return $this->hasMany(DealerAdminSetting::class, 'dealer_id', 'dealer_id');
     }
 
     /**
@@ -351,15 +471,39 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function leads()
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0)
-                    ->where(Lead::getTableName() . '.lead_type', '<>', LeadType::TYPE_NONLEAD);
+            ->where(Lead::getTableName() . '.lead_type', '<>', LeadType::TYPE_NONLEAD);
     }
 
-    public function printerSettings() : HasOne
+    /**
+     * Get Inventories
+     */
+    public function inventories(): HasMany
+    {
+        return $this->hasMany(Inventory::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get Integrations
+     */
+    public function integrations(): BelongsToMany
+    {
+        return $this->belongsToMany(Integration::class, 'integration_dealer', 'dealer_id', 'integration_id')->withPivot(['active']);
+    }
+
+    /**
+     * Get Collector
+     */
+    public function collector()
+    {
+        return $this->hasOne(Collector::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function printerSettings(): HasOne
     {
         return $this->hasOne(Settings::class, 'dealer_id', 'dealer_id');
     }
 
-    public function bins() : HasMany
+    public function bins(): HasMany
     {
         return $this->hasMany(Bin::class, 'dealer_id', 'dealer_id');
     }
@@ -369,17 +513,18 @@ class User extends Model implements Authenticatable, PermissionsInterface
         $userService = app(UserService::class);
         $crmLoginString = $userService->getUserCrmLoginUrl($this->getAuthIdentifier());
         if ($route) {
-            $crmLoginString .= '&r='.$route;
+            $crmLoginString .= '&r=' . $route;
         }
         return ($useNewDesign ? config('app.new_design_crm_url') : '') . $crmLoginString;
     }
 
-    public function isSecondaryUser() : bool
+    public function isSecondaryUser(): bool
     {
         return false;
     }
 
-    public static function getTableName() {
+    public static function getTableName()
+    {
         return self::TABLE_NAME;
     }
 
@@ -391,7 +536,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
     /**
      * Set the user's password encryption method
      *
-     * @param  string  $value
+     * @param string $value
      * @return void
      */
     public function setPasswordAttribute(string $value): void
@@ -403,5 +548,22 @@ class User extends Model implements Authenticatable, PermissionsInterface
             $this->attributes['salt'] = $salt;
         }
         $this->attributes['password'] = $encrypterService->encryptBySalt($value, $salt);
+    }
+
+    /**
+     * Unserializes and returns the serialized showroom dealers
+     * @return array|null
+     */
+    public function getShowroomDealers(): ?array
+    {
+        if ($this->showroom_dealers) {
+            return array_values(array_filter(unserialize($this->showroom_dealers)));
+        }
+        return null;
+    }
+
+    public function logo(): HasOne
+    {
+        return $this->hasOne(DealerLogo::class, 'dealer_id');
     }
 }

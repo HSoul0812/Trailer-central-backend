@@ -78,38 +78,34 @@ class ProfileRepository implements ProfileRepositoryInterface
      * @param $params
      * @return Collection
      */
-    public function getAll($params, string $type = 'inventory')
+    public function getAll($params)
     {
         /** @var  Builder $query */
-        $query = Profile::select(Profile::getTableName().'.id', 'profile', 'username', 'postCategory as category');
+        $query = Profile::select(Profile::getTableName().'.id', 'profile', 'username', 'postCategory as category')
+                        ->where('deleted', 0);
 
-        $query = $query->where('username', '<>', '')
-            ->where('username', '<>', '0')
-            ->where('deleted', 0);
-
-        if (isset($params['type'])) {
-            $type = $params['type'];
+        if (!isset($params['type'])) {
+            $params['type'] = 'inventory';
         }
-        $query->where('profile_type', $type);
+        $query = $query->where('profile_type', $params['type']);
+
+        if (!isset($params['sort'])) {
+            $params['sort'] = '-profile';
+        }
 
         if (isset($params['dealer_id'])) {
             $query = $query->where('dealer_id', $params['dealer_id']);
         }
 
+        // Include Slot ID?
         if (isset($params['slot_id']) && (int) $params['slot_id'] === Session::SLOT_SCHEDULER) {
             $query = $query->leftJoin(Category::getTableName(), Category::getTableName().'.category',
                                         '=', Profile::getTableName().'.postCategory')
                            ->where(Category::getTableName().'.grouping', Category::GROUP_BY_DEALER);
         }
 
-        if (!isset($params['sort'])) {
-            $params['sort'] = '-profile';
-        }
-        if (isset($params['sort'])) {
-            $query = $this->addSortQuery($query, $params['sort']);
-        }
-
-        return $query->get();
+        // Sort Query Always Required
+        return $this->addSortQuery($query, $params['sort'])->get();
     }
 
     protected function getSortOrders() {

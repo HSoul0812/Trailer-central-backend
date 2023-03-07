@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Export;
 
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 
 /**
  * Can be used for a simple PDF export tasks
@@ -74,10 +76,10 @@ abstract class PdfExporter
     /**
      * Fluent set the view
      *
-     * @param array $data
+     * @param array|Collection|LazyCollection $data
      * @return PdfExporter
      */
-    public function withData(array $data): self
+    public function withData($data): self
     {
         $this->view->with('data', $data);
         return $this;

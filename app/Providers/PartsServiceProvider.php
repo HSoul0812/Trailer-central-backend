@@ -13,6 +13,8 @@ use App\Repositories\Bulk\Parts\BulkDownloadRepository;
 use App\Repositories\Bulk\Parts\BulkUploadRepository;
 use App\Repositories\Parts\CostHistoryRepository;
 use App\Repositories\Parts\CostHistoryRepositoryInterface;
+use App\Repositories\Parts\Textrail\AttributeRepository;
+use App\Repositories\Parts\Textrail\AttributeRepositoryInterface;
 use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportServiceInterface;
 use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportService;
 use App\Repositories\Parts\PartRepositoryInterface;
@@ -21,6 +23,8 @@ use App\Repositories\Parts\AuditLogRepository;
 use App\Repositories\Parts\AuditLogRepositoryInterface;
 use App\Services\Export\Parts\BulkCsvDownloadJobService;
 use App\Services\Export\Parts\BulkDownloadMonitoredJobServiceInterface;
+use App\Services\Export\Parts\BulkReportCsvJobService;
+use App\Services\Export\Parts\BulkReportCsvJobServiceInterface;
 use App\Services\Export\Parts\BulkReportJobService;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
 use App\Services\Parts\PartService;
@@ -72,6 +76,7 @@ class PartsServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(PartRepositoryInterface::class, PartRepository::class);
+        $this->app->bind(AttributeRepositoryInterface::class, AttributeRepository::class);
         $this->app->bind('App\Repositories\Parts\BinRepositoryInterface', 'App\Repositories\Parts\BinRepository');
         $this->app->bind('App\Repositories\Parts\CycleCountRepositoryInterface', 'App\Repositories\Parts\CycleCountRepository');
         $this->app->bind('App\Repositories\Parts\BrandRepositoryInterface', 'App\Repositories\Parts\BrandRepository');
@@ -92,6 +97,7 @@ class PartsServiceProvider extends ServiceProvider
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
         $this->app->bind(BulkDownloadMonitoredJobServiceInterface::class, BulkCsvDownloadJobService::class);
         $this->app->bind(BulkCsvTechnicianReportServiceInterface::class, BulkCsvTechnicianReportService::class);
+        $this->app->bind(BulkReportCsvJobServiceInterface::class, BulkReportCsvJobService::class);
 
         // PDF exporter bindings
         $this->app->bind(BulkReportRepositoryInterface::class, BulkReportRepository::class);

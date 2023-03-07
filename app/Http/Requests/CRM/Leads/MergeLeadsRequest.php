@@ -13,6 +13,7 @@ class MergeLeadsRequest extends Request
     protected $rules = [
         'dealer_id' => 'required|integer|exists:dealer,dealer_id',
         'lead_id' => 'required|integer|valid_lead',
-        'merges_lead_id' => 'required|integer|valid_lead',
+        'merge_lead_ids' => 'required|array',
+        'merge_lead_ids.*' => 'integer|valid_lead',
     ];
 }

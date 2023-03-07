@@ -23,11 +23,12 @@ use App\Console\Commands\Parts\FixPartVendor;
 use App\Console\Commands\CRM\Dms\CVR\GenerateCVRDocumentCommand;
 use App\Console\Commands\CRM\Dms\UnitSale\GetCompletedSaleWithNoFullInvoice;
 use App\Console\Commands\CRM\Dms\UnitSale\FixEmptyManufacturerUnitSale;
+use App\Console\Commands\Database\PruneSSNCommand;
 use App\Console\Commands\Inventory\FixFloorplanBillStatus;
 use App\Console\Commands\Parts\Import\GetTextrailParts;
 use App\Console\Commands\Export\ExportFavoritesCommand;
 use App\Console\Commands\User\GenerateCrmUsers;
-use App\Console\Commands\Website\HideExpiredImages;
+use App\Console\Commands\Website\UpdateWebsiteImagesVisibility;
 
 class Kernel extends ConsoleKernel
 {
@@ -60,7 +61,8 @@ class Kernel extends ConsoleKernel
         MyScheduleWorkCommand::class,
         ExportFavoritesCommand::class,
         GenerateCrmUsers::class,
-        HideExpiredImages::class
+        UpdateWebsiteImagesVisibility::class,
+        PruneSSNCommand::class,
     ];
 
     /**
@@ -73,74 +75,105 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('run:bulk')
                 ->withoutOverlapping()
+                ->onOneServer()
                 ->runInBackground();
 
         $schedule->command('add:sitemaps')
                 ->daily()
+                ->onOneServer()
                 ->runInBackground();
 
         $schedule->command('user:create-access-token')
                 ->hourly()
+                ->onOneServer()
                 ->runInBackground();
 
         $schedule->command('user:generate-crm-users')
                 ->hourly()
+                ->onOneServer()
                 ->runInBackground();
 
         $schedule->command('crm:dms:update-po-num-ref')
                 ->daily()
+                ->onOneServer()
                 ->runInBackground();
 
-        //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
+        /*$schedule->command('leads:assign:hot-potato')
+                ->everyFiveMinutes()
+                ->runInBackground();*/
 
         $schedule->command('leads:import')
                 ->everyFiveMinutes()
+                ->onOneServer()
                 ->runInBackground();
 
+        /**
+         * Marketing
+         */
+        $schedule->command('marketing:craigslist:validate')
+                ->hourly()
+                ->onOneServer()
+                ->runInBackground();
 
         /**
          * Campaigns/Blasts
          */
-        $schedule->command('text:process-campaign')
-                ->withoutOverlapping()
-                ->runInBackground();
+        if (config('app.env') === 'production') {
+            $schedule->command('text:process-campaign')
+                    ->withoutOverlapping()
+                    ->onOneServer()
+                    ->runInBackground();
 
-        $schedule->command('text:deliver-blast')
-                ->withoutOverlapping()
-                ->runInBackground();
+            $schedule->command('text:deliver-blast')
+                    ->withoutOverlapping()
+                    ->onOneServer()
+                    ->runInBackground();
+        }
 
         $schedule->command('text:auto-expire-phones')
                 ->weeklyOn(7, '4:00')
+                ->onOneServer()
                 ->runInBackground();
 
         $schedule->command('email:deliver-blast')
                 ->withoutOverlapping()
+                ->onOneServer()
                 ->runInBackground();
-
 
         $schedule->command('files:clear-local-tmp-folder')
             ->weeklyOn(7, '4:00')
+            ->onOneServer()
             ->runInBackground();
 
         $schedule->command('website:generate-dealer-specific-site-urls')
             ->daily()
+            ->onOneServer()
             ->runInBackground();
 
         $schedule->command('inventory:auto-archive-sold-items')
             ->daily()
+            ->onOneServer()
             ->runInBackground();
 
         $schedule->command('inventory:fix-floorplan-bill-status')
             ->hourly()
+            ->onOneServer()
             ->runInBackground();
 
+        /**
+         * Scrape Email Replies
+         */
+        $schedule->command('email:scrape-replies')
+                ->everyFiveMinutes()
+                ->onOneServer()
+                ->runInBackground();
 
         /**
          * Scrape Facebook Messages
          */
-        $schedule->command('facebook:scrape-messages')
-                ->withoutOverlapping()
-                ->runInBackground();
+        /*$schedule->command('facebook:scrape-messages')
+                ->everyFiveMinutes()
+                ->runInBackground();*/
 
         // $schedule->command('inspire')
         //          ->hourly();
@@ -151,17 +184,36 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('command:get-textrail-parts')
            ->dailyAt('1:00')
+           ->onOneServer()
            ->runInBackground();
+
+        /**
+         * @todo Calo say we could schedule this to be removed in next scheduled release (Feb 20th)
+         *
+         * Temporary scheduled command to mitigate the integration issue,
+         * we need to make time so they will be able to move everything inventory related to the API side
+         */
+        $schedule->command('command:inventory:reindex')
+            ->dailyAt('1:00')
+            ->onOneServer()
+            ->runInBackground();
 
         $schedule->command('horizon:snapshot')
             ->everyFiveMinutes()
+            ->onOneServer()
             ->runInBackground();
 
         $schedule->command('export:inventory-favorites')
             ->daily()
+            ->onOneServer()
             ->runInBackground();
 
-        $schedule->command('website:hide-expired-images')
+        $schedule->command('website:update-images-visibility')
+            ->daily()
+            ->onOneServer()
+            ->runInBackground();
+
+        $schedule->command('database:prune-ssn')
             ->daily()
             ->runInBackground();
     }
@@ -173,7 +225,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

@@ -43,6 +43,9 @@ class ServiceOrderRepositoryTest extends TestCase
     
     /**
      * @covers ::update
+     *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
      */
     public function testUpdateServiceOrderStatus(): void 
     {
@@ -79,6 +82,9 @@ class ServiceOrderRepositoryTest extends TestCase
     
     /**
      * @covers ::get
+     *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
      */
     public function testGetServiceOrder(): void 
     {

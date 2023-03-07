@@ -8,7 +8,7 @@ use App\Traits\WithGetter;
 
 /**
  * Class DealerFacebook
- * 
+ *
  * @package App\Services\Dispatch\Facebook\DTOs
  */
 class DealerFacebook
@@ -58,6 +58,11 @@ class DealerFacebook
     /**
      * @var string
      */
+    private $authCode;
+
+    /**
+     * @var string
+     */
     private $authType;
 
     /**
@@ -68,5 +73,20 @@ class DealerFacebook
     /**
      * @var Collection<InventoryFacebook>
      */
-    private $inventory;
+    private $missing;
+
+    /**
+     * @var Collection<InventoryFacebook>
+     */
+    private $sold;
+
+    /**
+     * @var $string
+     */
+    private $last_attempt_ts;
+
+    /**
+     * @var int
+     */
+    private $posts_per_day;
 }

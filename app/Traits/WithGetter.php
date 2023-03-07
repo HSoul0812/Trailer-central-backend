@@ -21,4 +21,13 @@ trait WithGetter
 
         throw new PropertyDoesNotExists("'$key' property does not exists");
     }
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function __isset(string $key)
+    {
+        return isset($this->{$key});
+    }
 }

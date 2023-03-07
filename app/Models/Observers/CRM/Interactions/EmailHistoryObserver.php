@@ -31,7 +31,7 @@ class EmailHistoryObserver
      */
     public function created(EmailHistory $emailHistory)
     {
-        if (empty($emailHistory->lead_id)) {
+        if (empty($emailHistory->lead_id) || empty($emailHistory->date_sent)) {
             return;
         }
 

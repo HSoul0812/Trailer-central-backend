@@ -25,22 +25,22 @@ class DeliverBlast extends Command
     protected $description = 'Process sending texts to all leads on all active blasts.';
 
     /**
-     * @var App\Services\CRM\Text\CampaignServiceInterface
+     * @var BlastServiceInterface
      */
     protected $service;
 
     /**
-     * @var App\Repositories\CRM\Text\TextRepository
+     * @var TextRepositoryInterface
      */
     protected $texts;
 
     /**
-     * @var App\Repositories\CRM\Text\BlastRepository
+     * @var BlastRepositoryInterface
      */
     protected $blasts;
 
     /**
-     * @var datetime
+     * @var \DateTime
      */
     protected $datetime = null;
 

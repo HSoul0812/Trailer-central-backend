@@ -50,7 +50,7 @@ class TemplateSeeder extends Seeder
     public function __construct()
     {
         $this->dealer = factory(User::class)->create();
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->user = factory(NewUser::class)->create();
     }
 
     public function seed(): void
@@ -68,7 +68,7 @@ class TemplateSeeder extends Seeder
             // Create Template
             if(isset($seed['action']) && $seed['action'] === 'create') {
                 $template = factory(Template::class)->create([
-                    'user_id' => $this->dealer->getKey()
+                    'user_id' => $this->user->getKey()
                 ]);
 
                 $this->createdTemplates[] = $template;
@@ -77,7 +77,7 @@ class TemplateSeeder extends Seeder
 
             // Make Template
             $template = factory(Template::class)->make([
-                'user_id' => $this->dealer->getKey()
+                'user_id' => $this->user->getKey()
             ]);
 
             $this->missingTemplates[] = $template;
@@ -87,11 +87,12 @@ class TemplateSeeder extends Seeder
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
+        $userId = $this->user->getKey();
 
         // Database clean up
-        Template::where('user_id', $dealerId)->delete();
-        SalesPerson::where('user_id', $dealerId)->delete();
-        NewUser::destroy($dealerId);
+        Template::where('user_id', $userId)->delete();
+        SalesPerson::where('user_id', $userId)->delete();
+        NewUser::destroy($userId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();                
         User::destroy($dealerId);

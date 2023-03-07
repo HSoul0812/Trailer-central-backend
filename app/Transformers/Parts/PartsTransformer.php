@@ -10,9 +10,12 @@ use League\Fractal\Resource\Primitive;
 
 class PartsTransformer extends TransformerAbstract implements PartsTransformerInterface
 {
+    const CRM_NEW_PO_URL = '/accounting/purchase-order';
+
     protected $availableIncludes = [
         'purchaseOrders',
-        'total_qty'
+        'total_qty',
+        'partAttributes'
     ];
 
     public function transform(Part $part): array
@@ -51,10 +54,29 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
              'stock_min' => $part->stock_min,
              'stock_max' => $part->stock_max,
              'bins' => $part->bins,
-             'disabled' => count($part->bins) === 0
+             'disabled' => count($part->bins) === 0,
+             'new_po_url' => optional($part->user)->getCrmLoginUrl(
+                $this->getNewPORoute($part->id),
+                true
+             ),
+             'is_active' => (bool) $part->is_active,
+             'taxable' => $part->is_taxable,
          ];
     }
 
+    /**
+     * Include part attributes.
+     *
+     * @param \App\Models\Parts\Part $part
+     * @return Collection
+     */
+    public function includePartAttributes(\App\Models\Parts\Textrail\Part $part): Collection
+    {
+        return $this->collection(
+            $part->partAttributes,
+            new PartAttributeTransformer()
+        );
+    }
     /**
      * Include purchases resource object
      *
@@ -84,5 +106,10 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
     public function includeTotalQty(Part $part): Primitive
     {
         return $this->primitive($part->total_qty);
+    }
+
+    private function getNewPORoute(string $partId): string
+    {
+        return self::CRM_NEW_PO_URL . '?part_id=' . $partId;
     }
 }

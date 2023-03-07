@@ -9,10 +9,12 @@ use App\Models\CRM\Email\CampaignSent;
 use App\Models\CRM\Email\Template;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\User\NewDealerUser;
 use App\Models\User\User;
 use App\Models\User\NewUser;
 use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
+use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Traits\WithGetter;
 use Tests\database\seeds\Seeder;
 
@@ -20,6 +22,7 @@ use Tests\database\seeds\Seeder;
  * @property-read User $dealer
  * @property-read Website $website
  * @property-read SalesPerson $sales
+ * @property-read Template $template
  * @property-read array<Lead> $leads
  * @property-read array<Campaign> $createdCampaigns
  * @property-read array<Campaign> $missingCampaigns
@@ -44,6 +47,11 @@ class CampaignSeeder extends Seeder
      * @var Lead[]
      */
     private $leads;
+
+    /**
+     * @var Template
+     */
+    private $template;
 
     /**
      * @var Campaigns[]
@@ -71,7 +79,19 @@ class CampaignSeeder extends Seeder
     public function __construct()
     {
         $this->dealer = factory(User::class)->create();
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->user = factory(NewUser::class)->create();
+        $this->template = factory(Template::class)->create(['user_id' => $this->user->getKey()]);
+
+        $newDealerUserRepo = app(NewDealerUserRepositoryInterface::class);
+        $newDealerUser = $newDealerUserRepo->create([
+            'user_id' => $this->user->user_id,
+            'salt' => md5((string)$this->user->user_id),
+            'auto_import_hide' => 0,
+            'auto_msrp' => 0
+
+        ]);
+
+        $this->dealer->newDealerUser()->save($newDealerUser);
     }
 
     public function seed(): void
@@ -90,9 +110,10 @@ class CampaignSeeder extends Seeder
             if(isset($seed['action']) && $seed['action'] === 'create') {
                 // Create Campaign
                 $campaign = factory(Campaign::class)->create([
-                    'user_id' => $this->dealer->getKey(),
+                    'user_id' => $this->user->getKey(),
                     'campaign_name' => $seed['name'],
-                    'campaign_subject' => $seed['subject'] ?? $seed['name']
+                    'campaign_subject' => $seed['subject'] ?? $seed['name'],
+                    'email_template_id' => $this->template->getKey()
                 ]);
 
                 $this->createdCampaigns[] = $campaign;
@@ -101,9 +122,10 @@ class CampaignSeeder extends Seeder
 
             // Make Campaign
             $campaign = factory(Campaign::class)->make([
-                'user_id' => $this->dealer->getKey(),
+                'user_id' => $this->user->getKey(),
                 'campaign_name' => $seed['name'],
-                'campaign_subject' => $seed['subject'] ?? $seed['name']
+                'campaign_subject' => $seed['subject'] ?? $seed['name'],
+                'email_template_id' => $this->template->getKey()
             ]);
 
             $this->missingCampaigns[] = $campaign;
@@ -134,6 +156,7 @@ class CampaignSeeder extends Seeder
                     'drip_campaigns_id' => $this->createdCampaigns[0]->getKey(),
                     'lead_id' => $lead->getKey()
                 ]);
+                $sent->setRelation('lead', $lead);
 
                 $this->campaignsSent[] = $sent;
                 return;
@@ -144,6 +167,7 @@ class CampaignSeeder extends Seeder
                 'drip_campaigns_id' => $this->createdCampaigns[0]->getKey(),
                 'lead_id' => $lead->getKey()
             ]);
+            $sent->setRelation('lead', $lead);
 
             $this->campaignsUnsent[] = $sent;
         });
@@ -162,11 +186,13 @@ class CampaignSeeder extends Seeder
             }
         }
         Template::where('user_id', $dealerId)->delete();
+        Template::where('user_id', $this->user->getKey())->delete();
         Lead::where('dealer_id', $dealerId)->delete();
         SalesPerson::where('user_id', $dealerId)->delete();
         NewUser::destroy($dealerId);
+        NewDealerUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
-        Website::where('dealer_id', $dealerId)->delete();                
+        Website::where('dealer_id', $dealerId)->delete();
         User::destroy($dealerId);
     }
 }

@@ -16,13 +16,15 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Traits\SortTrait;
+use App\Services\CRM\Leads\DTOs\LeadFiltersPopular;
+use App\Utilities\TimeUtil;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
-use App\Utilities\TimeUtil;
 use League\Csv\Writer;
+use Carbon\Carbon;
 
 class LeadRepository implements LeadRepositoryInterface {
 
@@ -38,6 +40,18 @@ class LeadRepository implements LeadRepositoryInterface {
         'textLogs',
         'inventory',
         'fbUsers',
+    ];
+
+    private const DEFAULT_HOT_POTATO_DURATION = 30;
+
+    private const POPULAR_FILTERS = [
+        'all'              => ['label' => 'All'],
+        'due_today'        => ['label' => 'Due Today', 'type' => 'interaction', 'time' => 'today'],
+        'due_yesterday'    => ['label' => 'Due Yesterday', 'type' => 'interaction', 'time' => 'yesterday'],
+        'due_week'         => ['label' => 'Due This Week', 'type' => 'interaction', 'time' => 'week'],
+        'uncontacted'      => ['label' => 'Uncontacted', 'type' => 'interaction', 'time' => 'no'],
+        'interacted_today' => ['label' => 'Interacted Today', 'type' => 'interacted', 'time' => 'today'],
+        'interacted_week'  => ['label' => 'Interacted This Week', 'type' => 'interacted', 'time' => 'week']
     ];
 
     private $sortOrdersCrm = [
@@ -178,8 +192,20 @@ class LeadRepository implements LeadRepositoryInterface {
         return Lead::create($params);
     }
 
+    /**
+     * Delete Lead
+     *
+     * @param array $params
+     * @return Lead
+     */
     public function delete($params) {
-        throw new NotImplementedException;
+        
+        if (isset($params['id'])) {
+            $params['identifier'] = $params['id'];
+            unset($params['id']);
+        }
+
+        return Lead::where($params)->delete();
     }
 
     public function get($params) {
@@ -263,6 +289,58 @@ class LeadRepository implements LeadRepositoryInterface {
     }
 
     /**
+     * Get the earliest of submitted date between leads
+     * 
+     * @param array $leadIds
+     * @param string 
+     */
+    public function getMinSubmittedDateBetweenLeads(array $leadIds)
+    {
+        return Lead::selectRaw('MIN(date_submitted) AS min_date_submitted')
+            ->whereIn('identifier', $leadIds)->first()->min_date_submitted;
+    }
+
+    /**
+     * Get the latest contact date between leads
+     * 
+     * @param array $leadIds
+     * @return string
+     */
+    public function getMaxContactDateBetweenLeads(array $leadIds)
+    {
+        return LeadStatus::selectRaw('MAX(next_contact_date) AS max_contact_date')
+            ->whereIn('tc_lead_identifier', $leadIds)->first()->max_contact_date;
+    }
+
+    /**
+     * Get combined notes of leads
+     * 
+     * @param array $leadIds
+     * @return string
+     */
+    public function getNotesBetweenLeads(array $leadIds)
+    {
+        // Get Notes for Various Leads
+        $leads = Lead::select('note')
+            ->whereIn('identifier', $leadIds)
+            ->whereRaw('note is not null')
+            ->whereRaw("trim(note) <> ''")
+            ->get();
+
+        // Get Notes
+        $notes = '';
+        foreach($leads as $lead) {
+            if(!empty($notes)) {
+                $notes .= PHP_EOL . PHP_EOL;
+            }
+            $notes .= $lead->note;
+        }
+
+        // Return Combined Notes
+        return $notes;
+    }
+
+    /**
      * Get All Unassigned Leads
      *
      * @param int $params
@@ -310,6 +388,80 @@ class LeadRepository implements LeadRepositoryInterface {
 
         // Paginate!
         return $query->paginate($params['per_page'])->appends($params);
+    }
+
+    /**
+     * Get All Unprocessed Leads
+     *
+     * @param int $params
+     * @return Collection<Lead>
+     */
+    public function getAllUnprocessed(array $params): Collection {
+        $query = Lead::select(Lead::getTableName() . '.*')->with('inventory')
+                     ->where('lead_type', '<>', LeadType::TYPE_NONLEAD)
+                     ->leftJoin(NewDealerUser::getTableName(), Lead::getTableName() . '.dealer_id', '=', NewDealerUser::getTableName() . '.id')
+                     ->leftJoin(LeadStatus::getTableName(), Lead::getTableName() . '.identifier', '=', LeadStatus::getTableName() . '.tc_lead_identifier')
+                     ->leftJoin(SalesPerson::getTableName(), function ($join) {
+            $join->on(LeadStatus::getTableName() . '.sales_person_id', '=', SalesPerson::getTableName() . '.id')
+                 ->on(SalesPerson::getTableName() . '.user_id', '=', NewDealerUser::getTableName() . '.user_id')
+                 ->whereNull(SalesPerson::getTableName() . '.deleted_at');
+        })->leftJoin(Interaction::getTableName(), function ($join) {
+            $join->on(Lead::getTableName() . '.identifier', '=', Interaction::getTableName() . '.tc_lead_id')
+                 ->on(Interaction::getTableName() . '.interaction_time', '>', LeadStatus::getTableName() . '.next_contact_date')
+                 ->where(Interaction::getTableName() . '.interaction_type', 'EMAIL');
+        })->whereNotNull(SalesPerson::getTableName() . '.email')
+          ->where(Lead::getTableName() . '.is_archived', 0)
+          ->where(Lead::getTableName() . '.is_spam', 0)
+          ->whereNull(Interaction::getTableName() . '.interaction_time');
+
+        if (isset($params['dealer_id'])) {
+            $query = $query->where(Lead::getTableName() . '.dealer_id', $params['dealer_id']);
+        }
+
+        // Created At?
+        if(!isset($params['first_created']) && !isset($params['last_created'])) {
+            $query = $query->whereNotNull(LeadStatus::getTableName() . '.next_contact_date')
+                           ->where(LeadStatus::getTableName() . '.next_contact_date', '<>', '0000-00-00 00:00:00');
+
+            // Set First / Last Contact Date
+            if(isset($params['first_contact'])) {
+                $query = $query->where(LeadStatus::getTableName() . '.next_contact_date', '>=', $params['first_contact']);
+            }
+            if(isset($params['last_contact'])) {
+                $query = $query->where(LeadStatus::getTableName() . '.next_contact_date', '<=', $params['last_contact']);
+            }
+        } elseif(isset($params['first_contact']) || isset($params['last_contact'])) {
+            $query = $query->where(function($query) use($params) {
+                return $query->whereNull(LeadStatus::getTableName() . '.next_contact_date')
+                             ->orWhere(function($query) use($params) {
+                    // Set First / Last Contact Date
+                    if(isset($params['first_contact'])) {
+                        $query = $query->where(LeadStatus::getTableName() . '.next_contact_date', '>=', $params['first_contact']);
+                    }
+                    if(isset($params['last_contact'])) {
+                        $query = $query->where(LeadStatus::getTableName() . '.next_contact_date', '<=', $params['last_contact']);
+                    }
+                });
+            })->orWhere(function($query) use($params) {
+                // Set First / Last Created Date
+                if(isset($params['first_created'])) {
+                    $query = $query->where(Lead::getTableName() . '.date_submitted', '>=', $params['first_created']);
+                }
+                if(isset($params['last_created'])) {
+                    $query = $query->where(Lead::getTableName() . '.date_submitted', '<=', $params['last_created']);
+                }
+            });
+        }
+
+        // Set Sort Query
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        }
+
+        // Return Results
+        return $query->groupBy(Lead::getTableName() . '.identifier')
+                     ->orderBy(Lead::getTableName() . '.date_submitted', 'ASC')
+                     ->orderBy(Lead::getTableName() . '.identifier', 'ASC')->get();
     }
 
     /**
@@ -453,6 +605,43 @@ class LeadRepository implements LeadRepositoryInterface {
 
     protected function getSortOrderNames() {
         return $this->sortOrdersNames;
+    }
+
+    /** 
+     * Get Mapped Array of CRM Sorts > Name
+     * 
+     * @return array
+     */
+    public function getSortOrderNamesCrm(): array
+    {
+        // Initialize Sorts
+        $sorts = [];
+        foreach($this->getLeadsSortFieldsCrm() as $sort) {
+            $param = $sort['param'];
+            if(isset($this->sortOrdersNames[$param])) {
+                $sorts[$param] = $this->sortOrdersNames[$param]['name'];
+            }
+        }
+
+        // Return Sorts => Names Mapping
+        return $sorts;
+    }
+
+    /** 
+     * Get Popular Filters
+     * 
+     * @return array<LeadFiltersPopular>
+     */
+    public function getPopularFilters(): array
+    {
+        // Return Popular Filters Containing Preset Times
+        $filters = [];
+        foreach(self::POPULAR_FILTERS as $filter) {
+            $filters[] = LeadFiltersPopular::fill($filter);
+        }
+
+        // Return array<LeadFiltersPopular>
+        return $filters;
     }
 
     private function getHotLeadsByDealer($dealerId, $params = []) {

@@ -13,6 +13,10 @@ class HelpersTest extends TestCase
 {
     /**
      * @covers       \App\Traits\Repository\ElasticSearch\Helpers::makeMultiMatchQueryWithRelevance
+     *
+     * @group DMS
+     * @group DMS_ELASTIC_SEARCH
+     *
      * @dataProvider badArgumentsProvider
      */
     public function testWillThrowAnExceptionDueBadArguments(array $arguments): void
@@ -34,6 +38,9 @@ class HelpersTest extends TestCase
 
     /**
      * @covers       \App\Traits\Repository\ElasticSearch\Helpers::makeMultiMatchQueryWithRelevance
+     *
+     * @group DMS
+     * @group DMS_ELASTIC_SEARCH
      *
      * @dataProvider goodArgumentsProvider
      * @param  array  $fields

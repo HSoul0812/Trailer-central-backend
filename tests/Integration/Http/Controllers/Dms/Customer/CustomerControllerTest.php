@@ -29,6 +29,10 @@ class CustomerControllerTest extends TestCase
 
     /**
      * @covers ::destroy
+     *
+     * @group DMS
+     * @group DMS_CUSTOMER
+     *
      * @throws BindingResolutionException
      */
     public function testWithValidParams(): void
@@ -49,7 +53,7 @@ class CustomerControllerTest extends TestCase
         $response = $controller->destroy($customerId, $request);
 
         // Then I should see the customer not exist on database
-        $this->assertDeleted('dms_customer', ['id' => $customerId, 'dealer_id' => $dealerId]);
+        $this->assertSoftDeleted('dms_customer', ['id' => $customerId, 'dealer_id' => $dealerId]);
 
         // And I should see that response status is 202
         self::assertEquals(JsonResponse::HTTP_NO_CONTENT, $response->status());
@@ -64,7 +68,11 @@ class CustomerControllerTest extends TestCase
      * @param string $expectedExceptionMessage
      * @param string|null $firstExpectedErrorMessage
      *
+     * @throws Exception
      * @covers ::destroy
+     *
+     * @group DMS
+     * @group DMS_CUSTOMER
      */
     public function testWithInvalidParams(array $params,
                                           string $expectedException,
@@ -99,6 +107,61 @@ class CustomerControllerTest extends TestCase
         {
             throw $exception;
         }
+    }
+
+    public function validCustomernameProvider()
+    {
+        return [
+            [
+                'first_name' => 'Juan Carlos',
+                'middle_name' => 'Diego-Sanchez',
+                'last_name' => 'Rodriguez Jr.'
+            ],
+            [
+                'first_name' => 'Sara',
+                'middle_name' => 'Mary Anne',
+                'last_name' => 'Petersen-Nelson'
+            ],
+            [
+                'first_name' => 'Dr. Blake',
+                'middle_name' => 'Hunter',
+                'last_name' => 'Nelson Sr.'
+            ],
+            [
+                'first_name' => 'Anna-Molly',
+                'middle_name' => 'LeAnne',
+                'last_name' => 'Ray II'
+            ]
+        ];
+    }
+
+    /**
+     * @dataProvider validCustomernameProvider
+     * 
+     * @group DMS
+     * @group DMS_CUSTOMER
+     */
+    public function testCreateCustomerWithValidCustomerName($first_name, $middle_name, $last_name)
+    {
+        $params = [
+            'fist_name' => $first_name,
+            'middle_name' => $middle_name,
+            'last_name' => $last_name,
+            'display_name' => $first_name .' '. $middle_name .' '. $last_name,
+            'default_discount_percent' => 0
+        ];
+
+        $token = $this->seeder->dealers[0]->authToken->access_token;
+
+        $response = $this->json(
+            'PUT',
+            '/api/user/customers',
+            $params,
+            ['access-token' => $token]
+        );
+
+        $response->assertSuccessful()
+            ->assertJsonMissingValidationErrors();
     }
 
     /**

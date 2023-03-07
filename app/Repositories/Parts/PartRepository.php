@@ -12,10 +12,12 @@ use App\Models\Parts\PartImage;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Parts\VehicleSpecific;
 use Illuminate\Support\Facades\DB;
 use App\Models\Parts\BinQuantity;
+use App\Models\Parts\Bin;
 use App\Exceptions\ImageNotDownloadedException;
 use App\Repositories\Traits\SortTrait;
 
@@ -165,7 +167,9 @@ class PartRepository implements PartRepositoryInterface {
        return $part;
     }
 
-    public function createOrUpdate($params) {
+    public function createOrUpdate($params)
+    {
+        $part = null;
 
         if (isset($params['id'])) {
             $part = $this->model->where('id', $params['id'])->where('dealer_id', $params['dealer_id'])->first();
@@ -427,9 +431,11 @@ class PartRepository implements PartRepositoryInterface {
                 'v.name AS vendor_name',
                 'b.name AS brand_name',
                 't.name AS type_name',
-                'b.name AS category_name',
+                'c.name AS category_name',
             ])
             ->selectRaw(DB::raw('COALESCE((SELECT SUM(bc.qty) FROM part_bin_qty bc WHERE bc.part_id = p.id), 0) total_qty'))
+            ->selectRaw(DB::raw('(SELECT GROUP_CONCAT(CONCAT_WS(";", bc.bin_id, bc.qty)) FROM part_bin_qty bc WHERE bc.part_id = p.id) qty_values'))
+            ->selectRaw(DB::raw('(SELECT GROUP_CONCAT(CONCAT_WS(";", bin.id, bin.bin_name)) FROM dms_settings_part_bin bin WHERE bin.dealer_id = '.$dealerId.') bins'))
             ->selectRaw(DB::raw("(SELECT group_concat(i.image_url , '\\n') FROM part_images i WHERE i.part_id = p.id) images"))
             ->leftJoin(Vendor::getTableName().' AS v', 'p.vendor_id','=','v.id')
             ->leftJoin(Brand::getTableName().' AS b', 'p.brand_id','=','b.id')
@@ -437,6 +443,15 @@ class PartRepository implements PartRepositoryInterface {
             ->leftJoin(Category::getTableName().' AS c', 'p.category_id','=','c.id')
             ->orderBy('p.id')
             ->where('p.dealer_id', $dealerId);
+    }
+
+    /**
+     * Get all bins by dealerId.
+     * @param int $dealerId
+     * @return Collection
+     */
+    public function getBins($dealerId) {
+        return Bin::where('dealer_id', $dealerId)->get();
     }
 
     public function update($params) {
@@ -462,22 +477,27 @@ class PartRepository implements PartRepositoryInterface {
             }
 
             if ($part->save()) {
+                $deleteImagesIfNoIndex = data_get($params, 'delete_images_if_no_index', true);
+
                 if (isset($params['images'])) {
                     $part->images()->delete();
                     foreach($params['images'] as $image) {
                         try {
                             $this->storeImage($part->id, $image);
-                        } catch (\ImageNotDownloadedException $ex) {
+                        } catch (ImageNotDownloadedException $ex) {
 
                         }
                     }
                 } else {
-                    $part->images()->delete();
-                } 
+                    // Only delete the existing image if the index
+                    // name delete_images_if_no_index is set to true
+                    if ($deleteImagesIfNoIndex) {
+                        $part->images()->delete();
+                    }
+                }
 
                 if (isset($params['bins'])) {
                     $part->bins()->delete();
-                    $part->load('bins');
 
                     foreach ($params['bins'] as $bin) {
                         $binQty = $this->createBinQuantity([
@@ -485,8 +505,9 @@ class PartRepository implements PartRepositoryInterface {
                             'bin_id' => $bin['bin_id'],
                             'qty' => $bin['quantity']
                         ]);
-                        $part->bins->add($binQty);
                     }
+
+                    $part->load('bins');
                 }
             }
         });
@@ -528,9 +549,10 @@ class PartRepository implements PartRepositoryInterface {
 
     public function createPart($params)
     {
-        if (empty($params['latest_cost'])) {
+        if (Arr::has($params, 'dealer_cost') && empty($params['latest_cost'])) {
             $params['latest_cost'] = $params['dealer_cost'];
         }
+
         return $this->model->create($params);
     }
 
@@ -577,6 +599,11 @@ class PartRepository implements PartRepositoryInterface {
             } else if ($query['in_stock'] == self::PARTS_AVAILABLE) {
                 $search->filter('range', ['bins_total_qty' => ['lte' => 0]]);
             }
+        }
+
+        // if part is active
+        if (isset($query['is_active'])) {
+            $search->filter('term', ['is_active' => $query['is_active']]);
         }
 
         // filter by dealer

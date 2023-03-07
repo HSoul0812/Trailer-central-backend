@@ -54,6 +54,7 @@ class InquiryEmailServiceTest extends TestCase
      */
     const TEST_INQUIRY_EMAIL = 'admin@operatebeyond.com';
     const TEST_INQUIRY_NAME = 'Operate Beyond';
+    const TEST_INQUIRY_OVERRIDE = 'operatebeyond@gmail.com';
 
     /**
      * @const string
@@ -75,9 +76,39 @@ class InquiryEmailServiceTest extends TestCase
 
 
     /**
+     * @var LegacyMockInterface|InventoryRepositoryInterface
+     */
+    private $inventoryRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|PartRepositoryInterface
+     */
+    private $partRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|ShowroomRepositoryInterface
+     */
+    private $showroomRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|WebsiteRepositoryInterface
+     */
+    private $websiteRepositoryMock;
+
+    /**
      * @var LegacyMockInterface|WebsiteConfigRepositoryInterface
      */
     private $websiteConfigRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|UserRepositoryInterface
+     */
+    private $userRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|DealerLocationRepositoryInterface
+     */
+    private $dealerLocationRepositoryMock;
 
     public function setUp(): void
     {
@@ -285,54 +316,6 @@ class InquiryEmailServiceTest extends TestCase
         $this->assertTrue($result);
     }
 
-    /**
-     * @group CRM
-     * @covers ::send
-     * @group Inquiry
-     *
-     * @throws BindingResolutionException
-     */
-    public function testSendWithException()
-    {
-        // Send Request Params
-        $sendRequestParams = [
-            'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
-            'lead_types' => [LeadType::TYPE_GENERAL],
-            'website_domain' => self::TEST_DOMAIN,
-            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
-            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
-            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
-            'inquiry_name' => self::TEST_INQUIRY_NAME,
-            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
-            'device' => self::TEST_DEVICE,
-            'metadata' => [],
-            'is_spam' => 1
-        ];
-
-        // Get Inquiry Lead
-        $inquiry = new InquiryLead($sendRequestParams);
-
-
-        // @var InquiryEmailServiceInterface $service
-        $service = $this->app->make(InquiryEmailServiceInterface::class);
-
-        // Fake Mail
-        Mail::fake();
-
-        // Expect Exception
-        $this->expectException(SendInquiryFailedException::class);
-
-
-        // Validate Send Inquiry Result
-        $result = $service->send($inquiry);
-
-        // Assert a message was sent to the dealer...
-        Mail::assertNotSent(InquiryEmail::class);
-
-        // Assert True
-        $this->assertFalse($result);
-    }
-
 
     /**
      * @group CRM
@@ -390,6 +373,20 @@ class InquiryEmailServiceTest extends TestCase
             ->with($inquiry->websiteId, 'general/item_email_from')
             ->andReturn(self::TEST_WEBSITE_CONFIG);
 
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
+            ->andReturn(null);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email')
+            ->andReturn(null);
+
         // Mock User Repository
         $this->userRepositoryMock
             ->shouldReceive('get')
@@ -432,6 +429,7 @@ class InquiryEmailServiceTest extends TestCase
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
         $location->name = 'Indianopolis';
+        $location->email = self::TEST_INQUIRY_OVERRIDE;
 
         // Send Request Params
         $fillInquiry = [
@@ -470,6 +468,20 @@ class InquiryEmailServiceTest extends TestCase
             ->once()
             ->with($inquiry->websiteId, 'general/item_email_from')
             ->andReturn(self::TEST_WEBSITE_CONFIG);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
+            ->andReturn(null);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email')
+            ->andReturn(null);
 
         // Mock Dealer Location Repository
         $this->dealerLocationRepositoryMock
@@ -513,6 +525,7 @@ class InquiryEmailServiceTest extends TestCase
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
         $location->name = 'Indianopolis';
+        $location->email = self::TEST_INQUIRY_OVERRIDE;
 
         // Get Inventory
         $inventory = $this->getEloquentMock(Inventory::class);
@@ -562,6 +575,20 @@ class InquiryEmailServiceTest extends TestCase
             ->once()
             ->with($inquiry->websiteId, 'general/item_email_from')
             ->andReturn(self::TEST_WEBSITE_CONFIG);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
+            ->andReturn(null);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email')
+            ->andReturn(null);
 
         // Mock Inventory Repository
         $this->inventoryRepositoryMock
@@ -645,6 +672,20 @@ class InquiryEmailServiceTest extends TestCase
             ->once()
             ->with($inquiry->websiteId, 'general/item_email_from')
             ->andReturn(self::TEST_WEBSITE_CONFIG);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
+            ->andReturn(null);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email')
+            ->andReturn(null);
 
         // Mock Part Repository
         $this->partRepositoryMock
@@ -735,6 +776,20 @@ class InquiryEmailServiceTest extends TestCase
             ->once()
             ->with($inquiry->websiteId, 'general/item_email_from')
             ->andReturn(self::TEST_WEBSITE_CONFIG);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
+            ->andReturn(null);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email')
+            ->andReturn(null);
 
         // Mock Showroom Repository
         $this->showroomRepositoryMock

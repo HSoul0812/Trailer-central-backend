@@ -60,7 +60,7 @@ class InteractionSeeder extends Seeder
     {
         $this->dealer = factory(User::class)->create();
 
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->getKey()]);
+        $this->user = factory(NewUser::class)->create();
 
         // 
         $newDealerUserRepo = app(NewDealerUserRepositoryInterface::class);

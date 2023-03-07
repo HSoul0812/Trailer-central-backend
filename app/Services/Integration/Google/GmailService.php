@@ -2,14 +2,16 @@
 
 namespace App\Services\Integration\Google;
 
+use App\Exceptions\Common\InvalidEmailCredentialsException;
 use App\Exceptions\Common\MissingFolderException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
+use App\Exceptions\Integration\Google\MissingGmailLabelsException;
 use App\Exceptions\Integration\Google\InvalidGmailAuthMessageException;
 use App\Exceptions\Integration\Google\InvalidGoogleAuthCodeException;
 use App\Exceptions\Integration\Google\InvalidToEmailAddressException;
-use App\Exceptions\Integration\Google\MissingGmailLabelsException;
 use App\Exceptions\Integration\Google\FailedInitializeGmailMessageException;
 use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
+use App\Exceptions\Integration\Google\MissingGapiAccessTokenException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
@@ -182,7 +184,7 @@ class GmailService implements GmailServiceInterface
      * @param AccessToken $accessToken
      * @param string $folder folder name to get messages from; defaults to inbox
      * @param array $params
-     * @return whether the email was sent successfully or not
+     * @return array whether the email was sent successfully or not
      */
     public function messages(AccessToken $accessToken, string $folder = 'INBOX', array $params = []) {
         // Get Labels
@@ -198,11 +200,19 @@ class GmailService implements GmailServiceInterface
         $this->log->info('Getting Messages From Gmail Label ' . $folder . ' with filters: "' . $q . '"');
 
         // Get Messages
-        $results = $this->gmail->users_messages->listUsersMessages('me', [
-            'labelIds' => $this->getLabelIds($labels),
-            'q' => $q
-        ]);
-        $messages = $results->getMessages();
+        try {
+            $results = $this->gmail->users_messages->listUsersMessages('me', [
+                'labelIds' => $this->getLabelIds($labels),
+                'q' => $q
+            ]);
+            $messages = $results->getMessages();
+	    if(empty($messages)) {
+		$messages = [];
+	    }
+        } catch (\Exception $e) {
+            $this->log->error('Exception thrown trying to retrieve gmail messages: ' . $e->getMessage());
+            throw new InvalidEmailCredentialsException;
+        }
 
         // Return Results
         $this->log->info('Found ' . count($messages) . ' Messages to Process for Label ' . $folder);
@@ -281,7 +291,7 @@ class GmailService implements GmailServiceInterface
      * @param AccessToken $accessToken
      * @param string $search
      * @param bool $single
-     * @throws MissingGmailLabelsException
+     * @throws InvalidEmailCredentialsException
      * @throws MissingFolderException
      * @return array of labels
      */
@@ -290,9 +300,17 @@ class GmailService implements GmailServiceInterface
         $this->setAccessToken($accessToken);
 
         // Get Labels
-        $results = $this->gmail->users_labels->listUsersLabels('me');
-        $this->log->info('Found ' . count($results->getLabels()) . ' total labels on Gmail Email');
-        if(count($results->getLabels()) == 0) {
+        try {
+            $results = $this->gmail->users_labels->listUsersLabels('me');
+            $this->log->info('Found ' . count($results->getLabels()) . ' total labels on Gmail Email');
+            if(count($results->getLabels()) == 0) {
+                throw new MissingGmailLabelsException;
+            }
+        } catch (\Exception $e) {
+            $this->log->error('Exception thrown trying to retrieve labels: ' . $e->getMessage());
+            if(strpos($e->getMessage(), 'Request had invalid authentication credentials')) {
+                throw new InvalidEmailCredentialsException;
+            }
             throw new MissingGmailLabelsException;
         }
 
@@ -318,6 +336,16 @@ class GmailService implements GmailServiceInterface
         return $labels;
     }
 
+    /**
+     * Set Key for Google Service
+     *
+     * @param string $key
+     * @return string
+     */
+    public function setKey(string $key = ''): string {
+        return $this->google->setKey($key);
+    }
+
 
     /**
      * Set Access Token on Client
@@ -325,10 +353,10 @@ class GmailService implements GmailServiceInterface
      * @param type $accessToken
      * @return void
      */
-    private function setAccessToken(AccessToken $accessToken) {
-        // ID Token Exists?
-        if(empty($accessToken->id_token)) {
-            throw new MissingGapiIdTokenException;
+    public function setAccessToken(AccessToken $accessToken) {
+        // Access Token Exists?
+        if(empty($accessToken->access_token)) {
+            throw new MissingGapiAccessTokenException;
         }
 
         // Set Access Token on Client
@@ -352,10 +380,10 @@ class GmailService implements GmailServiceInterface
      * @param EmailToken $emailToken
      * @return void
      */
-    private function setEmailToken(EmailToken $emailToken) {
-        // ID Token Exists?
-        if(empty($emailToken->getIdToken())) {
-            throw new MissingGapiIdTokenException;
+    public function setEmailToken(EmailToken $emailToken) {
+        // Access Token Exists?
+        if(empty($emailToken->getAccessToken())) {
+            throw new MissingGapiAccessTokenException;
         }
 
         // Set Google Token on Client
@@ -418,7 +446,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Send Gmail Message
-     * 
+     *
      * @param \Google_Service_Gmail_Message $message
      * @return ParsedEmail
      */

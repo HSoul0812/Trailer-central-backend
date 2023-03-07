@@ -14,7 +14,7 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\DomCrawler\Crawler;
 
-class ADFService implements ImportTypeInterface
+class ADFService implements ImportTypeInterface, ImportSourceInterface
 {
     /**
      * @var LeadRepositoryInterface
@@ -39,6 +39,9 @@ class ADFService implements ImportTypeInterface
         $this->leads = $leads;
         $this->inventory = $inventory;
         $this->locations = $locations;
+
+        // Create Log
+        $this->log = Log::channel('import');
     }
 
     /**
@@ -54,7 +57,7 @@ class ADFService implements ImportTypeInterface
         $crawler = $this->validateAdf($parsedEmail->getBody());
 
         $adf = $this->parseAdf($dealer, $crawler);
-        Log::info('Parsed ADF Lead ' . $adf->getFullName() . ' For Dealer ID #' . $adf->getDealerId());
+        $this->log->info('Parsed ADF Lead ' . $adf->getFullName() . ' For Dealer ID #' . $adf->getDealerId());
 
         return $adf;
     }
@@ -65,11 +68,22 @@ class ADFService implements ImportTypeInterface
      */
     public function isSatisfiedBy(ParsedEmail $parsedEmail): bool
     {
-        $fixed = $this->fixCdata($parsedEmail->getBody());
-        $crawler = new Crawler($fixed);
-        $adf = $crawler->filter('adf')->first();
+        try {
+            $fixed = $this->fixCdata($parsedEmail->getBody());
+            $crawler = new Crawler($fixed);
+            $adf = $crawler->filter('adf')->first();
 
-        return $adf->count() >= 1 && !empty($adf->nodeName()) && $adf->nodeName() === 'adf';
+            $success = ($adf->count() >= 1 && !empty($adf->nodeName()) && $adf->nodeName() === 'adf');
+            if(!$success) {
+                $this->log->error('Invalid ADF format detected: ' . $adf->count() . ' adf count, ' .
+                        $adf->nodeName() . ' node, is ' .
+                        (($adf->nodeName() !== 'adf') ? 'not' : '') . ' adf node');
+            }
+            return $success;
+        } catch (\Exception $e) {
+            $this->log->error('Exception occurred trying to confirm ADF is valid format: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -88,7 +102,7 @@ class ADFService implements ImportTypeInterface
 
         // Valid XML?
         if($adf->count() < 1 || empty($adf->nodeName()) || ($adf->nodeName() !== 'adf')) {
-            Log::error("Body text failed to parse ADF correctly:\r\n\r\n" . $body);
+            $this->log->error("Body text failed to parse ADF correctly:\r\n\r\n" . $body);
             throw new InvalidImportFormatException;
         }
 
@@ -111,25 +125,26 @@ class ADFService implements ImportTypeInterface
         $adfLead->setVendorProvider($adf->filterXPath('//provider/name')->text(ADFLead::DEFAULT_PROVIDER));
 
         // Set Vendor Details
-        $this->getAdfVendor($adfLead, $adf->filter('vendor'));
+        $this->setAdfVendor($adfLead, $adf->filter('vendor'));
 
         // Get Date
         $adfLead->setRequestDate($adf->filter('requestdate')->text());
         $adfLead->setDealerId($dealer->dealer_id);
-        $adfLead->setWebsiteId($dealer->website->id);
+        $adfLead->setWebsiteId($dealer->website->id ?? 0);
 
         // Get Vendor Location
-        $this->getAdfVendorLocation($adfLead, $adf->filter('vendor'));
+        $this->setAdfVendorLocation($adfLead, $adf->filter('vendor'));
 
         // Set Contact Details
-        $this->getAdfContact($adfLead, $adf->filter('customer'));
+        $this->setAdfContact($adfLead, $adf->filter('customer'));
 
         // Set Vehicle Details
-        $this->getAdfVehicle($adfLead, $adf->filter('vehicle'));
+        $this->setAdfVehicle($adfLead, $adf->filter('vehicle'));
 
         // Get ADF Lead
         return $adfLead;
     }
+
 
     /**
      * Set ADF Contact Details to ADF Lead
@@ -138,14 +153,14 @@ class ADFService implements ImportTypeInterface
      * @param Crawler $contact
      * @return ADFLead
      */
-    private function getAdfContact(ADFLead $adfLead, Crawler $contact): ADFLead {
+    private function setAdfContact(ADFLead $adfLead, Crawler $contact): ADFLead {
         // Set First Name
-        $adfLead->setFirstName($contact->filterXPath('//contact/name[@part="first"]')->text());
-        $adfLead->setLastName($contact->filterXPath('//contact/name[@part="last"]')->text());
+        $adfLead->setFirstName($contact->filterXPath('//contact/name[@part="first"]')->text(''));
+        $adfLead->setLastName($contact->filterXPath('//contact/name[@part="last"]')->text(''));
 
         // Set Contact Details
-        $adfLead->setEmail($contact->filterXPath('//contact/email')->text());
-        $adfLead->setPhone($contact->filterXPath('//contact/phone')->text());
+        $adfLead->setEmail($contact->filterXPath('//contact/email')->text(''));
+        $adfLead->setPhone($contact->filterXPath('//contact/phone')->text(''));
 
         // Set Address Details
         $adfLead->setAddrStreet($contact->filterXPath('//address/street')->text(''));
@@ -154,7 +169,7 @@ class ADFService implements ImportTypeInterface
         $adfLead->setAddrZip($contact->filterXPath('//address/postalcode')->text(''));
 
         // Set Comments
-        $adfLead->setComments($contact->filter('comments')->text());
+        $adfLead->setComments($contact->filter('comments')->text(''));
 
         // Return ADF Lead
         return $adfLead;
@@ -168,7 +183,7 @@ class ADFService implements ImportTypeInterface
      * @param int $dealerId
      * @return ADFLead
      */
-    private function getAdfVehicle(ADFLead $adfLead, Crawler $vehicle): ADFLead {
+    private function setAdfVehicle(ADFLead $adfLead, Crawler $vehicle): ADFLead {
         // Set Vehicle Details
         $adfLead->setVehicleYear($vehicle->filter('year')->text(''));
         $adfLead->setVehicleMake($vehicle->filter('make')->text(''));
@@ -200,7 +215,7 @@ class ADFService implements ImportTypeInterface
      * @param Crawler $vendor
      * @return ADFLead
      */
-    private function getAdfVendor(ADFLead $adfLead, Crawler $vendor): ADFLead {
+    private function setAdfVendor(ADFLead $adfLead, Crawler $vendor): ADFLead {
         // Get Vendor ID's
         $vendorIds = $vendor->filter('id');
         $vendorIdMap = [];
@@ -211,7 +226,7 @@ class ADFService implements ImportTypeInterface
         $adfLead->setVendorIds($vendorIdMap);
 
         // Parse Vendor Details
-        $adfLead->setVendorName($vendor->filter('vendorname')->text());
+        $adfLead->setVendorName($vendor->filter('vendorname')->text(''));
 
         // Parse Vendor Contact Details
         $adfLead->setVendorContact($vendor->filterXPath('//contact/name')->text(''));
@@ -230,13 +245,13 @@ class ADFService implements ImportTypeInterface
      * @param Crawler $vendor
      * @return ADFLead
      */
-    private function getAdfVendorLocation(ADFLead $adfLead, Crawler $vendor): ADFLead {
+    private function setAdfVendorLocation(ADFLead $adfLead, Crawler $vendor): ADFLead {
         // Set Vendor Address Details
-        $adfLead->setVendorAddrStreet($vendor->filterXPath('//address/street')->text(''));
-        $adfLead->setVendorAddrCity($vendor->filterXPath('//address/city')->text(''));
-        $adfLead->setVendorAddrState($vendor->filterXPath('//address/regioncode')->text(''));
-        $adfLead->setVendorAddrZip($vendor->filterXPath('//address/postalcode')->text(''));
-        $adfLead->setVendorAddrCountry($vendor->filterXPath('//address/country')->text(''));
+        $adfLead->setVendorAddrStreet($vendor->filterXPath('//contact/address/street')->text(''));
+        $adfLead->setVendorAddrCity($vendor->filterXPath('//contact/address/city')->text(''));
+        $adfLead->setVendorAddrState($vendor->filterXPath('//contact/address/regioncode')->text(''));
+        $adfLead->setVendorAddrZip($vendor->filterXPath('//contact/address/postalcode')->text(''));
+        $adfLead->setVendorAddrCountry($vendor->filterXPath('//contact/address/country')->text(''));
 
         // Get Vendor Location
         $filters = $adfLead->getVendorAddrFilters();
@@ -262,5 +277,18 @@ class ADFService implements ImportTypeInterface
      */
     private function fixCdata($xml): string {
         return preg_replace('/<!\[CDATA\[(.*?)\]\]>/', '$1', $xml);
+    }
+
+    /**
+     * Given that the ADF format is unique, this returns
+     * the class itself as the source which is implementing
+     * both, type and source interfaces.
+     *
+     * @param ParsedEmail $parsedEmail
+     * @return ImportSourceInterface|null
+     */
+    public function findSource(ParsedEmail $parsedEmail): ?ImportSourceInterface
+    {
+        return $this->isSatisfiedBy($parsedEmail) ? $this : null;
     }
 }

@@ -7,16 +7,19 @@ namespace App\Services\Export;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\View\View;
 use Barryvdh\Snappy\PdfWrapper;
-use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 /**
  * Can be used for a simple PDF export to disk tasks
  */
-class FilesystemPdfExporter extends PdfExporter implements ExporterInterface
+class FilesystemPdfExporter extends PdfExporter implements PdfExporterInterface
 {
-    public const PDF_EXPORT_S3_PREFIX = 'financial-reports/';
-    
+    /** @var string a temp folder */
+    public const RUNTIME_PREFIX = 'runtime/';
+
+    public const ORIENTATION_PORTRAIT = 'portrait';
+    public const ORIENTATION_LANDSCAPE = 'landscape';
+
     /**
      * @var Filesystem
      */
@@ -59,6 +62,21 @@ class FilesystemPdfExporter extends PdfExporter implements ExporterInterface
         $this->engine->loadHTML($content);
         $output = $this->engine->output();
         ($this->afterLoadHtmlHandler)();
-        Storage::disk('s3')->put(self::PDF_EXPORT_S3_PREFIX . $this->filename, $output);
+
+        $this->filesystem->put(self::RUNTIME_PREFIX . $this->filename, $output);
+    }
+
+    /**
+     * @return resource|null
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     */
+    public function readStream()
+    {
+        return $this->filesystem->readStream(self::RUNTIME_PREFIX . $this->filename);
+    }
+
+    public function engine(): \Barryvdh\Snappy\PdfWrapper
+    {
+        return $this->engine;
     }
 }

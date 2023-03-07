@@ -25,6 +25,9 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
+     *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
      * @note IntegrationTestCase
@@ -38,6 +41,9 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
 
     /**
      * @covers ::get
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
+     *
      * @throws BindingResolutionException
      * @throws Exception when Uuid::uuid4()->toString() could not generate a uuid
      */
@@ -68,6 +74,9 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
 
     /**
      * @covers ::findByToken
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
+     *
      * @throws BindingResolutionException
      * @throws Exception when Uuid::uuid4()->toString() could not generate a uuid
      */
@@ -97,6 +106,9 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
 
     /**
      * @covers ::getAll
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
+     *
      * @dataProvider queryParametersAndSummariesProvider
      *
      * @param array $params list of query parameters
@@ -128,6 +140,9 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
 
     /**
      * @covers ::update
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
+     *
      * @throws BindingResolutionException
      * @throws Exception when Uuid::uuid4()->toString() could not generate a uuid
      */
@@ -182,6 +197,9 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
 
     /**
      * @covers ::updateProgress
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
+     *
      * @throws BindingResolutionException
      */
     public function testUpdateProgressIsWorkingProperly(): void
@@ -211,6 +229,9 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
 
     /**
      * @covers ::updateProgress
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
+     *
      * Test that SUT is updating the job status to `completed` when the progress is greater or equal than 100
      *
      * @throws BindingResolutionException
@@ -244,6 +265,9 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
 
     /**
      * @covers ::setFailed
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
+     *
      * @throws BindingResolutionException
      */
     public function testSetFailedIsWorkingProperly(): void
@@ -275,6 +299,9 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
 
     /**
      * @covers ::updateResult
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
+     *
      * @throws BindingResolutionException
      */
     public function testUpdateResultIsWorkingProperly(): void
@@ -307,6 +334,9 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
      * @covers ::updateProgress
      * @covers ::updateResult
      * @covers ::setFailed
+     *
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
      *
      * @dataProvider availableMethodsProvider
      *
@@ -342,6 +372,9 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
      * @covers ::create
      * @covers ::isBusyByDealer
      * @covers ::isBusyByJobName
+     *
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
      *
      * @throws BindingResolutionException
      * @throws Exception when Uuid::uuid4()->toString() could not generate a uuid

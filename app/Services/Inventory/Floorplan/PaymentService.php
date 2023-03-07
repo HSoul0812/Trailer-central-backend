@@ -2,6 +2,7 @@
 
 namespace App\Services\Inventory\Floorplan;
 
+use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface;
@@ -19,9 +20,9 @@ class PaymentService implements PaymentServiceInterface
     const FLOORPLAN_PAYMENT_KEY_PREFIX = 'bulk_floorplan_payment_';
 
     /**
-     * @var Connection
+     * @var Connection|null
      */
-    private $redis;
+    private $redis = null;
 
     /**
      * @var PaymentRepositoryInterface
@@ -56,7 +57,6 @@ class PaymentService implements PaymentServiceInterface
         InventoryRepositoryInterface $inventoryRepository
     )
     {
-        $this->redis = Redis::connection();
         $this->payment = $payment;
         $this->expenseRepo = $expenseRepo;
         $this->newItemService = $newItemService;
@@ -66,6 +66,8 @@ class PaymentService implements PaymentServiceInterface
 
     public function validatePaymentUUID(int $dealerId, string $paymentUUID)
     {
+        $this->connectToRedis();
+
         $bulkFloorplanPaymentKey = self::FLOORPLAN_PAYMENT_KEY_PREFIX . $dealerId;
         if ($this->redis->get($bulkFloorplanPaymentKey) === $paymentUUID) {
             return false;
@@ -76,6 +78,8 @@ class PaymentService implements PaymentServiceInterface
 
     public function setPaymentUUID(int $dealerId, string $paymentUUID)
     {
+        $this->connectToRedis();
+
         $bulkFloorplanPaymentKey = self::FLOORPLAN_PAYMENT_KEY_PREFIX . $dealerId;
         $this->redis->set($bulkFloorplanPaymentKey, $paymentUUID, 'EX', 3600);
     }
@@ -135,5 +139,30 @@ class PaymentService implements PaymentServiceInterface
         }
 
         return $expense;
+    }
+
+    /**
+     * @param int $dealerId
+     * @param string $checkNumber
+     *
+     * @return bool
+     */
+    public function checkNumberExists(int $dealerId, string $checkNumber): bool
+    {
+        $data = [
+            'entity_type' => Expense::ENTITY_VENDOR,
+            'tb_name' => Expense::TABLE_FLOORPLAN_PAYMENT,
+        ];
+
+        return $this->expenseRepo->checkNumberExists($dealerId, $checkNumber, $data);
+    }
+
+    private function connectToRedis(): void
+    {
+        if ($this->redis instanceof Connection) {
+            return;
+        }
+
+        $this->redis = Redis::connection('persist');
     }
 }

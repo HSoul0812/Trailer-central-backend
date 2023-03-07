@@ -23,6 +23,9 @@ class DealerUserTest extends TestCase
      * @covers ::getPermissions
      * @dataProvider permissionProvider
      *
+     * @group DMS
+     * @group DMS_DEALER_USER
+     *
      * @param Collection $permissions
      */
     public function testGetPermissions(Collection $permissions)
@@ -60,6 +63,9 @@ class DealerUserTest extends TestCase
     /**
      * @covers ::hasPermission
      * @dataProvider permissionProvider
+     *
+     * @group DMS
+     * @group DMS_DEALER_USER
      *
      * @param Collection $permissions
      */
@@ -105,6 +111,9 @@ class DealerUserTest extends TestCase
 
     /**
      * @covers ::getPermissions
+     *
+     * @group DMS
+     * @group DMS_DEALER_USER
      */
     public function testGetPermissionsWithoutPermissions()
     {
@@ -138,6 +147,9 @@ class DealerUserTest extends TestCase
 
     /**
      * @covers ::hasPermission
+     *
+     * @group DMS
+     * @group DMS_DEALER_USER
      */
     public function testHasPermissionWithoutPermissions()
     {

@@ -37,6 +37,13 @@ class RegisterServiceTest extends TestCase
         $this->service = new RegisterService($this->registerRepositoryMock);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_POS
+     *
+     * @return void
+     * @throws RegisterException
+     */
     public function testRegisterIsOpen()
     {
         $this->registerRepositoryMock->shouldReceive('hasOpenRegister')
@@ -49,6 +56,13 @@ class RegisterServiceTest extends TestCase
         $this->assertSame('A register is already opened!', $result);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_POS
+     *
+     * @return void
+     * @throws RegisterException
+     */
     public function testOpenNewRegisterSuccessful()
     {
         $register = $this->getEloquentMock(Register::class);
@@ -78,6 +92,13 @@ class RegisterServiceTest extends TestCase
         $this->assertSame('Register has been opened successfully!', $result);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_POS
+     *
+     * @return void
+     * @throws RegisterException
+     */
     public function testOpenNewRegisterFailed()
     {
         $exception = new \Exception();

@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Marketplace
- * 
+ *
  * @package App\Models\Marketing\Facebook\Marketplace
  */
 class Marketplace extends Model
@@ -38,16 +38,41 @@ class Marketplace extends Model
      */
     const TFA_TYPES = [
         'authy' => 'Authy',
-        'sms' => 'SMS'
+        'sms' => 'SMS',
+        'code' => 'Facebook 2FA Code',
     ];
 
     /**
      * @const array Active Two-Factor Auth Types
      */
     const TFA_TYPES_ACTIVE = [
-        'sms'
+        'sms', 'code'
     ];
 
+    /**
+     * @const string
+     */
+    const STATUS_ACTIVE = 'active';
+
+    /**
+     * @const string
+     */
+    const STATUS_INVALID = 'invalid';
+
+    /**
+     * @const string
+     */
+    const STATUS_FAILED = 'failed';
+
+    /**
+     * @const string
+     */
+    const STATUS_DELETED = 'deleted';
+
+    /**
+     * @const string
+     */
+    const STATUS_EXPIRED = 'expired';
 
     /**
      * @var string
@@ -72,13 +97,14 @@ class Marketplace extends Model
         'fb_password',
         'tfa_username',
         'tfa_password',
+        'tfa_code',
         'tfa_type',
         'imported_at'
     ];
 
     /**
      * Get User
-     * 
+     *
      * @return BelongsTo
      */
     public function user(): BelongsTo
@@ -88,7 +114,7 @@ class Marketplace extends Model
 
     /**
      * Get Dealer Location
-     * 
+     *
      * @return BelongsTo
      */
     public function dealerLocation(): BelongsTo
@@ -98,7 +124,7 @@ class Marketplace extends Model
 
     /**
      * Get Listings
-     * 
+     *
      * @return HasMany
      */
     public function listings(): HasMany
@@ -107,8 +133,28 @@ class Marketplace extends Model
     }
 
     /**
+     * Get Errors
+     *
+     * @return HasMany
+     */
+    public function errors(): HasMany
+    {
+        return $this->hasMany(Error::class, 'marketplace_id', 'id');
+    }
+
+    /**
+     * Get Metrics
+     *
+     * @return HasMany
+     */
+    public function metrics(): HasMany
+    {
+        return $this->hasMany(MarketplaceMetric::class, 'marketplace_id', 'id');
+    }
+
+    /**
      * Get Filters
-     * 
+     *
      * @return HasMany
      */
     public function filters(): HasMany
@@ -119,7 +165,7 @@ class Marketplace extends Model
 
     /**
      * Get Filters Map
-     * 
+     *
      * @return array{entity: array<string>,
      *               category: array<string>}
      */
@@ -144,7 +190,7 @@ class Marketplace extends Model
 
     /**
      * Is Up To Date?
-     * 
+     *
      * @return bool
      */
     public function getIsUpToDateAttribute(): bool

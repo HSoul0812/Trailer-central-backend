@@ -2,13 +2,20 @@
 
 namespace Tests;
 
+use App\Models\FeatureFlag;
+use App\Models\Inventory\Inventory;
+use App\Repositories\FeatureFlagRepositoryInterface;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use App\Exceptions\Tests\MissingTestDealerIdException;
 use App\Exceptions\Tests\MissingTestDealerLocationIdException;
 use App\Exceptions\Tests\MissingTestWebsiteIdException;
 use Mockery;
+use Mockery\LegacyMockInterface;
+use ReflectionException;
+use ReflectionProperty;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -18,10 +25,18 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // we want to assume always inventory cache invalidation feature flag is off
+        $this->setCacheInvalidationFeatureFlag(false);
+        Inventory::enableCacheInvalidation();
+        Inventory::enableSearchSyncing();
     }
 
     protected function tearDown(): void
     {
+        Inventory::enableCacheInvalidation();
+        Inventory::enableSearchSyncing();
+
         parent::tearDown();
     }
 
@@ -122,17 +137,18 @@ abstract class TestCase extends BaseTestCase
         $mock->shouldReceive('getRelationValue')->passthru();
         $mock->shouldReceive('relationLoaded')->passthru();
         $mock->shouldReceive('fromFloat')->passthru();
+        $mock->wasRecentlyCreated = true;
 
         return $mock;
     }
 
     /**
-     * @param Model $model
+     * @param Model|LegacyMockInterface $model
      * @param string $methodName
-     * @param Model $relation
+     * @param Model|null $relation
      * @return void
      */
-    protected function initHasOneRelation(Model $model, string $methodName, Model $relation)
+    protected function initHasOneRelation(Model $model, string $methodName, ?Model $relation)
     {
         $hasOne = Mockery::mock(HasOne::class);
 
@@ -140,6 +156,22 @@ abstract class TestCase extends BaseTestCase
         $model->shouldReceive($methodName)->andReturn($hasOne);
 
         $hasOne->shouldReceive('getResults')->andReturn($relation);
+    }
+
+    /**
+     * @param Model|LegacyMockInterface $model
+     * @param string $methodName
+     * @param Model|null $relation
+     * @return void
+     */
+    protected function initBelongsToRelation(Model $model, string $methodName, ?Model $relation)
+    {
+        $belongsTo = Mockery::mock(BelongsTo::class);
+
+        $model->shouldReceive('setRelation')->passthru();
+        $model->shouldReceive($methodName)->andReturn($belongsTo);
+
+        $belongsTo->shouldReceive('getResults')->andReturn($relation);
     }
 
     /**
@@ -208,5 +240,40 @@ abstract class TestCase extends BaseTestCase
         }
 
         self::assertFalse($callback->isCalled(), $message);
+    }
+
+    /**
+     * @param $object
+     * @param $property
+     * @param $value
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function setToPrivateProperty($object, $property, $value)
+    {
+        $reflector = new ReflectionProperty(get_class($object), $property);
+        $reflector->setAccessible(true);
+        $reflector->setValue($object, $value);
+    }
+
+    /**
+     * @param $object
+     * @param $property
+     * @return mixed
+     * @throws ReflectionException
+     */
+    public function getFromPrivateProperty($object, $property)
+    {
+        $reflector = new ReflectionProperty(get_class($object), $property);
+        $reflector->setAccessible(true);
+
+        return $reflector->getValue($object);
+    }
+
+    protected function setCacheInvalidationFeatureFlag(bool $isEnabled): void
+    {
+        app(FeatureFlagRepositoryInterface::class)->set(
+            new FeatureFlag(['code' => 'inventory-sdk-cache', 'is_enabled' => $isEnabled])
+        );
     }
 }

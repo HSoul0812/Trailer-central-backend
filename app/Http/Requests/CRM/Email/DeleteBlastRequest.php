@@ -9,10 +9,9 @@ use App\Http\Requests\Request;
  *
  * @author David A Conway Jr.
  */
-class DeleteBlastRequest extends Request {
-    
+class DeleteBlastRequest extends Request
+{
     protected $rules = [
         'id' => 'integer'
     ];
-    
 }

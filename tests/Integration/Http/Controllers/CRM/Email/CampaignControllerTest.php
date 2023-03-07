@@ -2,11 +2,10 @@
 
 namespace Tests\Integration\Http\Controllers\CRM\Email;
 
+use App\Models\CRM\Email\Campaign;
+use Illuminate\Foundation\Testing\WithFaker;
 use Tests\Integration\IntegrationTestCase;
-use Laravel\Lumen\Testing\DatabaseTransactions;
 use Tests\database\seeds\CRM\Email\CampaignSeeder;
-use App\Repositories\User\NewDealerUserRepositoryInterface;
-use App\Models\User\NewDealerUser;
 
 /**
  * Class CampaignControllerTest
@@ -14,10 +13,10 @@ use App\Models\User\NewDealerUser;
  *
  * @coversDefaultClass \App\Http\Controllers\v1\CRM\Email\CampaignController
  */
+class CampaignControllerTest extends IntegrationTestCase
+{
+    use WithFaker;
 
-class CampaignControllerTest extends IntegrationTestCase {
-    use DatabaseTransactions;
-    
     /**
      * @var CampaignSeeder
      */
@@ -33,32 +32,26 @@ class CampaignControllerTest extends IntegrationTestCase {
         parent::setUp();
 
         $this->seeder = new CampaignSeeder();
-        $this->seeder->seed();
         $this->accessToken = $this->seeder->dealer->access_token;
-
-        // Fixing Invalid User Id
-        $newDealerUserRepo = app(NewDealerUserRepositoryInterface::class);
-        $newDealerUser = $newDealerUserRepo->create([
-            'user_id' => $this->seeder->user->user_id,
-            'salt' => md5((string)$this->seeder->user->user_id),
-            'auto_import_hide' => 0,
-            'auto_msrp' => 0
-
-        ]);
-        $this->seeder->dealer->newDealerUser()->save($newDealerUser);
     }
 
     public function tearDown(): void
     {
-        NewDealerUser::destroy($this->seeder->dealer->dealer_id);
-
         $this->seeder->cleanUp();
 
         parent::tearDown();
     }
 
+    /**
+     * @group CRM
+     * @covers ::index
+     *
+     * @return void
+     */
     public function testIndex()
     {
+        $this->seeder->seed();
+
         $response = $this->json(
             'GET',
             '/api/user/emailbuilder/campaign',
@@ -127,5 +120,185 @@ class CampaignControllerTest extends IntegrationTestCase {
             ];
         }
         $this->assertResponseDataEquals($response, $expectedData, false);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::show
+     *
+     * @return void
+     */
+    public function testShow()
+    {
+        $this->seeder->seed();
+
+        /** @var Campaign $campaign */
+        $campaign = $this->seeder->createdCampaigns[0];
+
+        $response = $this->json(
+            'GET',
+            '/api/user/emailbuilder/campaign/' . $campaign->drip_campaigns_id,
+            [],
+            ['access-token' => $this->accessToken]
+        );
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'template_id',
+                    'template',
+                    'location_id',
+                    'location',
+                    'send_after_days',
+                    'action',
+                    'unit_category',
+                    'campaign_name',
+                    'user_id',
+                    'from_email_address',
+                    'campaign_subject',
+                    'include_archived',
+                    'is_enabled',
+                    'categories',
+                    'brands',
+                    'factory_campaign_id',
+                    'approved',
+                    'is_from_factory'
+                ]
+            ]);
+
+        $expectedData = [
+            'id' => (int)$campaign->drip_campaigns_id,
+            'template_id' => (int)$campaign->email_template_id,
+            'template' => $campaign->template->toArray(),
+            'location_id' => (int)$campaign->location_id,
+            'location' => $campaign->location,
+            'send_after_days' => (int)$campaign->send_after_days,
+            'action' => $campaign->action,
+            'unit_category' => $campaign->unit_category,
+            'campaign_name' => $campaign->campaign_name,
+            'user_id' => (int)$campaign->user_id,
+            'from_email_address' => $campaign->from_email_address,
+            'campaign_subject' => $campaign->campaign_subject,
+            'include_archived' => (int)$campaign->include_archived,
+            'is_enabled' => (int)$campaign->is_enabled,
+            'categories' => $campaign->categories->toArray(),
+            'brands' => $campaign->brands->toArray(),
+            'factory_campaign_id' => $campaign->factory ? $campaign->factory->id : null,
+            'approved' => $campaign->factory ? $campaign->factory->is_approved : true,
+            'is_from_factory' => isset($campaign->factory)
+        ];
+
+        $this->assertResponseDataEquals($response, $expectedData, false);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::create
+     *
+     * @return void
+     */
+    public function testCreate()
+    {
+        $userId = $this->seeder->user->getKey();
+
+        $this->assertDatabaseMissing('crm_drip_campaigns', ['user_id' => $userId]);
+
+        $params = [
+            'user_id' => $userId,
+            'email_template_id' => $this->seeder->template->getKey(),
+            'campaign_name' => $this->faker->unique()->word,
+            'send_after_days' => $this->faker->unique()->randomDigit,
+            'action' => 'inquired',
+            'campaign_subject' => $this->faker->unique()->sentence,
+            'include_archived' => 1,
+            'from_email_address' => $this->faker->unique()->email,
+            'is_enabled' => $this->faker->unique()->boolean,
+        ];
+
+        $response = $this->json(
+            'PUT',
+            '/api/user/emailbuilder/campaign',
+            $params,
+            ['access-token' => $this->accessToken]
+        );
+
+        $this->assertDatabaseHas('crm_drip_campaigns', $params);
+
+        $params['template_id'] = $params['email_template_id'];
+        unset($params['email_template_id']);
+
+        $response->assertStatus(200);
+
+        $this->assertResponseDataEquals($response, $params, false);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::update
+     *
+     * @return void
+     */
+    public function testUpdate()
+    {
+        $this->seeder->seed();
+
+        /** @var Campaign $campaign */
+        $campaign = $this->seeder->createdCampaigns[0];
+
+        $params = [
+            'campaign_name' => $this->faker->unique()->word,
+            'send_after_days' => $this->faker->unique()->randomDigit,
+            'action' => 'inquired',
+            'campaign_subject' => $this->faker->unique()->sentence,
+            'include_archived' => 1,
+            'from_email_address' => $this->faker->unique()->email,
+            'is_enabled' => $this->faker->unique()->boolean,
+        ];
+
+        $response = $this->json(
+            'POST',
+            '/api/user/emailbuilder/campaign/' . $campaign->getKey(),
+            $params,
+            ['access-token' => $this->accessToken]
+        );
+
+        $params['drip_campaigns_id'] = $campaign->getKey();
+
+        $this->assertDatabaseHas('crm_drip_campaigns', $params);
+
+        $params['id'] = $params['drip_campaigns_id'];
+        unset($params['drip_campaigns_id']);
+
+        $response->assertStatus(200);
+
+        $this->assertResponseDataEquals($response, $params, false);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::destroy
+     *
+     * @return void
+     */
+    public function testDestroy()
+    {
+        $this->seeder->seed();
+
+        /** @var Campaign $campaign */
+        $campaign = $this->seeder->createdCampaigns[0];
+
+        $this->assertDatabaseHas('crm_drip_campaigns', ['drip_campaigns_id' => $campaign->getKey()]);
+
+        $response = $this->json(
+            'DELETE',
+            '/api/user/emailbuilder/campaign/' . $campaign->getKey(),
+            [],
+            ['access-token' => $this->accessToken]
+        );
+
+        $response->assertStatus(204);
+
+        $this->assertDatabaseMissing('crm_drip_campaigns', ['drip_campaigns_id' => $campaign->getKey()]);
     }
 }

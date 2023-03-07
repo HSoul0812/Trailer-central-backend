@@ -11,57 +11,95 @@ class UsersFeatureTest extends TestCase
 {
     use WithFaker;
 
-    public function testCreateUser() {
+    /**
+     * @group DMS
+     * @group DMS_USER_FEATURES
+     *
+     * @return void
+     */
+    public function testCreateUser()
+    {
         $email = $this->faker->email;
-        $response = $this->post( '/api/users', [
+        $response = $this->post('/api/users', [
             'email' => $email,
-            'password' => $this->faker->password(8),
-            'name' => $this->faker->name
+            'password' => $this->faker->regexify('[A-Za-z0-9]{15}'),
+            'name' => $this->faker->name,
+            'clsf_active' => $this->faker->randomElement([0, 1]),
         ]);
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
             'data' => [
-                'email' => $email
-            ]
+                'email' => $email,
+            ],
         ]);
         User::where('email', $email)->delete();
     }
 
-    public function testCreateUserUsingInvalidEmail() {
+    /**
+     * @group DMS
+     * @group DMS_USER_FEATURES
+     *
+     * @return void
+     */
+    public function testCreateUserUsingInvalidEmail()
+    {
         $response = $this->post('/api/users', [
             'email' => 'invalid email',
             'password' => $this->faker->password(6, 7),
-            'name' => $this->faker->name
+            'name' => $this->faker->name,
         ]);
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function testCreateUserUsingInvalidPassword() {
-        $response = $this->post( '/api/users', [
+    /**
+     * @group DMS
+     * @group DMS_USER_FEATURES
+     *
+     * @return void
+     */
+    public function testCreateUserUsingInvalidPassword()
+    {
+        $response = $this->post('/api/users', [
             'email' => $this->faker->email,
             'password' => $this->faker->password(6, 7),
-            'name' => $this->faker->name
+            'name' => $this->faker->name,
         ]);
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function testGetUserWithExistingEmail() {
+    /**
+     * @group DMS
+     * @group DMS_USER_FEATURES
+     *
+     * @return void
+     *
+     * @throws \Exception
+     */
+    public function testGetUserWithExistingEmail()
+    {
         $user = factory(User::class)->create();
         $response = $this->get('/api/users?email=' . $user->email);
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJson([
             'data' => [
                 'email' => $user->email,
-                'name' => $user->name
-            ]
+                'name' => $user->name,
+            ],
         ]);
         $user->delete();
     }
 
-    public function testGetUserWithNonExistingEmail() {
+    /**
+     * @group DMS
+     * @group DMS_USER_FEATURES
+     *
+     * @return void
+     */
+    public function testGetUserWithNonExistingEmail()
+    {
         $email = $this->faker->unique()->email;
         $response = $this->get('/api/users?email=' . $email, [
-            'email' => $email
+            'email' => $email,
         ]);
         $response->assertStatus(Response::HTTP_NOT_FOUND);
     }

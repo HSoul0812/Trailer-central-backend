@@ -13,6 +13,7 @@ use App\Models\User\User;
 use App\Models\User\NewUser;
 use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
+use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Traits\WithGetter;
 use Tests\database\seeds\Seeder;
 
@@ -71,12 +72,28 @@ class BlastSeeder extends Seeder
     private $blastsUnsent = [];
 
     /**
+     * @var Template
+     */
+    private $template;
+
+    /**
      * InventorySeeder constructor.
      */
     public function __construct()
     {
         $this->dealer = factory(User::class)->create();
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->user = factory(NewUser::class)->create();
+        $this->template = factory(Template::class)->create(['user_id' => $this->user->getKey()]);
+
+        $newDealerUserRepo = app(NewDealerUserRepositoryInterface::class);
+        $newDealerUser = $newDealerUserRepo->create([
+            'user_id' => $this->user->user_id,
+            'salt' => md5((string)$this->user->user_id),
+            'auto_import_hide' => 0,
+            'auto_msrp' => 0
+        ]);
+
+        $this->dealer->newDealerUser()->save($newDealerUser);
     }
 
     public function seed(): void
@@ -92,10 +109,10 @@ class BlastSeeder extends Seeder
 
         collect($seeds)->each(function (array $seed): void {
             // Create Status
-            if(isset($seed['action']) && $seed['action'] === 'create') {
+            if (isset($seed['action']) && $seed['action'] === 'create') {
                 // Create Blast
                 $blast = factory(Blast::class)->create([
-                    'user_id' => $this->dealer->getKey(),
+                    'user_id' => $this->user->getKey(),
                     'campaign_name' => $seed['name'],
                     'campaign_subject' => $seed['subject'] ?? $seed['name']
                 ]);
@@ -106,7 +123,7 @@ class BlastSeeder extends Seeder
 
             // Make Blast
             $blast = factory(Blast::class)->make([
-                'user_id' => $this->dealer->getKey(),
+                'user_id' => $this->user->getKey(),
                 'campaign_name' => $seed['name'],
                 'campaign_subject' => $seed['subject'] ?? $seed['name']
             ]);
@@ -133,12 +150,13 @@ class BlastSeeder extends Seeder
             $this->leads[] = $lead;
 
             // Create Blast Sent
-            if(isset($seed['action']) && $seed['action'] === 'create') {
+            if (isset($seed['action']) && $seed['action'] === 'create') {
                 // Create Blast Sent
                 $sent = factory(BlastSent::class)->create([
                     'email_blasts_id' => $this->createdBlasts[0]->getKey(),
                     'lead_id' => $lead->getKey()
                 ]);
+                $sent->setRelation('lead', $lead);
 
                 $this->blastsSent[] = $sent;
                 return;
@@ -149,6 +167,7 @@ class BlastSeeder extends Seeder
                 'email_blasts_id' => $this->createdBlasts[0]->getKey(),
                 'lead_id' => $lead->getKey()
             ]);
+            $sent->setRelation('lead', $lead);
 
             $this->blastsUnsent[] = $sent;
         });
@@ -157,19 +176,20 @@ class BlastSeeder extends Seeder
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
+        $userId = $this->user->getKey();
 
         // Database clean up
-        if(!empty($this->createdBlasts) && count($this->createdBlasts)) {
-            foreach($this->createdBlasts as $blast) {
+        if (!empty($this->createdBlasts) && count($this->createdBlasts)) {
+            foreach ($this->createdBlasts as $blast) {
                 $blastId = $blast->email_blasts_id;
                 BlastSent::where('email_blasts_id', $blastId)->delete();
                 Blast::destroy($blastId);
             }
         }
-        Template::where('user_id', $dealerId)->delete();
+        Template::where('user_id', $userId)->delete();
         Lead::where('dealer_id', $dealerId)->delete();
         SalesPerson::where('user_id', $dealerId)->delete();
-        NewUser::destroy($dealerId);
+        NewUser::destroy($userId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();
         User::destroy($dealerId);

@@ -13,8 +13,10 @@ use App\Transformers\Parts\PartsTransformer;
 use App\Http\Requests\Parts\ShowPartRequest;
 use App\Http\Requests\Parts\GetPartsRequest;
 use App\Http\Requests\Parts\UpdatePartRequest;
+use App\Models\Parts\Part;
 use App\Services\Parts\PartServiceInterface;
 use App\Transformers\Parts\PartsTransformerInterface;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
@@ -49,6 +51,7 @@ class PartsController extends RestfulController
     public function __construct(PartRepositoryInterface $parts, PartServiceInterface $partService, Manager $fractal, PartsTransformerInterface $partsTransformer)
     {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
+        $this->middleware(SubstituteBindings::class)->only(['display']);
         $this->parts = $parts;
         $this->partService = $partService;
         $this->fractal = $fractal;
@@ -493,10 +496,11 @@ class PartsController extends RestfulController
      *     ),
      * )
      */
-    public function show(int $id) {
+    public function show($id)
+    {
         $request = new ShowPartRequest(['id' => $id]);
 
-        if ( $request->validate() ) {
+        if ($request->validate()) {
             return $this->response->item($this->parts->get(['id' => $id]), new PartsTransformer());
         }
 
@@ -749,10 +753,10 @@ class PartsController extends RestfulController
             $escapedQuery = resolve(EscapeElasticSearchReservedCharactersAction::class)->execute($request->get('query', '') ?? '');
             $request->merge(['query' => $escapedQuery]);
 
-            $query = $request->only('query', 'vendor_id', 'with_cost', 'in_stock', 'sort');
+            $query = $request->only('query', 'vendor_id', 'with_cost', 'in_stock', 'sort', 'is_active');
 
             $paginator = new \stdClass(); // this will hold the paginator produced by search
-            $dealerId = $this->getRequestDealerId($request, Auth::user());
+            $dealerId = $this->getRequestDealerId(Auth::user());
 
             // do the search
             $result = $this->parts->search(
@@ -784,12 +788,8 @@ class PartsController extends RestfulController
         }
     }
 
-    private function getRequestDealerId(Request $request, $user, $required = true)
+    private function getRequestDealerId($user, $required = true)
     {
-        if ($dealerId = $request->get('dealer_id', null)) {
-            return $dealerId;
-        }
-
         if (!empty($user) && !empty($user->dealer_id)) {
             return $user->dealer_id;
         }
@@ -801,4 +801,10 @@ class PartsController extends RestfulController
         return null;
     }
 
+    public function display(Part $part)
+    {
+        $part->load('bins.bin');
+
+        return $this->response->item($part, new PartsTransformer());
+    }
 }

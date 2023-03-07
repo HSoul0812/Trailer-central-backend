@@ -7,11 +7,23 @@ class ListCustomOverlaysTest extends EndpointCustomOverlaysTest
     protected const VERB = 'GET';
     protected const ENDPOINT = '/api/inventory/overlay';
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY_CUSTOM_OVERLAY
+     *
+     * @return void
+     */
     public function testItShouldPreventAccessingWithoutAuthentication(): void
     {
         $this->itShouldPreventAccessingWithoutAuthentication();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY_CUSTOM_OVERLAY
+     *
+     * @return void
+     */
     public function testItShouldListOnlyOwnedOverlays(): void
     {
         $otherSeed = $this->createDealerWithCustomerOverlays();

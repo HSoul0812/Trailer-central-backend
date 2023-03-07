@@ -14,6 +14,7 @@ use App\Mail\CRM\Interactions\InvalidTemplateEmail;
 use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\NewUser;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
@@ -23,6 +24,7 @@ use App\Repositories\CRM\Email\TemplateRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
@@ -61,6 +63,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @var App\Repositories\CRM\Email\BlastRepositoryInterface
      */
     protected $blasts;
+
+    /**
+     * @var App\Repositories\CRM\Leads\StatusRepository
+     */
+    protected $leadStatus;
 
     /**
      * @var App\Repositories\CRM\Email\CampaignRepositoryInterface
@@ -153,6 +160,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      */
     public function __construct(
         BlastRepositoryInterface $blasts,
+        StatusRepositoryInterface $leadStatus,
         CampaignRepositoryInterface $campaigns,
         TemplateRepositoryInterface $templates,
         BounceRepositoryInterface $bounces,
@@ -170,6 +178,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         Manager $fractal
     ) {
         $this->blasts = $blasts;
+        $this->leadStatus = $leadStatus;
         $this->campaigns = $campaigns;
         $this->templates = $templates;
         $this->bounces = $bounces;
@@ -224,7 +233,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => $blast->template->template_id,
             'dealer_id' => $blast->newDealerUser->id,
             'user_id' => $blast->user_id,
-            'sales_person_id' => $salesPerson->id ?? 0,
+            'sales_person_id' => $salesPerson->id ?? null,
             'from_email' => $blast->from_email_address ?: $this->getDefaultFromEmail()
         ]);
 
@@ -278,7 +287,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => $campaign->template->template_id,
             'dealer_id' => $campaign->newDealerUser->id,
             'user_id' => $campaign->user_id,
-            'sales_person_id' => $salesPerson->id ?? 0,
+            'sales_person_id' => $salesPerson->id ?? null,
             'from_email' => $campaign->from_email_address ?: $this->getDefaultFromEmail()
         ]);
 
@@ -344,8 +353,50 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => $id,
             'dealer_id' => $template->newDealerUser->id,
             'user_id' => $template->user_id,
-            'sales_person_id' => $salesPerson->id ?? 0,
+            'sales_person_id' => $salesPerson->id ?? null,
             'from_email' => $fromEmail ?: $this->getDefaultFromEmail(),
+        ]);
+
+        // Send Email and Return Response
+        try {
+            return $this->sendManual($builder, $toEmail);
+        } catch(\Exception $ex) {
+            throw new SendTemplateEmailFailedException($ex);
+        }
+    }
+
+    /**
+     * Send Test Email for Template
+     *
+     * @param int $dealerId ID of Dealer to Handle Test for
+     * @param int $userId ID of CRM User to Handle Test for
+     * @param string $subject Subject of Email to Send
+     * @param string $html HTML Content of Email to Send
+     * @param string $toEmail Email Address to Send To
+     * @param int $salesPersonId ID of Sales Person to Send From
+     * @param string $fromEmail Email to Send From
+     * @throws FromEmailMissingSmtpConfigException
+     * @throws SendTemplateEmailFailedException
+     * @return array response
+     */
+    public function testTemplate(
+        int $dealerId,
+        int $userId,
+        string $subject,
+        string $html,
+        string $toEmail
+    ): array {
+        // Create Email Builder Email!
+        $builder = new BuilderEmail([
+            'id' => 1,
+            'type' => BuilderEmail::TYPE_TEMPLATE,
+            'subject' => $subject,
+            'template' => $html,
+            'template_id' => 1,
+            'dealer_id' => $dealerId,
+            'user_id' => $userId,
+            'sales_person_id' => null,
+            'from_email' => $this->getDefaultFromEmail(),
         ]);
 
         // Send Email and Return Response
@@ -397,11 +448,36 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
             // Send Lead Email
             $status = $this->sendLeadEmail($builder, $leadId);
+            if ($status === BuilderStats::STATUS_SUCCESS) {
+                $this->updateLead($lead);
+            }
             $stats->updateStats($status);
         }
 
         // Return Sent Emails Collection
         return $stats;
+    }
+
+    /**
+     * Update Lead Status
+     *
+     * @param Lead $lead
+     * @return LeadStatus
+     */
+    private function updateLead(Lead $lead): LeadStatus
+    {
+        // If there was no status, or it was uncontacted, set to medium, otherwise, don't change.
+        if (empty($lead->leadStatus) || $lead->leadStatus->status === Lead::STATUS_UNCONTACTED) {
+            $status = Lead::STATUS_MEDIUM;
+        } else {
+            $status = $lead->leadStatus->status;
+        }
+
+        return $this->leadStatus->createOrUpdate([
+            'lead_id' => $lead->identifier,
+            'status' => $status,
+            'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
+        ]);
     }
 
     /**
@@ -426,7 +502,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
 
         // Create Email History Entry
-        return $this->emailhistory->create($builder->getEmailHistoryParams($interaction->interaction_id ?? 0));
+        $email = $this->emailhistory->create($builder->getEmailHistoryParams($interaction->interaction_id ?? 0));
+        sleep(1);
+        return $email;
     }
 
     /**
@@ -440,8 +518,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $parsedEmail = $builder->getParsedEmail($builder->emailId);
 
         // Get Smtp Config
-        $salesPerson = $this->salespeople->get(['sales_person_id' => $builder->salesPersonId]);
-        $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
+        $smtpConfig = null;
+        if($builder->salesPersonId) {
+            $salesPerson = $this->salespeople->get(['sales_person_id' => $builder->salesPersonId]);
+            $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
+        }
 
         // Refresh Access Token if Exists
         if(!empty($smtpConfig) && $smtpConfig->isAuthConfigOauth()) {
@@ -658,7 +739,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $dealer = $this->users->get(['dealer_id' => $builder->dealerId]);
         $credential = NewUser::getDealerCredential($dealer->newDealerUser->user_id);
         $launchUrl = Lead::getLeadCrmUrl($builder->leadId, $credential);
-        Mail::to($dealer->email)->send(new InvalidTemplateEmail($builder, $launchUrl));
+        try {
+            Mail::to($dealer->email)->send(new InvalidTemplateEmail($builder, $launchUrl));
+        } catch(\Exception $e) {
+            $this->log->error('Exception trying to send invalid template email: ' . $e->getMessage());
+        }
 
         // Fix Blast to Remove Template ID
         if($builder->type === BuilderEmail::TYPE_BLAST) {
@@ -706,7 +791,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Return Response Array
             return $this->response($builder, new Collection([$toEmail]));
         } catch(\Exception $ex) {
-            $this->log->error($ex->getMessage(), $ex->getTrace());
+            $this->log->error($ex->getMessage());
             throw new SendBuilderEmailsFailedException;
         }
     }
@@ -776,9 +861,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     private function refreshAccessToken(AccessToken $accessToken): AccessToken {
         // Refresh Token
         $validate = $this->auth->validate($accessToken);
-        if($validate->newToken && $validate->newToken->exists()) {
-            $this->log->info('Refreshed access token with ID #' . $accessToken->id . ' with replacement!');
-            $accessToken = $this->tokens->refresh($accessToken->id, $validate->newToken);
+        if($validate->accessToken) {
+            $accessToken = $validate->accessToken;
         }
 
         // Return New Token

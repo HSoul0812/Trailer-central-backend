@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class InventoryFacebook
- * 
+ *
  * @package App\Services\Dispatch\Facebook\DTOs
  */
 class InventoryFacebook
@@ -265,7 +265,7 @@ class InventoryFacebook
      */
     const DEFAULT_TRANSMISSION = 'Manual transmission';
 
-    
+
     /**
      * @const array Vehicle Fuel Types
      */
@@ -404,7 +404,7 @@ class InventoryFacebook
 
     /**
      * Create InventoryFacebook From Inventory
-     * 
+     *
      * @param Inventory $inventory
      * @param Marketplace $integration
      * @return InventoryFacebook
@@ -412,17 +412,18 @@ class InventoryFacebook
     public static function getFromInventory(Inventory $inventory,
             Marketplace $integration): InventoryFacebook
     {
+        $calculatedPrice = (!is_null($inventory->sales_price) && $inventory->sales_price > 0) ? $inventory->sales_price : ($inventory->use_website_price && $inventory->website_price > 0 ? $inventory->website_price : $inventory->price);
         // Create Inventory Mapping
         return new self([
             'inventory_id' => $inventory->inventory_id,
             'page_url' => $integration->page_url,
             'entity_type_id' => $inventory->entity_type_id,
             'category' => $inventory->category,
-            'price' => $inventory->price,
+            'price' => intval($calculatedPrice),
             'year' => $inventory->year,
             'manufacturer' => $inventory->manufacturer,
             'model' => $inventory->model,
-            'description' => $inventory->description,
+            'description' => (strlen($inventory->description) < INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK) ? strip_tags($inventory->description_html) : $inventory->description,
             'dealer_location_id' => $inventory->dealer_location_id,
             'location' => $inventory->dealerLocation->city_state,
             'color' => $inventory->attributes->get('color'),
@@ -436,7 +437,7 @@ class InventoryFacebook
 
     /**
      * Create InventoryFacebook From Inventory
-     * 
+     *
      * @param Listings $listing
      * @return InventoryFacebook
      */
@@ -447,7 +448,7 @@ class InventoryFacebook
         return new self([
             'inventory_id' => $inventory ? $inventory->inventory_id : $listing->inventory_id,
             'facebook_id' => $listing->facebook_id,
-            'page_url' => $listing->marketplace->page_url,
+            'page_url' => $listing->marketplace ? $listing->marketplace->page_url : '',
             'entity_type_id' => $inventory ? $inventory->entity_type_id : null,
             'category' => $inventory ? $inventory->category : null,
             'price' => $inventory ? $inventory->price : null,
@@ -469,7 +470,7 @@ class InventoryFacebook
 
     /**
      * Get Description With Markdown Conversion
-     * 
+     *
      * @return string
      */
     public function getMarkdownDescription(): string {
@@ -478,16 +479,16 @@ class InventoryFacebook
 
     /**
      * Get Description With HTML Removed
-     * 
+     *
      * @return string
      */
     public function getPlainDescription(): string {
-        return $this->stripMarkdown($this->description);
+        return $this->stripMarkdown($this->description ?? '');
     }
 
     /**
      * Get Account Type
-     * 
+     *
      * @return string
      */
     public function getAccountType(): string {
@@ -503,7 +504,7 @@ class InventoryFacebook
 
     /**
      * Get Listing Type
-     * 
+     *
      * @return string
      */
     public function getListingType(): string {
@@ -513,7 +514,7 @@ class InventoryFacebook
 
     /**
      * Get Specific Type
-     * 
+     *
      * @return string
      */
     public function getSpecificType(): string {
@@ -529,7 +530,7 @@ class InventoryFacebook
 
     /**
      * Get Color
-     * 
+     *
      * @param bool $internal
      * @return string
      */
@@ -545,7 +546,7 @@ class InventoryFacebook
 
     /**
      * Get Body Style
-     * 
+     *
      * @return string
      */
     public function getBodyStyle(): string {
@@ -555,7 +556,7 @@ class InventoryFacebook
 
     /**
      * Get Condition
-     * 
+     *
      * @return string
      */
     public function getCondition(): string {
@@ -565,7 +566,7 @@ class InventoryFacebook
 
     /**
      * Get Transmission
-     * 
+     *
      * @return string
      */
     public function getTransmission(): string {
@@ -575,7 +576,7 @@ class InventoryFacebook
 
     /**
      * Get Fuel Type
-     * 
+     *
      * @return string
      */
     public function getFuelType(): string {

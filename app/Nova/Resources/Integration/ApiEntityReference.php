@@ -2,14 +2,15 @@
 
 namespace App\Nova\Resources\Integration;
 
-use Epartment\NovaDependencyContainer\HasDependencies;
-use Epartment\NovaDependencyContainer\NovaDependencyContainer;
-use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Select;
-use Laravel\Nova\Fields\Text;
-use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping as FeedDealerIncomingMapping;
+use App\Models\Feed\Mapping\Incoming\ApiEntityReference as AER;
+use App\Nova\Filters\Integration\EntityReferencesKeyFilter;
+use App\Nova\Filters\Integration\EntityReferencesTypeFilter;
 use App\Nova\Resource;
-use App\Nova\Filters\DealerIDMapping;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Laravel\Nova\Fields\Text;
 
 class ApiEntityReference extends Resource
 {
@@ -20,7 +21,7 @@ class ApiEntityReference extends Resource
      *
      * @var string
      */
-    public static $model = 'App\Models\Feed\Mapping\Incoming\ApiEntityReference';
+    public static $model = AER::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -54,14 +55,13 @@ class ApiEntityReference extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function fields(Request $request)
-    {
+    public function fields(Request $request): array {
         return [
+            Text::make('Entity Type')->sortable(),
+
             Text::make('Entity ID')->sortable(),
 
             Text::make('Reference ID')->sortable(),
-
-            Text::make('Entity Type')->sortable(),
 
             Text::make('API Key')->sortable(),
         ];
@@ -73,8 +73,7 @@ class ApiEntityReference extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function cards(Request $request)
-    {
+    public function cards(Request $request): array {
         return [];
     }
 
@@ -84,9 +83,11 @@ class ApiEntityReference extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function filters(Request $request)
-    {
-        return [];
+    public function filters(Request $request): array {
+        return [
+            new EntityReferencesTypeFilter,
+            new EntityReferencesKeyFilter
+        ];
     }
 
     /**
@@ -95,8 +96,7 @@ class ApiEntityReference extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function lenses(Request $request)
-    {
+    public function lenses(Request $request): array {
         return [];
     }
 
@@ -106,8 +106,23 @@ class ApiEntityReference extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function actions(Request $request)
-    {
+    public function actions(Request $request): array {
         return [];
     }
+
+    /**
+     * @param $query
+     * @param $search
+     * @return Builder
+     */
+    protected static function applySearch($query, $search): Builder
+    {
+        if (Str::lower($search) === 'dealer') {
+        return parent::applySearch($query, $search)
+            ->orWhere(DB::raw('entity_type like \'dealer%\''));
+        }
+
+        return parent::applySearch($query, $search);
+    }
+
 }

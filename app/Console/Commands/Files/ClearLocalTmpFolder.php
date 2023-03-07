@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands\Files;
 
+use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -19,6 +19,8 @@ class ClearLocalTmpFolder extends Command
      */
     protected $signature = "files:clear-local-tmp-folder";
 
+    private $tempMediaPath;
+
     /**
      * Execute the console command.
      *
@@ -26,8 +28,34 @@ class ClearLocalTmpFolder extends Command
      */
     public function handle()
     {
-        $localTmpFolderPath = Storage::disk('local_tmp')->getAdapter()->getPathPrefix();
+        $this->tempMediaPath = Storage::disk('local_tmp')->path('media');
 
-        return File::cleanDirectory($localTmpFolderPath);
+        $this->deleteEverythingInDirectory($this->tempMediaPath);
+
+        return 0;
+    }
+
+    private function deleteEverythingInDirectory(string $dir): void
+    {
+        foreach (glob($dir . '/*') as $file) {
+            if (is_dir($file)) {
+                $this->deleteEverythingInDirectory($file);
+            } else {
+                try {
+                    unlink($file);
+                } catch (Exception $exception) {
+                    $this->error($exception->getMessage());
+                }
+            }
+        }
+
+        // We don't want to delete the root dir itself
+        if ($dir !== $this->tempMediaPath) {
+            try {
+                rmdir($dir);
+            } catch (Exception $exception) {
+                $this->error($exception->getMessage());
+            }
+        }
     }
 }

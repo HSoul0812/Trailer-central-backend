@@ -2,10 +2,13 @@
 
 namespace App\Repositories\CRM\Email;
 
+use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\BlastSent;
 use App\Repositories\Repository;
+use App\Repositories\TransactionalRepository;
 
-interface BlastRepositoryInterface extends Repository {
+interface BlastRepositoryInterface extends Repository, TransactionalRepository
+{
     /**
      * Mark Blast as Sent
      *
@@ -55,4 +58,12 @@ interface BlastRepositoryInterface extends Repository {
      * @return bool
      */
     public function wasLeadSent(int $blastId, int $leadId): bool;
+
+    /**
+     * Update Blast
+     *
+     * @param $params
+     * @return Blast
+     */
+    public function update($params): Blast;
 }

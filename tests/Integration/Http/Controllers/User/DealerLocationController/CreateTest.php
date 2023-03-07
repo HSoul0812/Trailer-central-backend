@@ -25,6 +25,9 @@ class CreateTest extends AbstractDealerLocationController
     /**
      * @dataProvider invalidParametersProvider
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @param array $params
      * @param string $expectedException
      * @param string $expectedExceptionMessage
@@ -32,17 +35,16 @@ class CreateTest extends AbstractDealerLocationController
      *
      * @throws Exception when an unexpected exception has been thrown instead of the desired exception
      */
-    public function testWithInvalidParameter(array $params,
-                                             string $expectedException,
-                                             string $expectedExceptionMessage,
-                                             $expectedErrorMessages): void
+    public function testWithInvalidParameter(
+        array $params,
+        string $expectedException,
+        string $expectedExceptionMessage,
+        $expectedErrorMessages
+    ): void
     {
-        // Given I have some invalid request parameters $params
-
         // And I know there are some dealers and locations
         $this->seeder->seed();
 
-        // And I'm using the controller "DealerLocationController"
         $controller = app(DealerLocationController::class);
 
         $paramsExtracted = $this->seeder->extractValues($params);
@@ -61,12 +63,12 @@ class CreateTest extends AbstractDealerLocationController
         } catch (ResourceException $exception) {
             if (is_string($expectedErrorMessages)) {
                 // Then I should see that the first error message has a specific string
-                self::assertSame($expectedErrorMessages, $exception->getErrors()->first());
+                $this->assertSame($expectedErrorMessages, $exception->getErrors()->first());
             } else if (is_array($expectedErrorMessages)) {
                 // Then I should see that the error collection has all expected fields with errors
                 $fieldsWithErrors = $exception->getErrors()->keys();
                 foreach ($expectedErrorMessages as $Key) {
-                    self::assertContainsEquals($Key, $fieldsWithErrors);
+                    $this->assertContainsEquals($Key, $fieldsWithErrors);
                 }
             } else {
                 // Then I should see that the error collection has some other error
@@ -78,6 +80,9 @@ class CreateTest extends AbstractDealerLocationController
     }
 
     /**
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @throws Exception when an unexpected exception has not been handled
      */
     public function testWithValidParameter(): void
@@ -125,10 +130,10 @@ class CreateTest extends AbstractDealerLocationController
         $data = $response->original;
 
         // Then I should see that response status is 200
-        self::assertSame(JsonResponse::HTTP_OK, $response->status());
+        $this->assertSame(JsonResponse::HTTP_OK, $response->status());
 
         // And I should see that response has a key-value "data"
-        self::assertArrayHasKey('data', $data);
+        $this->assertArrayHasKey('data', $data);
 
         // And I should see the data retrieved has a key-value "id" which is the identifier of the recently created dealer location
         $locationId = $data['data']['id'];
@@ -140,20 +145,19 @@ class CreateTest extends AbstractDealerLocationController
         ]);
 
         // And I should see that I have only one dealer location as default location and that location is the expected location
-        $defaultLocations = DealerLocation::where(['dealer_id' => $dealerId, 'is_default' => 1])->get();
-        self::assertCount(1, $defaultLocations);
-        self::assertSame($locationId, $defaultLocations->first()->dealer_location_id);
+        $defaultLocations = DealerLocation::where(['dealer_id' => $dealerId, 'is_default' => 1]);
+        $this->assertSame(1, $defaultLocations->count());
+        $this->assertSame($locationId, $defaultLocations->first()->dealer_location_id);
 
         // And I should see that I have only one dealer location as default location for invoicing and that location is the expected location
-        $defaultLocationsForInvoicing = DealerLocation::where(['dealer_id' => $dealerId, 'is_default_for_invoice' => 1])->get();
-        self::assertCount(1, $defaultLocationsForInvoicing);
-        self::assertSame($locationId, $defaultLocationsForInvoicing->first()->dealer_location_id);
+        $defaultLocationsForInvoicing = DealerLocation::where(['dealer_id' => $dealerId, 'is_default_for_invoice' => 1]);
+        $this->assertSame(1, $defaultLocationsForInvoicing->count());
+        $this->assertSame($locationId, $defaultLocationsForInvoicing->first()->dealer_location_id);
 
         // And I should see the persisted record has other related records
-        self::assertCount(1, DealerLocationSalesTax::where(['dealer_location_id' => $locationId])->get());
-        self::assertCount(2, DealerLocationSalesTaxItem::where(['dealer_location_id' => $locationId])->get());
-        self::assertCount(2, DealerLocationSalesTaxItemV1::where(['dealer_location_id' => $locationId])->get());
-        self::assertCount(3, DealerLocationQuoteFee::where(['dealer_location_id' => $locationId])->get());
+        $this->assertSame(1, DealerLocationSalesTax::where(['dealer_location_id' => $locationId])->count());
+        $this->assertSame(2, DealerLocationSalesTaxItem::where(['dealer_location_id' => $locationId])->count());
+        $this->assertSame(3, DealerLocationQuoteFee::where(['dealer_location_id' => $locationId])->count());
     }
 
     /**
@@ -186,8 +190,8 @@ class CreateTest extends AbstractDealerLocationController
                 $salesTaxItemsError = $bag->get('sales_tax_items') ? $bag->get('sales_tax_items')[0] : '';
                 $feesError = $bag->get('fees') ? $bag->get('fees')[0] : '';
 
-                self::assertSame('The sales tax items needs to be an array.', $salesTaxItemsError);
-                self::assertSame('The fees needs to be an array.', $feesError);
+                $this->assertSame('The sales tax items needs to be an array.', $salesTaxItemsError);
+                $this->assertSame('The fees needs to be an array.', $feesError);
             }
         ];
     }

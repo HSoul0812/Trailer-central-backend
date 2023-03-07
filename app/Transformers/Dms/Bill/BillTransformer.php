@@ -1,10 +1,10 @@
 <?php
+
 namespace App\Transformers\Dms\Bill;
 
+use App\Constants\Date;
 use App\Models\CRM\Dms\Quickbooks\Bill;
-use App\Models\CRM\Dms\Quickbooks\BillCategory;
 use App\Models\CRM\Dms\Quickbooks\BillItem;
-use App\Models\CRM\Dms\UnitSale;
 use App\Repositories\Dms\UnitSaleRepositoryInterface;
 use League\Fractal\TransformerAbstract;
 
@@ -43,9 +43,9 @@ class BillTransformer extends TransformerAbstract
             'dealer_id' => $bill->dealer_id,
             'dealer_location_id' => $bill->dealer_location_id,
             'doc_num' => $bill->doc_num,
-            'received_date' => $bill->received_date,
+            'received_date' => $bill->received_date ? $bill->received_date->format(Date::FORMAT_Y_M_D) : null,
             'total' => $bill->total,
-            'due_date' => $bill->due_date,
+            'due_date' => $bill->due_date ? $bill->due_date->format(Date::FORMAT_Y_M_D) : null,
             'packing_list_no' => $bill->packing_list_no,
             'qb_id' => $bill->qb_id,
             'remaining_balance' => $this->calculateRemaining($bill)
@@ -93,8 +93,7 @@ class BillTransformer extends TransformerAbstract
     {
         $balance = (float) $bill->total;
 
-        foreach ($bill->payments as $payment)
-        {
+        foreach ($bill->payments as $payment) {
             $balance -= $payment->amount;
         }
 

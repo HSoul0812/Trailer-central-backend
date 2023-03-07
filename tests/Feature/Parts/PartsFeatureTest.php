@@ -2,6 +2,9 @@
 
 namespace Tests\Feature\Parts;
 
+use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrder;
+use App\Models\Parts\Part;
+use Tests\database\seeds\Part\PartSeeder;
 use Tests\TestCase;
 
 /**
@@ -13,37 +16,79 @@ use Tests\TestCase;
  */
 class PartsFeatureTest extends TestCase
 {
+    /** @var PartSeeder */
+    private $seeder;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seeder = new PartSeeder(['count' => 5, 'with' => ['purchaseOrders']]);
+        $this->seeder->seed();
+    }
+
+    public function tearDown(): void
+    {
+        $this->seeder->cleanUp();
+
+        parent::tearDown();
+    }
+
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testIndexHttpOk(): void
     {
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
             ->get('/api/parts');
 
-        $response->assertStatus(200);
+        $response->assertOk();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testSearchHasDataProperty(): void
     {
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
             ->get('/api/parts');
 
-        $json = json_decode($response->getContent(), true);
-
-        self::assertTrue(isset($json['data']));
+        $response->assertJsonStructure([
+            'data'
+        ]);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testPartHasNotPurchaseOrdesPropertyWhenIncludeParamIsNotPresent(): void
     {
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
             ->get('/api/parts');
 
-        $json = json_decode($response->getContent(), true);
-
-        self::assertNotTrue(isset($json['data'][0]['purchases']));
+        $response->assertJsonMissing([
+            'purchaseOrders'
+        ]);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testPartHasPurchaseOrdersPropertyAndItsStructureIsWellFormed(): void
     {
         $params = [
@@ -54,30 +99,43 @@ class PartsFeatureTest extends TestCase
             ->withHeaders(['access-token' => $this->accessToken()])
             ->get('/api/parts?' . http_build_query($params));
 
-        $json = json_decode($response->getContent(), true);
-
-        self::assertTrue(isset($json['data'][0]['purchaseOrders']));
-        self::assertIsArray($json['data'][0]['purchaseOrders']);
-        self::assertArrayHasKey('data', $json['data'][0]['purchaseOrders']);
-        self::assertIsArray($json['data'][0]['purchaseOrders']['data']);
-        self::assertArrayHasKey('meta', $json['data'][0]['purchaseOrders']);
-        self::assertArrayHasKey('has_not_completed', $json['data'][0]['purchaseOrders']['meta']);
+        $response->assertJsonStructure([
+            'data' => [
+                '*' => [
+                    'purchaseOrders' => [
+                        'data',
+                        'meta' => [
+                            'has_not_completed'
+                        ]
+                    ]
+                ]
+            ]
+        ]);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testPartHasPurchaseOrdersNotCompleted(): void
     {
-        // Given I'm a dealer
-        $dealer_id = 1001;
-        // And I have part with certainly ID (stock number)
-        $term = 7300029;
+        $seeder = new PartSeeder(['count' => 5, 'with' => ['purchaseOrders']]);
+        $seeder->seed();
+
+        $part = Part::query()
+            ->whereHas('purchaseOrders.purchaseOrder', function ($query) {
+                $query->where('dms_purchase_order.status', '!=', PurchaseOrder::STATUS_COMPLETED);
+            })
+            ->orderByDesc('id')
+            ->first();
 
         $params = [
-            'dealer_id' => $dealer_id,
+            'dealer_id' => $part->dealer_id,
             'per_page' => 1,
             'page' => 1,
-            'query' => $term,
-            'search_term' => $term,
-            'naive_search' => 1,
+            'query' => $part->sku,
             'include' => 'purchaseOrders'
         ];
 
@@ -86,10 +144,35 @@ class PartsFeatureTest extends TestCase
             ->withHeaders(['access-token' => $this->accessToken()])
             ->get('/api/parts/search?' . http_build_query($params));
 
-        $json = json_decode($response->getContent(), true);
+        $response
+            ->assertSuccessful()
+            ->assertJsonPath('data.0.purchaseOrders.meta.has_not_completed', true);
+    }
 
-        // Then I should see a part with the property purchases and within it a
-        // property named has_not_completed equal true
-        self::assertTrue($json['data'][0]['purchaseOrders']['meta']['has_not_completed']);
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
+    public function testPartSearchWithDifferentDealerId(): void
+    {
+        $dealerId = $this->getTestDealerId();
+
+        $params = [
+            'dealer_id' => 5001,    // Passing different DealerId than Authenticated
+            'per_page' => 10,
+            'page' => 1,
+        ];
+
+        // When I search using the different dealer id
+        $response = $this
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->get('/api/parts/search?' . http_build_query($params));
+
+        $response
+            ->assertSuccessful()
+            ->assertJsonPath('data.0.dealer_id', $dealerId)
+            ->assertJsonPath('meta.pagination.per_page', 10);
     }
 }

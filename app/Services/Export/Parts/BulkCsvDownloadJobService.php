@@ -9,6 +9,7 @@ use App\Exceptions\Common\BusyJobException;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
 use App\Models\Parts\Part;
+use App\Models\Parts\Bin;
 use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
@@ -90,12 +91,17 @@ class BulkCsvDownloadJobService extends AbstractMonitoredJobService implements B
         // get stream of parts rows from db
         $partsQuery = $this->partRepository->queryAllByDealerId($job->dealer_id);
 
+        // get bin names
+        $addedHeaders = $this->partRepository->getBins($job->dealer_id)->map(function(Bin $bin) {
+            return $bin->bin_name;
+        })->toArray();
+
         $exporter = $this->getExporter($job);
 
         // prep the exporter
         $exporter->createFile()
             // set the csv headers
-            ->setHeaders($exporter->getHeaders())
+            ->setHeaders(array_merge($exporter->getHeaders(), $addedHeaders, ['Part ID']))
 
             // a line mapper maps the db columns by name to csv column by position
             ->setLineMapper(static function (\stdClass $part) use ($exporter): array {

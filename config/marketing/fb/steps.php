@@ -23,32 +23,68 @@ return [
         'start-posting',
         'skip-posting',
         'get-listing-id',
-        'close-and-clear-cookies'
+        'close-and-clear-cookies',
+        'timed-out'
     ])),
 
 
     // Complete List of Available Errors
     'errors' => env('FB_MARKETING_ERRORS', implode(",", [
-        'missing-tunnel',
-        'offline-tunnel',
-        'missing-inventory',
-        'login-failed',
-        'login-invalid',
+        'no-error',
+        'unknown',
+        // Authentication
+        'account-disabled',
+        'account-locked',
+        'auth-fail',
         'email-verification',
         'login-approval',
+        'login-failed',
+        'login-invalid',
         'two-factor-auth',
         'two-factor-failed',
-        'account-locked',
-        'account-disabled',
-        'temp-blocked',
+        // Connectivity
+        'missing-tunnel',
+        'offline-tunnel',
         'page-unavailable',
-        'marketplace-inaccessible',
-        'marketplace-blocked',
+        'slow-tunnel',
+        'timed-out',
+        // Inventory
+        'missing-inventory',
+        // Marketplace
         'final-account-review',
-        'limit-reached',
+        'marketplace-blocked',
+        'marketplace-inaccessible',
+        'temp-blocked',
+        // Posting
         'failed-post',
-        'flagged-post'
+        'flagged-post',
+        'limit-reached',
+        'location-invalid',
     ])),
+
+    'errors_title' => [
+        'no-error' => "No Error",
+        'missing-tunnel' => "Tunnel Client App Not Installed",
+        'offline-tunnel' => "Tunnel Client App Offline",
+        'slow-tunnel' => "Tunnel Client App Slow Internet Connection",
+        'missing-inventory' => "Inventory Missing",
+        'login-failed' => "Login Failed",
+        'login-invalid' => "Login Invalid",
+        'email-verification' => "Email Verification",
+        'login-approval' => "Login Approval",
+        'two-factor-auth' => "Two Factor Authentication Required",
+        'two-factor-failed' => "Two Factor Authentication Failed",
+        'account-locked' => "Facebook Account locked",
+        'account-disabled' => "Facebook Account disabled",
+        'temp-blocked' => "Facebook Account temporary blocked",
+        'page-unavailable' => "Facebook Page Unavailable",
+        'marketplace-inaccessible' => "Marketplace Not Available",
+        'marketplace-blocked' => "Market Place blocked",
+        'final-account-review' => "Final Account Review",
+        'limit-reached' => "Posting Limit Reached Temporary",
+        'failed-post' => "Failed Post",
+        'flagged-post' => "Flagged Post"
+    ],
 
 
     // Define Selectors By Step

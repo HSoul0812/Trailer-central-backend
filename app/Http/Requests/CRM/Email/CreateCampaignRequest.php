@@ -6,22 +6,25 @@ use App\Http\Requests\Request;
 
 /**
  * Create Campaign Request
- * 
+ *
  * @author David A Conway Jr.
  */
-class CreateCampaignRequest extends Request {
-
+class CreateCampaignRequest extends Request
+{
     protected $rules = [
-        'template_id' => 'required|email_template_exists',
-        'campaign_name' => 'required|string',
-        'from_sms_number' => 'nullable|regex:/(0-9)?[0-9]{10}/',
-        'action' => 'required|campaign_action_valid',
-        'location_id' => 'nullable|dealer_location_valid',
+        'user_id' => 'required|exists:App\Models\User\NewDealerUser,user_id',
+        'email_template_id' => 'required|email_template_exists',
+        'campaign_name' => 'required|string|unique_email_campaign_name',
         'send_after_days' => 'required|integer',
-        'category' => 'nullable|array',
-        'category.*' => 'inventory_cat_valid',
-        'brand' => 'nullable|array',
-        'brand.*' => 'inventory_mfg_valid',
+        'action' => 'required|campaign_action_valid',
+        'unit_categories' => 'nullable|array',
+        'unit_categories.*' => 'inventory_cat_valid',
+        'brands' => 'nullable|array',
+        'brands.*' => 'inventory_mfg_valid',
+        'campaign_subject' => 'required|string',
         'include_archived' => 'in:0,-1,1',
+        'location_id' => 'nullable|dealer_location_valid',
+        'from_email_address' => 'string|nullable',
+        'is_enabled' => 'boolean|nullable'
     ];
 }

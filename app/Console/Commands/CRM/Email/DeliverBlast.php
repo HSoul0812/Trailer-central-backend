@@ -39,26 +39,15 @@ class DeliverBlast extends Command
     protected $datetime = null;
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct(EmailBuilderServiceInterface $service,
-                                BlastRepositoryInterface $blastRepo)
-    {
-        parent::__construct();
-
-        $this->service = $service;
-        $this->blasts = $blastRepo;
-    }
-
-    /**
      * Execute the console command.
      *
      * @return mixed
      */
     public function handle()
     {
+        $this->service = resolve(EmailBuilderServiceInterface::class);
+        $this->blasts = resolve(BlastRepositoryInterface::class);
+
         // Get Dealer ID
         $dealerId = $this->argument('dealer');
 
@@ -99,12 +88,12 @@ class DeliverBlast extends Command
                         $this->service->sendBlast($blast);
                         $this->info("{$command} dealer #{$dealer->id} sent email blast #" . $blast->email_blasts_id);
                     } catch(\Exception $e) {
-                        $this->error("{$command} exception returned on email blast #{$blast->email_blasts_id} {$e->getMessage()}: {$e->getTraceAsString()}");
+                        $this->error("{$command} exception returned on email blast #{$blast->email_blasts_id} {$e->getMessage()}");
                     }
                 }
             }
         } catch(\Exception $e) {
-            $this->error("{$command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
+            $this->error("{$command} exception returned {$e->getMessage()}");
         }
 
         // Log End

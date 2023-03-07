@@ -2,9 +2,11 @@
 
 namespace App\Repositories\User;
 
+use App\Models\User\DealerClapp;
 use App\Repositories\Repository;
 use App\Models\User\User;
 use App\Repositories\TransactionalRepository;
+use Illuminate\Database\Eloquent\Collection;
 
 interface UserRepositoryInterface extends Repository, TransactionalRepository {
 
@@ -54,45 +56,10 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
     /**
      *
      * @param int $dealerId
-     * @param bool $overlayEnabled
-     * @param bool $overlay_default
-     * @param string $overlay_logo_position
-     * @param int $overlay_logo_width
-     * @param int $overlay_logo_height
-     * @param string $overlay_upper
-     * @param string $overlay_upper_bg
-     * @param int $overlay_upper_alpha
-     * @param string $overlay_upper_text
-     * @param int $overlay_upper_size
-     * @param int $overlay_upper_margin
-     * @param string $overlay_lower
-     * @param string $overlay_lower_bg
-     * @param int $overlay_lower_alpha
-     * @param string $overlay_lower_text
-     * @param int $overlay_lower_size
-     * @param int $overlay_lower_margin
-     * @param string $overlay_logo_src
-     * @return User
+     * @param array $params
+     * @return array fields and values that were changed
      */
-    public function updateOverlaySettings(int $dealerId,
-                                          int $overlayEnabled = null,
-                                          bool $overlay_default = null,
-                                          string $overlay_logo_position = null,
-                                          string $overlay_logo_width = null,
-                                          string $overlay_logo_height = null,
-                                          string $overlay_upper = null,
-                                          string $overlay_upper_bg = null,
-                                          int $overlay_upper_alpha = null,
-                                          string $overlay_upper_text = null,
-                                          int $overlay_upper_size = null,
-                                          int $overlay_upper_margin = null,
-                                          string $overlay_lower = null,
-                                          string $overlay_lower_bg = null,
-                                          int $overlay_lower_alpha = null,
-                                          string $overlay_lower_text = null,
-                                          int $overlay_lower_size = null,
-                                          int $overlay_lower_margin = null,
-                                          string $overlay_logo_src = null) : User;
+    public function updateOverlaySettings(int $dealerId, array $params) : array;
 
     /**
      * Check admin password
@@ -101,4 +68,116 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
      * @param string $password
      */
     public function checkAdminPassword(int $dealerId, string $password): bool;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function activateDealerClassifieds(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateDealerClassifieds(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function activateDms(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateDms(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @return mixed
+     */
+    public function deactivateDealer(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @param string $sourceId
+     * @return User
+     */
+    public function activateCdk(int $dealerId, string $sourceId): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateCdk(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateELeads(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateELeads(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return DealerClapp
+     */
+    public function activateMarketing(int $dealerId): DealerClapp;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateMarketing(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateMobile(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateMobile(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function activateQuoteManager(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateQuoteManager(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @param string $status
+     * @return User
+     */
+    public function changeStatus(int $dealerId, string $status): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function activateGoogleFeed(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateGoogleFeed(int $dealerId): User;
+
+    public function getByName(string $name): Collection;
 }

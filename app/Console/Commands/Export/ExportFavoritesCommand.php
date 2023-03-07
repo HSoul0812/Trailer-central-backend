@@ -43,13 +43,13 @@ class ExportFavoritesCommand extends Command
     {
         switch ((int)$config->value) {
             case self::EXPORT_DAILY:
-                return Carbon::parse($history->last_ran)->isYesterday();
+                return !Carbon::parse($history->last_ran)->isToday();
             case self::EXPORT_WEEKLY:
-                return now()->diffInDays(Carbon::parse($history->last_ran)) == 7;
+                return now()->diffInDays(Carbon::parse($history->last_ran)) >= 7;
             case self::EXPORT_BI_WEEKLY:
-                return now()->diffInDays(Carbon::parse($history->last_ran)) == 14;
+                return now()->diffInDays(Carbon::parse($history->last_ran)) >= 14;
             case self::EXPORT_MONTHLY:
-                return now()->diffInMonths(Carbon::parse($history->last_ran)) == 1;
+                return now()->diffInMonths(Carbon::parse($history->last_ran)) >= 1;
             default:
                 return false;
         }
@@ -98,7 +98,7 @@ class ExportFavoritesCommand extends Command
             }
             if (!$websiteHistory || $shouldExportNow) {
                 $emails = $websiteEmails->firstWhere('website_id', $websiteConfig->website_id);
-                if ($emails) {
+                if ($emails && $emails->value) {
                     $data = $favoritesRepository->get(['website_id' => $websiteConfig->website_id]);
 
                     $inventoryData = $data->map(function ($user) {

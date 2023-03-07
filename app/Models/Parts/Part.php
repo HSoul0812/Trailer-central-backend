@@ -2,15 +2,17 @@
 
 namespace App\Models\Parts;
 
+use App\Domains\Scout\Traits\ExceptionableSearchable;
 use App\Models\Traits\TableAware;
 use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Laravel\Scout\Searchable;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use Carbon\Carbon;
 use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
+use App\Models\User\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Part
@@ -26,7 +28,13 @@ use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
  */
 class Part extends Model
 {
-    use Searchable, CustomSearch, TableAware;
+    use ExceptionableSearchable, CustomSearch, TableAware;
+
+    protected const STATUS_ACTIVE = 'Active';
+    protected const STATUS_CATALOG = 'Catalog';
+
+    protected const TAXABLE = 'Taxable';
+    protected const NOT_TAXABLE = 'Not Taxable';
 
     protected $table = 'parts_v1';
 
@@ -65,7 +73,9 @@ class Part extends Model
         'video_embed_code',
         'stock_min',
         'stock_max',
-        'is_sublet_specific'
+        'is_sublet_specific',
+        'is_active',
+        'is_taxable',
     ];
 
     /**
@@ -73,9 +83,7 @@ class Part extends Model
      *
      * @var array
      */
-    protected $hidden = [
-
-    ];
+    protected $hidden = [];
 
     protected $cacheStores = [
         [
@@ -117,10 +125,13 @@ class Part extends Model
 
     protected $casts = [
         'dealer_cost' => 'float',
-        'latest_cost' => 'float'
+        'latest_cost' => 'float',
+        'is_active' => 'boolean',
+        'is_taxable' => 'boolean',
     ];
 
-    public static function boot() {
+    public static function boot()
+    {
         parent::boot();
 
         static::created(function ($part) {
@@ -156,16 +167,17 @@ class Part extends Model
 
         $array['vehicle_specific'] = $this->vehicleSpecifc;
 
-        //
         $array['price'] = (string)$this->modified_cost;
+        $array['is_active'] = (int)$this->is_active;
+        $array['is_taxable'] = (int)$this->is_taxable;
 
         // bin qty
         $array['bins'] = $this->bins;
-        $array['bins_total_qty'] = ($this->bins instanceof Collection)?
+        $array['bins_total_qty'] = ($this->bins instanceof Collection) ?
             $this->bins->reduce(function ($total, $item) {
                 // add only non zero quantities
-                return $total + ($item->qty > 0? $item->qty: 0);
-            }, 0): 0;
+                return $total + ($item->qty > 0 ? $item->qty : 0);
+            }, 0) : 0;
 
         return $array;
     }
@@ -173,8 +185,8 @@ class Part extends Model
     // Move to a trait
     public function updateCacheStoreTimes()
     {
-        foreach($this->cacheStores as $cache) {
-            foreach($cache as $key => $value) {
+        foreach ($this->cacheStores as $cache) {
+            foreach ($cache as $key => $value) {
                 if (!empty($value)) {
                     $cache[$key] = $this->{$value};
                 }
@@ -226,11 +238,11 @@ class Part extends Model
 
     public function getTotalQtyAttribute()
     {
-        return ($this->bins instanceof Collection)?
+        return ($this->bins instanceof Collection) ?
             $this->bins->reduce(function ($total, $item) {
                 // add only non zero quantities
-                return $total + ($item->qty > 0? $item->qty: 0);
-            }, 0): 0;
+                return $total + ($item->qty > 0 ? $item->qty : 0);
+            }, 0) : 0;
     }
 
     public function purchaseOrders(): HasMany
@@ -250,7 +262,7 @@ class Part extends Model
         $costModifier = $costModifiedRepo->getByDealerId($this->dealer_id);
 
         if ($costModifier && $costModifier->modifier > 0) {
-            $newCost = $this->dealer_cost + ($this->dealer_cost * ( $costModifier->modifier / 100 ));
+            $newCost = $this->dealer_cost + ($this->dealer_cost * ($costModifier->modifier / 100));
             return (float) $newCost > 0 ? $newCost : $this->price;
         }
 
@@ -260,13 +272,39 @@ class Part extends Model
     /**
      * Get Website Shipping
      */
-    public function getWebsiteFeeAttribute() {
+    public function getWebsiteFeeAttribute()
+    {
         // Use Handling Fee?
-        if(!empty($this->use_handling_fee) && !empty($this->handling_fee)) {
+        if (!empty($this->use_handling_fee) && !empty($this->handling_fee)) {
             return $this->handling_fee;
         }
 
         // Return Standard
         return !empty($this->shipping_fee) ? $this->shipping_fee : '0.00';
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusAttribute(): string
+    {
+        return $this->attributes['is_active']
+            ? self::STATUS_ACTIVE
+            : self::STATUS_CATALOG;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTaxableTitleAttribute(): string
+    {
+        return $this->attributes['is_taxable']
+            ? self::TAXABLE
+            : self::NOT_TAXABLE;
     }
 }

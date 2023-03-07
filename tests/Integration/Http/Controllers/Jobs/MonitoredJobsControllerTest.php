@@ -24,6 +24,9 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
 {
     /**
      * @covers ::index
+     *
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
      */
     public function testIndexWithInvalidParameter(): void
     {
@@ -57,6 +60,9 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
      * @param callable $expectedJobs callable(): \Illuminate\Support\Collection<MonitoredJob>
      *
      * @covers ::index
+     *
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
      */
     public function testIndexListJobsPerDealer(array $params,
                                           callable $expectedTotal,
@@ -92,6 +98,9 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
      *
      * @covers ::statusByToken
      * @covers ::status
+     *
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
      */
     public function testStatusByTokenWithInvalidParameters(array $params,
                                                     string $expectedException,
@@ -132,6 +141,9 @@ class MonitoredJobsControllerTest extends AbstractMonitoredJobsTest
      *
      * @covers ::statusByToken
      * @covers ::status
+     *
+     * @group DMS
+     * @group DMS_MONITORED_JOBS
      */
     public function testStatusByTokenWithValidParameters(array $params,
                                                   string $jobStatus,

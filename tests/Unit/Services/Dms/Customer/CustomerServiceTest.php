@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Tests\Integration\Services\Dms\Customer;
+namespace Tests\Unit\Services\Dms\Customer;
 
 use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\CRM\User\Customer;
@@ -100,6 +100,12 @@ class CustomerServiceTest extends TestCase
         );
     }
 
+    /**
+     * @group DMS
+     * @group DMS_CUSTOMER
+     *
+     * @return void
+     */
     public function testNonExistingImport() {
         $this->customerRepository
             ->shouldReceive('get')
@@ -131,6 +137,12 @@ class CustomerServiceTest extends TestCase
         $this->runImportTest($this->dealer_id, $this->dealer_location_id,'John', 'Doe', $this->unit_serial);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_CUSTOMER
+     *
+     * @return void
+     */
     public function testExistingCustomerImport() {
         $this->customerRepository
             ->shouldReceive('get')
@@ -161,6 +173,12 @@ class CustomerServiceTest extends TestCase
         $this->runImportTest($this->dealer_id, $this->dealer_location_id,'John', 'Doe', $this->unit_serial);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_CUSTOMER
+     *
+     * @return void
+     */
     public function testExistingInventoryImport() {
         $this->customerRepository
             ->shouldReceive('get')
@@ -187,6 +205,12 @@ class CustomerServiceTest extends TestCase
         $this->runImportTest($this->dealer_id, $this->dealer_location_id,'John', 'Doe', $this->unit_serial);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_CUSTOMER
+     *
+     * @return void
+     */
     public function testExistingCustomerInventoryImport() {
         $this->customerRepository
             ->shouldReceive('get')

@@ -9,6 +9,7 @@ Homestead.yaml
 .vagrant/
 /nova
 auth.json
+/public/storage
 /storage
 node_modules
 .vscode/
@@ -17,3 +18,4 @@ node_modules
 cghooks.lock
 
 .php-cs-fixer.cache
+.DS_Store

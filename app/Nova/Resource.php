@@ -10,6 +10,8 @@ abstract class Resource extends NovaResource
 {
     use HasDefaultableFields;
 
+    public static $defaultSort = null; // Update to your default column
+
     /**
      * Build an "index" query for the given resource.
      *
@@ -19,6 +21,11 @@ abstract class Resource extends NovaResource
      */
     public static function indexQuery(NovaRequest $request, $query)
     {
+        if (!empty(static::$defaultSort) && empty($request->get('orderBy'))) {
+            $query->getQuery()->orders = [];
+            return $query->orderBy(static::$defaultSort);
+        }
+
         return $query;
     }
 
@@ -58,5 +65,22 @@ abstract class Resource extends NovaResource
     public static function relatableQuery(NovaRequest $request, $query)
     {
         return parent::relatableQuery($request, $query);
+    }
+
+    /**
+     * Allow resources to be initialized sorted and customize it on the Resource
+     * ["field" => "direction"]
+     *
+     * @param $query
+     * @param array $orderings
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected static function applyOrderings($query, array $orderings)
+    {
+        if (empty($orderings) && property_exists(static::class, 'orderBy')) {
+            $orderings = static::$orderBy;
+        }
+
+        return parent::applyOrderings($query, $orderings);
     }
 }

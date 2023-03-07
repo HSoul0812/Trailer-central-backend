@@ -19,86 +19,82 @@ class QuickApprovalControllerTest extends TestCase
 
     /**
      * @covers ::index
+     *
      * @group quickbook
+     * @group DMS
+     * @group DMS_QUICKBOOK
      */
     public function testIndexWithToSendStatus() {
-        $response = $this->json(
-            'GET',
+        $response = $this->getJson(
             '/api/dms/quickbooks/quickbook-approvals?status=to_send&per_page=10&page=1&sort=created_at&search_term=clearing&_=1621970127182',
-            [],
             [
                 'access-token' => $this->accessToken()
             ]
         );
 
-        $response->assertStatus(200);
-
-        $responseJson = json_decode($response->getContent(), true);
-
-        $this->assertNotEmpty($responseJson);
-        $this->assertIsArray($responseJson);
-
-        $this->assertArrayHasKey('data', $responseJson);
-
-        $this->assertArrayHasKey('id',$responseJson['data'][0]);
-        $this->assertArrayHasKey('dealer_id',$responseJson['data'][0]);
-        $this->assertArrayHasKey('qb_obj',$responseJson['data'][0]);
-        $this->assertArrayHasKey('error_result',$responseJson['data'][0]);
-        $this->assertArrayHasKey('tb_name',$responseJson['data'][0]);
-        $this->assertArrayHasKey('tb_primary_id',$responseJson['data'][0]);
-        $this->assertArrayHasKey('tb_label',$responseJson['data'][0]);
-        $this->assertArrayHasKey('action_type',$responseJson['data'][0]);
-        $this->assertArrayHasKey('created_at',$responseJson['data'][0]);
-        $this->assertArrayHasKey('customer_name',$responseJson['data'][0]);
-        $this->assertArrayHasKey('payment_method',$responseJson['data'][0]);
-        $this->assertArrayHasKey('sales_ticket_num',$responseJson['data'][0]);
-        $this->assertArrayHasKey('ticket_total',$responseJson['data'][0]);
-        $this->assertArrayHasKey('qbo_account',$responseJson['data'][0]);
-        $this->assertArrayHasKey('removed_by',$responseJson['data'][0]);
-        $this->assertArrayHasKey('deleted_at',$responseJson['data'][0]);
+        $response->assertSuccessful()
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'dealer_id',
+                        'qb_obj',
+                        'error_result',
+                        'tb_name',
+                        'tb_primary_id',
+                        'tb_label',
+                        'action_type',
+                        'created_at',
+                        'customer_name',
+                        'payment_method',
+                        'sales_ticket_num',
+                        'ticket_total',
+                        'qbo_account',
+                        'removed_by',
+                        'deleted_at',
+                    ]
+                ]
+            ]);
     }
 
     /**
      * @covers ::index
+     *
      * @group quickbook
+     * @group DMS
+     * @group DMS_QUICKBOOK
      */
     public function testIndexWithRemovedStatus() {
-        $response = $this->json(
-            'GET',
+        $response = $this->getJson(
             '/api/dms/quickbooks/quickbook-approvals?status=removed&per_page=10&page=1&sort=created_at&_=1621975079636',
-            [],
             [
                 'access-token' => $this->accessToken()
             ]
         );
 
-        $response->assertStatus(200);
-
-        $responseJson = json_decode($response->getContent(), true);
-
-        $this->assertNotEmpty($responseJson);
-        $this->assertIsArray($responseJson);
-
-        $this->assertArrayHasKey('data', $responseJson);
-
-        $this->assertArrayHasKey('id',$responseJson['data'][0]);
-        $this->assertArrayHasKey('dealer_id',$responseJson['data'][0]);
-        $this->assertArrayHasKey('qb_obj',$responseJson['data'][0]);
-        $this->assertArrayHasKey('error_result',$responseJson['data'][0]);
-        $this->assertArrayHasKey('tb_name',$responseJson['data'][0]);
-        $this->assertArrayHasKey('tb_primary_id',$responseJson['data'][0]);
-        $this->assertArrayHasKey('tb_label',$responseJson['data'][0]);
-        $this->assertArrayHasKey('action_type',$responseJson['data'][0]);
-        $this->assertArrayHasKey('created_at',$responseJson['data'][0]);
-        $this->assertArrayHasKey('customer_name',$responseJson['data'][0]);
-        $this->assertArrayHasKey('payment_method',$responseJson['data'][0]);
-        $this->assertArrayHasKey('sales_ticket_num',$responseJson['data'][0]);
-        $this->assertArrayHasKey('ticket_total',$responseJson['data'][0]);
-        $this->assertArrayHasKey('qbo_account',$responseJson['data'][0]);
-
-        // Only in removed
-        $this->assertArrayHasKey('removed_by',$responseJson['data'][0]);
-        $this->assertArrayHasKey('deleted_at',$responseJson['data'][0]);
+        $response->assertSuccessful()
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'dealer_id',
+                        'qb_obj',
+                        'error_result',
+                        'tb_name',
+                        'tb_primary_id',
+                        'tb_label',
+                        'action_type',
+                        'created_at',
+                        'customer_name',
+                        'payment_method',
+                        'sales_ticket_num',
+                        'ticket_total',
+                        'qbo_account',
+                        'removed_by',
+                        'deleted_at',
+                    ]
+                ]
+            ]);
     }
 
     public function setUp(): void
@@ -122,7 +118,10 @@ class QuickApprovalControllerTest extends TestCase
 
     /**
      * @covers ::destroy
+     *
      * @group quickbook
+     * @group DMS
+     * @group DMS_QUICKBOOK
      */
     public function testDestroy()
     {
@@ -149,7 +148,10 @@ class QuickApprovalControllerTest extends TestCase
      * @param string|null $firstExpectedErrorMessage
      *
      * @covers ::destroy
+     *
      * @group quickbook
+     * @group DMS
+     * @group DMS_QUICKBOOK
      */
     public function testDestroyWithoutDealerId(array $params,
                                                string $expectedException,
@@ -178,7 +180,10 @@ class QuickApprovalControllerTest extends TestCase
 
     /**
      * @covers ::moveStatus
+     *
      * @group quickbook
+     * @group DMS
+     * @group DMS_QUICKBOOK
      */
     public function testMoveStatus()
     {

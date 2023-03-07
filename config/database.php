@@ -45,8 +45,51 @@ return [
 
         'mysql' => [
             'driver' => 'mysql',
+            'read' => [
+                'host' => [
+                    // if no separate read write hosts are configured, then
+                    // the same host will be used for both connectsion
+                    env('DB_READ_HOST', env('DB_HOST', '127.0.0.1')),
+                ],
+            ],
+            'write' => [
+                'host' => [
+                    env('DB_HOST', '127.0.0.1'),
+                ],
+            ],
+            'sticky' => false,
             'url' => env('DATABASE_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => env('DB_STRICT_MODE', false),
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
+        'backup_mysql' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'read' => [
+                'host' => [
+                    // if no separate read write hosts are configured, then
+                    // the same host will be used for both connectsion
+                    env('DB_HOST', '127.0.0.1'),
+                ],
+            ],
+            'write' => [
+                'host' => [
+                    env('DB_HOST', '127.0.0.1'),
+                ],
+            ],
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
@@ -123,7 +166,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
 
         'default' => [
@@ -140,6 +183,26 @@ return [
             'password' => env('REDIS_PASSWORD', null),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_CACHE_DB', '1'),
+        ],
+
+        /**
+         * This new connection is aimed to help us to flush only this db, so we will avoid mistake,
+         * also this is faster and safe
+         */
+        'sdk-search-cache' => [
+            'url' => env('REDIS_URL'),
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_SDK_SEARCH_CACHE_DB', '3'),
+        ],
+
+        'sdk-single-cache' => [
+            'url' => env('REDIS_URL'),
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_SDK_SINGLE_CACHE_DB', '4'),
         ],
 
         'dealer-proxy' => [
@@ -162,13 +225,25 @@ return [
 
         'persist' => [
             'url' => env('REDIS_PERSIST_URL'),
-            'host' => env('REDIS_PERSIST_HOST', '127.0.0.1'),
+            'host' => env('REDIS_PERSIST_HOST', env('REDIS_HOST', '127.0.0.1')),
             'password' => env('REDIS_PERSIST_PASSWORD', null),
             'port' => env('REDIS_PERSIST_PORT', '6379'),
             'database' => env('REDIS_PERSIST_CACHE_DB', '0'),
             'options' => [
                 'prefix' => env('REDIS_PERSIST_PREFIX', '')
             ]
+        ],
+
+        /**
+         * This new connection is aimed to have isolated the invalidation jobs, so we will ensure we will have only
+         * one job per invalidation key pattern, avoiding to have many jobs using resources.
+         */
+        'inventory-job-cache' => [
+            'url' => env('REDIS_URL'),
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_INVENTORY_JOB_CACHE_DB', '5'),
         ],
     ],
 ];

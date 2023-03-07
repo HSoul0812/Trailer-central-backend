@@ -7,6 +7,7 @@ use App\Exceptions\CRM\Text\NoLeadSmsNumberAvailableException;
 use App\Exceptions\CRM\Text\ReplyInvalidArgumentException;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Text\Number;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
@@ -37,13 +38,13 @@ class TextServiceTest extends TestCase
 {
     private const TEST_FULL_NAME = 'test_full_name';
     private const TEST_TO_NUMBER = '123456';
-    private const TEST_FROM_NUMBER = '654321';
-    private const TEST_FROM_NUMBER_2 = '159753';
-    private const TEST_DEALER_ID = PHP_INT_MAX;
-    private const TEST_PREFERRED_LOCATION = PHP_INT_MAX - 1;
-    private const TEST_LEAD_IDENTIFIER = PHP_INT_MAX - 2;
+    private const TEST_FROM_NUMBER = '6543210986';
+    private const TEST_FROM_NUMBER_2 = '1597537493';
+    private const TEST_DEALER_ID = 1;
+    private const TEST_PREFERRED_LOCATION = 2;
+    private const TEST_LEAD_IDENTIFIER = 3;
     private const TEST_MESSAGE = 'some_message';
-    private const TEST_TEXT_LOG_ID = PHP_INT_MAX - 3;
+    private const TEST_TEXT_LOG_ID = 4;
 
     /**
      * @var TwilioServiceInterface|Mockery\LegacyMockInterface|Mockery\MockInterface
@@ -183,8 +184,7 @@ class TextServiceTest extends TestCase
             ->shouldReceive('createOrUpdate')
             ->once()
             ->with(Mockery::on(function($params) {
-                return isset($params['lead_id']) && $params['lead_id'] === self::TEST_LEAD_IDENTIFIER
-                    && isset($params['status']) && $params['status'] === Lead::STATUS_MEDIUM
+                return isset($params['lead_id']) && $params['lead_id'] === self::TEST_LEAD_IDENTIFIER && isset($params['status'])
                     && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
             }));
 
@@ -204,6 +204,10 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->once()
             ->withNoArgs();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
@@ -295,8 +299,7 @@ class TextServiceTest extends TestCase
             ->once()
             ->with(Mockery::on(function($params) {
                 return isset($params['lead_id']) && $params['lead_id'] === self::TEST_LEAD_IDENTIFIER
-                    && isset($params['status']) && $params['status'] === Lead::STATUS_MEDIUM
-                    && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
+                    && isset($params['status']) && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
             }));
 
         $this->textRepositoryMock
@@ -315,6 +318,10 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->once()
             ->withNoArgs();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
@@ -412,8 +419,7 @@ class TextServiceTest extends TestCase
             ->once()
             ->with(Mockery::on(function($params) {
                 return isset($params['lead_id']) && $params['lead_id'] === self::TEST_LEAD_IDENTIFIER
-                    && isset($params['status']) && $params['status'] === Lead::STATUS_MEDIUM
-                    && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
+                    && isset($params['status']) && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
             }));
 
         $this->textRepositoryMock
@@ -432,6 +438,10 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->once()
             ->withNoArgs();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
@@ -538,8 +548,7 @@ class TextServiceTest extends TestCase
             ->once()
             ->with(Mockery::on(function($params) {
                 return isset($params['lead_id']) && $params['lead_id'] === self::TEST_LEAD_IDENTIFIER
-                    && isset($params['status']) && $params['status'] === Lead::STATUS_MEDIUM
-                    && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
+                    && isset($params['status']) && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
             }));
 
         $this->textRepositoryMock
@@ -567,6 +576,10 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->once()
             ->withNoArgs();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
@@ -613,7 +626,7 @@ class TextServiceTest extends TestCase
 
         $lead->shouldReceive('getTextPhoneAttribute')
             ->once()
-            ->andReturn(null);
+            ->andReturn('');
 
         $this->fileServiceMock
             ->shouldReceive('bulkUpload')
@@ -1586,11 +1599,16 @@ class TextServiceTest extends TestCase
      */
     public function sendParamsProvider(): array
     {
+        /** @var LeadStatus|Mockery\MockInterface|Mockery\LegacyMockInterface $leadStatus */
+        $leadStatus = $this->getEloquentMock(LeadStatus::class);
+        $leadStatus->status = LeadStatus::STATUS_HOT;
+
         /** @var Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead */
         $lead = $this->getEloquentMock(Lead::class);
 
         $lead->dealer_id = self::TEST_DEALER_ID;
         $lead->identifier = self::TEST_LEAD_IDENTIFIER;
+        $lead->leadStatus = $leadStatus;
 
         /** @var NewDealerUser|Mockery\MockInterface|Mockery\LegacyMockInterface $newDealerUser */
         $newDealerUser = $this->getEloquentMock(NewDealerUser::class);

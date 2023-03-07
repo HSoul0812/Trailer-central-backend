@@ -12,12 +12,15 @@ class ImportImagesFromCSV extends Command {
     
     use StreamCSVTrait;
     
+    private const DEFAULT_STOCK_HEADER_NAME = 'stock #';
+    private const DEFAULT_IMAGE_HEADER_NAME = 'images';
+    
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $signature = "inventory:import-images {s3-bucket} {s3-key} {dealerId} {lowerIndex} {upperIndex}";
+    protected $signature = "inventory:import-images {s3-bucket} {s3-key} {dealerId} {lowerIndex} {upperIndex} {imageLinksInMultiColumn?} {imageFilterKeywords?} {stockHeaderName?} {imageHeaderName?}";
    
     
     /**
@@ -42,10 +45,32 @@ class ImportImagesFromCSV extends Command {
         $this->dealerId = $this->argument('dealerId');
         $lowerIndex = $this->argument('lowerIndex');
         $upperIndex = $this->argument('upperIndex');
+        $imageLinksInMultiColumn = $this->argument('imageLinksInMultiColumn');
+        $imageFilterKeywords = $this->argument('imageFilterKeywords');
+        $stockHeaderName = $this->argument('stockHeaderName');
+        $imageHeaderName = $this->argument('imageHeaderName');
+        
+        if (empty($stockHeaderName)) {
+            $stockHeaderName = self::DEFAULT_STOCK_HEADER_NAME;
+        }
+        
+        if (empty($imageHeaderName)) {
+            $imageHeaderName = self::DEFAULT_IMAGE_HEADER_NAME;
+        }
+        
+        if (empty($imageLinksInMultiColumn)) {
+            $imageLinksInMultiColumn = false;
+        }
+        
+        if ($imageFilterKeywords) {
+            $imageFilterKeywords = explode(',', $imageFilterKeywords);
+        } else {
+            $imageFilterKeywords = [];
+        }
         
         $inventoryService = app(InventoryServiceInterface::class);
         
-        $this->streamCsv(function($csvData, $lineNumber) use ($inventoryService, $lowerIndex, $upperIndex) {
+        $this->streamCsv(function($csvData, $lineNumber) use ($inventoryService, $lowerIndex, $upperIndex, $imageLinksInMultiColumn, $imageFilterKeywords, $stockHeaderName, $imageHeaderName) {
             if ($lineNumber === 1) {
                 $this->columnToHeaderMapping = $csvData;
                 return;
@@ -60,22 +85,37 @@ class ImportImagesFromCSV extends Command {
             }
             
             $this->info("Starting inventory image import");
-            
+
             $inventoryData = $this->mapInventoryValueToKey($csvData);
 
-            if (empty($inventoryData['images']) || empty($inventoryData['stock #'])) {
+            if (empty($inventoryData[$imageHeaderName]) || empty($inventoryData[$stockHeaderName])) {
                 $this->error("Skipping inventory due to empty images or empty stock");
                 return;
             }
             
-            $stock = $inventoryData['stock #'];
-                        
-            $images = array_map(function($imageData) {
-                return [
-                    'url' => $imageData
-                ];
-            }, explode(',', $inventoryData['images']));
+            $stock = $inventoryData[$stockHeaderName];
+            $images = [];
             
+            if ($imageLinksInMultiColumn) {  
+                foreach($inventoryData as $invCellData) {
+                    if (filter_var($invCellData, FILTER_VALIDATE_URL)) {
+                        foreach($imageFilterKeywords as $keyword) {
+                            if (strpos($invCellData, $keyword) === false) {
+                                $images[] = ['url' => $invCellData];
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                $images = array_map(function($imageData) {
+                    return [
+                        'url' => $imageData
+                    ];
+                }, explode(',', $inventoryData[$imageHeaderName]));
+            }
+
             $inventory = Inventory::where('stock', $stock)->where('is_archived', 0)->where('dealer_id', $this->dealerId)->first();
             
             if (empty($inventory)) {
@@ -134,7 +174,7 @@ class ImportImagesFromCSV extends Command {
     {
         $result = [];
         foreach ($data as $key => $value) {
-            $result[$this->columnToHeaderMapping[$key]] = $value;
+            $result[!empty($this->columnToHeaderMapping[$key]) ? $this->columnToHeaderMapping[$key] : $key] = $value;
         }
         return $result;
     }

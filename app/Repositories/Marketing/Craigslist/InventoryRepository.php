@@ -200,9 +200,14 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     private function buildInventoryQuery(array $params): Builder {
         /** @var Builder $query */
-        $query = $this->initInventoryQuery()
+        $query = $this->initInventoryResultsQuery()
                       ->where(Inventory::getTableName().'.dealer_id', '=', $params['dealer_id'])
-                      ->where(Profile::getTableName().'.id', '=', $params['profile_id']);
+                      ->where(Profile::getTableName().'.id', '=', $params['profile_id'])
+                      ->groupBy(Inventory::getTableName().'.inventory_id');
+
+        if (isset($params['images_greater_than']) || isset($params['images_less_than'])) {
+            $query = $query->selectRaw('count('.InventoryImage::getTableName().'.inventory_id) as image_count');
+        }
 
         if (isset($params['dealer_location_id'])) {
             $query = $query->where(Inventory::getTableName().'.dealer_location_id', $params['dealer_location_id']);
@@ -233,21 +238,35 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query;
     }
 
-    private function initInventoryQuery() : Builder
+    private function initInventoryResultsQuery() : Builder
     {
-        return DB::table(Inventory::getTableName())->select([
+        return $this->initInventoryQuery()->select([
                     Inventory::getTableName().'.inventory_id', Inventory::getTableName().'.stock',
-                    Inventory::getTableName().'.dealer_location_id',
-                    Inventory::getTableName().'.title', Inventory::getTableName().'.category',
-                    Inventory::getTableName().'.manufacturer', Inventory::getTableName().'.price',
-                    Post::getTableName().'.cl_status', Image::getTableName().'.filename as primary_image',
+                    Inventory::getTableName().'.dealer_location_id', Inventory::getTableName().'.title',
+                    Inventory::getTableName().'.category', Inventory::getTableName().'.manufacturer',
+                    Inventory::getTableName().'.price', Post::getTableName().'.cl_status',
+                    Image::getTableName().'.filename as primary_image', 'img2.filename as primary_image_backup',
                     Post::getTableName().'.added', Session::getTableName().'.session_scheduled',
                     Queue::getTableName().'.queue_id', Post::getTableName().'.clid',
                     Post::getTableName().'.view_url', Post::getTableName().'.manage_url'
-                ])->leftJoin(InventoryImage::getTableName(), Inventory::getTableName().'.inventory_id',
-                            '=', InventoryImage::getTableName().'.inventory_id')
+                ]);
+    }
+
+    private function initInventoryQuery() : Builder
+    {
+        return DB::table(Inventory::getTableName())
+                ->leftJoin(InventoryImage::getTableName(), function($join) {
+                    $join->on(Inventory::getTableName().'.inventory_id', '=', InventoryImage::getTableName().'.inventory_id');
+                    $join->on(function($join) {
+                        $join->on(InventoryImage::getTableName().'.is_default', '=', DB::raw('1'));
+                        $join->orOn(InventoryImage::getTableName().'.position', '=', DB::raw('1'));
+                    });
+                })
                 ->leftJoin(Image::getTableName(), Image::getTableName().'.image_id',
                             '=', InventoryImage::getTableName().'.image_id')
+                ->leftJoin(InventoryImage::getTableName() . ' as invImg2',
+                            Inventory::getTableName().'.inventory_id', '=', 'invImg2.inventory_id')
+                ->leftJoin(Image::getTableName() . ' as img2', 'img2.image_id', '=', 'invImg2.image_id')
                 ->crossJoin(Profile::getTableName())
                 ->leftJoin(Post::getTableName(), function($query) {
                     $query->on(Inventory::getTableName().'.inventory_id', '=', Post::getTableName().'.inventory_id')
@@ -325,19 +344,39 @@ class InventoryRepository implements InventoryRepositoryInterface
             }
         }
 
-        if (isset($params['images_greater_than']) || isset($params['images_less_than'])) {
-            $query = $query->selectRaw('count('.InventoryImage::getTableName().'.inventory_id) as image_count');
-        }
-
         // Return Query Builder
-        return $query->groupBy(Inventory::getTableName().'.inventory_id');;
+        return $query;
     }
 
-    private function getResultsCountFromQuery(Builder $query) : int
+    private function getResultsCountFromQuery(array $params) : int
     {
-        $queryString = str_replace(array('?'), array('\'%s\''), $query->toSql());
-        $queryString = vsprintf($queryString, $query->getBindings());
-        return current(DB::select(DB::raw("SELECT count(*) as row_count FROM ($queryString) as inventory_count")))->row_count;
+        /** @var Builder $query */
+        $query = $this->initInventoryQuery()
+                      ->select(DB::raw('count(DISTINCT ' . Inventory::getTableName() . '.inventory_id' . ') AS row_count'))
+                      ->where(Inventory::getTableName().'.dealer_id', '=', $params['dealer_id'])
+                      ->where(Profile::getTableName().'.id', '=', $params['profile_id']);
+
+        if (isset($params['dealer_location_id'])) {
+            $query = $query->where(Inventory::getTableName().'.dealer_location_id', $params['dealer_location_id']);
+        }
+
+        if (isset($params['type']) && $params['type'] === 'archives') {
+            $query = $this->archivedInventoryQuery($query);
+        } else {
+            // Skip Archived
+            $query->where(function ($query) {
+                $query->where(Inventory::getTableName().'.is_archived', '<>', 1)
+                      ->orWhereNull(Inventory::getTableName().'.is_archived');
+            });
+
+            // Override Inventory Query
+            $query = $this->overrideInventoryQuery($query, $params['dealer_id']);
+        }
+
+        $query = $this->filterInventoryQuery($query, $params);
+
+        // Return Count
+        return $query->first()->row_count;
     }
 
     private function getPaginatedResults($params)
@@ -345,9 +384,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         $perPage = !isset($params['per_page']) ? self::DEFAULT_PAGE_SIZE : (int)$params['per_page'];
         $currentPage = !isset($params['page']) ? 1 : (int)$params['page'];
 
-        $paginatedQuery = $this->buildInventoryQuery($params);
-        $resultsCount = $this->getResultsCountFromQuery($paginatedQuery);
+        $resultsCount = $this->getResultsCountFromQuery($params);
 
+        $paginatedQuery = $this->buildInventoryQuery($params);
         if((int) $params['per_page'] !== -1) {
             $paginatedQuery->skip(($currentPage - 1) * $perPage);
             $paginatedQuery->take($perPage);

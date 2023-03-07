@@ -54,9 +54,11 @@ class CollectorTransformer extends TransformerAbstract
             'active' => $collector->active,
             'cdk_password' => $collector->cdk_password,
             'cdk_username' => $collector->cdk_username,
+            'cdk_dealer_cmfs' => $collector->cdk_dealer_cmfs,
             'ids_token' => $collector->ids_token,
             'ids_default_location' => $collector->ids_default_location,
             'use_factory_mapping' => $collector->use_factory_mapping,
+            'is_mfg_brand_mapping_enabled' => $collector->is_mfg_brand_mapping_enabled,
             'xml_url' => $collector->xml_url,
             'csv_url' => $collector->csv_url,
             'motility_username' => $collector->motility_username,
@@ -80,6 +82,15 @@ class CollectorTransformer extends TransformerAbstract
             'ignore_manually_added_units' => $collector->ignore_manually_added_units,
             'is_bdv_enabled' => $collector->is_bdv_enabled,
             'show_on_auction123' => $collector->show_on_auction123,
+            'video_source_fields' => $collector->video_source_fields,
+            'override_all' => $collector->override_all,
+            'override_images' => $collector->override_images,
+            'override_video' => $collector->override_video,
+            'override_prices' => $collector->override_prices,
+            'override_attributes' => $collector->override_attributes,
+            'override_descriptions' => $collector->override_descriptions,
+            'last_run' => $collector->last_run,
+            'scheduled_for' => $collector->scheduled_for,
         ];
     }
 }

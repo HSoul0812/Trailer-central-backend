@@ -28,6 +28,9 @@ class MoveRelatedRecordsTest extends TestCase
      *
      * @dataProvider dealerLocationIdsToMoveProvider
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @throws Exception when an unexpected exception has been thrown instead of the desired exception
      */
     public function testWillThrowADomainException(?int $locationIdToMove, string $expectedExceptionMessage): void
@@ -102,6 +105,9 @@ class MoveRelatedRecordsTest extends TestCase
 
     /**
      * Test that SUT will move those related records from a location to another location
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @throws Exception when an unexpected exception has not been handled
      */

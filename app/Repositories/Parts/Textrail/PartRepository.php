@@ -2,7 +2,9 @@
 
 namespace App\Repositories\Parts\Textrail;
 
+use App\Models\Parts\Textrail\Attribute;
 use App\Models\Parts\Textrail\Part;
+use App\Models\Parts\Textrail\PartAttribute;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Repositories\Parts\PartRepository as BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
@@ -56,5 +58,28 @@ class PartRepository extends BaseRepository implements PartRepositoryInterface
     public function getAllByIds(array $ids): Collection
     {
         return $this->model->whereIn('id', $ids)->get();
+    }
+
+    /**
+     * @param Part $part
+     * @param Attribute $dbAttribute
+     * @param mixed $value
+     * @return PartAttribute
+     */
+    public function addAttribute(Part $part, Attribute $dbAttribute, $value): PartAttribute
+    {
+        $partAttribute = PartAttribute::where('attribute_id', '=', $dbAttribute->id)->where('part_id', '=', $part->id)->first();
+
+        if (!$partAttribute) {
+            $partAttribute = PartAttribute::firstOrCreate(
+                [
+                    'attribute_id' => $dbAttribute->id,
+                    'part_id' => $part->id,
+                    'attribute_value' => $value
+                ]
+            );
+        }
+
+        return $partAttribute;
     }
 }

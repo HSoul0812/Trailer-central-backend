@@ -72,6 +72,9 @@ class DealerOptionsServiceTest extends TestCase
 
     /**
      * @covers ::activateCrm
+     *
+     * @group DMS
+     * @group DMS_DEALER_OPTIONS
      */
     public function testActivateCrm()
     {
@@ -138,6 +141,9 @@ class DealerOptionsServiceTest extends TestCase
 
     /**
      * @covers ::activateCrm
+     *
+     * @group DMS
+     * @group DMS_DEALER_OPTIONS
      */
     public function testActivateCrmWithoutCrmUser()
     {
@@ -211,6 +217,9 @@ class DealerOptionsServiceTest extends TestCase
 
     /**
      * @covers ::activateCrm
+     *
+     * @group DMS
+     * @group DMS_DEALER_OPTIONS
      */
     public function testActivateCrmWithoutCrmUserRole()
     {
@@ -282,6 +291,9 @@ class DealerOptionsServiceTest extends TestCase
 
     /**
      * @covers ::activateCrm
+     *
+     * @group DMS
+     * @group DMS_DEALER_OPTIONS
      */
     public function testActivateCrmWithoutNewDealerUser()
     {
@@ -389,6 +401,9 @@ class DealerOptionsServiceTest extends TestCase
 
     /**
      * @covers ::activateCrm
+     *
+     * @group DMS
+     * @group DMS_DEALER_OPTIONS
      */
     public function testActivateCrmWithException()
     {
@@ -442,6 +457,9 @@ class DealerOptionsServiceTest extends TestCase
 
     /**
      * @covers ::deactivateCrm
+     *
+     * @group DMS
+     * @group DMS_DEALER_OPTIONS
      */
     public function testDeactivateCrm()
     {
@@ -482,6 +500,9 @@ class DealerOptionsServiceTest extends TestCase
 
     /**
      * @covers ::deactivateCrm
+     *
+     * @group DMS
+     * @group DMS_DEALER_OPTIONS
      */
     public function testDeactivateCrmWithException()
     {

@@ -43,6 +43,7 @@ class FileService extends AbstractFileService
         'text/csv' => 'csv',
         'text/plain' => 'csv',
         'text/calendar' => 'ics',
+        'text/rtf' => 'rtf',
 
         'application/pdf' => 'pdf',
         'application/rtf' => 'rtf',

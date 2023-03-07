@@ -3,6 +3,7 @@
 namespace App\Models\CRM\Leads;
 
 use App\Models\Inventory\Inventory;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -20,6 +21,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class InventoryLead extends Model
 {
+    use TableAware;
+
     /**
      * The table associated with the model.
      *

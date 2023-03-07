@@ -2,10 +2,12 @@
 
 namespace App\Jobs\CRM\Leads\Export;
 
+use App\Exceptions\CRM\Leads\Export\InvalidToEmailAddressException;
 use App\Jobs\Job;
 use App\Mail\CRM\Leads\Export\ADFEmail;
 use App\Models\CRM\Leads\Lead;
 use App\Services\CRM\Leads\DTOs\ADFLead;
+use App\Traits\ParsesEmails;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Bus\Queueable;
@@ -20,7 +22,11 @@ use Carbon\Carbon;
  */
 class ADFJob extends Job
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    use ParsesEmails;
 
     /**
      * @var ADFLead
@@ -31,48 +37,58 @@ class ADFJob extends Job
      * @var Lead
      */
     private $lead;
-    
-    /**     
+
+    /**
      * @var array
      */
     private $toEmails;
-    
+
     /**
      * @var array
      */
     private $copiedEmails;
-    
+
     /**
      *
      * @var array
      */
     private $hiddenCopiedEmails;
-    
+
     /**
      * ADF Export constructor.
-     * @param InquiryLead $lead
+     * @param ADFLead $adf
+     * @param Lead $lead
+     * @param array $toEmails
+     * @param array $copiedEmails
+     * @param array $hiddenCopiedEmails
      */
     public function __construct(ADFLead $adf, Lead $lead, array $toEmails, array $copiedEmails, array $hiddenCopiedEmails = [])
     {
         $this->adf = $adf;
         $this->lead = $lead;
-        $this->toEmails = $toEmails;
-        $this->copiedEmails = $copiedEmails;
-        $this->hiddenCopiedEmails = $hiddenCopiedEmails;
+        $this->toEmails = $this->parseEmails($toEmails);
+        $this->copiedEmails = $this->parseEmails($copiedEmails);
+        $this->hiddenCopiedEmails = $this->parseEmails($hiddenCopiedEmails);
     }
 
     /**
      * Handle ADF Job
-     * 
+     *
      * @return boolean
      * @throws \Exception
      */
-    public function handle()
+    public function handle(): bool
     {
-        Log::info('Mailing ADF Lead', ['lead' => $this->adf->leadId]);
+        // Initialize Log
+        $log = Log::channel('leads-export');
+        $log->info('Mailing ADF Lead', ['lead' => $this->adf->leadId]);
 
         try {
-            Mail::to($this->toEmails) 
+            if(empty($this->toEmails)) {
+                throw new InvalidToEmailAddressException();
+            }
+
+            Mail::to($this->toEmails)
                 ->cc($this->copiedEmails)
                 ->bcc($this->hiddenCopiedEmails)
                 ->send(
@@ -80,15 +96,17 @@ class ADFJob extends Job
                 );
 
             // Set ADF Export Date
-            if(empty($this->lead->adf_email_sent)) {
+            if (empty($this->lead->adf_email_sent)) {
                 $this->lead->adf_email_sent = Carbon::now()->setTimezone('UTC')->toDateTimeString();
                 $this->lead->save();
             }
-            
-            Log::info('ADF Lead Mailed Successfully', ['lead' => $this->adf->leadId]);
+
+            // ADF Lead Sent
+            $log->info('ADF Lead Mailed Successfully', ['lead' => $this->adf->leadId]);
             return true;
         } catch (\Exception $e) {
-            Log::error('ADFLead Mail error', $e->getTrace());
+            // ADF Lead Mail Error
+            $log->error('ADFLead Mail error', $e->getTrace());
             throw $e;
         }
     }

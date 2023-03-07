@@ -18,7 +18,7 @@ class BulkUpdateCustomOverlaysRequest extends WithDealerRequest
         return array_merge($this->rules, [
             'overlays' => 'array|required',
             'overlays.*.name' => ['required', Rule::in(CustomOverlay::VALID_CUSTOM_NAMES)],
-            'overlays.*.value' => 'required|string|max:255',
+            'overlays.*.value' => 'nullable|string|max:255',
         ]);
     }
 }

@@ -10,13 +10,11 @@ use Faker\Generator as Faker;
 /**
  * Define Template Factory
  */
-$factory->define(Template::class, function (Faker $faker) {
-    // Get New Dealer User
-    $newDealerUser = NewDealerUser::find(TestCase::getTestDealerId());
+$factory->define(Template::class, function (Faker $faker, array $attributes) {
+    $userId = $attributes['user_id'] ?? NewDealerUser::find(TestCase::getTestDealerId())->user_id;
 
-    // Return Overrides
     return [
-        'user_id' => $newDealerUser->user_id,
+        'user_id' => $userId,
         'name' => $faker->sentence,
         'template' => "Hello, {lead_name}\n\nWe see that you might be interested in {title_of_unit_of_interest}\n\nTesting, testing, 1, 2, 3!\n\nThank you!"
     ];

@@ -3,37 +3,32 @@
 namespace Tests\Unit\Jobs\CRM\Interactions;
 
 use App\Exceptions\CRM\Email\Builder\SendEmailBuilderJobFailedException;;
-use App\Models\CRM\Interactions\EmailHistory;
+
+use App\Exceptions\PropertyDoesNotExists;
 use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
-use Illuminate\Support\Facades\Log;
 use Mockery;
+use Mockery\LegacyMockInterface;
 use Tests\TestCase;
 
 /**
- * Test for App\Jobs\CRM\Leads\AutoAssignJob
+ * Test for App\Jobs\CRM\Interactions\SendEmailBuilderJob
  *
- * Class AutoAssignJobTest
- * @package Tests\Unit\Jobs\Files
+ * Class SendEmailBuilderJobTest
+ * @package ests\Unit\Jobs\CRM\Interactions
  *
  * @coversDefaultClass \App\Jobs\CRM\Interactions\SendEmailBuilderJob
  */
 class SendEmailBuilderJobTest extends TestCase
 {
-    /**
-     * @var LegacyMockInterface|EmailBuilderServiceInterface
-     */
-    private $emailBuilderServiceMock;
+    private const BUILDER_EMAIL_ID = PHP_INT_MAX;
+    private const BUILDER_EMAIL_TYPE = 'campaign';
+    private const BUILDER_EMAIL_LEAD_ID = PHP_INT_MAX - 1;
+    private const BUILDER_EMAIL_LEAD_EMAIL_ID = PHP_INT_MAX - 2;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->emailBuilderServiceMock = Mockery::mock(EmailBuilderServiceInterface::class);
-        $this->app->instance(EmailBuilderServiceInterface::class, $this->emailBuilderServiceMock);
-    }
+    private const PARSED_EMAIL_MESSAGE_ID = PHP_INT_MAX - 3;
 
 
     /**
@@ -41,68 +36,36 @@ class SendEmailBuilderJobTest extends TestCase
      * @covers ::handle
      * @group EmailBuilder
      *
-     * @throws BindingResolutionException
+     * @dataProvider dataProvider
+     *
+     * @param BuilderEmail $builderEmail
+     * @param ParsedEmail $parsedEmail
+     * @param EmailBuilderServiceInterface|LegacyMockInterface $emailBuilderServiceMock
      */
-    public function testHandle()
-    {
-        // Mock EmailHistory
-        $email = $this->getEloquentMock(EmailHistory::class);
-        $email->email_id = 1;
-
-        // Mock BuilderEmail
-        $builder = $this->getEloquentMock(BuilderEmail::class);
-        $builder->id = 1;
-        $builder->type = 'campaign';
-        $builder->leadId = 1;
-
-        // Mock ParsedEmail
-        $parsedEmail = $this->getEloquentMock(ParsedEmail::class);
-
-
-        // Mock Email Builder
-        $builder->shouldReceive('getLogParams')
-            ->twice()
-            ->andReturn([
-                'lead' => $builder->leadId,
-                'type' => $builder->type,
-                $builder->type => $builder->id
-            ]);
-
-        // Mock Email Builder Save to DB
-        $this->emailBuilderServiceMock
-            ->shouldReceive('saveToDb')
-            ->withArgs([$builder])
-            ->once()
-            ->andReturn($email);
-
-        // Mock Email Builder Send Email
-        $this->emailBuilderServiceMock
+    public function testHandle(
+        BuilderEmail $builderEmail,
+        ParsedEmail $parsedEmail,
+        EmailBuilderServiceInterface $emailBuilderServiceMock
+    ) {
+        $emailBuilderServiceMock
             ->shouldReceive('sendEmail')
-            ->withArgs([$builder, $email->email_id])
             ->once()
+            ->with($builderEmail)
             ->andReturn($parsedEmail);
 
-        // Mock Email Builder Send Email
-        $this->emailBuilderServiceMock
-            ->shouldReceive('markSent')
-            ->withArgs([$builder, $parsedEmail])
-            ->once();
+        $emailBuilderServiceMock
+            ->shouldReceive('markSentMessageId')
+            ->once()
+            ->with($builderEmail, $parsedEmail);
 
+        $emailBuilderServiceMock
+            ->shouldReceive('markEmailSent')
+            ->once()
+            ->with($parsedEmail);
 
-        // Initialize Send Email Builder Job
-        $sendEmailBuilderJob = new SendEmailBuilderJob($builder);
+        $sendEmailBuilderJob = new SendEmailBuilderJob($builderEmail);
+        $result = $sendEmailBuilderJob->handle($emailBuilderServiceMock);
 
-        // Handle Send Email Builder Job
-        $result = $sendEmailBuilderJob->handle($this->emailBuilderServiceMock);
-
-        // Receive Handling Auto Assign on Leads
-        Log::shouldReceive('info')->with('Email Builder Mailed Successfully', [
-            'lead' => $builder->leadId,
-            'type' => $builder->type,
-            $builder->type => $builder->id
-        ]);
-
-        // Assert True
         $this->assertTrue($result);
     }
 
@@ -111,63 +74,62 @@ class SendEmailBuilderJobTest extends TestCase
      * @covers ::handle
      * @group EmailBuilder
      *
-     * @throws BindingResolutionException
+     * @dataProvider dataProvider
+     *
+     * @param BuilderEmail $builderEmail
+     * @param ParsedEmail $parsedEmail
+     * @param EmailBuilderServiceInterface|LegacyMockInterface $emailBuilderServiceMock
      */
-    public function testHandleWithException()
-    {
-        // Mock EmailHistory
-        $email = $this->getEloquentMock(EmailHistory::class);
-        $email->email_id = 1;
-
-        // Mock BuilderEmail
-        $builder = $this->getEloquentMock(BuilderEmail::class);
-        $builder->id = 1;
-        $builder->type = 'campaign';
-        $builder->leadId = 1;
-
-
-        // Mock Email Builder
-        $builder->shouldReceive('getLogParams')
-            ->once()
-            ->andReturn([
-                'lead' => $builder->leadId,
-                'type' => $builder->type,
-                $builder->type => $builder->id
-            ]);
-
-        // Mock Email Builder Save to DB
-        $this->emailBuilderServiceMock
-            ->shouldReceive('saveToDb')
-            ->withArgs([$builder])
-            ->once()
-            ->andReturn($email);
-
-        // Mock Email Builder Send Email Failed
-        $this->emailBuilderServiceMock
+    public function testHandleWithException(
+        BuilderEmail $builderEmail,
+        ParsedEmail $parsedEmail,
+        EmailBuilderServiceInterface $emailBuilderServiceMock
+    ) {
+        $emailBuilderServiceMock
             ->shouldReceive('sendEmail')
-            ->withArgs([$builder, $email->email_id])
-            ->once();
+            ->once()
+            ->with($builderEmail)
+            ->andReturn($parsedEmail);
 
-        // Mock Email Builder Send Email
-        $this->emailBuilderServiceMock
-            ->shouldReceive('markSent')
-            ->withArgs([$builder])
-            ->once();
+        $emailBuilderServiceMock
+            ->shouldReceive('markSentMessageId')
+            ->once()
+            ->with($builderEmail, $parsedEmail);
 
-        // Expect Exception
+        $emailBuilderServiceMock
+            ->shouldReceive('markEmailSent')
+            ->once()
+            ->with($parsedEmail)
+            ->andThrow(\Exception::class);
+
         $this->expectException(SendEmailBuilderJobFailedException::class);
 
+        $sendEmailBuilderJob = new SendEmailBuilderJob($builderEmail);
+        $result = $sendEmailBuilderJob->handle($emailBuilderServiceMock);
 
-        // Initialize Send Email Builder Job
-        $sendEmailBuilderJob = new SendEmailBuilderJob($builder);
+        $this->assertTrue($result);
+    }
 
-        // Handle Send Email Builder Job
-        $result = $sendEmailBuilderJob->handle($this->emailBuilderServiceMock);
+    /**
+     * @return array[]
+     * @throws PropertyDoesNotExists
+     */
+    public function dataProvider(): array
+    {
+        $builderEmail = new BuilderEmail([
+            'id' => self::BUILDER_EMAIL_ID,
+            'type' => self::BUILDER_EMAIL_TYPE,
+            'lead_id' => self::BUILDER_EMAIL_LEAD_ID,
+            'email_id' => self::BUILDER_EMAIL_LEAD_EMAIL_ID,
+        ]);
 
-        // Receive Handling Error on Send Email Builder Job
-        Log::shouldReceive('error');
+        $parsedEmail = new ParsedEmail([
+            'message_id' => self::PARSED_EMAIL_MESSAGE_ID
+        ]);
 
-        // Assert True
-        $this->assertFalse($result);
+        /** @var EmailBuilderServiceInterface|LegacyMockInterface $builder */
+        $emailBuilderServiceMock = Mockery::mock(EmailBuilderServiceInterface::class);
+
+        return [[$builderEmail, $parsedEmail, $emailBuilderServiceMock]];
     }
 }

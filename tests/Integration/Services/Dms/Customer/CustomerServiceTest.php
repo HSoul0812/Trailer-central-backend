@@ -29,6 +29,12 @@ class CustomerServiceTest extends TestCase
         $this->service = app()->make(CustomerServiceInterface::class);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_CUSTOMER
+     *
+     * @return void
+     */
     public function testNonExistingImport() {
         $dealers = new DealerLocationSeeder();
         $dealers->seed();
@@ -39,6 +45,12 @@ class CustomerServiceTest extends TestCase
         $dealers->cleanUp();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_CUSTOMER
+     *
+     * @return void
+     */
     public function testExistingCustomerImport() {
         $seeder = new CustomerSeeder();
         $seeder->seed();
@@ -56,6 +68,12 @@ class CustomerServiceTest extends TestCase
         $seeder->cleanUp();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_CUSTOMER
+     *
+     * @return void
+     */
     public function testExistingInventoryImport() {
         $seeder = new InventorySeeder();
         $seeder->seed();
@@ -67,6 +85,12 @@ class CustomerServiceTest extends TestCase
         $seeder->cleanUp();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_CUSTOMER
+     *
+     * @return void
+     */
     public function testExistingCustomerInventoryImport() {
         $seeder = new InventorySeeder();
         $seeder->seed();

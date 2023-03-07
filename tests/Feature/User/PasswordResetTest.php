@@ -4,6 +4,7 @@ namespace Tests\Feature\User;
 
 use App\Mail\User\PasswordResetEmail;
 use App\Models\User\DealerPasswordReset;
+use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 use App\Models\User\User;
@@ -17,6 +18,7 @@ use App\Repositories\User\DealerPasswordResetRepositoryInterface;
  */
 class PasswordResetTest extends TestCase
 {
+    use WithFaker;
 
     private const NON_EXISTENT_EMAIL = 'bestdeveverinthehistoryofdev@bestdev.com';
 
@@ -48,6 +50,12 @@ class PasswordResetTest extends TestCase
         parent::tearDown();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testStartPasswordReset()
     {
         $this->dealer = $this->dealer->fresh();
@@ -57,6 +65,12 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(201);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testStartPasswordResetNoEmail()
     {
         $this->dealer = $this->dealer->fresh();
@@ -66,6 +80,12 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(422);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testStartPasswordResetNonExistentEmail()
     {
         $this->dealer = $this->dealer->fresh();
@@ -75,13 +95,19 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(201);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testFinishPasswordReset()
     {
         $this->dealer = $this->dealer->fresh();
 
         $passwordReset = $this->assertResetPasswordWasSent();
 
-        $password = uniqid();
+        $password = $this->faker->password(6, 8);
 
         $response = $this->json('POST', '/api/user/password-reset/finish', ['code' => $passwordReset->code, 'password' => $password]);
         $response->assertStatus(201);
@@ -90,21 +116,39 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function testFinishPasswordResetWrongPassword()
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
+    public function testFinishPasswordResetWrongPasswordLength(): void
     {
         $this->dealer = $this->dealer->fresh();
 
         $passwordReset = $this->assertResetPasswordWasSent();
 
-        $password = uniqid();
+        $password = $this->faker->password(9);
 
         $response = $this->json('POST', '/api/user/password-reset/finish', ['code' => $passwordReset->code, 'password' => $password]);
-        $response->assertStatus(201);
+        $response->assertStatus(422);
 
-        $response = $this->json('POST', '/api/user/login', ['email' => $this->dealer->email, 'password' => 'wrongpassword']);
-        $response->assertStatus(400);
+        $json = json_decode($response->getContent(), true);
+
+        self::assertArrayHasKey('message', $json);
+        self::assertArrayHasKey('errors', $json);
+        self::assertArrayHasKey('password', $json['errors']);
+
+        $this->assertSame('Validation Failed', $json['message']);
+        $this->assertContains('The password should not be greater than 8 characters.', $json['errors']['password']);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testFinishPasswordResetNoPassword()
     {
         $this->dealer = $this->dealer->fresh();
@@ -115,13 +159,19 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(422);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testFinishPasswordResetNoCode()
     {
         $this->dealer = $this->dealer->fresh();
 
         $this->assertResetPasswordWasSent();
 
-        $password = uniqid();
+        $password = $this->faker->password(6, 8);
 
         $response = $this->json('POST', '/api/user/password-reset/finish', ['password' => $password]);
         $response->assertStatus(422);

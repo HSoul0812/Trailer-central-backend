@@ -129,20 +129,22 @@ class SalesAuthServiceTest extends TestCase
         // Get Test Sales Person
         $accessToken = factory(AccessToken::class)->make();
         $salesPerson = factory(SalesPerson::class)->make([
-            'id' => (int) $accessToken->relation_id
+            'user_id' => (int) $accessToken->relation_id
         ]);
+        $salesPerson->id = $accessToken->relation_id;
         $validate = ['is_valid' => true, 'is_expired' => false];
 
         // Create Request Params
         $createRequestParams = [
-            'id' => (int) $accessToken->relation_id,
+            'user_id' => (int) $accessToken->relation_id,
             'token_type' => 'google',
             'access_token' => $accessToken->access_token,
             'id_token' => $accessToken->id_token,
             'refresh_token' => $accessToken->refresh_token,
             'expires_in' => $accessToken->expires_in,
             'expires_at' => $accessToken->expires_at,
-            'issued_at' => $accessToken->issued_at
+            'issued_at' => $accessToken->issued_at,
+            'email' => $salesPerson->email
         ];
 
         // Create Auth Params
@@ -167,6 +169,16 @@ class SalesAuthServiceTest extends TestCase
             ->shouldReceive('get')
             ->once()
             ->with(['sales_person_id' => $accessToken->relation_id])
+            ->andReturn($salesPerson);
+        $this->salesPersonRepositoryMock
+            ->shouldReceive('getByEmail')
+            ->twice()
+            ->with($createRequestParams['user_id'], $createRequestParams['email'])
+            ->andReturn($salesPerson);
+        $this->salesPersonRepositoryMock
+            ->shouldReceive('update')
+            ->once()
+            ->withAnyArgs()
             ->andReturn($salesPerson);
 
         // Mock Sales Person Repository
@@ -239,7 +251,7 @@ class SalesAuthServiceTest extends TestCase
         // Mock Sales Person Repository
         $this->salesPersonRepositoryMock
             ->shouldReceive('get')
-            ->once()
+            ->twice()
             ->with(['sales_person_id' => $accessToken->relation_id])
             ->andReturn($salesPerson);
 

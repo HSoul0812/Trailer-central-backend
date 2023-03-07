@@ -6,18 +6,21 @@ namespace App\Nova\Resources\Integration;
 
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Models\Integration\Collector\CollectorFields;
+use App\Nova\Actions\Importer\DefaultValueMappingImporter;
 use App\Nova\Filters\DealerIDMapping;
 use App\Nova\Resource;
-use App\Nova\Resources\Dealer\Dealer;
+use App\Nova\Resources\Dealer\LightDealer;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
+use App\Nova\Actions\Exports\DefaultValueMappingExport;
+
 class DefaultValueMapping extends Resource
 {
-    public static $group = 'Integration';
+    public static $group = 'Collector';
 
     /**
      * The model the resource corresponds to.
@@ -60,7 +63,7 @@ class DefaultValueMapping extends Resource
     public function fields(Request $request)
     {
         return [
-            BelongsTo::make('Dealer', 'dealers', Dealer::class)->sortable()->rules('required'),
+            BelongsTo::make('Dealer', 'dealers', LightDealer::class)->searchable()->sortable()->rules('required'),
 
             Select::make('Field', 'map_from')
                 ->options(CollectorFields::select(['label', 'field'])->orderBy('label')->get()->pluck('label', 'field'))
@@ -132,6 +135,9 @@ class DefaultValueMapping extends Resource
      */
     public function actions(Request $request)
     {
-        return [];
+        return [
+            (new DefaultValueMappingExport())->withHeadings()->askForFilename(),
+            new DefaultValueMappingImporter()
+        ];
     }
 }

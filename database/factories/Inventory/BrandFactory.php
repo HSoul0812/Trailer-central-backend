@@ -8,9 +8,10 @@ use Faker\Generator as Faker;
 
 $factory->define(Brand::class, static function (Faker $faker, array $attributes): array {
     return [
-        'name' => $faker->name,
+        'name' => $attributes['name'] ?? $faker->name,
         'logo' => '',
         'logo_highres' => '',
         'description' => '',
+        'manufacturer_id' => $attributes['manufacturer_id'] ?? null,
     ];
 });

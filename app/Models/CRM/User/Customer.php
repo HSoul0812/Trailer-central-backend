@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\User;
 
+use App\Domains\Scout\Traits\ExceptionableSearchable;
 use App\Helpers\StringHelper;
 use App\Models\Traits\TableAware;
 use ElasticScoutDriverPlus\CustomSearch;
@@ -10,7 +11,6 @@ use App\Models\CRM\Dms\UnitSale;
 use App\Models\Region;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
-use Laravel\Scout\Searchable;
 use App\Models\User\User as Dealer;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Collection;
@@ -63,7 +63,7 @@ use Carbon\Carbon;
  */
 class Customer extends Model
 {
-    use Searchable, CustomSearch, SoftDeletes, TableAware;
+    use ExceptionableSearchable, CustomSearch, SoftDeletes, TableAware;
 
     protected $table = 'dms_customer';
 

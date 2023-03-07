@@ -37,6 +37,9 @@ class DealerLocationMileageFeeControllerTest extends TestCase
 
     /**
      * @covers ::index
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION_MILEAGE_FEE
      */
     public function testIndex() {
         $this->seeder->seed();
@@ -53,6 +56,9 @@ class DealerLocationMileageFeeControllerTest extends TestCase
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION_MILEAGE_FEE
      */
     public function testCreate() {
         $this->seeder->seed();
@@ -73,6 +79,8 @@ class DealerLocationMileageFeeControllerTest extends TestCase
 
     /**
      * @covers ::delete
+     * @group DMS
+     * @group DMS_DEALER_LOCATION_MILEAGE_FEE
      */
     public function testDelete() {
         $this->seeder->seed();

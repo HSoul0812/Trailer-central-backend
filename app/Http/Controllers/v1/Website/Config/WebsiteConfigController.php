@@ -10,6 +10,7 @@ use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Website\Config\CreateOrUpdateRequest;
+use App\Transformers\Website\Config\DefaultWebsiteConfigRequestTransformer;
 use App\Transformers\Website\Config\DefaultWebsiteConfigValueTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
@@ -72,6 +73,8 @@ class WebsiteConfigController extends RestfulControllerV2
           return $this->response->errorBadRequest();
       }
 
-      return $this->response->array($this->websiteConfigRepository->createOrUpdate($websiteId, $request->all()));
+      $transformer = new DefaultWebsiteConfigRequestTransformer();
+
+      return $this->response->array($this->websiteConfigRepository->createOrUpdate($websiteId, $transformer->transform($request)));
     }
 }

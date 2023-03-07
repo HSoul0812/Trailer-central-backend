@@ -17,8 +17,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class WebsiteConfig extends Model
 {
+    const USER_ACCOUNTS_KEY = 'general/user_accounts';
     const INVENTORY_PRINT_LOGO_KEY = 'inventory/print_logo';
     const DURATION_BEFORE_AUTO_ARCHIVING_KEY = 'inventory/duration_before_auto_archiving';
+    const MOBILE_KEY_ENABLED = 'general/mobile/enabled';
     const ECOMMERCE_KEY_ENABLE = 'parts/ecommerce/enabled';
     const GENERAL_HEAD_SCRIPT_KEY = 'general/head_script';
     const CALL_TO_ACTION = 'call-to-action';

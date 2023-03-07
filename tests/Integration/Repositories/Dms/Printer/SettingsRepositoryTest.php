@@ -37,6 +37,9 @@ class SettingsRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group DMS
+     * @group DMS_PRINTER
+     *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
      */
@@ -49,6 +52,9 @@ class SettingsRepositoryTest extends TestCase
     
     /**
      * @covers ::getByDealerId
+     *
+     * @group DMS
+     * @group DMS_PRINTER
      */
     public function testGetByDealerIdReturnsDealerRecord(): void 
     {
@@ -62,6 +68,9 @@ class SettingsRepositoryTest extends TestCase
     
     /**
      * @covers ::getByDealerId
+     *
+     * @group DMS
+     * @group DMS_PRINTER
      */
     public function testGetByDealerIdReturnsPrinterSettings(): void 
     {
@@ -75,6 +84,9 @@ class SettingsRepositoryTest extends TestCase
     
     /**
      * @covers ::getByDealerId
+     *
+     * @group DMS
+     * @group DMS_PRINTER
      */
     public function testGetByDealerIdFails(): void 
     {

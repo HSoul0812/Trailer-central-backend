@@ -14,6 +14,7 @@ use App\Repositories\Dms\UnitSaleLaborRepository;
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\User\DealerLocation;
 use App\Models\User\User;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -45,14 +46,20 @@ class UnitSaleLaborRepositoryTest extends TestCase
         Payment::where('dealer_id', $this->dealerId)->delete();
         $this->dealerId = null;
         parent::tearDown();
-
     }
 
     /**
      * @covers ::getTechnicians
+     *
+     * @group DMS
+     * @group DMS_UNIT_SALE_LABOR
      */
     public function testGetTechnicians()
     {
+        $params = [
+            'dealer_id' => $this->getTestDealerId()
+        ];
+
         $technician1 = 'unit_test_get_technician_technician_1';
         $technician2 = 'unit_test_get_technician_technician_2';
         $technician3 = 'unit_test_get_technician_technician_3';
@@ -60,17 +67,18 @@ class UnitSaleLaborRepositoryTest extends TestCase
         for ($i = 0; $i < 3; $i++) {
             factory(UnitSaleLabor::class)->create([
                 'technician' => $technician1,
+                'unit_sale_id' => factory(UnitSale::class)->create($params)->getKey()
             ]);
         }
 
         factory(UnitSaleLabor::class)->create([
             'technician' => $technician2,
+            'unit_sale_id' => factory(UnitSale::class)->create($params)->getKey()
         ]);
 
         /** @var UnitSaleLaborRepository $repository */
         $repository = app()->make(UnitSaleLaborRepository::class);
-
-        $result = $repository->getTechnicians(['dealer_id' => $this->getTestDealerId()]);
+        $result = $repository->getTechnicians($params);
 
         $this->assertIsArray($result);
 
@@ -87,9 +95,13 @@ class UnitSaleLaborRepositoryTest extends TestCase
      * @covers ::serviceReport
      * @dataProvider serviceReportProvider
      *
+     * @group DMS
+     * @group DMS_UNIT_SALE_LABOR
+     *
      * @param array $unitSaleLabor11
      * @param array $unitSaleLabor12
      * @param array $unitSaleLabor21
+     * @throws BindingResolutionException
      */
     public function testServiceReport(array $unitSaleLabor11, array $unitSaleLabor12, array $unitSaleLabor21)
     {
@@ -414,9 +426,13 @@ class UnitSaleLaborRepositoryTest extends TestCase
      * @covers ::serviceReport
      * @dataProvider serviceReportProvider
      *
+     * @group DMS
+     * @group DMS_UNIT_SALE_LABOR
+     *
      * @param array $unitSaleLabor11
      * @param array $unitSaleLabor12
      * @param array $unitSaleLabor21
+     * @throws BindingResolutionException
      */
     public function testServiceReportWithDates(array $unitSaleLabor11, array $unitSaleLabor12, array $unitSaleLabor21)
     {
@@ -476,6 +492,9 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
     /**
      * @covers ::serviceReport
+     *
+     * @group DMS
+     * @group DMS_UNIT_SALE_LABOR
      */
     public function testServiceReportWithTechnician()
     {
@@ -617,13 +636,16 @@ class UnitSaleLaborRepositoryTest extends TestCase
     }
 
 
-
     /**
      * @covers ::serviceReport
      * @dataProvider serviceReportPaymentLaborProvider
      *
+     * @group DMS
+     * @group DMS_UNIT_SALE_LABOR
+     *
      * @param array $paymentLabor31
      * @param array $paymentLabor32
+     * @throws BindingResolutionException
      */
     public function testServiceReportPaymentLabor(
         array $paymentLabor31,
@@ -736,8 +758,12 @@ class UnitSaleLaborRepositoryTest extends TestCase
      * @covers ::serviceReport
      * @dataProvider serviceReportPaymentLaborProvider
      *
+     * @group DMS
+     * @group DMS_UNIT_SALE_LABOR
+     *
      * @param array $paymentLabor31
      * @param array $paymentLabor32
+     * @throws BindingResolutionException
      */
     public function testServiceReportPaymentLaborWithDate(
         array $paymentLabor31,

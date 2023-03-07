@@ -7,6 +7,12 @@ use Tests\TestCase;
 
 class BinControllerTest extends TestCase
 {
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testUpdate()
     {
         $seeder = new BinSeeder();

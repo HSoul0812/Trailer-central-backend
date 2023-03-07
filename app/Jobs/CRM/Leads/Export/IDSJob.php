@@ -60,8 +60,10 @@ class IDSJob extends Job
         if ($this->lead->ids_exported) {
             throw new \Exception('Already Exported');
         }
-        
-        Log::info('Mailing IDS Lead', ['lead' => $this->lead->identifier]);
+
+        // Initialize Log
+        $log = Log::channel('leads-export');
+        $log->info('Mailing IDS Lead', ['lead' => $this->lead->identifier]);
         
         $inquiryLead = $inquiryEmailService->createFromLead($this->lead);
         
@@ -84,17 +86,17 @@ class IDSJob extends Job
 
             $this->lead->ids_exported = 1;
             $this->lead->save();
-            
-            Log::info('IDS Lead Mailed Successfully', ['lead' => $this->lead->identifier]);
+
+            // IDS Lead Sent
+            $log->info('IDS Lead Mailed Successfully', ['lead' => $this->lead->identifier]);
             return true;
         } catch (\Exception $e) {
-            
-            // Flag it as exported anyway 
-            
+            // Flag it as exported anyway             
             $this->lead->ids_exported = 1;
             $this->lead->save();
-            
-            Log::error('IDSLead Mail error', $e->getTrace());
+
+            // IDS Lead Error
+            $log->error('IDSLead Mail error', $e->getTrace());
             throw $e;
         }
     }

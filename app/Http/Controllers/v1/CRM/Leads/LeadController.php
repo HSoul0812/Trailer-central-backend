@@ -6,6 +6,7 @@ use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\CRM\Leads\AssignLeadRequest;
+use App\Http\Requests\CRM\Leads\FilterLeadsRequest;
 use App\Http\Requests\CRM\Leads\FirstLeadRequest;
 use App\Http\Requests\CRM\Leads\GetLeadsSortFieldsCrmRequest;
 use App\Http\Requests\CRM\Leads\MergeLeadsRequest;
@@ -20,8 +21,10 @@ use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Transformers\CRM\Leads\GetUniqueFullNamesTransformer;
 use App\Transformers\CRM\Leads\LeadTransformer;
+use App\Transformers\CRM\Leads\LeadFiltersTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
+use App\Http\Requests\CRM\Leads\DeleteLeadRequest;
 
 class LeadController extends RestfulControllerV2
 {
@@ -47,8 +50,9 @@ class LeadController extends RestfulControllerV2
      */
     public function __construct(LeadRepositoryInterface $leads, LeadServiceInterface $service)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show', 'first', 'assign', 'getMatches', 'mergeLeads', 'uniqueFullNames']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show', 'first', 'assign', 'getMatches', 'mergeLeads', 'uniqueFullNames', 'destroy']);
         $this->middleware('setWebsiteIdOnRequest')->only(['index', 'update', 'create']);
+        $this->middleware('setSalesPersonIdOnRequest')->only(['create']);
         $this->leads = $leads;
         $this->service = $service;
         $this->transformer = new LeadTransformer;
@@ -280,9 +284,41 @@ class LeadController extends RestfulControllerV2
             return $this->response->errorBadRequest();
         }
 
-        $this->service->mergeLeads($id, $request->get('merges_lead_id'));
+        $this->service->mergeLeads($id, $request->get('merge_lead_ids'));
 
         return $this->updatedResponse();
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/leads/filters",
+     *     description="Retrieve various filter options for view leads page",
+     *     tags={"Lead"},
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns various filter options",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     *
+     * @param Request $request
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function filters(Request $request): Response
+    {
+        $request = new FilterLeadsRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->response->item($this->service->getFilters($request->all()), new LeadFiltersTransformer());
+        }
+
+        return $this->response->errorBadRequest();
     }
 
     public function output(Request $request)
@@ -292,5 +328,18 @@ class LeadController extends RestfulControllerV2
         if ($request->validate()) {
             return $this->leads->output($request->all());
         }
+    }
+
+    public function destroy(int $id, Request $request)
+    {
+        $request = new DeleteLeadRequest(array_merge($request->all(), ['id' => $id]));
+        
+        if ($request->validate() 
+            && $this->leads->delete(['id' => $id, 'dealer_id' => $request->get('dealer_id')]) > 0) {
+
+            return $this->updatedResponse();
+        }
+
+        return $this->response->errorBadRequest();
     }
 }

@@ -66,45 +66,65 @@ use App\Models\CRM\Leads\Facebook\User as FbUser;
  * @property int $unique_id
  * @property int $bigtex_exported
  *
+ * @property User $user
  * @property Website $website
  * @property LeadStatus $leadStatus
  * @property FbUser $fbUsers
  * @property FbLead $fbLead
  * @property Inventory $inventory
+ *
+ * @property string $full_name
+ *
  */
 class Lead extends Model
 {
     use TableAware;
 
-    const STATUS_WON = 'Closed';
-    const STATUS_WON_CLOSED = 'Closed (Won)';
-    const STATUS_LOST = 'Closed (Lost)';
-    const STATUS_HOT = 'Hot';
-    const STATUS_COLD = 'Cold';
-    const STATUS_MEDIUM = 'Medium';
-    const STATUS_UNCONTACTED = 'Uncontacted';
-    const STATUS_NEW_INQUIRY = 'New Inquiry';
+    public const STATUS_WON = 'Closed';
+    public const STATUS_WON_CLOSED = 'Closed (Won)';
+    public const STATUS_LOST = 'Closed (Lost)';
+    public const STATUS_HOT = 'Hot';
+    public const STATUS_COLD = 'Cold';
+    public const STATUS_MEDIUM = 'Medium';
+    public const STATUS_UNCONTACTED = 'Uncontacted';
+    public const STATUS_NEW_INQUIRY = 'New Inquiry';
 
-    const NOT_ARCHIVED = 0;
-    const LEAD_ARCHIVED = 1;
+    public const IGNORE_ARCHIVED = -1;
+    public const NOT_ARCHIVED = 0;
+    public const LEAD_ARCHIVED = 1;
+    public const ARCHIVED_STATUSES = [
+        self::NOT_ARCHIVED => 'Active Only',
+        self::LEAD_ARCHIVED => 'Archived Only',
+        self::IGNORE_ARCHIVED => 'All Leads'
+    ];
 
-    const IS_NOT_SPAM = 0;
-    const IS_SPAM = 1;
+    public const IS_NOT_SPAM = 0;
+    public const IS_SPAM = 1;
 
-    const IS_FROM_CLASSIFIEDS = 1;
-    const IS_NOT_FROM_CLASSIFIEDS = 0;
+    public const IS_FROM_CLASSIFIEDS = 1;
+    public const IS_NOT_FROM_CLASSIFIEDS = 0;
 
-    const IS_BIGTEX_EXPORTED = 1;
-    const IS_BIGTEX_NOT_EXPORTED = 0;
+    public const IS_BIGTEX_EXPORTED = 1;
+    public const IS_BIGTEX_NOT_EXPORTED = 0;
 
+    public const IS_IDS_EXPORTED = 1;
+    public const IS_NOT_IDS_EXPORTED = 0;
 
-    const IS_IDS_EXPORTED = 1;
-    const IS_NOT_IDS_EXPORTED = 0;
+    public const LEAD_TYPE_CLASSIFIED = 'classified';
 
-    const LEAD_TYPE_CLASSIFIED = 'classified';
+    public const TABLE_NAME = 'website_lead';
 
-    const TABLE_NAME = 'website_lead';
-
+    /**
+     * Lead fields that are related to Customer fields
+     * Lead field => Customer field
+     */
+    public const CUSTOMER_FIELDS = [
+        'email_address' => 'email',
+        'phone_number' => 'work_phone',
+        'first_name' => 'first_name',
+        'last_name' => 'last_name',
+        'middle_name' => 'middle_name'
+    ];
 
     /**
      * The table associated with the model.
@@ -125,14 +145,14 @@ class Lead extends Model
      *
      * @var string
      */
-    const CREATED_AT = 'date_submitted';
+    public const CREATED_AT = 'date_submitted';
 
     /**
      * The name of the "updated at" column.
      *
      * @var string
      */
-    const UPDATED_AT = NULL;
+    public const UPDATED_AT = null;
 
     /**
      * The attributes that are mass assignable.
@@ -169,6 +189,7 @@ class Lead extends Model
         'is_from_classifieds',
         'bigtex_exported',
         'next_followup',
+        'middle_name',
     ];
 
     protected $casts = [
@@ -183,7 +204,7 @@ class Lead extends Model
         return $this->hasMany(EmailHistory::class, 'lead_id', 'identifier');
     }
 
-    public function getAllInteractions() : Collection
+    public function getAllInteractions(): Collection
     {
         $interactionsRepo = app(InteractionsRepositoryInterface::class);
         return $interactionsRepo->getFirst10([
@@ -294,7 +315,7 @@ class Lead extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
@@ -321,16 +342,19 @@ class Lead extends Model
      *
      * @return array
      */
-    public function getId() {
+    public function getId()
+    {
         return $this->processProperty(CompactHelper::expand($this->identifier));
     }
 
-    public function getProductId() {
+    public function getProductId()
+    {
         $productIds = $this->getProductIds();
         return reset($productIds);
     }
 
-    public function getProductIds() {
+    public function getProductIds()
+    {
         return $this->product()->pluck('product_id')->toArray();
     }
 
@@ -344,7 +368,8 @@ class Lead extends Model
         return $this->hasOne(LeadStatus::class, 'tc_lead_identifier', 'identifier');
     }
 
-    public function getDateSubmitted() {
+    public function getDateSubmitted()
+    {
         return $this->processProperty($this->date_submitted);
     }
 
@@ -353,7 +378,8 @@ class Lead extends Model
      *
      * @return string
      */
-    public function getSource() {
+    public function getSource(): string
+    {
         if (empty($this->leadStatus)) {
             return '';
         }
@@ -361,28 +387,52 @@ class Lead extends Model
         return $source['source'] ?? '';
     }
 
-    public function getStatusId() {
+    public function getStatusId()
+    {
         return null;
     }
 
     /**
      * Find Lead Contact Details
      *
-     * @param type $id
-     * @return type
+     * @param int $id
+     * @return array
      */
-    public static function findLeadContact($id) {
+    public static function findLeadContact(int $id): array
+    {
         $result = Lead::findOrFail($id)->pluck('first_name', 'last_name', 'email_address')->toArray();
         return array('name' => $result['first_name'] .' '. $result['last_name'], 'email' => $result['email_address']);
     }
 
 
     /**
+     * Get Dealer Emails
+     *
+     * @return array<string>
+     */
+    public function getDealerEmailsAttribute(): array
+    {
+        // Get Email From Preferred Location
+        if (!empty($this->dealerLocation->email)) {
+            return explode(";", $this->dealerLocation->email);
+        }
+
+        // Get Email From Unit of Interest Location
+        if (!empty($this->inventory->dealerLocation->email)) {
+            return explode(";", $this->inventory->dealerLocation->email);
+        }
+
+        // Get Email From Dealer
+        return explode(";", $this->user->email);
+    }
+
+    /**
      * Get Inventory ID's
      *
      * @return array
      */
-    public function getInventoryIdsAttribute() {
+    public function getInventoryIdsAttribute(): array
+    {
         // Initialize Inventory ID's Array
         $inventoryIds = $this->units()->pluck('inventory.inventory_id')->toArray();
 
@@ -396,17 +446,18 @@ class Lead extends Model
     /**
      * Get Inventory Title
      *
-     * @return array
+     * @return string
      */
-    public function getInventoryTitleAttribute() {
+    public function getInventoryTitleAttribute(): string
+    {
         // Get Inventory Title
-        if(!empty($this->inventory) && !empty($this->inventory->title)) {
+        if (!empty($this->inventory) && !empty($this->inventory->title)) {
             return $this->inventory->title;
         }
 
         // Initialize Inventory Title Array
         $titles = $this->units()->pluck('title')->toArray();
-        if(count($titles) > 0) {
+        if (count($titles) > 0) {
             return reset($titles);
         }
         return '';
@@ -417,7 +468,8 @@ class Lead extends Model
      *
      * @return string
      */
-    public function getFullNameAttribute() {
+    public function getFullNameAttribute(): string
+    {
         return trim("{$this->first_name} {$this->last_name}");
     }
 
@@ -426,9 +478,10 @@ class Lead extends Model
      *
      * @return string
      */
-    public function getIdNameAttribute() {
+    public function getIdNameAttribute(): string
+    {
         $idName = $this->full_name;
-        if(empty($idName)) {
+        if (empty($idName)) {
             $idName = "#" . $this->identifier;
         }
         return $idName;
@@ -439,8 +492,9 @@ class Lead extends Model
      *
      * @return string
      */
-    public function getTextPhoneAttribute() {
-        if(empty($this->phone_number)) {
+    public function getTextPhoneAttribute(): string
+    {
+        if (empty($this->phone_number)) {
             return '';
         }
         $phone = preg_replace("/[^0-9]/", "", $this->phone_number);
@@ -452,8 +506,9 @@ class Lead extends Model
      *
      * @return string
      */
-    public function getCleanPhoneAttribute() {
-        if(empty($this->phone_number)) {
+    public function getCleanPhoneAttribute(): string
+    {
+        if (empty($this->phone_number)) {
             return '';
         }
         $phone = preg_replace("/[-+)( x]+/", "", $this->phone_number);
@@ -465,12 +520,13 @@ class Lead extends Model
      *
      * @return array
      */
-    public function getLeadTypesAttribute() {
+    public function getLeadTypesAttribute(): array
+    {
         // Initialize Inventory ID's Array
         $leadTypes = $this->leadTypes()->pluck('lead_type')->toArray();
 
         // Append Current Lead Type If Not Already in Array
-        if(!in_array($this->lead_type, $leadTypes)) {
+        if (!in_array($this->lead_type, $leadTypes)) {
             array_unshift($leadTypes, $this->lead_type);
         }
 
@@ -483,8 +539,9 @@ class Lead extends Model
      *
      * @return string
      */
-    public function getFullAddressAttribute() {
-        if(empty($this->address) || empty($this->city) || empty($this->state)) {
+    public function getFullAddressAttribute(): ?string
+    {
+        if (empty($this->address) || empty($this->city) || empty($this->state)) {
             return null;
         }
         return "{$this->address}, {$this->city}, {$this->state}, {$this->zip}";
@@ -493,8 +550,9 @@ class Lead extends Model
     /**
      * @return string(phone number) number in format (XXX) NNN-NNNN
      */
-    public function getPrettyPhoneNumberAttribute() {
-        if(  preg_match( '/^(\d{3})(\d{3})(\d{4})$/', $this->phone_number,  $matches ) ) {
+    public function getPrettyPhoneNumberAttribute(): ?string
+    {
+        if (preg_match('/^(\d{3})(\d{3})(\d{4})$/', $this->phone_number, $matches)) {
             return '(' . $matches[1] . ')' . ' ' .$matches[2] . '-' . $matches[3];
         } else {
             return null;
@@ -506,7 +564,7 @@ class Lead extends Model
      *
      * @return null|DealerLocation
      */
-    public function getPreferredDealerLocationAttribute()
+    public function getPreferredDealerLocationAttribute(): ?DealerLocation
     {
         if (empty($this->preferred_location)) {
             return null;
@@ -520,14 +578,15 @@ class Lead extends Model
      *
      * @return int
      */
-    public function getPreferredLocationAttribute() {
+    public function getPreferredLocationAttribute(): int
+    {
         // Dealer Location ID Exists?
-        if(!empty($this->dealer_location_id)){
+        if (!empty($this->dealer_location_id)) {
             return $this->dealer_location_id;
         }
 
         // Return Inventory Location ID Instead
-        if(!empty($this->inventory->dealer_location_id)) {
+        if (!empty($this->inventory->dealer_location_id)) {
             return $this->inventory->dealer_location_id;
         }
 
@@ -535,12 +594,11 @@ class Lead extends Model
         return 0;
     }
 
-    public function getInquiryTypeAttribute() : string
+    public function getInquiryTypeAttribute(): string
     {
         switch($this->lead_type) {
-            case LeadType::TYPE_CRAIGSLIST:
-                return LeadType::TYPE_INVENTORY;
             case LeadType::TYPE_INVENTORY:
+            case LeadType::TYPE_CRAIGSLIST:
                 return LeadType::TYPE_INVENTORY;
             case LeadType::TYPE_SHOWROOM_MODEL:
                 return LeadType::TYPE_SHOWROOM;
@@ -554,14 +612,15 @@ class Lead extends Model
      *
      * @return string
      */
-    public function getInquiryNameAttribute(): string {
+    public function getInquiryNameAttribute(): string
+    {
         // Dealer Location Name Exists?
-        if(!empty($this->dealerLocation->name)) {
+        if (!empty($this->dealerLocation->name)) {
             return $this->dealerLocation->name;
         }
 
         // Inventory Dealer Location Name Exists?
-        if(!empty($this->inventory->dealerLocation->name)) {
+        if (!empty($this->inventory->dealerLocation->name)) {
             return $this->inventory->dealerLocation->name;
         }
 
@@ -574,14 +633,15 @@ class Lead extends Model
      *
      * @return string
      */
-    public function getInquiryEmailAttribute(): string {
+    public function getInquiryEmailAttribute(): string
+    {
         // Dealer Location Email Exists?
-        if(!empty($this->dealerLocation->email)) {
+        if (!empty($this->dealerLocation->email)) {
             return $this->dealerLocation->email;
         }
 
         // Inventory Dealer Location Email Exists?
-        if(!empty($this->inventory->dealerLocation->email)) {
+        if (!empty($this->inventory->dealerLocation->email)) {
             return $this->inventory->dealerLocation->email;
         }
 
@@ -596,20 +656,20 @@ class Lead extends Model
      * @param mixed $property
      * @return mixed
      */
-    private function processProperty($property) {
+    private function processProperty($property)
+    {
         return empty($property) ? null : $property;
     }
 
     /**
      * Get Purchases for Lead
      *
-     * @param int $leadId
      * @return array of result data
-     * @throws \Exception
      */
-    public function getInvoices() {
+    public function getInvoices(): array
+    {
         // Get Purchases
-        if(empty($this->invoices)) {
+        if (empty($this->invoices)) {
             $resultSet = $this->unitSale()->pluck('total_price', 'id')->with(function ($query) {
                 $query->invoices()->payment()->groupBy('invoice_id')->map(function ($row) {
                     return $row->sum('amount');
@@ -618,7 +678,7 @@ class Lead extends Model
 
             // Loop Purchases
             $invoices = array();
-            foreach($resultSet as $result) {
+            foreach ($resultSet as $result) {
                 $invoices[] = $result;
             }
             $this->invoices = $invoices;
@@ -631,34 +691,35 @@ class Lead extends Model
     /**
      * Get Total Purchases for Lead
      *
-     * @param int $leadId
-     * @return string  of result data
      */
-    public function getLifetimeSales() {
+    public function getLifetimeSales()
+    {
         // Get Sales
-        if(empty($this->lifetime_sales)) {
+        if (empty($this->lifetime_sales)) {
             $resultSet = $this->unitSale()->invoices()->payment()->groupBy('invoice_id')->map(function ($row) {
                 return $row->sum('amount');
             });
 
             // Loop Purchases
-            foreach($resultSet as $result) {
+            foreach ($resultSet as $result) {
                 $this->lifetime_sales = $result->paid_amount;
             }
         }
 
         // Return Sales
-        if($this->lifetime_sales > 0) {
+        if ($this->lifetime_sales > 0) {
             return number_format(round($this->lifetime_sales, 2), 2);
         }
         return 0;
     }
 
-    public static function getTableName() {
+    public static function getTableName(): string
+    {
         return self::TABLE_NAME;
     }
 
-    public static function getLeadCrmUrl($leadId, $credential) {
+    public static function getLeadCrmUrl($leadId, $credential): string
+    {
         return config('app.new_design_crm_url') . 'user/login?e=' . $credential . '&r=' . urlencode(config('app.crm_lead_url') . CompactHelper::expand($leadId));
     }
 }
