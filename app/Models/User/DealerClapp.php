@@ -140,7 +140,7 @@ class DealerClapp extends Model
      */
     public function getNextSessionAttribute(): string {
         // Get Session
-        $session = $this->nextSessions()->first();
+        $session = $this->nextSession()->first();
 
         // Return Session Scheduled
         return $session->session_scheduled ?? '';
