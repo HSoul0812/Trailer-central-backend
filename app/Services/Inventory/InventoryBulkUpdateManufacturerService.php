@@ -38,15 +38,24 @@ class InventoryBulkUpdateManufacturerService implements InventoryBulkUpdateManuf
     public function update(array $params)
     {
         try {
+            if (empty($params['from_manufacturer'])) {
+                throw new Exception('Value from_manufacturer is required.');
+            }
+
+            if (empty($params['to_manufacturer'])) {
+                throw new Exception('Value to_manufacturer is required.');
+            }
+
             $this->inventoryRepository->bulkUpdate(
                 ['manufacturer' => $params['from_manufacturer']],
                 [ 'manufacturer' => $params['to_manufacturer']]
             );
 
             Log::info('Inventory manufacturers updated successfully', $params);
+
+            return true;
         } catch (Exception $e) {
             Log::error('Inventory manufacturers update error. Message - ' . $e->getMessage(), $e->getTrace());
-
             throw $e;
         }
     }
