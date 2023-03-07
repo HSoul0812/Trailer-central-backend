@@ -26,6 +26,8 @@ class Handler extends ExceptionHandler
         'password_confirmation',
     ];
 
+    protected const MSG_QUERY_EXCEPTION = "This was occurred by query issue.";
+
     /**
      * Report or log an exception.
      *
@@ -36,6 +38,9 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $exception)
     {
+        if($exception instanceof \Illuminate\Database\QueryException) {
+            throw new Exception(self::MSG_QUERY_EXCEPTION, $exception->getCode());
+        }
         parent::report($exception);
     }
 
