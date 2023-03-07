@@ -1179,6 +1179,8 @@ class InventoryService implements InventoryServiceInterface
         $input = str_replace('<br/>', '<br>', $input);
         $input = str_replace('<bR/>', '<br>', $input);
         $input = str_replace('<bR>', '<br>', $input);
+        $input = str_replace('<bR />', '<br>', $input);
+        $input = str_replace('<br />', '<br>', $input);
         $input = preg_replace('/<(?!br\s*\/?)[^<>]+>/', '', $input);
 
         // Try/Catch Errors
@@ -1220,10 +1222,6 @@ class InventoryService implements InventoryServiceInterface
      */
     private function fixNonAsciiChars(string $description)
     {
-
-        //$description = preg_replace('/(\\?\*){2,}/', '**', $description);
-        $description = preg_replace('/(\\?_)+/', '_', $description);
-
         // Fix 0xa0 or nbsp
         $description = preg_replace('/\xA0/', ' ', $description);
         $description = preg_replace('/\xBE/', '3/4', $description);
@@ -1246,24 +1244,30 @@ class InventoryService implements InventoryServiceInterface
 
         //$description = preg_replace('/[[:^print:]]/', ' ', $description);
 
+        preg_match('/<p>(.*?)<\/p>/s', $description, $match);
+        if (!empty($match[0])) {
+            $new_ul = strip_tags($match[0], '<blockquote><br><h1><h2><h3><h4><h5><h6><ul><ol><li><a><b><strong>');
+            $description = str_replace('<br /><br />', '<br />', $description);
+            $description = str_replace($match[0], $new_ul, $description);
+        }
+
         preg_match('/<blockquote>(.*?)<\/blockquote>/s', $description, $match);
         if (!empty($match[0])) {
-            $new_ul = strip_tags($match[0], '<blockquote><br><ul><ol><li><a><b><strong>');
-            $description = str_replace('<br /><br />', '<br />', $description);
+            $new_ul = strip_tags($match[0], '<blockquote><br><h1><h2><h3><h4><h5><h6><ul><ol><li><a><b><strong>');
             $description = str_replace($match[0], $new_ul, $description);
         }
 
 
         preg_match('/<ul.*>(.*?)<\/ul>/s', $description, $match);
         if (!empty($match[0])) {
-            $new_ul = strip_tags($match[0], '<ul><li><a><b><strong>');
+            $new_ul = strip_tags($match[0], '<ul><li><h1><h2><h3><h4><h5><h6><a><b><strong>');
             $description = str_replace($match[0], $new_ul, $description);
         }
 
         // Only accepts necessary tags
         preg_match('/<ol.*>(.*?)<\/ol>/s', $description, $match);
         if (!empty($match[0])) {
-            $new_ol = strip_tags($match[0], '<ol><li><a><b><strong>');
+            $new_ol = strip_tags($match[0], '<ol><li><h1><h2><h3><h4><h5><h6><a><b><strong>');
             $description = str_replace($match[0], $new_ol, $description);
         }
 
