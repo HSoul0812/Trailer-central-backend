@@ -251,7 +251,7 @@ class ClappPost
             'init_url' => $queue->profile->initial_url,
             'category' => $queue->inventory->category,
             'category_type' => $queue->profile->category->grouping,
-            'subarea' => strtolower($queue->profile->market_subarea),
+            'subarea' => strtolower($queue->profile->subarea_alt_name),
             'market' => $queue->profile->market_city,
             'from_email' => $queue->profile->Username,
             'confirm_email' => $queue->profile->Username,

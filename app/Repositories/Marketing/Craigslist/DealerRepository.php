@@ -3,8 +3,9 @@
 namespace App\Repositories\Marketing\Craigslist;
 
 use App\Exceptions\NotImplementedException;
-use App\Models\User\DealerClapp;
 use App\Models\Marketing\Craigslist\Session;
+use App\Models\User\User;
+use App\Models\User\DealerClapp;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Pagination;
 use Illuminate\Database\Eloquent\Builder;
@@ -82,7 +83,11 @@ class DealerRepository implements DealerRepositoryInterface
     public function getAll($params)
     {
         /** @var  Builder $query */
-        $query = DealerClapp::with('activeDealer')
+        $query = DealerClapp::leftJoin(Dealer::GetTableName(),
+                                DealerClapp::getTableName() . '.dealer_id', '=',
+                                Dealer::getTableName() . '.dealer_id')
+                    ->whereNotNull(Dealer::getTableName() . '.stripe_id')
+                    ->where(Dealer::getTableName() . '.state', User::STATUS_ACTIVE)
                     ->leftJoin(Session::GetTableName(),
                                 DealerClapp::getTableName() . '.dealer_id', '=',
                                 Session::getTableName() . '.session_dealer_id')
@@ -90,6 +95,13 @@ class DealerRepository implements DealerRepositoryInterface
 
         if (!isset($params['type'])) {
             $params['type'] = 'now';
+        }
+
+        if (isset($params['has_balance'])) {
+            $query = $query->leftJoin(Balance::GetTableName(),
+                                DealerClapp::getTableName() . '.dealer_id', '=',
+                                Balance::getTableName() . '.dealer_id')
+                           ->whereNotNull('balance')->where('balance', '>', 0);
         }
 
         if($params['type'] === 'now') {
