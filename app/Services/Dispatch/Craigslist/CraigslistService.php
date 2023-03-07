@@ -364,7 +364,7 @@ class CraigslistService implements CraigslistServiceInterface
                 'slots'        => $clapp->slots,
                 'chrome_mode'  => $clapp->chrome_mode,
                 'since'        => $clapp->since,
-                'next'         => $clapp->next_session,
+                'next'         => null,//$clapp->next_session,
                 'type'         => $params['type'],
                 'dealer_name'  => $clapp->dealer->name,
                 'dealer_email' => $clapp->dealer->email,
