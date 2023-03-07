@@ -17,7 +17,7 @@ class UpdateStatusDefaultValue extends Migration
     public function up(): void
     {
         Schema::table(self::INVENTORY_TABLE, function (Blueprint $table) {
-            $table->integer(self::INVENTORY_COLUMN, 255)->default(1)->change();
+            $table->integer(self::INVENTORY_COLUMN, 255)->nullable(false)->default(1)->change();
         });
     }
 }
