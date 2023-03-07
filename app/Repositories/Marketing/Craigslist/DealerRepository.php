@@ -102,7 +102,8 @@ class DealerRepository implements DealerRepositoryInterface
             $query = $query->leftJoin(Balance::GetTableName(),
                                 DealerClapp::getTableName() . '.dealer_id', '=',
                                 Balance::getTableName() . '.dealer_id')
-                           ->whereNotNull('balance')->where('balance', '>', 0);
+                           ->whereNotNull(Balance::getTableName() . '.balance')
+                           ->where(Balance::getTableName() . '.balance', '>', 0);
         }
 
         if($params['type'] === 'now') {
