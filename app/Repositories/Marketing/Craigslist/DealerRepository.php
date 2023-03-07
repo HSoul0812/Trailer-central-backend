@@ -83,7 +83,7 @@ class DealerRepository implements DealerRepositoryInterface
     public function getAll($params)
     {
         /** @var  Builder $query */
-        $query = DealerClapp::leftJoin(Dealer::GetTableName(),
+        $query = DealerClapp::leftJoin(User::GetTableName(),
                                 DealerClapp::getTableName() . '.dealer_id', '=',
                                 User::getTableName() . '.dealer_id')
                     ->whereNotNull(User::getTableName() . '.stripe_id')
