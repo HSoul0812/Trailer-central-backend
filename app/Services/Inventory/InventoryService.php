@@ -1222,6 +1222,10 @@ class InventoryService implements InventoryServiceInterface
      */
     private function fixNonAsciiChars(string $description)
     {
+
+        //$description = preg_replace('/(\\?\*){2,}/', '**', $description);
+        $description = preg_replace('/(\\?_)+/', '_', $description);
+
         // Fix 0xa0 or nbsp
         $description = preg_replace('/\xA0/', ' ', $description);
         $description = preg_replace('/\xBE/', '3/4', $description);
