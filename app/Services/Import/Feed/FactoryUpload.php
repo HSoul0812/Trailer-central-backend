@@ -42,21 +42,25 @@ class FactoryUpload
         $completed = 0;
         foreach ($json['transactions'] as $transaction) {
             if (isset($transaction['action']) && isset($transaction['parameters']) && is_array($transaction['parameters'])) {
-                $inventory = array_change_key_case($transaction['parameters']);
-
-                // Validate vin key real name and assign it to $vin
-                if (!empty($inventory['vin'])) {
-                    $vin = $inventory['vin'];
-                } else if (!empty($inventory['vin_no'])) {
-                    $vin = $inventory['vin_no'];
-                } else {
-                    // Impossible to get here but an extra validation won't hurt.
+                if (empty($transaction['action'])) {
                     continue;
                 }
 
                 switch ($transaction['action']) {
                     // Add inventory unit
                     case 'addInventory':
+                        $inventory = array_change_key_case($transaction['parameters']);
+
+                        // Validate vin key real name and assign it to $vin
+                        if (!empty($inventory['vin'])) {
+                            $vin = $inventory['vin'];
+                        } else if (!empty($inventory['vin_no'])) {
+                            $vin = $inventory['vin_no'];
+                        } else {
+                            // Impossible to get here but an extra validation won't hurt.
+                            break;
+                        }
+
                         Log::info("{$json['code']} Import: adding inventory with VIN: " . $vin);
                         $this->repository->createOrUpdate([
                             'code' => $json['code'],
