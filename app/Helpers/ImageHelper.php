@@ -550,7 +550,7 @@ class ImageHelper
      *
      * @return string
      */
-    protected function getRandomString()
+    public function getRandomString()
     {
         return bin2hex(random_bytes(18));
     }
