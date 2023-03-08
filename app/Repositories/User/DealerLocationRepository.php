@@ -124,10 +124,12 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
 
         $updateParams = Arr::except($params, ['id']);
 
-        return DealerLocation::query()
+        DealerLocation::query()
             ->lockForUpdate()
             ->where('dealer_location_id', $dealerLocationId)
             ->update($updateParams);
+
+        return true;
     }
 
     public function turnOffDefaultLocationByDealerId(int $dealerId): bool
