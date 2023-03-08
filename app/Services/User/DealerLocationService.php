@@ -201,7 +201,7 @@ class DealerLocationService implements DealerLocationServiceInterface
      * @throws InvalidArgumentException when `sales_tax_items` is not an array
      * @throws InvalidArgumentException when `fees` is not an array
      */
-    public function update(int $locationId, int $dealerId, array $params): bool
+    public function update(int $locationId, int $dealerId, array $params): DealerLocation
     {
         try {
             $this->locationRepo->beginTransaction();
@@ -220,7 +220,7 @@ class DealerLocationService implements DealerLocationServiceInterface
 
             $salesTaxItemColumnTitles = $this->encodeTaxColumnTitles($params['sales_tax_item_column_titles'] ?? []);
 
-            $this->locationRepo->update(
+            $dealerLocation = $this->locationRepo->update(
                 $params + $locationRelDefinition + ['sales_tax_item_column_titles' => $salesTaxItemColumnTitles]
             );
 
@@ -266,7 +266,7 @@ class DealerLocationService implements DealerLocationServiceInterface
 
             $this->locationRepo->commitTransaction();
 
-            return true;
+            return $dealerLocation;
         } catch (Exception $e) {
             $this->loggerService->error(
                 'Dealer location updating error. params=' .
