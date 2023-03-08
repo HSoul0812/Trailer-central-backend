@@ -129,7 +129,7 @@ class TransactionRepository implements TransactionRepositoryInterface {
      * @return Transaction
      */
     public function update($params) {
-        $transaction = $this->find($params);
+        $transaction = $this->get($params);
 
         DB::transaction(function() use (&$transaction, $params) {
             // Fill Transaction Details
@@ -167,7 +167,7 @@ class TransactionRepository implements TransactionRepositoryInterface {
      */
     public function createOrUpdate(array $params): Transaction {
         // Get Transaction
-        $transaction = $this->get($params);
+        $transaction = $this->find($params);
 
         // Transaction Exists? Update!
         if(!empty($transaction->dealer_id)) {
