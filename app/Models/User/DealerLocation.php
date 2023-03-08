@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Propaganistas\LaravelPhone\PhoneNumber;
 
 /**
  * Class DealerLocation
@@ -348,5 +349,14 @@ class DealerLocation extends Model
         }
 
         return $locationTitle;
+    }
+
+    public static function phoneWithNationalFormat(string $phone, string $countryCode = 'US'): string
+    {
+        try {
+            return PhoneNumber::make($phone, strtoupper($countryCode))->formatNational();
+        } catch (\Exception $exception) {
+            return $phone;
+        }
     }
 }

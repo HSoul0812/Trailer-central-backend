@@ -101,6 +101,11 @@ class ClientMessage
     static public function varied(Collection $validation): ClientMessage {
         // Get Client
         $client = $validation->first();
+        foreach($validation as $single) {
+            if($single->elapsed() < $client->elapsed()) {
+                $client = $single;
+            }
+        }
 
         // Discover Client Level
         $message = self::message($client->level, [
