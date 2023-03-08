@@ -138,6 +138,29 @@ class SubareaRepository implements SubareaRepositoryInterface {
         return $city;
     }
 
+
+    /**
+     * Find Subarea
+     * 
+     * @param array $params
+     * @return null|Subarea
+     */
+    public function find(array $params): ?Subarea {
+        // Name Exists?
+        if(isset($params['name']) && $params['name']) {
+            return Subarea::where('name', $params['name'])->first();
+        }
+
+        // Code Exists?
+        if(isset($params['code']) && $params['code']) {
+            // Find Subarea By Code
+            return Subarea::find($params['code']);
+        }
+
+        // Find Subarea By ID (Still Must Be Code)
+        return Subarea::find($params['id']);
+    }
+
     /**
      * Create OR Update Subarea
      * 
@@ -145,10 +168,10 @@ class SubareaRepository implements SubareaRepositoryInterface {
      * @return Subarea
      */
     public function createOrUpdate(array $params): Subarea {
-        // Get Post
-        $city = $this->get($params);
+        // Get Subarea
+        $city = $this->find($params);
 
-        // Post Exists? Update!
+        // Subarea Exists? Update!
         if(!empty($city->code)) {
             return $this->update($params);
         }

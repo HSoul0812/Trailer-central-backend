@@ -123,6 +123,42 @@ class SessionRepository implements SessionRepositoryInterface {
         return $session;
     }
 
+
+    /**
+     * Find Session
+     * 
+     * @param array $params
+     * @return null|Session
+     */
+    public function find(array $params): ?Session {
+        // Session ID Exists?
+        if(isset($params['session_id']) && $params['session_id']) {
+            return Session::where('session_id', $params['session_id'])->first();
+        }
+
+        // Find Session By ID
+        return Session::find($params['id']);
+    }
+
+    /**
+     * Create OR Update Session
+     * 
+     * @param array $params
+     * @return Session
+     */
+    public function createOrUpdate(array $params): Session {
+        // Get Session
+        $post = $this->find($params);
+
+        // Session Exists? Update!
+        if(!empty($post->id)) {
+            return $this->update($params);
+        }
+
+        // Create Instead
+        return $this->create($params);
+    }
+
     protected function getSortOrders() {
         return $this->sortOrders;
     }
