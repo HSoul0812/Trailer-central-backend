@@ -125,33 +125,33 @@ class QueueRepository implements QueueRepositoryInterface {
 
 
     /**
-     * Find Post
+     * Find Queue
      * 
      * @param array $params
-     * @return null|Post
+     * @return null|Queue
      */
-    public function find(array $params): ?Post {
+    public function find(array $params): ?Queue {
         // Queue ID Exists?
         if(isset($params['queue_id']) && $params['queue_id']) {
             return Queue::where('queue_id', $params['queue_id'])->first();
         }
 
-        // Find Post By ID
-        return Post::find($params['id'] ?? 0);
+        // Find Queue By ID
+        return Queue::find($params['id'] ?? 0);
     }
 
     /**
-     * Create OR Update Post
+     * Create OR Update Queue
      * 
      * @param array $params
-     * @return Post
+     * @return Queue
      */
-    public function createOrUpdate(array $params): Post {
-        // Get Post
-        $post = $this->find($params);
+    public function createOrUpdate(array $params): Queue {
+        // Get Queue
+        $queue = $this->find($params);
 
-        // Post Exists? Update!
-        if(!empty($post->id)) {
+        // Queue Exists? Update!
+        if(!empty($queue->id)) {
             return $this->update($params);
         }
 

@@ -125,12 +125,12 @@ class SessionRepository implements SessionRepositoryInterface {
 
 
     /**
-     * Get Session
+     * Find Session
      * 
      * @param array $params
-     * @return Session
+     * @return null|Session
      */
-    public function find($params) {
+    public function find(array $params): ?Session {
         // Session ID Exists?
         if(isset($params['session_id']) && $params['session_id']) {
             return Session::where('session_id', $params['session_id'])->first();

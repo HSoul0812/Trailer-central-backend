@@ -10,9 +10,9 @@ interface SessionRepositoryInterface extends Repository {
      * Get Session
      * 
      * @param array $params
-     * @return Session
+     * @return null|Session
      */
-    public function find($params);
+    public function find(array $params): ?Session;
 
     /**
      * Create OR Update Session

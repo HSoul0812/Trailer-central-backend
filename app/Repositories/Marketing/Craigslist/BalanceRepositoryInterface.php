@@ -12,7 +12,7 @@ interface BalanceRepositoryInterface extends Repository {
      * @param array $params
      * @return null|Balance
      */
-    public function get(array $params): ?Balance;
+    public function find(array $params): ?Balance;
 
     /**
      * Create OR Update Balance

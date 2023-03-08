@@ -118,7 +118,7 @@ class BalanceRepository implements BalanceRepositoryInterface {
      * @param array $params
      * @return null|Balance
      */
-    public function get(array $params): ?Balance {
+    public function find(array $params): ?Balance {
         // Find Balance By Dealer ID
         return Balance::find($params['dealer_id']);
     }
