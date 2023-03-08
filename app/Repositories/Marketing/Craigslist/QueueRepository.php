@@ -123,6 +123,42 @@ class QueueRepository implements QueueRepositoryInterface {
         return $queue;
     }
 
+
+    /**
+     * Find Post
+     * 
+     * @param array $params
+     * @return null|Post
+     */
+    public function find(array $params): ?Post {
+        // Queue ID Exists?
+        if(isset($params['queue_id']) && $params['queue_id']) {
+            return Queue::where('queue_id', $params['queue_id'])->first();
+        }
+
+        // Find Post By ID
+        return Post::find($params['id'] ?? 0);
+    }
+
+    /**
+     * Create OR Update Post
+     * 
+     * @param array $params
+     * @return Post
+     */
+    public function createOrUpdate(array $params): Post {
+        // Get Post
+        $post = $this->find($params);
+
+        // Post Exists? Update!
+        if(!empty($post->id)) {
+            return $this->update($params);
+        }
+
+        // Create Instead
+        return $this->create($params);
+    }
+
     protected function getSortOrders() {
         return $this->sortOrders;
     }
