@@ -4,6 +4,8 @@ use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 
+use App\Logging\CloudWatchLoggerFactory;
+
 return [
 
     /*
@@ -340,6 +342,17 @@ return [
         'sentry' => [
             'driver' => 'sentry',
             'level' => env('SENTRY_LOG_LEVEL', 'error')
+        ],
+        'cloudwatch' => [
+            'stream_name' => env('CLOUDWATCH_STREAM_NAME','laravel.log'),
+            'driver' => 'custom',
+            'via' => CloudWatchLoggerFactory::class,
+            'sdk' => [
+                'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+                'version' => 'latest'
+            ],
+            'retention' => env('CLOUDWATCH_LOG_RETENTION',7),
+            'level' => env('CLOUDWATCH_LOG_LEVEL','error')
         ],
     ],
 
