@@ -4,6 +4,7 @@ namespace App\Models\Marketing\Craigslist;
 
 use App\Models\Traits\Inventory\CompositePrimaryKeys;
 use App\Models\Traits\TableAware;
+use Awobaz\Compoships\Compoships;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Market extends Model
 {
-    use TableAware, CompositePrimaryKeys;
+    use TableAware, CompositePrimaryKeys, Compoships;
 
 
     // Define Table Name Constant

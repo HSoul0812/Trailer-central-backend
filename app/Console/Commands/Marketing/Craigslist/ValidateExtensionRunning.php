@@ -87,11 +87,14 @@ class ValidateExtensionRunning extends Command
         }
 
         // Check Client Status
+        $log->info('Return Status of ' . $validation->count() . ' CL Clients ' .
+                    'Per Allowed Internal Email Address');
         $messages = $this->service->status($validation);
 
         // Send Slack Messages?
         if($messages->count() > 0) {
-            $log->info('Sending Slack Messages for ' . $clients->count() . ' CL Clients');
+            $log->info('Sending ' . $messages->count() . ' Slack Messages for ' .
+                        $clients->count() . ' CL Clients');
             foreach($messages as $message) {
                 $this->service->send($message);
             }

@@ -232,10 +232,10 @@ class CraigslistService implements CraigslistServiceInterface
         ]);
 
         // Get Parameters for DealerCraigslist
-        $params['balance'] = $clapp->balance->balance;
+        $params['balance'] = !empty($clapp->balance->balance) ? $clapp->balance->balance : 0;
         $dealerClapp = [
             'dealer_id'    => $clapp->dealer_id,
-            'balance'      => $clapp->balance->balance,
+            'balance'      => $params['balance'],
             'slots'        => $clapp->slots,
             'chrome_mode'  => $clapp->chrome_mode,
             'since'        => $clapp->since,
@@ -360,10 +360,11 @@ class CraigslistService implements CraigslistServiceInterface
             // Append DealerCraigslist to Collection
             $dealers->push(new DealerCraigslist([
                 'dealer_id'    => $clapp->dealer_id,
+                'balance'      => null,//!empty($clapp->balance->balance) ? $clapp->balance->balance : 0,
                 'slots'        => $clapp->slots,
                 'chrome_mode'  => $clapp->chrome_mode,
                 'since'        => $clapp->since,
-                'next'         => $clapp->next_session,
+                'next'         => null,//$clapp->next_session,
                 'type'         => $params['type'],
                 'dealer_name'  => $clapp->dealer->name,
                 'dealer_email' => $clapp->dealer->email,
