@@ -21,6 +21,11 @@ use App\Models\CRM\User\Customer;
 use App\Models\User\DealerLocation;
 use App\Models\Inventory\Inventory;
 use App\Models\CRM\Leads\InventoryLead;
+use App\Models\User\DealerUser;
+use App\Models\User\DealerUserPermission;
+use App\Models\User\Interfaces\PermissionsInterface;
+use App\Nova\Permission;
+use App\Models\CRM\User\SalesPerson;
 
 /**
  * Class LeadControllerTest
@@ -124,7 +129,7 @@ class LeadControllerTest extends IntegrationTestCase
         ]);
 
         // create Customer
-        factory(Customer::class)->create([
+        $this->customer = factory(Customer::class)->create([
             'first_name' => $this->lead->first_name,
             'last_name' => $this->lead->last_name,
             'email' => $this->lead->email_address,
@@ -146,6 +151,168 @@ class LeadControllerTest extends IntegrationTestCase
 
         // assign first 4 inventories as units of interest
         $this->lead->units()->saveMany($this->inventories->slice(0, 4));
+
+        // create a Secondary User with Salesperson Role for CRM
+        $this->salesPerson = factory(SalesPerson::class)->create([
+            'user_id' => $user->user_id,
+            'dealer_location_id' => $this->location->getKey()
+        ]);
+
+        $dealerUser = factory(DealerUser::class)->create([
+            'dealer_id' => $this->dealer->getKey(),
+        ]);
+
+        factory(DealerUserPermission::class)->create([
+            'dealer_user_id' => $dealerUser->dealer_user_id,
+            'feature' => PermissionsInterface::CRM,
+            'permission_level' => $this->salesPerson->getKey(),
+        ]);
+        
+        $this->salespersonToken = factory(AuthToken::class)->create([
+            'user_id' => $dealerUser->dealer_user_id,
+            'user_type' => AuthToken::USER_TYPE_DEALER_USER,
+            'access_token' => md5($dealerUser->dealer_user_id.uniqid())
+        ]);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::create
+     */
+    public function testCreateAsSalesperson()
+    {
+        $params = [
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'lead_types' => $this->faker->randomElements(LeadType::TYPE_ARRAY, 2)
+        ];
+
+        $response = $this->json(
+            'PUT',
+            '/api/leads',
+            $params,
+            ['access-token' => $this->salespersonToken->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        $content = json_decode($response->getContent(), true);
+        $leadId = $content['data']['id'];
+
+        $this->assertDatabaseHas(Lead::getTableName(), [
+            'identifier' => $leadId,
+            'dealer_id' => $this->dealer->getKey()
+        ]);
+
+        $this->assertDatabaseHas(LeadStatus::getTableName(), [
+            'sales_person_id' => $this->salesPerson->getKey(),
+            'tc_lead_identifier' => $leadId
+        ]);
+
+        // cleanup
+        LeadStatus::where('tc_lead_identifier', $leadId)->delete();
+    }
+
+    /**
+     * @group CRM
+     * @covers ::create
+     */
+    public function testCreateWithExistingCustomer()
+    {
+        $firstName = $this->faker->firstName();
+        $lastName = $this->faker->lastName();
+        $params = [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'lead_types' => $this->faker->randomElements(LeadType::TYPE_ARRAY, 2),
+            'customer_id' => $this->customer->getKey()
+        ];
+
+        $this->assertDatabaseHas(Customer::getTableName(), [
+            'id' => $this->customer->getKey(),
+            'dealer_id' => $this->dealer->getKey(),
+            'website_lead_id' => $this->lead->getKey()
+        ]);
+
+        $response = $this->json(
+            'PUT',
+            '/api/leads',
+            $params,
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        $content = json_decode($response->getContent(), true);
+        $leadId = $content['data']['id'];
+
+        $this->assertDatabaseHas(Lead::getTableName(), [
+            'identifier' => $leadId,
+            'dealer_id' => $this->dealer->getKey()
+        ]);
+
+        $this->assertDatabaseHas(Customer::getTableName(), [
+            'id' => $this->customer->getKey(),
+            'dealer_id' => $this->dealer->getKey(),
+            'website_lead_id' => $leadId
+        ]);
+
+        $this->assertDatabaseMissing(Customer::getTableName(), [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'dealer_id' => $this->dealer->getKey()
+        ]);
+
+        // cleanup
+        LeadStatus::where('tc_lead_identifier', $leadId)->delete();
+    }
+
+    /**
+     * @group CRM
+     * @covers ::create
+     */
+    public function testCreateWithInteraction()
+    {
+        $note = $this->faker->sentence();
+        $time = Carbon::now()->format('Y-m-d H:i:s');
+        $params = [
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'lead_types' => $this->faker->randomElements(LeadType::TYPE_ARRAY, 2),
+            'interaction' => [
+                'type' => Interaction::TYPE_TASK,
+                'note' => $note,
+                'time' => $time
+            ]
+        ];
+
+        $response = $this->json(
+            'PUT',
+            '/api/leads',
+            $params,
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        $content = json_decode($response->getContent(), true);
+        $leadId = $content['data']['id'];
+
+        $this->assertDatabaseHas(Lead::getTableName(), [
+            'identifier' => $leadId,
+            'dealer_id' => $this->dealer->getKey()
+        ]);
+
+        $this->assertDatabaseHas(Interaction::getTableName(), [
+            'tc_lead_id' => $leadId,
+            'user_id' => $this->dealer->newDealerUser->user_id,
+            'interaction_type' => Interaction::TYPE_TASK,
+            'interaction_notes' => $note,
+            'interaction_time' => $time
+        ]);
+
+        // cleanup
+        LeadStatus::where('tc_lead_identifier', $leadId)->delete();
     }
 
     /**
@@ -655,8 +822,15 @@ class LeadControllerTest extends IntegrationTestCase
         Inventory::where('dealer_id', $this->dealer->getKey())->delete();
         $this->website->delete();
         $this->location->delete();
+        Customer::where('dealer_id', $this->dealer->getKey())->delete();
 
         $this->token->delete();
+
+        // Delete Secondary User Data
+        $this->salespersonToken->delete();
+        DealerUserPermission::where('permission_level', $this->salesPerson->getKey())->delete();
+        DealerUser::where('dealer_id', $this->dealer->getKey())->delete();
+        $this->salesPerson->forceDelete();
 
         // Delete CRM User Related Data
         NewDealerUser::where(['user_id' => $userId])->delete();

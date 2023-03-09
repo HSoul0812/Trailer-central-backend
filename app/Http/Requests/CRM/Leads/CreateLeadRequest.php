@@ -39,6 +39,9 @@ class CreateLeadRequest extends Request {
         'contact_type' => 'in:CONTACT,TASK',
         'sales_person_id' => 'sales_person_valid',
         'next_followup' => 'nullable|date_format:Y-m-d H:i:s',
+        'interaction.type' => 'interaction_type_valid',
+        'interaction.note' => 'interaction_note_valid:interaction.type',
+        'interaction.time' => 'required_with:interaction.type|date_format:Y-m-d H:i:s'
     ];
 
 }

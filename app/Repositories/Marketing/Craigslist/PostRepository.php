@@ -142,7 +142,7 @@ class PostRepository implements PostRepositoryInterface {
      * @return Post
      */
     public function update($params) {
-        $post = $this->find($params);
+        $post = $this->get($params);
 
         DB::transaction(function() use (&$post, $params) {
             // Set Dates if Not Provided
@@ -188,7 +188,7 @@ class PostRepository implements PostRepositoryInterface {
      */
     public function createOrUpdate(array $params): Post {
         // Get Post
-        $post = $this->get($params);
+        $post = $this->find($params);
 
         // Post Exists? Update!
         if(!empty($post->id)) {
