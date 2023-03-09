@@ -152,7 +152,7 @@ class UpdateTest extends TestCase
         $result = $service->update($location->dealer_location_id, $dealerId, $params);
 
         // Then I expect that "DealerLocationService::update" returns true
-        self::assertInstanceOf(DealerLocation::class, $result);
+        self::assertTrue($result);
     }
 
     /**
@@ -237,7 +237,7 @@ class UpdateTest extends TestCase
         $result = $service->update($location->dealer_location_id, $dealerId, $params);
 
         // Then I expect that "DealerLocationService::update" returns true
-        self::assertInstanceOf(DealerLocation::class, $result);
+        self::assertTrue($result);
     }
 
     /**
@@ -316,7 +316,7 @@ class UpdateTest extends TestCase
         $result = $service->update($location->dealer_location_id, $dealerId, $params);
 
         // Then I expect that "DealerLocationService::update" returns true
-        self::assertInstanceOf(DealerLocation::class, $result);
+        $this->assertTrue($result);
     }
 
     /**

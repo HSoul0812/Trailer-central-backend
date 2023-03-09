@@ -15,7 +15,6 @@ use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\User\DealerLocationSalesTaxItemRepositoryInterface;
 use App\Repositories\User\DealerLocationSalesTaxRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use InvalidArgumentException;
 use DomainException;
 use Exception;
@@ -194,16 +193,15 @@ class DealerLocationService implements DealerLocationServiceInterface
      * @param int $dealerId
      * @param array $params
      *
-     * @return DealerLocation
+     * @return bool
      *
      * @throws Exception when there was some unknown db error
      * @throws InvalidArgumentException when `dealer_id` has not been provided
      * @throws InvalidArgumentException when `dealer_location_id` has not been provided
      * @throws InvalidArgumentException when `sales_tax_items` is not an array
      * @throws InvalidArgumentException when `fees` is not an array
-     * @throws ModelNotFoundException when $locationId doesn't exist in the database
      */
-    public function update(int $locationId, int $dealerId, array $params): DealerLocation
+    public function update(int $locationId, int $dealerId, array $params): bool
     {
         try {
             $this->locationRepo->beginTransaction();
@@ -222,7 +220,7 @@ class DealerLocationService implements DealerLocationServiceInterface
 
             $salesTaxItemColumnTitles = $this->encodeTaxColumnTitles($params['sales_tax_item_column_titles'] ?? []);
 
-            $dealerLocation = $this->locationRepo->update(
+            $this->locationRepo->update(
                 $params + $locationRelDefinition + ['sales_tax_item_column_titles' => $salesTaxItemColumnTitles]
             );
 
@@ -268,7 +266,7 @@ class DealerLocationService implements DealerLocationServiceInterface
 
             $this->locationRepo->commitTransaction();
 
-            return $dealerLocation;
+            return true;
         } catch (Exception $e) {
             $this->loggerService->error(
                 'Dealer location updating error. params=' .
