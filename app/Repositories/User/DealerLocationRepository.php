@@ -4,6 +4,7 @@ namespace App\Repositories\User;
 
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
+use Arr;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerLocation;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -119,9 +120,14 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
      */
     public function update($params): bool
     {
-        $location = DealerLocation::findOrFail($this->getDealerLocationIdFromParams($params));
+        $dealerLocationId = $this->getDealerLocationIdFromParams($params);
 
-        return $location->fill($params)->save();
+        $updateParams = Arr::except($params, ['id']);
+
+        return DealerLocation::query()
+            ->lockForUpdate()
+            ->where('dealer_location_id', $dealerLocationId)
+            ->update($updateParams);
     }
 
     public function turnOffDefaultLocationByDealerId(int $dealerId): bool

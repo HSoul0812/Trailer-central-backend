@@ -161,4 +161,30 @@ class TaskControllerTest extends IntegrationTestCase {
 
         $seeder->cleanup();
     }
+
+    /**
+     * @group CRM
+     */
+    public function testGetContactDate()
+    {
+        $seeder = new InteractionSeeder();
+        $seeder->seed();
+
+        $response = $this->json(
+            'GET',
+            '/api/leads/'. $seeder->leads[0]->getKey() .'/contact-date',
+            [],
+            ['access-token' => $seeder->authToken->access_token]
+        );
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'contact_date',
+                    'task_details'
+                ]
+            ]);
+
+        $seeder->cleanup();
+    }
 }

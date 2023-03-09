@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 
+use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\DateTime;
@@ -71,7 +72,7 @@ class TransactionExecuteQueue extends Resource
                 return $value['stock_id'] ?? null;
             })->onlyOnIndex(),
 
-            KeyValue::make('Data')->hideFromIndex(),
+            Code::make('Data')->language('javascript')->json()->hideFromIndex(),
 
             Text::make('Response')->sortable(),
 

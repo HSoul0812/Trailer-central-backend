@@ -113,6 +113,73 @@ class DealerLocationValidationTest extends TestCase {
             ]);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
+     * @return void
+     */
+    public function testDealerLocationWithoutOptional()
+    {
+        // PUT /api/user/dealer-location
+        $formData = [
+            'dealer_id' => $this->dealer->dealer_id,
+            'name' => $this->faker->streetName(),
+            'contact' => $this->faker->name(),
+            'address' => $this->faker->streetAddress(),
+            'city' => $this->faker->city(),
+            'county' => $this->faker->city(),
+            'region' => $this->faker->state(),
+            'country' => 'US',
+            'postalcode' => $this->faker->postcode(),
+            'phone' => '(970) 592-8015'
+        ];
+
+        $response = $this->withHeaders(['access-token' => $this->token->access_token])
+            ->putJson(self::apiEndpoint, $formData)
+            ->assertSuccessful()
+            ->assertJsonFragment([
+                'name' => $formData['name'],
+                'contact' => $formData['contact'],
+                'address' => $formData['address'],
+                'city' => $formData['city'],
+                'county' => $formData['county'],
+                'region' => $formData['region'],
+                'country' => $formData['country'],
+                'phone' => $formData['phone'],
+                'dealer_id' => $formData['dealer_id'],
+            ]);
+
+        $this->dealerLocationId = $response->decodeResponseJson()['data']['id'];
+
+        // POST /api/user/dealer-location/:Id
+        $updatingFormData = [
+            'city' => $this->faker->city(),
+            'county' => $this->faker->city(),
+            'region' => $this->faker->state(),
+            'country' => 'US',
+            'postalcode' => $this->faker->postcode(),
+            'phone' => '(267) 352-4031',
+            'sms' => 1,
+            'sms_phone' => '(979) 325-2092',
+            'permanent_phone' => 1
+        ];
+
+        $response = $this->withHeaders(['access-token' => $this->token->access_token])
+            ->postJson(self::apiEndpoint .'/'. $this->dealerLocationId, $updatingFormData)
+            ->assertSuccessful()
+            ->assertJsonFragment([
+                'name' => $formData['name'],
+                'contact' => $formData['contact'],
+                'address' => $formData['address'],
+                'city' => $updatingFormData['city'],
+                'county' => $updatingFormData['county'],
+                'region' => $updatingFormData['region'],
+                'country' => $updatingFormData['country'],
+                'sms_phone' => '+19793252092',
+            ]);
+    }
+
     public function validationDataProvider()
     {
         return [

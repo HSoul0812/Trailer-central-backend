@@ -2,17 +2,19 @@
 
 namespace App\Models\Marketing\Craigslist;
 
+use App\Models\Traits\Inventory\CompositePrimaryKeys;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Market
- * 
+ *
  * @package App\Models\Marketing\Craigslist
  */
 class Market extends Model
 {
-    use TableAware;
+    use TableAware, CompositePrimaryKeys;
 
 
     // Define Table Name Constant
@@ -34,6 +36,11 @@ class Market extends Model
     public $timestamps = false;
 
     /**
+     * @var bool
+     */
+    public $incrementing = false;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
@@ -47,4 +54,14 @@ class Market extends Model
         'subarea_name',
         'subarea_alt_name'
     ];
+
+    /**
+     * Get City
+     * 
+     * @return BelongsTo
+     */
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class, 'city_name', 'city');
+    }
 }
