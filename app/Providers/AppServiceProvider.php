@@ -45,6 +45,8 @@ use App\Repositories\Dms\Quickbooks\ItemNewRepository;
 use App\Repositories\Dms\Quickbooks\ItemNewRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\DealerRepository;
+use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Showroom\ShowroomBulkUpdateRepository;
@@ -319,6 +321,8 @@ class AppServiceProvider extends ServiceProvider
             ->give(function () {
                 return new FileService(app()->make(Client::class), app()->make(SanitizeHelper::class));
             });
+
+        $this->app->bind(DealerRepositoryInterface::class, DealerRepository::class);
 
         $this->app->bind(TimeClockRepositoryInterface::class, TimeClockRepository::class);
         $this->app->bind(EmployeeRepositoryInterface::class, EmployeeRepository::class);

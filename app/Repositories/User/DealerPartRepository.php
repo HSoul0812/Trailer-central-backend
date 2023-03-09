@@ -2,12 +2,15 @@
 
 namespace App\Repositories\User;
 
+use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\User\DealerPart;
 use Illuminate\Support\Facades\DB;
 
 class DealerPartRepository  implements DealerPartRepositoryInterface
 {
+    use Transaction;
+
     /**
      * @param array $params
      * @return DealerPart
