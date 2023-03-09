@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\v1\User;
 
+use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
+use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\User\CheckDealerLocationRequest;
 use App\Http\Requests\User\DeleteDealerLocationRequest;
@@ -171,21 +173,22 @@ class DealerLocationController extends RestfulControllerV2
     }
 
     /**
+     * @param int $id
+     * @param Request $request
      * @return Response|void
      *
-     * @throws ModelNotFoundException
-     * @throws ResourceException when there was a failed validation
-     * @throws HttpException when the provided resource id does not belongs to dealer who has made the request
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
      */
     public function update(int $id, Request $request): Response
     {
         $request = new UpdateDealerLocationRequest(['id' => $id] + $request->all());
 
-        if ($request->validate() && $this->service->update($request->getId(), $request->getDealerId(), $request->all())) {
-            return $this->sendResponseForSingleLocation($request->getId(), $request->getInclude());
-        }
+        $request->validate();
 
-        $this->response->errorBadRequest();
+        $dealerLocation = $this->service->update($request->getId(), $request->getDealerId(), $request->all());
+
+        return $this->sendResponseForSingleLocation($request->getId(), $request->getInclude(), $dealerLocation);
     }
 
     /**
