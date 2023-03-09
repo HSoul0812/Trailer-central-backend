@@ -131,7 +131,7 @@ class SignInController extends RestfulController
             $user = $this->extractUserFromRequest($request);
 
             try {
-                $this->passwordResetService->updatePassword($user, $request->password);
+                $this->passwordResetService->updatePassword($user, $request->password, $request->current_password);
             } catch (TooLongPasswordException $ex) {
                 // the request validation is preventing this, but just in case anyone remove that rule
                 // we're going to handle it here
