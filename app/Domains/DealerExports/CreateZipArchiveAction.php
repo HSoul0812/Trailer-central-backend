@@ -57,7 +57,7 @@ class CreateZipArchiveAction
         }
         $zip->setPassword(decrypt($dealerExport->zip_password, false));
         if ($zip->close()) {
-            Storage::disk('s3')->put($s3ZipFilePath, $tmpZipFilePath);
+            Storage::disk('s3')->put($s3ZipFilePath, file_get_contents($tmpZipFilePath));
             $dealerExport->update([
                 'file_path' => Storage::disk('s3')->url($s3ZipFilePath),
                 'status' => DealerExport::STATUS_PROCESSED,
