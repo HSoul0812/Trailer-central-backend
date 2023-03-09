@@ -7,6 +7,7 @@ use App\Models\User\User;
 use ZipArchive;
 use Illuminate\Support\Facades\Storage;
 use Exception;
+use League\Flysystem\Filesystem;
 
 /**
  * Class CreateZipArchiveAction
@@ -40,19 +41,18 @@ class CreateZipArchiveAction
         $s3ZipFilePath = 'exports/'. $this->dealer->dealer_id . '/dealer-archive.zip';
         $tmpZipFilePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $s3ZipFilePath;
 
-        $zip = new ZipArchive();
-        $zip->open($tmpZipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+        $zip = new ZipArchive;
+        $zip->open($tmpZipFilePath, ZipArchive::CREATE);
 
         $files = Storage::disk('s3')->files('exports/' . $this->dealer->dealer_id);
 
         foreach($files as $file) {
             if ($file !== $s3ZipFilePath) {
                 try {
-                    $fileToUpload = Storage::disk('s3')->get($file);
-                    $zip->addFromString(basename($file), $fileToUpload);
+                    $fileToArchive = Storage::disk('s3')->get($file);
+                    $zip->addFromString(basename($file), $fileToArchive);
                 } catch (Exception $e) {
                 }
-
             }
         }
         $zip->setPassword(decrypt($dealerExport->zip_password, false));
