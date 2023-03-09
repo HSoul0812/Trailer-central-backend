@@ -28,7 +28,7 @@ class FeatureFlagRepository implements FeatureFlagRepositoryInterface
     {
         // Return an empty collection if the table isn't being created yet
         if ($this->model === null) {
-            return new Collection();
+            self::$list = new Collection();
         }
 
         if ($this->isEmpty()) {

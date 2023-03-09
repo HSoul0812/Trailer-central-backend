@@ -19,5 +19,5 @@ interface PasswordResetServiceInterface {
      */
     public function finishReset(string $code, string $password) : bool;
 
-    public function updatePassword(UserAuthenticatable $user, string $password) : bool;
+    public function updatePassword(UserAuthenticatable $user, string $password, string $current_password) : bool;
 }
