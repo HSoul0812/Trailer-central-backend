@@ -250,7 +250,7 @@ class TemplateController extends RestfulControllerV2
         
         if ($request->validate() && $this->templates->delete(['id' => $id])) {
             // Create Email
-            return $this->response->noContent();
+            return $this->updatedResponse();
         }
         
         return $this->response->errorBadRequest();
