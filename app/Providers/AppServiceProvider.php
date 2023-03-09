@@ -103,6 +103,8 @@ use App\Services\Dms\Pos\RegisterServiceInterface;
 use App\Services\File\FileService;
 use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
+use App\Services\Inventory\InventoryBulkUpdateManufacturerService;
+use App\Services\Inventory\InventoryBulkUpdateManufacturerServiceInterface;
 use App\Services\Subscription\StripeService;
 use App\Services\Subscription\StripeServiceInterface;
 use App\Services\User\DealerIntegrationService;
@@ -324,6 +326,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(WebsiteConfigServiceInterface::class, WebsiteConfigService::class);
 
         $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
+        $this->app->bind(InventoryBulkUpdateManufacturerServiceInterface::class, InventoryBulkUpdateManufacturerService::class);
 
         $this->app->bind(ErrorRepositoryInterface::class, ErrorRepository::class);
 
