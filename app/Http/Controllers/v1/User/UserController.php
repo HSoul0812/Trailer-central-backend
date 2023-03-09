@@ -106,26 +106,30 @@ class UserController extends RestfulControllerV2
     /**
      * Activate Dealer Classifieds
      * @param Request $request
-     * @param bool $activate
      * @return Response
-     * @throws \App\Exceptions\Requests\Validation\NoObjectIdValueSetException
-     * @throws \App\Exceptions\Requests\Validation\NoObjectTypeSetException
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     * @throws \Exception
      */
-    public function updateDealerClassifieds(Request $request): Response {
+    public function updateDealerClassifieds(Request $request): Response
+    {
         $getRequest = new DealerClassifiedsRequest($request->all());
-        if($getRequest->validate()) {
-            if ($getRequest->active) {
-                if ($this->dealerOptionsService->activateDealerClassifieds($request->dealer_id)) {
-                    return $this->successResponse();
-                }
-            } else {
-                if ($this->dealerOptionsService->deactivateDealerClassifieds($request->dealer_id)) {
-                    return $this->successResponse();
-                }
-            }
+
+        $fields = (object) [
+            'subscription' => 'clsf_active',
+            'active' => $getRequest->active
+        ];
+
+        if (!$getRequest->validate()) {
+            return $this->response->errorBadRequest();
         }
 
-        return $this->response->errorBadRequest();
+        $this->dealerOptionsService->manageDealerSubscription(
+            $request->dealer_id,
+            $fields
+        );
+
+        return $this->successResponse();
     }
 
     /**
