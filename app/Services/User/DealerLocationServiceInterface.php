@@ -24,7 +24,7 @@ interface DealerLocationServiceInterface
 
     public function create(int $dealerId, array $params): DealerLocation;
 
-    public function update(int $locationId, int $dealerId, array $params): DealerLocation;
+    public function update(int $locationId, int $dealerId, array $params): bool;
 
     public function getAnotherAvailableLocationIdToMove(int $locationId, int $dealerId): ?int;
 

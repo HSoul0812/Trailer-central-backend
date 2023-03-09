@@ -117,9 +117,8 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
     /**
      * @throws ModelNotFoundException
      * @throws InvalidArgumentException when `dealer_location_id` has not been provided
-     * @throws ModelNotFoundException
      */
-    public function update($params): DealerLocation
+    public function update($params): bool
     {
         $dealerLocationId = $this->getDealerLocationIdFromParams($params);
 
@@ -130,7 +129,7 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
             ->where('dealer_location_id', $dealerLocationId)
             ->update($updateParams);
 
-        return DealerLocation::findOrFail($dealerLocationId);
+        return true;
     }
 
     public function turnOffDefaultLocationByDealerId(int $dealerId): bool
