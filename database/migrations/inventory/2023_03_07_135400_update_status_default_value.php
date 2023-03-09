@@ -1,14 +1,10 @@
 <?php
 
+use App\Models\Inventory\Inventory;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 class UpdateStatusDefaultValue extends Migration
 {
-    private const INVENTORY_TABLE = 'inventory';
-    private const INVENTORY_COLUMN = 'status';
-
     /**
      * Run the migrations.
      * Prevent Collectors and other routines fail add default value to status
@@ -16,8 +12,12 @@ class UpdateStatusDefaultValue extends Migration
      */
     public function up(): void
     {
-        Schema::table(self::INVENTORY_TABLE, function (Blueprint $table) {
-            $table->integer(self::INVENTORY_COLUMN, 255)->nullable(false)->default(1)->change();
-        });
+        // Set any inventory with status = null to 1
+        Inventory::whereNull('status')->update([
+            'status' => 1,
+        ]);
+
+        // Use DB statement to prevent Laravel from throwing exception regarding enum type
+        DB::statement('ALTER TABLE `inventory` CHANGE COLUMN `status` `status` INT(255) NOT NULL DEFAULT 1 AFTER `description_html`');
     }
 }
