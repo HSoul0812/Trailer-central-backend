@@ -37,15 +37,17 @@ interface DealerPasswordResetRepositoryInterface extends Repository {
      *
      * @param User $dealer
      * @param string $password
+     * @param string $current_password
      * @return void
      */
-    public function updateDealerPassword(User $dealer, string $password) : void;
+    public function updateDealerPassword(User $dealer, string $password, string $current_password) : void;
 
     /**
      * 
      * @param DealerUser $user
      * @param string $password
+     * @param string $current_password
      * @return void
      */
-    public function updateDealerUserPassword(DealerUser $user, string $password) : void;
+    public function updateDealerUserPassword(DealerUser $user, string $password, string $current_password) : void;
 }

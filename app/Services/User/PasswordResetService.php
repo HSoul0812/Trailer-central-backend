@@ -51,19 +51,19 @@ class PasswordResetService implements PasswordResetServiceInterface {
         return $this->passwordResetRepo->completePasswordReset($code, $password);
     }
 
-    public function updatePassword(UserAuthenticatable $user, string $password) : bool
+    public function updatePassword(UserAuthenticatable $user, string $password, string $current_password) : bool
     {
         if($user->type === UserAuthenticatable::TYPE_DEALER){
             $user = $this->userRepo->get(['dealer_id' => $user->id]);
 
-            $this->passwordResetRepo->updateDealerPassword($user, $password);
+            $this->passwordResetRepo->updateDealerPassword($user, $password, $current_password);
 
             return true;
         }
 
         $user = $this->dealerUserRepo->get(['dealer_user_id' => $user->id]);
 
-        $this->passwordResetRepo->updateDealerUserPassword($user, $password);
+        $this->passwordResetRepo->updateDealerUserPassword($user, $password, $current_password);
 
         return true;
     }
