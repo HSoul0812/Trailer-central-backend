@@ -52,6 +52,7 @@ class LeadController extends RestfulControllerV2
     {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show', 'first', 'assign', 'getMatches', 'mergeLeads', 'uniqueFullNames', 'destroy']);
         $this->middleware('setWebsiteIdOnRequest')->only(['index', 'update', 'create']);
+        $this->middleware('setSalesPersonIdOnRequest')->only(['create']);
         $this->leads = $leads;
         $this->service = $service;
         $this->transformer = new LeadTransformer;

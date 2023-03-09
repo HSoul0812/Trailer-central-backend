@@ -3,8 +3,10 @@
 namespace App\Repositories\Marketing\Craigslist;
 
 use App\Exceptions\NotImplementedException;
-use App\Models\User\DealerClapp;
+use App\Models\Marketing\Craigslist\Balance;
 use App\Models\Marketing\Craigslist\Session;
+use App\Models\User\User;
+use App\Models\User\DealerClapp;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Pagination;
 use Illuminate\Database\Eloquent\Builder;
@@ -82,7 +84,12 @@ class DealerRepository implements DealerRepositoryInterface
     public function getAll($params)
     {
         /** @var  Builder $query */
-        $query = DealerClapp::with('activeDealer')
+        $query = DealerClapp::with('dealer')//->with('balance')->with('nextSession')
+                    ->leftJoin(User::GetTableName(),
+                                DealerClapp::getTableName() . '.dealer_id', '=',
+                                User::getTableName() . '.dealer_id')
+                    ->whereNotNull(User::getTableName() . '.stripe_id')
+                    ->where(User::getTableName() . '.state', User::STATUS_ACTIVE)
                     ->leftJoin(Session::GetTableName(),
                                 DealerClapp::getTableName() . '.dealer_id', '=',
                                 Session::getTableName() . '.session_dealer_id')
