@@ -1265,12 +1265,30 @@ class InventoryService implements InventoryServiceInterface
 
         $description = preg_replace_callback('~<ul>(.*?)</ul>~s', function($matches) {
             $matches[1] = preg_replace(self::REMOVE_EMPTY_LINE_FIRST_AND_LAST, '', $matches[1]);
-            return '<ul>' . $matches[1] . '</ul>';
+
+            preg_match_all('~<li>(.*?)</li>~s', $matches[1], $li_matches);
+
+            $finalHTML = '<ul>' ;
+            foreach ($li_matches[0] as $li_item) {
+                $finalHTML.= $li_item;
+            }
+            $finalHTML.= '</ul>';
+
+            return $finalHTML;
         }, $description);
 
         $description = preg_replace_callback('~<ol>(.*?)</ol>~s', function($matches) {
             $matches[1] = preg_replace(self::REMOVE_EMPTY_LINE_FIRST_AND_LAST, '', $matches[1]);
-            return '<ol>' . $matches[1] . '</ol>';
+
+            preg_match_all('~<li>(.*?)</li>~s', $matches[1], $li_matches);
+
+            $finalHTML = '<ol>' ;
+            foreach ($li_matches[0] as $li_item) {
+                $finalHTML.= $li_item;
+            }
+            $finalHTML.= '</ol>';
+
+            return $finalHTML;
         }, $description);
 
         preg_match('/<ul.*>(.*?)<\/ul>/s', $description, $match);
