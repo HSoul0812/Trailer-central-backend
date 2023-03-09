@@ -13,7 +13,6 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
 {
     const DEFAULT_GET_PARAMS = [
         self::CONDITION_AND_WHERE => [
-            ['active', '=', 1],
             ['is_archived', '<>', 1],
         ],
     ];
