@@ -17,6 +17,7 @@ use App\Domains\DealerExports\POS\SalesLedgerExport;
 use App\Domains\DealerExports\POS\RefundsExportAction;
 use App\Domains\DealerExports\Service\RepairOrdersExport;
 use App\Domains\DealerExports\Quotes\QuotesExportAction;
+use App\Domains\DealerExports\BackOffice\PurchaseOrdersExportAction;
 
 /**
  * Class ExportManagerAction
@@ -40,6 +41,8 @@ class ExportManagerAction
         CustomersExportAction::class,
         // BackOffice -> Bills
         BillsExportAction::class,
+        // BackOffice -> Purchase Order
+        PurchaseOrdersExportAction::class,
         // POS -> Sales
         SalesLedgerExport::class,
         // POS -> Sales -> Refunds
@@ -73,5 +76,7 @@ class ExportManagerAction
 
             DealerDataExportJob::dispatch($this->dealer, $exportAction);
         }
+
+        (new CreateZipArchiveAction($this->dealer))->execute();
     }
 }
