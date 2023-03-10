@@ -2,6 +2,7 @@
 
 namespace Tests\Integration\App\Api\UserTracking;
 
+use App\Models\WebsiteUser\WebsiteUser;
 use Str;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Common\IntegrationTestCase;
@@ -60,5 +61,65 @@ class UserTrackingTest extends IntegrationTestCase
             ])
             ->assertCreated()
             ->assertJsonPath('user_tracking.meta', null);
+    }
+
+    public function testItDoesNotAcceptBotRequest()
+    {
+        $this
+            ->postJson(
+                uri: self::USER_TRACK_ENDPOINT,
+                data: [
+                    'visitor_id' => Str::random(),
+                    'event' => $this->faker->word(),
+                    'url' => $this->faker->url(),
+                ],
+                headers: [
+                    'User-Agent' => 'bot',
+                ],
+            )
+            ->assertOk()
+            ->assertJsonPath('data', []);
+    }
+
+    public function testItCanAssignWebsiteUserIdFromBearerToken()
+    {
+        $websiteUser = WebsiteUser::factory()->create();
+
+        $token = auth('api')->tokenById($websiteUser->id);
+
+        $this
+            ->postJson(
+                uri: self::USER_TRACK_ENDPOINT,
+                data: [
+                    'visitor_id' => Str::random(),
+                    'event' => $this->faker->word(),
+                    'url' => $this->faker->url(),
+                ],
+                headers: [
+                    'Authorization' => "Bearer $token",
+                ],
+            )
+            ->assertCreated()
+            ->assertJsonPath('user_tracking.website_user_id', $websiteUser->id);
+    }
+
+    public function testItAssignWebsiteUserIdAsNullIfTokenIsInvalid()
+    {
+        $token = Str::random();
+
+        $this
+            ->postJson(
+                uri: self::USER_TRACK_ENDPOINT,
+                data: [
+                    'visitor_id' => Str::random(),
+                    'event' => $this->faker->word(),
+                    'url' => $this->faker->url(),
+                ],
+                headers: [
+                    'Authorization' => "Bearer $token",
+                ],
+            )
+            ->assertCreated()
+            ->assertJsonPath('user_tracking.website_user_id', null);
     }
 }
