@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Domains\UserTracking\Types\UserTrackingEvent;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class UserTrackingFactory extends Factory
@@ -14,7 +15,13 @@ class UserTrackingFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'visitor_id' => $this->faker->uuid(),
+            'website_user_id' => null,
+            'event' => UserTrackingEvent::PAGE_VIEW,
+            'url' => $this->faker->url(),
+            'meta' => [
+                'foo' => 'bar',
+            ],
         ];
     }
 }
