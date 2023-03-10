@@ -3,7 +3,6 @@
 namespace App\Repositories\WebsiteUser;
 
 use App\Models\UserTracking;
-use Throwable;
 
 class UserTrackingRepository implements UserTrackingRepositoryInterface
 {
