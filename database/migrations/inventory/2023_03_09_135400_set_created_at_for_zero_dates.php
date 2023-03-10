@@ -8,10 +8,11 @@ use stdClass as Row;
 
 class SetCreatedAtForZeroDates extends Migration
 {
-
     private const ZERO_DATE = '0000-00-00 00:00:00';
 
-    /** @var string when there is not a replaceable date this default date will be setup */
+    /** @var string when there is not a heuristic date, this default date will be setup,
+     *              also it is oldest enough to do not provoke another data discrepancy
+     */
     private const DEFAULT_DATE = '2020-01-01 00:00:00';
 
     /**
