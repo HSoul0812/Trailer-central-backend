@@ -20,7 +20,7 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
         // Try to get the user id from the request, if there is no token,
         // or it's invalidated, then we save website_user_id as null
         return rescue(
-            callback: fn() =>auth('api')->user()?->id,
+            callback: fn() => auth('api')->user()?->id,
             report: false,
         );
     }
