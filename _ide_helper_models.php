@@ -15,8 +15,9 @@ namespace App\Models\Dealer{
  * App\Models\Dealer\ViewedDealer
  *
  * @property int $id
- * @property int $dealer_id
  * @property string $name
+ * @property int $dealer_id
+ * @property int $inventory_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Database\Factories\Dealer\ViewedDealerFactory factory(...$parameters)
@@ -26,6 +27,7 @@ namespace App\Models\Dealer{
  * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer whereDealerId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer whereInventoryId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer whereUpdatedAt($value)
  */
@@ -411,6 +413,35 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
  */
 	class User extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\UserTracking
+ *
+ * @property int $id
+ * @property string $visitor_id
+ * @property int|null $website_user_id
+ * @property string $event
+ * @property string $url
+ * @property array|null $meta
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\WebsiteUser\WebsiteUser|null $websiteUser
+ * @method static \Database\Factories\UserTrackingFactory factory(...$parameters)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking query()
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereEvent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereMeta($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereVisitorId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereWebsiteUserId($value)
+ */
+	class UserTracking extends \Eloquent {}
 }
 
 namespace App\Models\WebsiteUser{
