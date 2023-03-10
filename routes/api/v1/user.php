@@ -44,7 +44,7 @@ $api->version('v1', function ($api) {
             [VerificationController::class, 'resend']
         )->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
 
-        $api->post('/track', [TrackController::class, 'create']);
+        $api->post('/track', [TrackController::class, 'create'])->middleware(['human-only']);
     });
 
     $api->group(['prefix' => '/user', 'middleware' => 'auth:api'], function ($api) {
