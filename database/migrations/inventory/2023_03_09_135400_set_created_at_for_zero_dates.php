@@ -22,6 +22,8 @@ class SetCreatedAtForZeroDates extends Migration
      * if the heuristic method wouldn't work, it will use the default date `2020-01-01 00:00:00`. Finally it will
      * reindex by dealers and invalidate their cache.
      *
+     * @note In March 09 of 2023 there are 4862 affected records (13 dealers)
+     *
      * @return void
      */
     public function up(): void
