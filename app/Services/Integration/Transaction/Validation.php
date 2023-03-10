@@ -259,7 +259,7 @@ class Validation
     static private function checkRequired($key, $value, $validationSettings): bool
     {
         //if validation is not set to true, or value is defined and not empty
-        return !$validationSettings || (isset($value) && !empty($value));
+        return !$validationSettings || (isset($value) && ($value==="0" || $value));
     }
 
     /**
