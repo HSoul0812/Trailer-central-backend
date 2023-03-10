@@ -3,6 +3,7 @@
 namespace App\Services\User;
 
 use App\Repositories\User\DealerLogoRepositoryInterface;
+use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -26,13 +27,16 @@ class DealerLogoService implements DealerLogoServiceInterface
         $filename = $this->filename($dealerId, $logo->getClientOriginalExtension());
         $path = self::UPLOAD_DIRECTORY . '/' . $filename;
 
+        $this->delete($dealerId);
+
         Storage::disk(self::STORAGE_DISK)->putFileAs(self::UPLOAD_DIRECTORY, $logo, $filename);
         return $path;
     }
 
     protected function filename(int $dealerId, string $extension): string
     {
-        return "{$dealerId}_logo.{$extension}";
+        $timestamp = now()->getTimestamp();
+        return "{$dealerId}_{$timestamp}_logo.{$extension}";
     }
 
     public function delete(int $dealerId): void
