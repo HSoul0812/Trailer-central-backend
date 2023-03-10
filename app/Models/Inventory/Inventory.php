@@ -5,8 +5,6 @@ namespace App\Models\Inventory;
 use App\Helpers\SanitizeHelper;
 use App\Helpers\TypesHelper;
 use App\Indexers\Inventory\InventoryElasticSearchConfigurator;
-use App\Indexers\Inventory\SafeIndexer;
-use App\Indexers\WithIndexConfigurator;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\CRM\Dms\ServiceOrder;
@@ -20,12 +18,9 @@ use App\Models\Parts\Vendor;
 use App\Models\Traits\TableAware;
 use App\Models\User\DealerLocation;
 use App\Models\User\User;
-use App\Services\Inventory\InventoryUpdateSource;
-use App\Services\Inventory\InventoryUpdateSourceInterface;
 use App\Traits\CompactHelper;
 use App\Traits\GeospatialHelper;
 use ElasticScoutDriverPlus\CustomSearch;
-use Exception;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Collection;
@@ -37,7 +32,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
-use Laravel\Scout\Searchable;
+use App\Indexers\Inventory\InventorySearchable as Searchable;
 
 /**
  * Class Inventory
@@ -96,6 +91,7 @@ use Laravel\Scout\Searchable;
  * @property bool $show_on_ksl
  * @property bool $show_on_racingjunk
  * @property bool $show_on_website
+ * @property \DateTimeInterface|Carbon $tt_payment_expiration_date
  * @property bool $overlay_enabled
  * @property bool $is_special
  * @property bool $is_featured
@@ -188,7 +184,7 @@ use Laravel\Scout\Searchable;
  */
 class Inventory extends Model
 {
-    use TableAware, SpatialTrait, GeospatialHelper, Searchable, WithIndexConfigurator, CustomSearch;
+    use TableAware, SpatialTrait, GeospatialHelper, Searchable, CustomSearch;
 
     /** @var InventoryElasticSearchConfigurator */
     private static $indexConfigurator;
@@ -327,6 +323,7 @@ class Inventory extends Model
         'show_on_ksl',
         'show_on_racingjunk',
         'show_on_website',
+        'tt_payment_expiration_date',
         'overlay_enabled',
         'is_special',
         'is_featured',
@@ -377,7 +374,8 @@ class Inventory extends Model
         'times_viewed',
         'trailerworld_store_id',
         'show_on_auction123',
-        'show_on_rvt'
+        'show_on_rvt',
+        'sold_at',
     ];
 
     protected $casts = [
@@ -397,7 +395,8 @@ class Inventory extends Model
         'qb_sync_processed' => 'boolean',
         'is_floorplan_bill' => 'boolean',
         'sold_at' => 'datetime',
-        'changed_fields_in_dashboard' => 'array'
+        'changed_fields_in_dashboard' => 'array',
+        'tt_payment_expiration_date' => 'date'
     ];
 
     protected $hidden = [
@@ -823,16 +822,6 @@ class Inventory extends Model
         return self::TABLE_NAME;
     }
 
-    public function searchableAs(): string
-    {
-        return self::$searchableAs ?? $this->indexConfigurator()->aliasName();
-    }
-
-    public function toSearchableArray(): array
-    {
-        return $this->indexConfigurator()->transformer()->transform($this);
-    }
-
     /**
      * Gets the attribute value stored in the `eav_attribute_value` table, using the memory cache provided by `getAttributesAttribute`.
      *
@@ -871,26 +860,6 @@ class Inventory extends Model
         ];
     }
 
-    public function indexConfigurator(): InventoryElasticSearchConfigurator
-    {
-        if (self::$indexConfigurator) {
-            return self::$indexConfigurator;
-        }
-
-        self::$indexConfigurator = new InventoryElasticSearchConfigurator();
-
-        return self::$indexConfigurator;
-    }
-
-    /**
-     * @throws Exception when some unknown error has been thrown
-     */
-    public static function makeAllSearchableUsingAliasStrategy(): void
-    {
-        $indexer = app(SafeIndexer::class);
-        $indexer->ingest();
-    }
-
     public function listings(): HasMany
     {
         return $this->hasMany(Listings::class, 'inventory_id', 'inventory_id');
@@ -899,13 +868,6 @@ class Inventory extends Model
     public function activeListings()
     {
         return $this->listings()->whereNotIn('status', ['expired', 'deleted']);
-    }
-
-    public static function makeAllSearchableByDealers(array $dealers = []): void
-    {
-        self::query()->with(['user', 'user.website'])
-            ->whereIn('dealer_id', $dealers)
-            ->searchable();
     }
 
     /**
@@ -956,45 +918,5 @@ class Inventory extends Model
                 $query->whereNull('status')
                     ->orWhere('status', '<>', self::STATUS_QUOTE);
             });
-    }
-
-    /**
-     * Save without triggering the model events
-     * @param array $options
-     * @return mixed
-     */
-    public function saveQuietly(array $options = [])
-    {
-        return static::withoutEvents(function () use ($options) {
-            return $this->save($options);
-        });
-    }
-
-    /**
-     * Delete without triggering the model events
-     * @return mixed
-     * @throws Exception
-     */
-    public function deleteQuietly()
-    {
-        return static::withoutEvents(function () {
-            return $this->delete();
-        });
-    }
-
-    /**
-     * This need to be override to be able avoid dispatching jobs when integrations is requesting
-     * @return void
-     */
-    function searchable()
-    {
-        if (!$this->getInventoryUpdateSource()->integrations()) {
-            $this->newCollection([$this])->searchable();
-        }
-    }
-
-    protected function getInventoryUpdateSource(): InventoryUpdateSource
-    {
-        return app(InventoryUpdateSourceInterface::class);
     }
 }

@@ -8,7 +8,7 @@ use App\Http\Requests\Request;
 
 class CreateOrUpdateRequest extends Request
 {
-    private const REGEX_IMAGE_URL = 'regex:/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/';
+    private const REGEX_IMAGE_URL = 'regex:/(http(s?):)([\/|.|\w|\s|-])*\.(?:jpg|gif|png)/';
     private const YES_NO = 'in:1,0';
     private const SHOWING_RANGE = 'in:show,do_not_show';
 
@@ -94,6 +94,7 @@ class CreateOrUpdateRequest extends Request
             'contact-as-form/show_captcha' => ['integer', self::YES_NO],
             'general/user_accounts' => ['integer', self::YES_NO],
             'showroom/show_brands' => ['integer', self::YES_NO],
+            'showroom/load_from_linked_dealers_in_global_filters' => ['integer', self::YES_NO],
             'showroom/brands' => 'string',
             'general/favorites_export_schedule' => ['integer', 'in:0,1,2,3'],
             'payment-calculator/term-list' => 'json',

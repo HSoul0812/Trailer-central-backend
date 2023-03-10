@@ -84,10 +84,9 @@ class BulkReportCsvJobService extends AbstractMonitoredJobService implements Bul
         $currentProcessed = 0;
         $currentUpdateProgressStepIndex = 0;
         $typeOfStock = $job->payload->filters['type_of_stock'];
-        $shouldOutputBinName = $this->shouldOutputBinName($typeOfStock);
 
         // Write the header line
-        $headerLine = $this->headerLine($shouldOutputBinName);
+        $headerLine = $this->headerLine();
         $exporter->writeLine($headerLine);
 
         // Start looping through each item in the report
@@ -108,7 +107,7 @@ class BulkReportCsvJobService extends AbstractMonitoredJobService implements Bul
                     if ($type === self::TYPE_INVENTORIES) {
                         // For inventory line, we don't want to print the bin name if we
                         // don't need to (user only selects to print the inventory for example)
-                        $line = $this->inventoryLine($bin, $shouldOutputBinName);
+                        $line = $this->inventoryLine($bin);
                     }
 
                     if ($type === self::TYPE_PARTS) {
@@ -171,19 +170,11 @@ class BulkReportCsvJobService extends AbstractMonitoredJobService implements Bul
     /**
      * Get the line array for the header
      *
-     * @param bool $shouldOutputBinName
      * @return array
      */
-    private function headerLine(bool $shouldOutputBinName): array
+    private function headerLine(): array
     {
-        $line = ['Sku/Stock', 'Title', 'Cost', 'Price'];
-
-        // Only print the bin name column if we need to
-        if ($shouldOutputBinName) {
-            $line[] = 'Bin Name';
-        }
-
-        return array_merge($line, ['Qty', 'Total Cost', 'Total Price']);
+        return ['Sku/Stock', 'Title', 'Cost', 'Price', 'Bin Name', 'Qty', 'Total Cost', 'Total Price'];
     }
 
     /**
@@ -203,28 +194,20 @@ class BulkReportCsvJobService extends AbstractMonitoredJobService implements Bul
      * Get the line array for the inventory row
      *
      * @param object $bin
-     * @param bool $shouldOutputBinName
      * @return array
      */
-    private function inventoryLine(object $bin, bool $shouldOutputBinName): array
+    private function inventoryLine(object $bin): array
     {
-        $line = [
+        return [
             $bin->reference,
             $bin->title,
             $bin->dealer_cost,
             $bin->price,
-        ];
-
-        // Only add the bin name column if we should add it
-        if ($shouldOutputBinName) {
-            $line[] = '';
-        }
-
-        return array_merge($line, [
+            '',
             $bin->qty,
             $bin->dealer_cost * $bin->qty,
             $bin->price * $bin->qty,
-        ]);
+        ];
     }
 
     /**

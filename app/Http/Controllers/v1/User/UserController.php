@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\v1\User;
 
+use App\Domains\InteractionIntegration\Permissions\InteractionIntegrationFeature;
+use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
+use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\DealerClassifiedsRequest;
 use App\Http\Requests\User\GetDealerRequest;
 use App\Http\Requests\User\GetUserRequest;
+use App\Http\Requests\User\ListUserByNameRequest;
+use App\Models\User\Interfaces\PermissionsInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\User\DealerOptionsService;
 use App\Transformers\User\UserTransformer;
@@ -35,7 +40,7 @@ class UserController extends RestfulControllerV2
         UserRepositoryInterface $userRepository,
         DealerOptionsService $dealerOptionsService
     ) {
-        $this->middleware('setDealerIdOnRequest');
+        $this->middleware('setDealerIdOnRequest')->except(['create', 'listByName']);
         $this->userRepository = $userRepository;
         $this->dealerOptionsService = $dealerOptionsService;
     }
@@ -101,25 +106,45 @@ class UserController extends RestfulControllerV2
     /**
      * Activate Dealer Classifieds
      * @param Request $request
-     * @param bool $activate
      * @return Response
-     * @throws \App\Exceptions\Requests\Validation\NoObjectIdValueSetException
-     * @throws \App\Exceptions\Requests\Validation\NoObjectTypeSetException
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     * @throws \Exception
      */
-    public function updateDealerClassifieds(Request $request): Response {
+    public function updateDealerClassifieds(Request $request): Response
+    {
         $getRequest = new DealerClassifiedsRequest($request->all());
-        if($getRequest->validate()) {
-            if ($getRequest->active) {
-                if ($this->dealerOptionsService->activateDealerClassifieds($request->dealer_id)) {
-                    return $this->successResponse();
-                }
-            } else {
-                if ($this->dealerOptionsService->deactivateDealerClassifieds($request->dealer_id)) {
-                    return $this->successResponse();
-                }
-            }
+
+        $fields = (object) [
+            'subscription' => 'clsf_active',
+            'active' => $getRequest->active
+        ];
+
+        if (!$getRequest->validate()) {
+            return $this->response->errorBadRequest();
         }
 
-        return $this->response->errorBadRequest();
+        $this->dealerOptionsService->manageDealerSubscription(
+            $request->dealer_id,
+            $fields
+        );
+
+        return $this->successResponse();
+    }
+
+    /**
+     * @throws NoObjectTypeSetException
+     * @throws NoObjectIdValueSetException
+     */
+    public function listByName(Request $request): Response
+    {
+        $request = new ListUserByNameRequest($request->all());
+
+        $request->validate();
+
+        return $this->response->collection(
+            $this->userRepository->getByName($request->input('name')),
+            new UserTransformer()
+        );
     }
 }

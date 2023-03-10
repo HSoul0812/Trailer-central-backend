@@ -183,7 +183,7 @@ class GmailService implements GmailServiceInterface
      * @param AccessToken $accessToken
      * @param string $folder folder name to get messages from; defaults to inbox
      * @param array $params
-     * @return whether the email was sent successfully or not
+     * @return array whether the email was sent successfully or not
      */
     public function messages(AccessToken $accessToken, string $folder = 'INBOX', array $params = []) {
         // Get Labels
@@ -205,6 +205,9 @@ class GmailService implements GmailServiceInterface
                 'q' => $q
             ]);
             $messages = $results->getMessages();
+	    if(empty($messages)) {
+		$messages = [];
+	    }
         } catch (\Exception $e) {
             $this->log->error('Exception thrown trying to retrieve gmail messages: ' . $e->getMessage());
             throw new InvalidEmailCredentialsException;
@@ -350,9 +353,9 @@ class GmailService implements GmailServiceInterface
      * @return void
      */
     public function setAccessToken(AccessToken $accessToken) {
-        // ID Token Exists?
-        if(empty($accessToken->id_token)) {
-            throw new MissingGapiIdTokenException;
+        // Access Token Exists?
+        if(empty($accessToken->access_token)) {
+            throw new MissingGapiAccessTokenException;
         }
 
         // Set Access Token on Client
@@ -377,9 +380,9 @@ class GmailService implements GmailServiceInterface
      * @return void
      */
     public function setEmailToken(EmailToken $emailToken) {
-        // ID Token Exists?
-        if(empty($emailToken->getIdToken())) {
-            throw new MissingGapiIdTokenException;
+        // Access Token Exists?
+        if(empty($emailToken->getAccessToken())) {
+            throw new MissingGapiAccessTokenException;
         }
 
         // Set Google Token on Client

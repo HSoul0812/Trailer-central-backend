@@ -8,9 +8,13 @@ use App\Domains\Parts\Actions\GetCriteriaToSearchPartInEsAction;
 use App\Models\Inventory\Inventory;
 use App\Models\Parts\Part;
 use Illuminate\Support\Facades\Log;
+use App\Repositories\Pos\QuoteRepository;
+use App\Models\Pos\Quote;
+use Illuminate\Support\Facades\Auth;
 
 class PosService
 {
+
     /**
      * Search for POS products across 2 ES indexes (parts, inventory)
      *
@@ -55,5 +59,18 @@ class PosService
         }
 
         return $search->execute()->models();
+    }
+
+    /**
+     * @param array $params
+     * 
+     * @return Quote
+     */
+    public function createQuote($params)
+    {
+        return Quote::create([
+            'dealer_id' => Auth::user()->dealer_id,
+            'quote_details' => $params['quote_details']
+        ]);
     }
 }

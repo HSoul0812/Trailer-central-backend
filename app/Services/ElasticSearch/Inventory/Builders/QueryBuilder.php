@@ -246,6 +246,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         'sort' => []
     ];
 
+    /** @var GeolocationInterface */
     private $geolocation;
 
     public function __construct(FieldMapperService $mapper)
@@ -258,11 +259,13 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         collect($dealerIds)->each(function ($term) {
             $term = Term::fromArray($term);
             $type = $term->getOperator() === Term::OPERATOR_EQ ? 'must' : 'must_not';
-            $this->query['query']['bool'][$type][] = [
+
+            // to ensure it is always a top of terms
+            array_unshift($this->query['query']['bool'][$type], [
                 'terms' => [
                     'dealerId' => $term->getValues()
                 ]
-            ];
+            ]);
         });
 
         return $this;
@@ -386,34 +389,88 @@ class QueryBuilder implements InventoryQueryBuilderInterface
             }
 
             $filters->getFields()->each(function (Filter $field) use (&$query) {
+
+                if ($field->getName() === 'classifieds_site') {
+                    $classifiedSitesQuery = $this->mapper->getBuilder($field)->generalQuery();
+
+                    // to ensure it always has proper structure
+                    $query = array_merge_recursive($query, [
+                        'query' => [
+                            'bool' => [
+                                'must' => [
+                                ]
+                            ]
+                        ]
+                    ]);
+
+                    // to ensure it will be prepend
+                    array_unshift($query['query']['bool']['must'], ...$classifiedSitesQuery['query']['bool']['must']);
+
+                    if (isset($classifiedSitesQuery['query']['bool']['must_not'])) {
+                        // to ensure it always has proper structure
+                        $query = array_merge_recursive($query, [
+                            'query' => [
+                                'bool' => [
+                                    'must_not' => [
+                                    ]
+                                ]
+                            ]
+                        ]);
+
+                        // to ensure it will be prepend
+                        array_unshift($query['query']['bool']['must_not'], ...$classifiedSitesQuery['query']['bool']['must_not']);
+                    }
+
+                    return;
+                }
+
                 $query = array_merge_recursive($query, $this->mapper->getBuilder($field)->generalQuery());
             });
+
             return $query;
         };
     }
 
     private function addStatusSortScript(string $status): void
     {
-        array_push($this->query['sort'], ... array_map(static function ($value) {
-            if(is_numeric($value)){
-                return [
-                    '_script' => [
-                        'type' => 'string',
-                        'script' => [
-                            'inline' => "doc['status'].size() != 0 && doc['status'].value == params.status ? '1': '0'", // to avoid casting issues
-                            'params' => [
-                                'status' => (int)$value
-                            ]
-                        ],
-                        'order' => 'desc'
-                    ]
-                ];
-            }
+        $sortingAsArray = array_filter(explode(',', trim($status)));
 
-            $parts = explode(':', $value);
+        if (count($sortingAsArray) === 0) {
+            return;
+        }
 
-            return [\Str::camel($parts[0]) => ['order' => $parts[1]]];
-        }, explode(',', $status)));
+        if (((int) $sortingAsArray[0]) === 0) {
+            $parts = explode(':', $sortingAsArray[0]);
+
+            $this->query['sort'][] = [\Str::camel($parts[0]) => ['order' => $parts[1]]];
+
+            array_shift($sortingAsArray);
+        }
+
+        $script = "if (doc['status'].size() == 0) {return 0;}";
+        $max = count($sortingAsArray);
+        $ceil = $max;
+
+        foreach ($sortingAsArray as $sorting) {
+            $script .= sprintf(
+                " else if (doc['status'].value == '%s') {  return %d;} ",
+                $sorting,
+                $ceil--
+            );
+        }
+
+        $script .= " else {return 0;}";
+
+        $this->query['sort'][] = [
+            '_script' => [
+                'type' => 'number',
+                'script' => [
+                    'lang' => 'painless',
+                    'source' => $script
+                ],
+                'order' => 'desc'
+            ]
+        ];
     }
 
     private function addGeoDistanceSortScript(string $order): void
@@ -423,7 +480,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 '_geo_distance' => [
                     'location.geo' => [
                         'lat' => $this->geolocation->lat(),
-                        'lon' => $this->geolocation->lng()
+                        'lon' => $this->geolocation->lon()
                     ],
                     'order' => $order
                 ]
@@ -549,7 +606,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     private function addGeoDistanceQuery(GeolocationRange $geolocation): void
     {
-        $geo = sprintf('%d, %d', $geolocation->lat(), $geolocation->lon());
+        $geo = sprintf('%.2f, %.2f', $geolocation->lat(), $geolocation->lon());
 
         $query = [
             'sort' => [
@@ -569,7 +626,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 'must' => [
                     [
                         'geo_distance' => [
-                            'distance' => sprintf('%f%s', abs($geolocation->range()), $geolocation->units()),
+                            'distance' => sprintf('%g%s', abs($geolocation->range()), $geolocation->units()),
                             'location.geo' => $geo
                         ]
                     ]

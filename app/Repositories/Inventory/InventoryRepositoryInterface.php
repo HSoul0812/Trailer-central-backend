@@ -3,6 +3,8 @@
 namespace App\Repositories\Inventory;
 
 use App\Models\Inventory\Inventory;
+use App\Models\Inventory\InventoryFile;
+use App\Models\Inventory\InventoryImage;
 use App\Repositories\Repository;
 use App\Repositories\TransactionalRepository;
 use Illuminate\Support\LazyCollection;
@@ -11,7 +13,6 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
 {
     const DEFAULT_GET_PARAMS = [
         self::CONDITION_AND_WHERE => [
-            ['active', '=', 1],
             ['is_archived', '<>', 1],
         ],
     ];
@@ -46,6 +47,8 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
 
     public function massUpdate(array $params): bool;
 
+    public function bulkUpdate(array $where, array $params): bool;
+
     /**
      * @return int number of touched records
      */
@@ -77,4 +80,18 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
      * @return Inventory|null
      */
     public function findByStock(int $dealerId, string $stock): ?Inventory;
+
+    /**
+     * @param Inventory $inventory
+     * @param array $newImages
+     * @return InventoryImage[]
+     */
+    public function createInventoryImages(Inventory $inventory, array $newImages): array;
+
+    /**
+     * @param Inventory $inventory
+     * @param array $newFiles
+     * @return InventoryFile[]
+     */
+    public function createInventoryFiles(Inventory $inventory, array $newFiles): array;
 }

@@ -2,8 +2,8 @@
 
 namespace App\Nova\Policies;
 
-use App\Models\User\NovaUser;
 use App\Models\User\DealerLocation;
+use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 
@@ -15,95 +15,89 @@ class LocationPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support', 'Sales', 'DataSupport'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any locations.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can view the location.
      *
-     * @param  NovaUser|null $user
-     * @param  DealerLocation  $location
+     * @param NovaUser|null $user
+     * @param DealerLocation $location
      * @return bool
      */
-    public function view(?NovaUser $user, DealerLocation $location): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+    public function view(?NovaUser $user, DealerLocation $location): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create locations.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can update the location.
      *
-     * @param  NovaUser  $user
-     * @param  DealerLocation  $location
+     * @param NovaUser $user
+     * @param DealerLocation $location
      * @return bool
      */
-    public function update(NovaUser $user, DealerLocation $location): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+    public function update(NovaUser $user, DealerLocation $location): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can delete the location.
      *
-     * @param  NovaUser  $user
-     * @param  DealerLocation  $location
+     * @param NovaUser $user
+     * @param DealerLocation $location
      * @return bool
      */
-    public function delete(NovaUser $user, DealerLocation $location): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+    public function delete(NovaUser $user, DealerLocation $location): bool {
+        return false;
     }
 
     /**
      * Determine whether the user can restore the location.
      *
-     * @param  NovaUser  $user
-     * @param  DealerLocation  $location
+     * @param NovaUser $user
+     * @param DealerLocation $location
      * @return void
      */
-    public function restore(NovaUser $user, DealerLocation $location): void
-    {
+    public function restore(NovaUser $user, DealerLocation $location): void {
         //
     }
 
     /**
      * Determine whether the user can permanently delete the location.
      *
-     * @param  NovaUser  $user
-     * @param  DealerLocation  $location
+     * @param NovaUser $user
+     * @param DealerLocation $location
      * @return void
      */
-    public function forceDelete(NovaUser $user, DealerLocation $location): void
-    {
+    public function forceDelete(NovaUser $user, DealerLocation $location): void {
         //
     }
 }

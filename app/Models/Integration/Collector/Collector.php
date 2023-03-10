@@ -74,7 +74,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $api_params
  * @property string|null $api_max_records
  * @property string|null $api_pagination
+ *
+ * @property Collection<CollectorLog> $collectorLogs
  * @property Collection<CollectorSpecification> $specifications
+ *
  * @property User $dealers
  * @property DealerLocation $dealerLocation
  * @property bool $ignore_manually_added_units
@@ -154,6 +157,7 @@ class Collector extends Model implements Filterable
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'id',
         'dealer_location_id',
         'dealer_id',
         'process_name',
@@ -230,7 +234,7 @@ class Collector extends Model implements Filterable
 
     public function getOverridableFieldsListAttribute(): string
     {
-        $overridable_fields = array_keys(array_filter($this->overridable_fields, function($v){
+        $overridable_fields = array_keys(array_filter($this->overridable_fields, function ($v) {
             return $v;
         }));
 
@@ -252,12 +256,23 @@ class Collector extends Model implements Filterable
         return $this->hasMany(CollectorSpecification::class);
     }
 
+    public function collectorLogs(): HasMany
+    {
+        return $this->hasMany(CollectorLog::class);
+    }
+
     public function jsonApiFilterableColumns(): ?array
     {
         return ['*'];
     }
 
-    public function collectorChangeReports() {
+    public function collectorChangeReports()
+    {
         return $this->hasMany(CollectorChangeReport::class);
+    }
+
+    public function collectorAdminNotes()
+    {
+        return $this->hasMany(CollectorAdminNote::class);
     }
 }

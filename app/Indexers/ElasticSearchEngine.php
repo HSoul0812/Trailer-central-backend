@@ -7,6 +7,9 @@ use ElasticAdapter\Indices\Alias;
 use ElasticAdapter\Indices\Index;
 use ElasticAdapter\Indices\Mapping;
 use ElasticAdapter\Indices\Settings;
+use ElasticScoutDriver\Factories\DocumentFactoryInterface;
+use ElasticScoutDriver\Factories\ModelFactoryInterface;
+use ElasticScoutDriver\Factories\SearchRequestFactoryInterface;
 use Elasticsearch\Client;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
@@ -19,6 +22,22 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
     /** @var array<string, bool> */
     private static $indexStatus = [];
 
+    public function __construct(
+        DocumentManager $documentManager,
+        DocumentFactoryInterface $documentFactory,
+        SearchRequestFactoryInterface $searchRequestFactory,
+        ModelFactoryInterface $modelFactory,
+        IndexManager $indexManager
+    ) {
+        $this->refreshDocuments = config('elastic.scout_driver.refresh_documents');
+
+        $this->documentManager = $documentManager;
+        $this->documentFactory = $documentFactory;
+        $this->searchRequestFactory = $searchRequestFactory;
+        $this->modelFactory = $modelFactory;
+        $this->indexManager = $indexManager;
+    }
+
     /**
      * Update the given model in the index.
      *
@@ -28,7 +47,12 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
      */
     public function update($models): void
     {
-        $this->ensureIndexIsCreated($models);
+        if (in_array(config('app.env'), ['local', 'dev'])) {
+            // in production or staging this is not an issue, but in devs/local environments we need to avoid index auto-creation
+            // because the index mapping most of cases are special
+            // in production we're using `inventory:recreate-index` command to made sure it is being created with proper mapping
+            $this->ensureIndexIsCreated($models);
+        }
 
         try {
             parent::update($models);
@@ -42,6 +66,9 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
                 ];
             })->toJson();
 
+            // @todo to avoid any potential missing inventory in the ES index due some error at bulk time,
+            // we should persist the error somewhere, maybe in MySQL DB, it will be handy to trace any error source
+            // at indexation time
             Log::critical($failedModels);
         }
     }
@@ -82,6 +109,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
             method_exists($first, 'indexConfigurator') &&
             ($configurator = $first->indexConfigurator()) &&
             ($searchableAs = $configurator->aliasName()) &&
+            config('elastic.scout_driver.check_index.inventory', true) && // to save a RPC in ES server
             !$this->isIndexAlreadyCreated($searchableAs)
         ) {
             $indexName = $configurator->name();

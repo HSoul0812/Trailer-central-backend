@@ -13,10 +13,15 @@ use Maatwebsite\LaravelNovaExcel\Actions\DownloadExcel;
 
 /**
  * Class DealerIncomingPendingMappingExport
- * @package App\Nova\Actions\Exports\DealerIncomingPendingMappingExport
+ * @package App\Nova\Actions\Exports
  */
 class DealerIncomingPendingMappingExport extends DownloadExcel implements WithHeadings, WithMapping, WithStyles, WithEvents
 {
+    /**
+     * @var string
+     */
+    public $name = "Export Dealer Incoming Pending Mappings";
+
     /**
      * @return array
      */
@@ -64,7 +69,7 @@ class DealerIncomingPendingMappingExport extends DownloadExcel implements WithHe
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) {
                 foreach ($event->sheet->getColumnIterator() as $column) {
                     $event->sheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
                 }

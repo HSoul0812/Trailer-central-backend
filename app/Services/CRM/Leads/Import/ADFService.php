@@ -14,7 +14,7 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\DomCrawler\Crawler;
 
-class ADFService implements ImportTypeInterface
+class ADFService implements ImportTypeInterface, ImportSourceInterface
 {
     /**
      * @var LeadRepositoryInterface
@@ -277,5 +277,18 @@ class ADFService implements ImportTypeInterface
      */
     private function fixCdata($xml): string {
         return preg_replace('/<!\[CDATA\[(.*?)\]\]>/', '$1', $xml);
+    }
+
+    /**
+     * Given that the ADF format is unique, this returns
+     * the class itself as the source which is implementing
+     * both, type and source interfaces.
+     *
+     * @param ParsedEmail $parsedEmail
+     * @return ImportSourceInterface|null
+     */
+    public function findSource(ParsedEmail $parsedEmail): ?ImportSourceInterface
+    {
+        return $this->isSatisfiedBy($parsedEmail) ? $this : null;
     }
 }

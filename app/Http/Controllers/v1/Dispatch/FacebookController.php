@@ -124,8 +124,10 @@ class FacebookController extends RestfulControllerV2 {
         if ($request->validate()) {
             // Return Item Facebook Dispatch Dealer Transformer
             Log::channel('dispatch-fb')->info('Debug time after validating FB Inventory endpoint: ' . (microtime(true) - $startTime));
-            $data = $this->itemResponse($this->service->dealer($request->id, $request->all(), $startTime),
-                                $this->dealerTransformer, 'data');
+            $data = $this->itemResponse(
+                $this->service->dealer($request->id, $request->all(), $startTime),
+                $this->dealerTransformer,
+                'data');
             Log::channel('dispatch-fb')->info('Debug time after calling service: ' . (microtime(true) - $startTime));
             return $data;
         }

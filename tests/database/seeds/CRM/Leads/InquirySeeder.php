@@ -19,6 +19,7 @@ use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\Inventory\Inventory;
 use App\Models\CRM\Leads\InventoryLead;
+use App\Models\CRM\User\Customer;
 
 class InquirySeeder extends Seeder {
 
@@ -42,6 +43,11 @@ class InquirySeeder extends Seeder {
      * @var Lead
      */
     protected $lead;
+
+    /**
+     * @var Customer
+     */
+    protected $customer;
 
     public function seed(): void
     {
@@ -94,6 +100,10 @@ class InquirySeeder extends Seeder {
         ]);
 
         $this->website->websiteConfigs()->updateOrCreate(['key' => WebsiteConfig::LEADS_MERGE_ENABLED], ['value' => 1]);
+
+        $this->customer = factory(Customer::class)->create([
+            'dealer_id' => $this->dealer->getKey()
+        ]);
     }
 
     public function cleanUp(): void
@@ -101,13 +111,18 @@ class InquirySeeder extends Seeder {
         $dealerId = $this->dealer->getKey();
         $userId = $this->dealer->newDealerUser->user_id;
 
+        Customer::where('dealer_id', $dealerId)->forceDelete();
         Interaction::where('tc_lead_id', $this->lead->getKey())->delete();
         InventoryLead::where('website_lead_id', $this->lead->getKey())->delete();
-        Lead::destroy($this->lead->getKey());
+        Lead::where('dealer_id', $dealerId)->delete();
         DealerLocation::where('dealer_id', $dealerId)->delete();
         WebsiteConfig::where('website_id', $this->website->getKey())->delete();
         Website::where('dealer_id', $dealerId)->delete();
         AuthToken::where(['user_id' => $this->authToken->user_id, 'user_type' => AuthToken::USER_TYPE_DEALER])->delete();
+
+        CrmUser::where('user_id', $userId)->delete();
+        NewUser::destroy($userId);
+        NewDealerUser::destroy($dealerId);
         User::destroy($dealerId);
 
         CrmUser::where('user_id', $userId)->delete();

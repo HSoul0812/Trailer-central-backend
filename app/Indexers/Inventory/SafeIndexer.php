@@ -2,37 +2,28 @@
 
 namespace App\Indexers\Inventory;
 
-use App\Models\User\User;
-use App\Repositories\User\UserRepositoryInterface;
+use App\Jobs\Job;
+use App\Models\BatchedJob;
+use App\Models\User\User as Dealer;
 use Elasticsearch\Client;
-use Illuminate\Database\Eloquent\Builder;
-use App\Indexers\ElasticSearchEngine;
+use Illuminate\Contracts\Events\Dispatcher;
 use App\Models\Inventory\Inventory;
-use App\Constants\Date;
 use Exception;
+use Laravel\Scout\Events\ModelsImported;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 class SafeIndexer
 {
-    public const RECORDS_PER_BULK = 1000;
+    /** @var int time in seconds */
+    private const WAIT_TIME = 15;
 
-    public const INGEST_BY_DEALER = 'by_dealer';
-    public const INGEST_REGULAR = 'regular';
-
-    /** @var ElasticSearchEngine * */
-    private $indexManager;
+    public const RECORDS_PER_BULK = 500;
 
     /** @var ConsoleOutput * */
     private $output;
 
     /** @var int */
-    private $numberOfUnitsProcessed;
-
-    /** @var int */
     private $numberUnitsToBeProcessed;
-
-    /** @var string */
-    private $indexName;
 
     /** @var string */
     private $indexAlias;
@@ -40,14 +31,14 @@ class SafeIndexer
     /** @var Client */
     private $client;
 
-    /** @var UserRepositoryInterface */
-    private $dealerRepository;
+    /** @var Dispatcher */
+    private $events;
 
-    public function __construct(UserRepositoryInterface $dealerRepository, Client $client, ConsoleOutput $output)
+    public function __construct(Client $client, ConsoleOutput $output, Dispatcher $events)
     {
-        $this->dealerRepository = $dealerRepository;
         $this->client = $client;
         $this->output = $output;
+        $this->events = $events;
     }
 
     /**
@@ -60,73 +51,117 @@ class SafeIndexer
 
         $model = new Inventory();
         $this->indexAlias = $model->indexConfigurator()->aliasName();
-        $this->indexName = $model::$searchableAs = $model->indexConfigurator()->name();
+        Inventory::$searchableAs = $model->indexConfigurator()->name();
 
         $indexList = $this->getIndexList();
 
-        $this->indexManager = $model->searchableUsing();
+        $indexManager = $model->searchableUsing();
 
-        $this->numberUnitsToBeProcessed = $model->newQuery()->publishable()->count('inventory_id');
-
-        $this->numberOfUnitsProcessed = 0;
+        $this->numberUnitsToBeProcessed = $model->newQuery()->count('inventory_id');
 
         // we must to avoid index name collisions, so, when we have a physical index using the name as the upcoming index alias
         // then we need to apply a cloning strategy to rename such index
-        $this->indexManager->ensureIndexDoesNotExists($this->indexAlias);
+        $indexManager->ensureIndexDoesNotExists($this->indexAlias);
 
-        $now = now(); // bear in mind the timezone
+        // @todo we need to consider another potential source of changes like dealer, payment calculator, dealer location and overlay settings updating
+        // for now, this command should be ran in time frames where those changes wont happen
+        $lastUpdateTime = $model->newQuery()->max('updated_at_auto');
 
         $itIsAlreadySwapped = false;
 
-        $this->indexManager->createIndex(
-            $this->indexName,
+        $indexManager->createIndex(
+            Inventory::$searchableAs,
             ['mapping' => $model->indexConfigurator()->mapping(), 'settings' => $model->indexConfigurator()->settings()]
         );
 
-        if (!$this->indexManager->isIndexAlreadyCreated($this->indexAlias)) {
+        if (!$indexManager->isIndexAlreadyCreated($this->indexAlias)) {
             // this edge case happens only in the development environment when we've removed by manually any index
             // so, this will alias the current index and any queued job will use it
-            $this->indexManager->swapIndexNames($this->indexName, $this->indexAlias);
+            $indexManager->swapIndexNames(Inventory::$searchableAs, $this->indexAlias);
             $itIsAlreadySwapped = true;
         }
 
-        if (config('elastic.scout_driver.ingestion.inventory', self::INGEST_BY_DEALER) === self::INGEST_BY_DEALER) {
-            /** @var User[] $dealerList */
-            $dealerList = $this->dealerRepository->getAll([]);
+        Job::batch(function (BatchedJob $batch) use ($model) {
+            $this->output->writeln(
+                sprintf(
+                    'It will ingest <comment>%d</comment> records to the index [%s]...',
+                    $this->numberUnitsToBeProcessed,
+                    Inventory::$searchableAs)
+            );
+            $this->output->writeln(sprintf('Working on batch <comment>%s</comment> ...', $batch->batch_id));
 
-            foreach ($dealerList as $dealer) {
-                $this->chunkHandler(
-                      $model->newQuery()
-                            ->publishable()
-                            ->with('user', 'user.website', 'orderedImages')
-                            ->where('dealer_id', $dealer->dealer_id)
+            $this->events->listen(ModelsImported::class, function ($event) use ($model) {
+                $lastInventoryId = $event->models->last()->inventory_id;
+
+                $this->output->writeln(
+                    sprintf(
+                        '<comment>Dispatched jobs to reindex [%s] models up to ID:</comment> %d',
+                        get_class($model),
+                        $lastInventoryId)
                 );
-            }
-        } else {
-            // this way is faster than `by dealer` ingestion, but it will need a better MySQL instance like production
-            $this->chunkHandler($model->newQuery()->publishable()->with(['user', 'user.website']));
-        }
+            });
 
-        if (!$itIsAlreadySwapped) {
-            $this->indexManager->swapIndexNames($this->indexName, $this->indexAlias);
-        }
+            Inventory::makeAllSearchable();
 
-        $this->indexManager->purgeIndexList($indexList->toArray());
+            $this->events->forget(ModelsImported::class);
+
+            $this->output->writeln(sprintf('Waiting for batch <comment>%s</comment> ...', $batch->batch_id));
+        }, __CLASS__, self::WAIT_TIME);
 
         // given it could be some record which was changed/added between main ingesting process and the index swapping process
         // so, we need to cover them by pulling them once again and ingest them
-        $query = $model->newQuery()
-                ->with('user', 'user.website', 'orderedImages')
-                ->where('updated_at_auto', '>=', $now->format(Date::FORMAT_Y_M_D_T));
+        $this->output->writeln(
+            'Checking if some records were affected while the main ingestion was working...'
+        );
 
-        $this->numberUnitsToBeProcessed = $query->count('inventory_id');
-        $this->numberOfUnitsProcessed = 0;
+        $this->numberUnitsToBeProcessed = $model->newQuery()
+            ->where('updated_at_auto', '>', $lastUpdateTime)
+            ->count('inventory.inventory_id');
 
-        if ($this->numberUnitsToBeProcessed > 0) {
-            $this->output->writeln('Checking some records affected while the main ingest was working...');
+        if ($this->numberUnitsToBeProcessed) {
+            Job::batch(function (BatchedJob $batch) use ($model, $lastUpdateTime) {
+                $this->output->writeln(
+                    sprintf(
+                        'It will ingest <comment>%d</comment> records to the index [%s]...',
+                        $this->numberUnitsToBeProcessed,
+                        Inventory::$searchableAs)
+                );
+
+                $this->output->writeln(sprintf('Working on batch <comment>%s</comment> ...', $batch->batch_id));
+
+                $this->events->listen(ModelsImported::class, function ($event) use ($model) {
+                    $lastInventoryId = $event->models->last()->inventory_id;
+
+                    $this->output->writeln(
+                        sprintf(
+                            '<comment>Dispatched jobs to reindex [%s] models up to ID:</comment> %d',
+                            get_class($model),
+                            $lastInventoryId)
+                    );
+                });
+
+                Dealer::query()->select('dealer.dealer_id')
+                    ->get()
+                    ->each(function (Dealer $dealer) use ($model, $lastUpdateTime): void {
+                        $model->newQuery()
+                            ->select('inventory.inventory_id')
+                            ->with('user', 'user.website', 'dealerLocation')
+                            ->where('inventory.dealer_id', $dealer->dealer_id)
+                            ->where('updated_at_auto', '>', $lastUpdateTime)
+                            ->searchable();
+                    });
+
+                $this->events->forget(ModelsImported::class);
+
+                $this->output->writeln(sprintf('Waiting for batch <comment>%s</comment> ...', $batch->batch_id));
+            }, __CLASS__, self::WAIT_TIME);
         }
 
-        $this->chunkHandler($query);
+        $indexManager->purgeIndexList($indexList->toArray());
+
+        if (!$itIsAlreadySwapped) {
+            $indexManager->swapIndexNames(Inventory::$searchableAs, $this->indexAlias);
+        }
     }
 
     /**
@@ -136,26 +171,6 @@ class SafeIndexer
     {
         return collect($this->client->indices()->getAlias())->filter(function ($info, $indexName) {
             return strstr($indexName, $this->indexAlias);
-        });
-    }
-
-    protected function chunkHandler(Builder $query): void
-    {
-        $query->chunk(self::RECORDS_PER_BULK, function ($models): void {
-            try {
-                $this->indexManager->update($models);
-                $this->numberOfUnitsProcessed += $models->count();
-
-                $this->output->writeln(
-                    sprintf('[%s] processing %d of %d',
-                        $this->indexName,
-                        $this->numberOfUnitsProcessed,
-                        $this->numberUnitsToBeProcessed)
-                );
-            } catch (Exception $e) {
-                $this->output->writeln(sprintf('[%s] at %s of %d', $e->getMessage(), $e->getFile(), $e->getLine()));
-                // to avoid any interruption
-            }
         });
     }
 }

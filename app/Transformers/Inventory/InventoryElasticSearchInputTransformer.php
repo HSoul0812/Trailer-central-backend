@@ -15,14 +15,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 class InventoryElasticSearchInputTransformer implements Transformer
 {
-    /** @var InventoryImageTransformer  */
-    private $inventoryImageTransformer;
-
-    public function __construct()
-    {
-        $this->inventoryImageTransformer = new InventoryImageTransformer;
-    }
-
     /**
      * @param Inventory $model
      * @return array
@@ -98,7 +90,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'numPassengers'        => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::PASSENGERS)),
             'numSleeps'            => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::SLEEPING_CAPACITY)),
             'numSlideouts'         => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::SLIDEOUTS)),
-            'numStalls'            => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::STALLS)),
+            'numStalls'            => $model->getAttributeById(Attribute::STALLS),
             'conversion'           => $model->getAttributeById(Attribute::CONVERSION),
             'customConversion'     => $model->getAttributeById(Attribute::CUSTOM_CONVERSION),
 
@@ -207,13 +199,6 @@ class InventoryElasticSearchInputTransformer implements Transformer
         ];
     }
 
-    private function imagesMapper(): callable
-    {
-        return static function (InventoryImage $image) {
-            return $image->image->filename;
-        };
-    }
-
     protected function settingsRepository(): SettingsRepositoryInterface
     {
         return app(SettingsRepositoryInterface::class);
@@ -223,7 +208,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
     {
         return static function (InventoryImage $image): int {
             // when the position is null, it will sorted a last position
-            $position = $image->position ?: InventoryImage::LAST_IMAGE_POSITION;
+            $position = $image->position ?? InventoryImage::LAST_IMAGE_POSITION;
 
             return $image->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION : $position;
         };

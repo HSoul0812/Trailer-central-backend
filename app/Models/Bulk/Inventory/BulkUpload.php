@@ -5,6 +5,14 @@ namespace App\Models\Bulk\Inventory;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $dealer_id
+ * @property string $title
+ * @property string $status
+ *
+ * @method static self find(int $id)
+ */
 class BulkUpload extends Model {
 
     const VALIDATION_ERROR = 'validation_error';

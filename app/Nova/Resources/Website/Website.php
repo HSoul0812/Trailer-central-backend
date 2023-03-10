@@ -69,7 +69,11 @@ class Website extends Resource
 
             Text::make('Template')->help("This will apply as the CertificateName on SSL certificates")->hideFromIndex(),
 
+            Text::make('Template','template')->sortable(),
+
             Boolean::make('Active', 'is_active')->sortable(),
+
+            Boolean::make('Responsive', 'responsive')->sortable(),
 
             Textarea::make('Global Filter', 'type_config')->sortable()->help(
                 "Usage:<br>
@@ -129,7 +133,7 @@ class Website extends Resource
               lte (is less than or equal)<br>"
             ),
 
-            Text::make('Head Scripts', 'HeadScripts')->hideFromIndex(),
+            Textarea::make('Head Scripts', 'HeadScripts')->hideFromIndex(),
 
         ];
     }

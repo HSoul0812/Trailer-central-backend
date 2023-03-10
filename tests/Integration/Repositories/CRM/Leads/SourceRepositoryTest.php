@@ -520,7 +520,7 @@ class SourceRepositoryTest extends TestCase
         $duplicateEntryLambda = function (int $userId, string $sourceName) {
             return $this->getDuplicateEntryMessage(
                 "$userId-$sourceName",
-                'user_source'
+                'crm_lead_sources.user_source'
             );
         };
 

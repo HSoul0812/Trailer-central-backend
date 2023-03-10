@@ -52,7 +52,7 @@ class IntegrationController extends RestfulControllerV2
             );
         }
 
-        $this->response->errorBadRequest();
+        return $this->response->errorBadRequest();
     }
 
     /**
@@ -77,6 +77,6 @@ class IntegrationController extends RestfulControllerV2
             );
         }
 
-        $this->response->errorBadRequest();
+        return $this->response->errorBadRequest();
     }
 }

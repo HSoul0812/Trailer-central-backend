@@ -30,9 +30,16 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
 
     $category = $attributes['category'] ?? optional($inventoryCategory)->legacy_category ?? '';
 
-    // Get Showroom Model
+    // Get Manufacturer
     $mfg = $attributes['manufacturer'] ?? Manufacturers::inRandomOrder()->first();
-    $mfg_id = $mfg->id ?? Manufacturers::where('name', $attributes['manufacturer'])->first()->id;
+    if(!empty($attributes['manufacturer']) || !empty($mfg->id)) {
+        $mfg_id = $mfg->id ?? Manufacturers::where('name', $attributes['manufacturer'])->first()->id;
+    } else {
+        $mfg = factory(Manufacturers::class)->create();
+        $mfg_id = $mfg->getKey();
+    }
+
+    // Get Showroom Model
     $brand = $attributes['brand'] ?? Brand::where('manufacturer_id', $mfg_id)->inRandomOrder()->first();
     $brandName = is_string($brand) ? $brand : $brand->name ?? '';
     $showroom = Showroom::where('manufacturer', is_string($mfg) ? $mfg : $mfg->name)->inRandomOrder()->first();

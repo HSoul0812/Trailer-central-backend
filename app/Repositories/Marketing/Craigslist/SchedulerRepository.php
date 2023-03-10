@@ -7,6 +7,7 @@ use App\Models\Marketing\Craigslist\Queue;
 use App\Models\Marketing\Craigslist\Session;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -109,7 +110,10 @@ class SchedulerRepository implements SchedulerRepositoryInterface {
         }
 
         if(isset($params['s_status'])) {
-            $query = $query->where(Session::getTableName().'.status', $params['s_status']);
+            if(!is_array($params['s_status'])) {
+                $params['s_status'] = array($params['s_status']);
+            }
+            $query = $query->whereIn(Session::getTableName().'.status', $params['s_status']);
         }
 
         if(isset($params['s_status_not'])) {
@@ -117,11 +121,22 @@ class SchedulerRepository implements SchedulerRepositoryInterface {
         }
 
         if(isset($params['q_status'])) {
-            $query = $query->where(Queue::getTableName().'.status', $params['q_status']);
+            if(!is_array($params['q_status'])) {
+                $params['q_status'] = array($params['q_status']);
+            }
+            $query = $query->whereIn(Queue::getTableName().'.status', $params['q_status']);
         }
 
         if(isset($params['q_status_not'])) {
-            $query = $query->whereNotIn(Session::getTableName().'.status', $params['q_status_not']);
+            $query = $query->whereNotIn(Queue::getTableName().'.status', $params['q_status_not']);
+        }
+
+        // Limit within a certain range of dates
+        if (isset($params['start'])) {
+            $query->whereDate(Session::getTableName() . '.session_scheduled', '>=', $params['start']);
+        }
+        if (isset($params['end'])) {
+            $query->whereDate(Session::getTableName() . '.session_scheduled', '<=', $params['end']);
         }
 
         if(!isset($params['sort'])) {
@@ -171,6 +186,60 @@ class SchedulerRepository implements SchedulerRepositoryInterface {
         // Restrict Per Page Limit
         if (!isset($params['per_page'])) {
             $params['per_page'] = 5;
+        }
+
+        // Return Special Formatted
+        return $this->getAll($params);
+    }
+
+    /**
+     * Get All Scheduled Posts Now Ready
+     * 
+     * @param array $params
+     * @return LengthAwarePaginator<Queue>
+     */
+    public function getReady(array $params): LengthAwarePaginator {
+        // Append Status Restrictions
+        $params['s_status'] = ['scheduled', 'new'];
+        $params['s_status_not'] = ['error', 'done'];
+        $params['q_status_not'] = ['error', 'done'];
+
+        // Only Get Slot 99
+        $params['slot_id'] = 99;
+
+        // Scheduled End
+        $params['end'] = DB::raw('NOW()');
+
+        // Restrict Per Page Limit
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 10;
+        }
+
+        // Return Special Formatted
+        return $this->getAll($params);
+    }
+
+    /**
+     * Get All Queued Updated Posts Now Ready
+     * 
+     * @param array $params
+     * @return LengthAwarePaginator<Queue>
+     */
+    public function getUpdates(array $params): LengthAwarePaginator {
+        // Append Status Restrictions
+        $params['s_status'] = ['queued', 'new'];
+        $params['s_status_not'] = ['error', 'done'];
+        $params['q_status_not'] = ['error', 'done'];
+
+        // Only Get Slot 97
+        $params['slot_id'] = 97;
+
+        // Scheduled End
+        $params['end'] = DB::raw('NOW()');
+
+        // Restrict Per Page Limit
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 10;
         }
 
         // Return Special Formatted

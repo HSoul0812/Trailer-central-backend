@@ -202,10 +202,19 @@ class ClientRedisRepository implements ClientRepositoryInterface
         // Loop Behaviours
         $clients = new Collection();
         foreach($behaviours as $behaviour) {
+            $ignore = explode(" ", config('marketing.cl.settings.warning.ignore'));
+            if(in_array($behaviour->dealerId, $ignore)) {
+                continue;
+            }
+
             // Combine Dealer Clients
             $uuids = $this->getAllUuids($behaviour->dealerId, $behaviour->slotId);
-            foreach($uuids as $uuid) {
-                $clients->push($uuid);
+            if($uuids->count() > 0) {
+                foreach($uuids as $uuid) {
+                    $clients->push($uuid);
+                }
+            } else {
+                $clients->push($behaviour);
             }
             $this->log->info('Merged ' . $uuids->count() . ' Clients For Total ' . $clients->count());
         }

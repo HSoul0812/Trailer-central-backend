@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Inventory\Inventory;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -18,13 +19,21 @@ class AccessToken
      */
     public function handle($request, Closure $next)
     {
+        $accessTokenHeader = $request->header('access-token');
+        $clientId = $request->header('x-client-id');
+
+        // if the request is coming from integration processes, then it will avoid to dispatch many inventory-related jobs
+        if ($clientId && $clientId === config('integrations.inventory_cache_auth.credentials.integration_client_id')) {
+            Inventory::disableCacheInvalidationAndSearchSyncing();
+        }
+
         if ($request->has('dealer_id')) {
             Cache::put(env('DEALER_ID_KEY', 'api_dealer_id'), $request->get('dealer_id'));
         }
 
 
-        if ($request->header('access-token')) {
-            $accessToken = AuthToken::where('access_token', $request->header('access-token'))->first();
+        if ($accessTokenHeader) {
+            $accessToken = AuthToken::where('access_token', $accessTokenHeader)->first();
             if ($accessToken && $accessToken->user) {
                 Auth::setUser($accessToken->user);
                 return $next($request);
@@ -35,12 +44,12 @@ class AccessToken
             return $next($request);
         }
 
-        if ( strpos($request->url(), 'feed/atw') && $request->header('access-token') )
+        if ( strpos($request->url(), 'feed/atw') && $accessTokenHeader )
         {
-            if ( $request->header('access-token') === config('integrations.atw.credentials.access_token') )
+            if ( $accessTokenHeader === config('integrations.atw.credentials.access_token') )
             {
                 return $next($request);
-            } else 
+            } else
             {
                 return response('Invalid access token.', 403);
             }

@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Models\CRM\Leads\Jotform;
 
 use Illuminate\Database\Eloquent\Model;
 
 class WebsiteForms extends Model
-{    
+{
     /**
      * The table associated with the model.
      *
@@ -18,7 +19,7 @@ class WebsiteForms extends Model
      * @var string
      */
     protected $primaryKey = 'id';
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -30,6 +31,6 @@ class WebsiteForms extends Model
         'title',
         'username',
         'url',
-        'status'
+        'status',
     ];
 }

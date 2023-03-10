@@ -21,13 +21,15 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
     private const EDGE_CASES_TO_GENERATE_QUERIES_FOR = [
         'show_images', //based on the show images config
         'clearance_special', // based on all-inventory/all-clearance-specials for `pandpsales` & `pandprvs`,
-        'location_region', //based on addRegionToElastic on DW
+        'location_region', // based on addRegionToElastic on DW
         'location_city', // based on addRegionToElastic on DW
         'classifieds_site', // based on InventoryCommon class on DW
-        'sale_price_script', //handle sale&price filtering
-        'location_country', //filter by location.country for TT
-        'empty_images', //handle exclusion of empty images
-        'availability', //handle availability
+        'sale_price_script', // handle sale&price filtering
+        'location_country', // filter by location.country for TT
+        'empty_images', // handle exclusion of empty images
+        'availability', // handle availability
+        'isArchived',  // to be able handle some especial OEM like `Mill Trailers` and MO Great Dane
+        'showOnWebsite', // to be able handle some especial OEM like `Mill Trailers` and MO Great Dane
     ];
 
     /**

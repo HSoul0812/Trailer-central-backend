@@ -3,6 +3,7 @@
 namespace App\Services\Import\Inventory;
 
 use App\Events\Inventory\InventoryUpdated;
+use App\Exceptions\Inventory\InventoryException;
 use App\Helpers\ConvertHelper;
 use App\Models\Inventory\Attribute;
 use App\Models\Inventory\Category;
@@ -322,6 +323,13 @@ class CsvImportService implements CsvImportServiceInterface
                 "special order" => 5
             )
         ),
+        "is_featured" => array(
+            "type" => "enum",
+            "list" => array(
+                "yes" => "1",
+                "no" => "0"
+            )
+        ),
         "is_special" => array(
             "type" => "enum",
             "list" => array(
@@ -526,17 +534,11 @@ class CsvImportService implements CsvImportServiceInterface
                 $inventory = $this->inventoryService->create($this->inventory);
             }
 
-            if (!$inventory) {
-                $this->validationErrors[] = "Error creating/updating Inventory";
-                $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                //throw new \Exception("Error creating/updating Inventory");
-            }
-
             event(new InventoryUpdated($inventory, [
                 'description' => 'Created/updated using inventory bulk uploader'
             ]));
-        } catch (\Exception $ex) {
-            $this->validationErrors[] = $ex->getTraceAsString();
+        } catch (\Exception | InventoryException $ex) {
+            $this->validationErrors[] = 'An error occurred validating the inventory' . $this->inventory['stock'] ? ' with stock: ' . $this->inventory['stock'] . '.' : ' on row: ' . $lineNumber;
             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
             Log::info('Error found on inventory for inventory bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString() . json_encode($this->validationErrors));
             Log::info("Index to header mapping: {$this->indexToheaderMapping}");
@@ -1017,26 +1019,30 @@ class CsvImportService implements CsvImportServiceInterface
 
             case 'location_phone':
                 // lookup location by phone number
+                $phone = str_replace(array('(', ')', ' ', '-'), '', $value);
                 $dealerLocation = DealerLocation::where([
-                    'phone' => $value,
+                    'phone' => $phone,
                     'dealer_id' => $this->bulkUpload->dealer_id
                 ])->first();
 
-                if ($dealerLocation) {
-                    $this->inventory['dealer_location_id'] = $dealerLocation->dealer_location_id;
-                } else {
-                    $phone = str_replace(array('(', ')', ' ', '-'), '', $value);
+                // If no dealerLocation is found by phone, use default dealer location
+                if (!$dealerLocation) {
                     $dealerLocation = DealerLocation::where([
-                        'phone' => $phone,
-                        'dealer_id' => $this->bulkUpload->dealer_id
+                        'dealer_id' => $this->bulkUpload->dealer_id,
+                        'is_default' => 1
                     ])->first();
 
-                    if ($dealerLocation) {
-                        $this->inventory['dealer_location_id'] = $dealerLocation->dealer_location_id;
-                    } else {
-                        return "Location based on phone number '{$value}' not found.";
+                    // If no default location found use first location found for dealer
+                    if (!$dealerLocation) {
+                        $dealerLocation = DealerLocation::where([
+                            'dealer_id' => $this->bulkUpload->dealer_id,
+                        ])->first();
+                    } else { // If no location found return default error
+                        return "Location based on phone number '{$value}' not found and no location has been found for this dealer.";
                     }
                 }
+
+                $this->inventory['dealer_location_id'] = $dealerLocation->dealer_location_id;
                 break;
 
             case 'axles':

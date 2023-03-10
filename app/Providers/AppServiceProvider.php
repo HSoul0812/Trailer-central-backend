@@ -29,6 +29,8 @@ use App\Repositories\Dms\Pos\RegisterRepository;
 use App\Repositories\Dms\Pos\RegisterRepositoryInterface;
 use App\Repositories\Dms\StockRepository;
 use App\Repositories\Dms\StockRepositoryInterface;
+use App\Repositories\FeatureFlagRepository;
+use App\Repositories\FeatureFlagRepositoryInterface;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepository;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepository;
@@ -43,6 +45,8 @@ use App\Repositories\Dms\Quickbooks\ItemNewRepository;
 use App\Repositories\Dms\Quickbooks\ItemNewRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\DealerRepository;
+use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Showroom\ShowroomBulkUpdateRepository;
@@ -101,6 +105,8 @@ use App\Services\Dms\Pos\RegisterServiceInterface;
 use App\Services\File\FileService;
 use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
+use App\Services\Inventory\InventoryBulkUpdateManufacturerService;
+use App\Services\Inventory\InventoryBulkUpdateManufacturerServiceInterface;
 use App\Services\Subscription\StripeService;
 use App\Services\Subscription\StripeServiceInterface;
 use App\Services\User\DealerIntegrationService;
@@ -180,6 +186,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('customer_name_unique', 'App\Rules\Dms\Quickbooks\CustomerNameUnique@validate');
         \Validator::extend('stock_type_valid', 'App\Rules\Bulks\Parts\StockTypeValid@passes');
         \Validator::extend('unit_sale_exists', 'App\Rules\Dms\UnitSaleExists@passes');
+        \Validator::extend('valid_clapp_dealer', 'App\Rules\Marketing\Craigslist\ValidDealer@passes');
         \Validator::extend('valid_clapp_profile', 'App\Rules\Marketing\Craigslist\ValidProfile@passes');
         \Validator::extend('valid_include', 'App\Rules\ValidInclude@validate');
         \Validator::extend('location_belongs_to_dealer', 'App\Rules\Locations\LocationBelongsToDealer@passes');
@@ -315,17 +322,22 @@ class AppServiceProvider extends ServiceProvider
                 return new FileService(app()->make(Client::class), app()->make(SanitizeHelper::class));
             });
 
+        $this->app->bind(DealerRepositoryInterface::class, DealerRepository::class);
+
         $this->app->bind(TimeClockRepositoryInterface::class, TimeClockRepository::class);
         $this->app->bind(EmployeeRepositoryInterface::class, EmployeeRepository::class);
         $this->app->bind(TimeClockServiceInterface::class, TimeClockService::class);
         $this->app->bind(WebsiteConfigServiceInterface::class, WebsiteConfigService::class);
 
         $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
+        $this->app->bind(InventoryBulkUpdateManufacturerServiceInterface::class, InventoryBulkUpdateManufacturerService::class);
 
         $this->app->bind(ErrorRepositoryInterface::class, ErrorRepository::class);
 
         $this->app->bind(SubscriptionRepositoryInterface::class, SubscriptionRepository::class);
         $this->app->bind(StripeServiceInterface::class, StripeService::class);
+
+        $this->app->singleton(FeatureFlagRepositoryInterface::class, FeatureFlagRepository::class);
 
         $this->app->register(PhoneServiceProvider::class);
     }

@@ -9,6 +9,7 @@ use App\Models\User\User;
 use App\Models\Website\Website;
 use App\Repositories\Showroom\ShowroomRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\Website\EntityRepositoryInterface;
 use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Database\Connection;
@@ -27,6 +28,7 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
         'is_active' => 1,
         'template' => '1column'
     ];
+    private const SHOWROOM_INCLUDE_DEALERS_FROM_GLOBAL_FILTERS = 'showroom/load_from_linked_dealers_in_global_filters';
 
     /** @var WebsiteRepositoryInterface */
     private $websiteRepository;
@@ -46,12 +48,18 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
     /** @var LoggerServiceInterface */
     private $logger;
 
-    public function __construct(WebsiteRepositoryInterface  $websiteRepository,
-                                UserRepositoryInterface     $dealerRepository,
-                                ShowroomRepositoryInterface $showroomRepository,
-                                EntityRepositoryInterface   $entityRepository,
-                                Connection                  $connection,
-                                LoggerServiceInterface      $logger)
+    /**
+     * @var WebsiteConfigRepositoryInterface
+     */
+    private $websiteConfigRepository;
+
+    public function __construct(WebsiteRepositoryInterface       $websiteRepository,
+                                UserRepositoryInterface          $dealerRepository,
+                                ShowroomRepositoryInterface      $showroomRepository,
+                                WebsiteConfigRepositoryInterface $websiteConfigRepository,
+                                EntityRepositoryInterface        $entityRepository,
+                                Connection                       $connection,
+                                LoggerServiceInterface           $logger)
     {
         $this->websiteRepository = $websiteRepository;
         $this->showroomRepository = $showroomRepository;
@@ -59,26 +67,34 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
         $this->dealerRepository = $dealerRepository;
         $this->connection = $connection;
         $this->logger = $logger;
+        $this->websiteConfigRepository = $websiteConfigRepository;
     }
 
     public function getAllByWebsiteId(int $websiteId): Collection
     {
         $website = $this->getWebsiteById($websiteId);
-        $dealer = $this->getDealerById($website->dealer_id);
+        $mainDealer = $this->getDealerById($website->dealer_id);
 
-        $showroomDealers = [];
-
+        $showroomDealers = $mainDealer->getShowroomDealers() ?? [];
         try {
-            if ($dealer->showroom_dealers) {
-                $showroomDealers = array_values(array_filter(unserialize($dealer->showroom_dealers)));
+            $configEnabled = $this->websiteConfigRepository->getValueOrDefault($websiteId, self::SHOWROOM_INCLUDE_DEALERS_FROM_GLOBAL_FILTERS);
+            if (boolval($configEnabled[self::SHOWROOM_INCLUDE_DEALERS_FROM_GLOBAL_FILTERS])) {
+                $dealersIds = $website->getFilterValue('dealer_id') ?? [];
+                foreach ($dealersIds as $dealerId) {
+                    $dealer = $this->getDealerById((int)$dealerId);
+                    if ($dealers = $dealer->getShowroomDealers()) {
+                        $showroomDealers = array_merge($showroomDealers, $dealers);
+                    }
+                }
             }
+            $showroomDealers = array_unique($showroomDealers);
         } catch (\Exception $exception) {
             $this->logger->error('`ExtraWebsiteConfigService::getAll` has failed to unserialize `showroom_dealers`');
         }
 
         return collect([
-            'include_showroom' => (bool)$dealer->showroom,
-            'showroom_dealers' => $showroomDealers,
+            'include_showroom' => (bool)$mainDealer->showroom,
+            'showroom_dealers' => array_values($showroomDealers),
             'available_showroom_dealers' => $this->showroomRepository->distinctByManufacturers(),
             'global_filter' => $website->type_config
         ]);
@@ -113,7 +129,7 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
             $dealer->save();
 
             if (array_key_exists('global_filter', $params)) {
-                $website->type_config = (string) $params['global_filter'];
+                $website->type_config = (string)$params['global_filter'];
                 $website->save();
             }
 

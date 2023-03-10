@@ -5,6 +5,7 @@ namespace App\Services\CRM\Leads;
 use App\Exceptions\CRM\Leads\MergeLeadsException;
 use App\Models\CRM\Interactions\Facebook\Message;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Interactions\Interaction;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
@@ -23,6 +24,7 @@ use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 
 /**
  * Class LeadService
@@ -99,6 +101,11 @@ class LeadService implements LeadServiceInterface
     protected $customerRepository;
 
     /**
+     * @var TrackingRepositoryInterface
+     */
+    protected $trackingRepository;
+
+    /**
      * LeadService constructor.
      */
     public function __construct(
@@ -114,7 +121,8 @@ class LeadService implements LeadServiceInterface
         FacebookRepositoryInterface $facebookRepository,
         TextRepositoryInterface $textRepository,
         QuoteRepositoryInterface $quoteRepository,
-        CustomerRepositoryInterface $customerRepository
+        CustomerRepositoryInterface $customerRepository,
+        TrackingRepositoryInterface $trackingRepository
     ) {
         // Initialize Repositories
         $this->leads = $leads;
@@ -130,6 +138,7 @@ class LeadService implements LeadServiceInterface
         $this->textRepository = $textRepository;
         $this->quoteRepository = $quoteRepository;
         $this->customerRepository = $customerRepository;
+        $this->trackingRepository = $trackingRepository;
     }
 
 
@@ -168,6 +177,11 @@ class LeadService implements LeadServiceInterface
         // Update Units of Inventory
         if (isset($params['inventory'])) {
             $this->updateUnitsOfInterest($lead, $params['inventory']);
+        }
+
+        // Create Customer if Not Exists and BOTH First/Last Name Provided
+        if (!empty($params['first_name']) && !empty($params['last_name'])) {
+            $this->customerRepository->createFromLead($lead);
         }
 
         // Return Full Lead Details
@@ -217,13 +231,13 @@ class LeadService implements LeadServiceInterface
     }
 
     /**
-     * Merge Lead
+     * Adding Sent Inquiry into Lead Interaction 
      *
      * @param Lead $lead
      * @param array $params
      * @return Interaction
      */
-    public function merge(Lead $lead, array $params): Interaction {
+    public function mergeInquiry(Lead $lead, array $params): Interaction {
         // Configure Notes From Provided Data
         $notes = '';
         if(!empty($params['first_name'])) {
@@ -253,7 +267,7 @@ class LeadService implements LeadServiceInterface
         // Get Interaction Data
         return $this->interactions->create([
             'lead_id' => $lead->identifier,
-            'interaction_type'   => 'INQUIRY',
+            'interaction_type'   => Interaction::TYPE_INQUIRY,
             'interaction_notes'  => !empty($notes) ? 'Original Inquiry: ' . $notes : 'Not Provided'
         ]);
     }
@@ -457,22 +471,26 @@ class LeadService implements LeadServiceInterface
     }
 
     /**
-     * @param int $leadId
-     * @param int $mergesLeadId
+     * Merge Lead Data
+     * 
+     * @param int $leadId primary lead ID
+     * @param int $oldLeadId lead ID to be merged
      * @return bool
      * @throws MergeLeadsException
      */
-    public function mergeLeads(int $leadId, int $mergesLeadId): bool
+    public function mergeLeadData(int $leadId, int $oldLeadId): bool
     {
         $params = [
             'lead_id' => $leadId,
-            'search' => ['lead_id' => $mergesLeadId]
+            'search' => ['lead_id' => $oldLeadId]
         ];
 
         $customerParams = [
             'website_lead_id' => $leadId,
-            'search' => ['website_lead_id' => $mergesLeadId]
+            'search' => ['website_lead_id' => $oldLeadId]
         ];
+
+        $lead = $this->leads->get(['id' => $leadId]);
 
         try {
             $this->beginTransaction();
@@ -487,9 +505,30 @@ class LeadService implements LeadServiceInterface
 
             $this->customerRepository->bulkUpdate($customerParams);
 
+            $this->trackingRepository->batchUpdate(
+                ['lead_id' => $leadId],
+                ['lead_id' => $oldLeadId]
+            );
+
+            $this->interactions->batchUpdate(
+                ['tc_lead_id' => $leadId],
+                ['tc_lead_id' => $oldLeadId]
+            );
+
+            $oldLead = $this->leads->get(['id' => $oldLeadId]);
+            $this->mergeInquiry($lead, [
+                'first_name' => $oldLead->first_name,
+                'last_name' => $oldLead->last_name,
+                'phone_number' => $oldLead->phone_number,
+                'email_address' => $oldLead->email_address,
+                'comments' => $oldLead->comments
+            ]);
+
+            $this->mergeUnits($leadId, $oldLeadId);
+
             $this->commitTransaction();
 
-            Log::info('leads has been successfully merged', ['leadId' => $leadId, 'mergesLeadId' => $mergesLeadId]);
+            Log::info('leads has been successfully merged', ['leadId' => $leadId, 'oldLeadId' => $oldLeadId]);
 
         } catch (\Exception $e) {
             Log::error('Merge leads error. Message - ' . $e->getMessage() , $e->getTrace());
@@ -499,5 +538,67 @@ class LeadService implements LeadServiceInterface
         }
 
         return true;
+    }
+
+    /**
+     * Merge Leads
+     * 
+     * @param int $LeadId primary lead ID
+     * @param array $mergeLeadIds lead IDs to be merged
+     * @return void
+     */
+    public function mergeLeads(int $leadId, array $mergeLeadIds)
+    {
+        $combinedLeadIds = $mergeLeadIds;
+        $combinedLeadIds[] = $leadId;
+
+        // replace with earliest submitted date and combined notes
+        $notes = $this->leads->getNotesBetweenLeads($combinedLeadIds);
+        $minSubmittedDate = $this->leads->getMinSubmittedDateBetweenLeads($combinedLeadIds);
+
+        $this->leads->update([
+            'id' => $leadId, 
+            'date_submitted' => $minSubmittedDate, 
+            'note' => $notes
+        ]);
+
+        // replace with latest contact date
+        $maxContactDate = $this->leads->getMaxContactDateBetweenLeads($combinedLeadIds);
+
+        $this->status->createOrUpdate([
+            'lead_id' => $leadId, 
+            'next_contact_date' => $maxContactDate, 
+            'contact_type' => LeadStatus::TYPE_CONTACT
+        ]);
+
+        // merge lead data then delete lead
+        foreach ($mergeLeadIds as $mergeLeadId) {
+
+            $this->mergeLeadData($leadId, $mergeLeadId);
+            $this->leads->delete(['id' => $mergeLeadId]);
+        }
+    }
+
+    /**
+     * Merge Inventory Lead
+     * 
+     * @param int $leadId primary lead ID
+     * @param int $oldLeadId lead ID to be merged
+     * @return void
+     */
+    public function mergeUnits(int $leadId, int $oldLeadId)
+    {
+        $leadUnitIds = $this->units->getUnitIds($leadId);
+        $oldLeadUnitIds = $this->units->getUnitIds($oldLeadId);
+
+        $missingUnitIds = array_diff($oldLeadUnitIds, $leadUnitIds);
+
+        foreach ($missingUnitIds as $missingUnitId) {
+
+            $this->units->create([
+                'inventory_id' => $missingUnitId,
+                'website_lead_id' => $leadId
+            ]);
+        }
     }
 }

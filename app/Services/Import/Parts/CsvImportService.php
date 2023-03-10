@@ -64,6 +64,8 @@ class CsvImportService implements CsvImportServiceInterface
     const HEADER_VIDEO_EMBED_CODE = 'Video Embed Code';
     const HEADER_ALTERNATE_PART_NUMBER = 'Alternate Part Number';
     const HEADER_SHIPPING_FEE = 'Shipping Fee';
+    const HEADER_IS_ACTIVE = 'Is Active';
+    const HEADER_IS_TAXABLE = 'Is Taxable';
 
     // The separator to separate each images from the image header
     const HEADER_IMAGE_SEPARATOR = ',';
@@ -104,6 +106,8 @@ class CsvImportService implements CsvImportServiceInterface
         self::HEADER_VIDEO_EMBED_CODE => self::HEADER_RULE_OPTIONAL,
         self::HEADER_ALTERNATE_PART_NUMBER => self::HEADER_RULE_OPTIONAL,
         self::HEADER_SHIPPING_FEE => self::HEADER_RULE_OPTIONAL,
+        self::HEADER_IS_ACTIVE => self::HEADER_RULE_OPTIONAL,
+        self::HEADER_IS_TAXABLE => self::HEADER_RULE_OPTIONAL,
     ];
 
     const MEMORY_CACHE_KEY_VENDORS = 'vendors';
@@ -694,6 +698,12 @@ class CsvImportService implements CsvImportServiceInterface
                 $this->storeErrorIfValueIsEmpty(self::HEADER_SHIPPING_FEE, $line, $value);
                 $part['shipping_fee'] = $this->sanitizeValueToNumber($value);
             },
+            self::HEADER_IS_ACTIVE => function (array &$part, ?string $value, int $line) {
+                $part['is_active'] = $this->sanitizeValueToBoolean($value, false);
+            },
+            self::HEADER_IS_TAXABLE => function (array &$part, ?string $value, int $line) {
+                $part['is_taxable'] = $this->sanitizeValueToBoolean($value, true);
+            },
         ];
     }
 
@@ -940,16 +950,10 @@ class CsvImportService implements CsvImportServiceInterface
      */
     private function sanitizeValueToBoolean(?string $value, bool $default = false): bool
     {
-        if (empty($value)) {
+        if (is_null($value) || $value === '') {
             return $default;
         }
 
-        $filteredValue = filter_var($value, FILTER_VALIDATE_BOOLEAN);
-
-        if ($filteredValue === false) {
-            return $default;
-        }
-
-        return $filteredValue;
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 }

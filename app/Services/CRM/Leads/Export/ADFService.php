@@ -55,6 +55,15 @@ class ADFService implements ADFServiceInterface
      */
     public function export(Lead $lead): bool
     {
+        /*
+         * If the lead comes with dealer location 0 or null
+         * And we have an inventory assigned to the lead
+         * Use the inventory dealer location instead
+         */
+        if (empty($lead->dealer_location_id) && !empty($lead->inventory)) {
+            $lead->dealer_location_id = $lead->inventory->dealer_location_id;
+        }
+
         $leadEmail = $this->leadEmailRepository->find($lead->dealer_id, $lead->dealer_location_id);
         if (!$leadEmail) {
             Log::info("Lead {$lead->identifier} couldn't find a LeadEmail associated.");
@@ -89,7 +98,7 @@ class ADFService implements ADFServiceInterface
         // Initialize ADF Lead Params
         $this->adfParams = [
             'leadId' => $lead->identifier,
-            'subject' => $lead->lead_type,
+            'subject' => $this->getLeadSubject($lead),
             'requestDate' => $lead->date_submitted,
             'firstName' => $lead->first_name,
             'lastName' => $lead->last_name,
@@ -176,5 +185,42 @@ class ADFService implements ADFServiceInterface
             'vendorAddrZip' => $location->postalcode,
             'vendorAddrCountry' => $location->country,
         ];
+    }
+
+    /**
+     * @param Lead $lead
+     * @return string
+     */
+    private function getLeadSubject(Lead $lead): string
+    {
+        switch($lead->lead_type) {
+            case 'call':
+                $subject = "You Just Received a Click to Call From %s";
+                return sprintf($subject, $lead->full_name);
+            case 'inventory':
+                $subject = 'Inventory Information Request on %s';
+                break;
+            case 'part':
+                $subject = "Inventory Part Information Request on %s";
+                break;
+            case 'showroom':
+                $subject = "Showroom Model Information Request on %s";
+                break;
+            case 'cta':
+                $subject = "New CTA Response on %s";
+                break;
+            case 'sms':
+                $subject = "New SMS Sent on %s";
+                break;
+            case 'bestprice':
+                $subject = 'New Get Best Price Information Request on %s';
+                break;
+            default:
+                $subject = 'New General Submission on %s';
+                break;
+        }
+
+        // Generate subject depending on type
+        return sprintf($subject, $lead->website->domain);
     }
 }

@@ -13,10 +13,15 @@ use Maatwebsite\LaravelNovaExcel\Actions\DownloadExcel;
 
 /**
  * Class FieldMappingExport
- * @package App\Nova\Actions\Exports\FieldMappingExport
+ * @package App\Nova\Actions\Exports
  */
 class FieldMappingExport extends DownloadExcel implements WithHeadings, WithMapping, WithStyles, WithEvents
 {
+    /**
+     * @var string
+     */
+    public $name = "Export Field Mapping Export";
+
     /**
      * @return array
      */
@@ -25,7 +30,8 @@ class FieldMappingExport extends DownloadExcel implements WithHeadings, WithMapp
         return [
             'Dealer ID',
             'Their Field',
-            'Our Field'
+            'Our Field',
+            'Type'
         ];
     }
 
@@ -39,7 +45,8 @@ class FieldMappingExport extends DownloadExcel implements WithHeadings, WithMapp
         return [
             $mapping->dealer_id,
             $mapping->map_from,
-            $mapping->map_to
+            $mapping->map_to,
+            $mapping->type
         ];
     }
 
@@ -64,7 +71,7 @@ class FieldMappingExport extends DownloadExcel implements WithHeadings, WithMapp
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) {
                 foreach ($event->sheet->getColumnIterator() as $column) {
                     $event->sheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
                 }

@@ -86,12 +86,28 @@ class Website extends Model
       }
     }
 
+    /**
+     * Get the value for a specific type config
+     * @param string $filter
+     * @return mixed
+     */
+    public function getFilterValue(string $filter){
+        $serializedData = $this->getOriginal('type_config');
+        if (strpos($serializedData, ':') !== 0) {
+            $filters = unserialize($serializedData, ['allowed_classes' => true]);
+            if (isset($filters[$filter])) {
+                return $filters[$filter];
+            }
+        }
+        return null;
+    }
+
     public function unserializeDealerFilter(array $dealer_ids): string
     {
         $printData = '';
 
         foreach ($dealer_ids as $dealer_id) {
-            $printData = 'dealer_id|eq|' . $dealer_id . PHP_EOL;
+            $printData .= 'dealer_id|eq|' . $dealer_id . PHP_EOL;
         }
 
         return $printData;

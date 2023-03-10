@@ -220,7 +220,7 @@ class TypeRepositoryTest extends TestCase
         $duplicateEntryLambda = function (int $leadId, string $leadType) {
             return $this->getDuplicateEntryMessage(
                 "$leadId-$leadType",
-                'lead_type'
+                'website_lead_types.lead_type'
             );
         };
 

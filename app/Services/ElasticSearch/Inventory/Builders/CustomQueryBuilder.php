@@ -76,7 +76,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                                     ],
                                     [
                                         'wildcard' => [
-                                            'title' => [
+                                            'title.tokens' => [
                                                 'value' => '*as is*'
                                             ]
                                         ]
@@ -263,6 +263,19 @@ doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
         ];
     }
 
+    private function buildBooleanQueryForGlobalFilter(string $name, array $values): array
+    {
+        $field = str_replace('_', '.', $name);
+
+        $query['bool']['must'][] = [
+            'term' => [
+                $field => (bool)$values[0]
+            ]
+        ];
+
+        return $query;
+    }
+
     public function globalQuery(): array
     {
         $this->field->getTerms()->each(function (Term $term) {
@@ -274,6 +287,10 @@ doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
                 case 'location_city':
                 case 'location_country':
                     $this->appendToQuery($this->buildLocationQueryForGlobalFilter($name, $values));
+                    break;
+                case 'isArchived':
+                case 'showOnWebsite':
+                    $this->appendToQuery($this->buildBooleanQueryForGlobalFilter($name, $values));
                     break;
             }
 

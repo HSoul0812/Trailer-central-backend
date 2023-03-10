@@ -23,11 +23,17 @@ class ImageRepository implements ImageRepositoryInterface
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @return bool
      */
     public function update($params)
     {
-        throw new NotImplementedException;
+        $imageId = $params['id'];
+
+        $image = Image::findOrFail($imageId);
+
+        unset($params['id']);
+
+        return $image->update($params);
     }
 
     /**
@@ -51,6 +57,10 @@ class ImageRepository implements ImageRepositoryInterface
             foreach ($params[self::CONDITION_AND_WHERE_IN] as $field => $values) {
                 $query = $query->whereIn($field, $values);
             }
+        }
+
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query = $query->where($field, $values);
         }
 
         return $query->delete();

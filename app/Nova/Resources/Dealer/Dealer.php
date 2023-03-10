@@ -2,46 +2,36 @@
 
 namespace App\Nova\Resources\Dealer;
 
-use App\Nova\Actions\ActivateUserAccounts;
-use App\Nova\Actions\DeactivateUserAccounts;
+use App\Nova\Resource;
+use Laravel\Nova\Panel;
+use Illuminate\Http\Request;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Stack;
+use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\Password;
+use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\BooleanGroup;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Integration\Integration;
 use App\Nova\Actions\Dealer\ChangeStatus;
 use App\Nova\Actions\Dealer\DeactivateDealer;
-use App\Nova\Actions\Dealer\DeactivateECommerce;
-use App\Nova\Actions\Dealer\HiddenIntegrations\ActivateELeads;
-use App\Nova\Actions\Dealer\HiddenIntegrations\DeactivateELeads;
-use App\Nova\Actions\Dealer\Subscriptions\CDK\ActivateCdk;
-use App\Nova\Actions\Dealer\Subscriptions\CRM\ActivateCrm;
-use App\Nova\Actions\Dealer\Subscriptions\CRM\DeactivateCrm;
-use App\Nova\Actions\Dealer\Subscriptions\DealerClassifieds\ActivateDealerClassifieds;
-use App\Nova\Actions\Dealer\Subscriptions\DealerClassifieds\DeactivateDealerClassifieds;
-use App\Nova\Actions\Dealer\Subscriptions\DMS\DeactivateDms;
-use App\Nova\Actions\Dealer\Subscriptions\ECommerce\ActivateECommerce;
-use App\Nova\Actions\Dealer\Subscriptions\Google\ActivateGoogleFeed;
-use App\Nova\Actions\Dealer\Subscriptions\Google\DeactivateGoogleFeed;
-use App\Nova\Actions\Dealer\Subscriptions\Marketing\ActivateMarketing;
-use App\Nova\Actions\Dealer\Subscriptions\Marketing\DeactivateMarketing;
-use App\Nova\Actions\Dealer\Subscriptions\Parts\ActivateParts;
-use App\Nova\Actions\Dealer\Subscriptions\Parts\DeactivateParts;
-use App\Nova\Actions\Dealer\Subscriptions\QuoteManager\ActivateQuoteManager;
-use App\Nova\Actions\Dealer\Subscriptions\Scheduler\ActivateScheduler;
-use App\Nova\Actions\Dealer\Subscriptions\Scheduler\DeactivateScheduler;
-use App\Nova\Resource;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
-use Laravel\Nova\Fields\BelongsTo;
-use Laravel\Nova\Fields\Boolean;
-use Laravel\Nova\Fields\BooleanGroup;
-use Laravel\Nova\Fields\HasMany;
-use Laravel\Nova\Fields\Password;
-use Laravel\Nova\Fields\PasswordConfirmation;
-use Laravel\Nova\Fields\Stack;
-use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\ActionRequest;
-use Laravel\Nova\Panel;
 use Trailercentral\PasswordlessLoginUrl\PasswordlessLoginUrl;
+use App\Nova\Actions\Dealer\Subscriptions\ManageDealerSubscriptions;
+use App\Nova\Actions\Dealer\HiddenIntegrations\ManageHiddenIntegrations;
 
+/**
+ * class Dealer
+ *
+ * @package App\Nova\Resources\Dealer
+ */
 class Dealer extends Resource
 {
+    /**
+     * The section the resource corresponds to.
+     *
+     * @var string
+     */
     public static $group = 'Dealer';
 
     /**
@@ -67,12 +57,16 @@ class Dealer extends Resource
         'dealer_id', 'name', 'email',
     ];
 
+    /**
+     *
+     * @var array
+     */
     public static $with = ['crmUser'];
 
     /**
      * Get the fields displayed by the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function fields(Request $request): array
@@ -140,7 +134,7 @@ class Dealer extends Resource
                 ->onlyOnForms()
                 ->creationRules('required', 'string', 'min:12', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/')
                 ->updateRules('nullable', 'string', 'min:12', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/')
-                ->fillUsing(function($request, $model, $attribute, $requestAttribute) {
+                ->fillUsing(function ($request, $model, $attribute, $requestAttribute) {
                     if (!empty($request[$requestAttribute])) {
                         $model->{$attribute} = $request[$requestAttribute];
                     }
@@ -149,6 +143,9 @@ class Dealer extends Resource
         ];
     }
 
+    /**
+     * @return array
+     */
     public function subscriptions(): array
     {
         return [
@@ -184,25 +181,17 @@ class Dealer extends Resource
         ];
     }
 
+    /**
+     * @return array
+     */
     public function hiddenIntegrations(): array
     {
         return [
-            BooleanGroup::make('Hidden Integrations')->options([
-                'IsAuction123Active' => 'Auction123',
-                'IsAutoConxActive' => 'AutoConx',
-                'IsCarbaseActive' => 'Carbase',
-                'IsDP360Active' => 'DP360',
-                'IsELeadsActive' => 'E-Leads',
-                'IsTrailerUsaActive' => 'TrailerUSA',
-            ])->withMeta(['value' =>
-                [
-                    'IsAuction123Active' => $this->IsAuction123Active,
-                    'IsAutoConxActive' => $this->IsAutoConxActive,
-                    'IsCarbaseActive' => $this->IsCarbaseActive,
-                    'IsDP360Active' => $this->IsDP360Active,
-                    'IsELeadsActive' => $this->IsELeadsActive,
-                    'IsTrailerUsaActive' => $this->IsTrailerUsaActive,
-                ]
+            BooleanGroup::make('Hidden Integrations')->options(
+                Integration::activeHiddenIntegrations()->pluck('name', 'integration_id')
+            )->withMeta(['value' =>
+                // We're mapping the active value to bool so Nova can render the tag with the right class
+                array_map(function($v) { return (bool) $v; }, $this->integrations->pluck('active', 'integration_id')->toArray())
             ])->exceptOnForms()
         ];
     }
@@ -210,7 +199,7 @@ class Dealer extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function cards(Request $request): array
@@ -221,7 +210,7 @@ class Dealer extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function filters(Request $request): array
@@ -232,7 +221,7 @@ class Dealer extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function lenses(Request $request): array
@@ -243,212 +232,17 @@ class Dealer extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @return array
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function actions(Request $request): array
     {
         return [
-            app()->make(ActivateCdk::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
+            app()->make(ManageDealerSubscriptions::class),
+            app()->make(ManageHiddenIntegrations::class),
 
-                return $this->resource instanceof Model && !$this->resource->isCdkActive;
-            }),
-            app()->make(\App\Nova\Actions\Dealer\Subscriptions\CDK\DeactivateCdk::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && $this->resource->isCdkActive;
-            }),
-            app()->make(ActivateCrm::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && !$this->resource->isCrmActive;
-            }),
-            app()->make(DeactivateCrm::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && $this->resource->isCrmActive;
-            }),
-            app()->make(ActivateDealerClassifieds::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && !$this->resource->clsf_active;
-            }),
-            app()->make(DeactivateDealerClassifieds::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && $this->resource->clsf_active;
-            }),
-            app()->make(\App\Nova\Actions\Dealer\Subscriptions\DMS\ActivateDms::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && !$this->resource->is_dms_active;
-            }),
-            app()->make(DeactivateDms::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && $this->resource->is_dms_active;
-            }),
-            app()->make(ActivateECommerce::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && !$this->resource->isEcommerceActive;
-            }),
-            app()->make(DeactivateECommerce::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && $this->resource->isEcommerceActive;
-            }),
-            app()->make(ActivateELeads::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && !$this->resource->isELeadsActive;
-            }),
-            app()->make(DeactivateELeads::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && $this->resource->isELeadsActive;
-            }),
-            app()->make(ActivateGoogleFeed::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && !$this->resource->isELeadsActive;
-            }),
-            app()->make(DeactivateGoogleFeed::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && $this->resource->isELeadsActive;
-            }),
-            app()->make(ActivateMarketing::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && !$this->resource->isMarketingActive;
-            }),
-            app()->make(DeactivateMarketing::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && $this->resource->isMarketingActive;
-            }),
-            app()->make(\App\Nova\Actions\Dealer\Subscriptions\MobileSite\ActivateMobileSite::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && !$this->resource->isMobileActive;
-            }),
-            app()->make(\App\Nova\Actions\Dealer\Subscriptions\MobileSite\DeactivateMobileSite::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && $this->resource->isMobileActive;
-            }),
-            app()->make(ActivateParts::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && !$this->resource->isPartsActive;
-            }),
-            app()->make(DeactivateParts::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && $this->resource->isPartsActive;
-            }),
-            app()->make(ActivateQuoteManager::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && !$this->resource->is_quote_manager_active;
-            }),
-            app()->make(\App\Nova\Actions\Dealer\Subscriptions\QuoteManager\DeactivateQuoteManager::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && $this->resource->is_quote_manager_active;
-            }),
-            app()->make(ActivateScheduler::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && !$this->resource->is_scheduler_active;
-            }),
-            app()->make(DeactivateScheduler::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && $this->resource->is_scheduler_active;
-            }),
-            app()->make(ActivateUserAccounts::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && !$this->resource->isUserAccountsActive;
-            }),
-            app()->make(DeactivateUserAccounts::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && $this->resource->isUserAccountsActive;
-            }),
+            app()->make(DeactivateDealer::class),
             app()->make(ChangeStatus::class),
-            app()->make(DeactivateDealer::class)->canSee(function ($request) {
-                if ($request instanceof ActionRequest) {
-                    return true;
-                }
-
-                return $this->resource instanceof Model && !$this->resource->deleted;
-            }),
         ];
-    }
-
-    public function validateActionState($request, bool $validation): bool
-    {
-        if ($request instanceof ActionRequest) {
-            return true;
-        }
-
-        return $this->resource instanceof Model && $validation;
     }
 }

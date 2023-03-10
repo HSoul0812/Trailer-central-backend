@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $is_stock,
  *
  * @property Image $image
+ * @property Inventory $inventory
  */
 class InventoryImage extends Model
 {
@@ -57,6 +58,11 @@ class InventoryImage extends Model
     public function image(): BelongsTo
     {
         return $this->belongsTo(Image::class, 'image_id', 'image_id');
+    }
+
+    public function inventory(): BelongsTo
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
 
     public function isDefault(): bool

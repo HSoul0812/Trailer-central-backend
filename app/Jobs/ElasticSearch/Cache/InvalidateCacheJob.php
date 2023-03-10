@@ -3,21 +3,28 @@
 namespace App\Jobs\ElasticSearch\Cache;
 
 use App\Jobs\Job;
-use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
-use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 
 class InvalidateCacheJob extends Job
 {
+    private const TAG = 'cache-invalidation';
+
     /** @var string[] */
     private $keyPatterns;
 
     public $tries = 1;
 
-    public $queue = 'inventory';
+    public $queue = 'inventory-cache';
+
+    /** @var int given we have an ElasticSearch refresh interval of 60 seconds, we need to made sure this will be precessed after that period  */
+    public $delay = 62;
 
     public function tags(): array
     {
-        return ['cache-invalidation'];
+        return array_merge(
+            [self::TAG],
+            $this->keyPatterns
+        );
     }
 
     /**
@@ -28,14 +35,8 @@ class InvalidateCacheJob extends Job
         $this->keyPatterns = $keyPatterns;
     }
 
-    public function handle(ResponseCacheInterface $service, UniqueCacheInvalidationInterface $uniqueCacheInvalidation): void
+    public function handle(InventoryResponseCacheInterface $service): void
     {
-        $service->invalidate(...$this->keyPatterns);
-        $uniqueCacheInvalidation->removeJobsForKeys($this->keyPatterns);
-    }
-
-    public function failed(): void
-    {
-        app(UniqueCacheInvalidationInterface::class)->removeJobsForKeys($this->keyPatterns);
+        $service->invalidate($this->keyPatterns);
     }
 }

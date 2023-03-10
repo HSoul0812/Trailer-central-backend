@@ -28,7 +28,7 @@ use Illuminate\Support\Arr;
 
 /**
  * Class MarketplaceService
- * 
+ *
  * @package App\Services\Dispatch\Facebook
  */
 class MarketplaceService implements MarketplaceServiceInterface
@@ -56,7 +56,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Construct Facebook Marketplace Service
-     * 
+     *
      * @param MarketplaceRepositoryInterface $marketplace
      * @param TunnelRepositoryInterface $tunnels
      * @param ListingRepositoryInterface $listings
@@ -91,7 +91,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Login to Marketplace
-     * 
+     *
      * @param string $uuid
      * @param string $ip
      * @param string $version
@@ -118,7 +118,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Get Marketplace Status
-     * 
+     *
      * @return MarketplaceStatus
      */
     public function status(array $params): MarketplaceStatus {
@@ -138,7 +138,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Get Dealer Inventory
-     * 
+     *
      * @param int $integrationId
      * @param array $params
      * @return DealerFacebook
@@ -154,7 +154,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         // Get Types
         $type = !empty($params['type']) ? $params['type'] : MarketplaceInventory::METHOD_DEFAULT;
-        if(empty(MarketplaceStatus::INVENTORY_METHODS[$type])) {
+        if (empty(MarketplaceStatus::INVENTORY_METHODS[$type])) {
             $type = MarketplaceInventory::METHOD_DEFAULT;
         }
 
@@ -171,7 +171,10 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_code' => $integration->tfa_code,
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
-            'inventory' => !$integration->is_up_to_date ? $this->getInventory($integration, $type, $params) : null
+            'missing' => !$integration->is_up_to_date ? $this->getInventory($integration, 'missing', $params) : null,
+            'sold' => !$integration->is_up_to_date ? $this->getInventory($integration, 'sold', $params) : null,
+            'posts_per_day' => $integration->posts_per_day ?? intval(config('marketing.fb.settings.limit.listings', 3))
+
         ]);
         $nowTime = microtime(true);
         $this->log->info('Debug time after creating DealerFacebook: ' . ($nowTime - $startTime));
@@ -179,8 +182,8 @@ class MarketplaceService implements MarketplaceServiceInterface
     }
 
     /**
-     * Login to Marketplace
-     * 
+     * Create Listings for Facebook in DB
+     *
      * @param array $params
      * @return Listings
      */
@@ -206,21 +209,24 @@ class MarketplaceService implements MarketplaceServiceInterface
                 $this->images->deleteAll($listing->id);
 
                 // Add New Images
-                foreach($params['images'] as $imageId) {
+                foreach ($params['images'] as $imageId) {
                     $this->images->create([
                         'listing_id' => $listing->id,
                         'image_id' => $imageId
                     ]);
                 }
                 $this->log->info('Saved ' . count($params['images']) . ' Images for ' .
-                                    'Listing #' . $params['id']);
+                    'Listing #' . $params['id']);
             }
 
-            $nrOfListingsToday = $this->listings->countFacebookPostings(Marketplace::find($params['marketplace_id']));
-            $inventoryRemaining = $this->getInventory(Marketplace::find($params['marketplace_id']), MarketplaceStatus::METHOD_MISSING, []);
+            $integration = Marketplace::find($params['marketplace_id']);
+            $nrOfListingsToday = $this->listings->countFacebookPostings($integration);
+            $inventoryRemaining = $this->getInventory($integration, MarketplaceStatus::METHOD_MISSING, []);
             $nrInventoryItemsRemaining = count($inventoryRemaining->inventory);
 
-            if ($nrOfListingsToday === config('marketing.fb.settings.limit.listings', 3) || $nrInventoryItemsRemaining === 0) {
+            $maxListings = $integration->posts_per_day ?? config('marketing.fb.settings.limit.listings', 3);
+
+            if ($nrOfListingsToday === $maxListings || $nrInventoryItemsRemaining === 0) {
                 // Update Imported At
                 $marketplace = $this->marketplace->update([
                     'id' => $params['marketplace_id'],
@@ -244,7 +250,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Logging Details for Step
-     * 
+     *
      * @param MarketplaceStep $step
      * @return MarketplaceStep
      */
@@ -289,11 +295,11 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Get Dealer Integrations
-     * 
+     *
      * @return Collection<DealerFacebook>
      */
     private function getIntegrations(array $params): Collection {
-        
+
         $runningIntegrationIds = $this->postingSession->getIntegrationIds();
 
         $integrations = $this->marketplace->getAll(['sort' => '-last_attempt_ts',
@@ -328,7 +334,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Get Inventory to Post
-     * 
+     *
      * @param Marketplace $integration
      * @param string $type missing|updates|sold
      * @param array $params
@@ -350,22 +356,25 @@ class MarketplaceService implements MarketplaceServiceInterface
         $this->log->info('Debug time BEFORE ' . $method . ': ' . ($nowTime - $startTime));
 
         if ($type === MarketplaceStatus::METHOD_MISSING) {
-            $params['per_page'] = config('marketing.fb.settings.limit.listings') - $this->listings->countFacebookPostings($integration);
+            $maxListings = $integration->posts_per_day ?? config('marketing.fb.settings.limit.listings', 3);
+            $params['per_page'] = $maxListings - $this->listings->countFacebookPostings($integration);
         }
 
         // Get Inventory
         $inventory = $this->listings->{$method}($integration, $params);
+
         $nowTime = microtime(true);
         $this->log->info('Debug time after ' . $method . ': ' . ($nowTime - $startTime));
 
         // Loop Through Inventory Items
         $listings = new Collection();
-        foreach($inventory as $listing) {
-            if($type === MarketplaceStatus::METHOD_MISSING) {
+        foreach ($inventory as $listing) {
+            if ($type === MarketplaceStatus::METHOD_MISSING) {
                 $item = InventoryFacebook::getFromInventory($listing, $integration);
             } else {
                 $item = InventoryFacebook::getFromListings($listing);
             }
+
             $listings->push($item);
             $nowTime = microtime(true);
             $this->log->info('Debug time InventoryFacebook #' . $listing->inventory_id . ': ' . ($nowTime - $startTime));
@@ -381,7 +390,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Save Logs to Dispatch Logs
-     * 
+     *
      * @param Marketplace $integration
      * @param string $type missing|updates|sold
      * @param array $params
@@ -410,7 +419,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Save Logs to Dispatch Logs
-     * 
+     *
      * @param MarketplaceStep $step
      * @return null|Error
      */

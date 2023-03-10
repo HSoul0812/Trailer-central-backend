@@ -42,6 +42,7 @@ class CustomEmail extends Mailable
         // Override Message-ID?
         $this->callbacks[] = function ($message) use (&$messageId, $email, $config) {
             $message->getHeaders()->get('Message-ID')->setId($email->cleanMessageId());
+            $message->getHeaders()->addTextHeader('X-SES-CONFIGURATION-SET', config('services.ses.options.ConfigurationSetName'));
 
             // BuilderEmail Config Provided?
             if(!empty($config)) {

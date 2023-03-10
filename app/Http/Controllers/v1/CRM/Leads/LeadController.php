@@ -22,6 +22,7 @@ use App\Transformers\CRM\Leads\GetUniqueFullNamesTransformer;
 use App\Transformers\CRM\Leads\LeadTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
+use App\Http\Requests\CRM\Leads\DeleteLeadRequest;
 
 class LeadController extends RestfulControllerV2
 {
@@ -47,7 +48,7 @@ class LeadController extends RestfulControllerV2
      */
     public function __construct(LeadRepositoryInterface $leads, LeadServiceInterface $service)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show', 'first', 'assign', 'getMatches', 'mergeLeads', 'uniqueFullNames']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show', 'first', 'assign', 'getMatches', 'mergeLeads', 'uniqueFullNames', 'destroy']);
         $this->middleware('setWebsiteIdOnRequest')->only(['index', 'update', 'create']);
         $this->leads = $leads;
         $this->service = $service;
@@ -280,7 +281,7 @@ class LeadController extends RestfulControllerV2
             return $this->response->errorBadRequest();
         }
 
-        $this->service->mergeLeads($id, $request->get('merges_lead_id'));
+        $this->service->mergeLeads($id, $request->get('merge_lead_ids'));
 
         return $this->updatedResponse();
     }
@@ -292,5 +293,18 @@ class LeadController extends RestfulControllerV2
         if ($request->validate()) {
             return $this->leads->output($request->all());
         }
+    }
+
+    public function destroy(int $id, Request $request)
+    {
+        $request = new DeleteLeadRequest(array_merge($request->all(), ['id' => $id]));
+        
+        if ($request->validate() 
+            && $this->leads->delete(['id' => $id, 'dealer_id' => $request->get('dealer_id')]) > 0) {
+
+            return $this->updatedResponse();
+        }
+
+        return $this->response->errorBadRequest();
     }
 }

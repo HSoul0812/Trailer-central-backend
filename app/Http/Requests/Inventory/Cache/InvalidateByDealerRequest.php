@@ -13,4 +13,9 @@ class InvalidateByDealerRequest extends Request
             'dealer_id.*' => 'required|integer|exists:App\Models\User\User,dealer_id',
         ];
     }
+
+    public function dealerIds(): array
+    {
+        return array_unique($this->input('dealer_id', []));
+    }
 }

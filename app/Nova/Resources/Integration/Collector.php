@@ -3,8 +3,9 @@
 namespace App\Nova\Resources\Integration;
 
 use App\Models\Integration\Collector\CollectorFields;
+use App\Nova\Actions\Exports\CollectorExport;
+use App\Nova\Actions\Importer\CollectorImporter;
 use App\Nova\Resource;
-use App\Nova\Resources\Dealer\Dealer;
 use App\Nova\Resources\Dealer\Location;
 use App\Nova\Resources\Dealer\LightDealer;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Panel;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\BooleanGroup;
+use App\Nova\Resources\Integration\CollectorAdminNote as AdminNote;
 use App\Models\Integration\Collector\Collector as CollectorModel;
 
 use Epartment\NovaDependencyContainer\HasDependencies;
@@ -33,7 +35,7 @@ class Collector extends Resource
 {
     use HasDependencies;
 
-    public static $group = 'Integration';
+    public static $group = 'Collector';
 
     /**
      * The model the resource corresponds to.
@@ -338,7 +340,12 @@ class Collector extends Resource
 
             HasMany::make('Specifications', 'specifications', CollectorSpecification::class),
 
-            HasMany::make('Change Reports', 'collectorChangeReports', CollectorChangeReport::class)
+            HasMany::make('Admin Notes', 'collectorAdminNotes', AdminNote::class),
+
+            HasMany::make('Change Reports', 'collectorChangeReports', CollectorChangeReport::class),
+
+            HasMany::make('Collector Logs', 'collectorLogs', CollectorLog::class)
+
         ];
     }
 
@@ -381,8 +388,11 @@ class Collector extends Resource
      * @param Request $request
      * @return array
      */
-    public function actions(Request $request)
+    public function actions(Request $request): array
     {
-        return [];
+        return [
+            (new CollectorExport())->withHeadings()->askForFilename(),
+            new CollectorImporter()
+        ];
     }
 }

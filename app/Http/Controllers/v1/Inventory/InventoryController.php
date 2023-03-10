@@ -16,9 +16,10 @@ use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Http\Requests\Inventory\GetInventoryItemRequest;
 use App\Http\Requests\Inventory\SearchInventoryRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
+use App\Models\Inventory\Inventory;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Transformers\Inventory\InventoryElasticSearchOutputTransformer;
@@ -61,14 +62,14 @@ class InventoryController extends RestfulControllerV2
     protected $inventoryElasticSearchService;
 
     /**
-     * @var ResponseCacheInterface
-     */
-    protected $responseCache;
-
-    /**
      * @var ResponseCacheKeyInterface
      */
     protected $responseCacheKey;
+
+    /**
+     * @var InventoryResponseCacheInterface
+     */
+    public $inventoryResponseCache;
 
     /**
      * Create a new controller instance.
@@ -77,14 +78,15 @@ class InventoryController extends RestfulControllerV2
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param InventoryHistoryRepositoryInterface $inventoryHistoryRepository
      * @param InventoryElasticSearchServiceInterface $inventoryElasticSearchService
-     * @param ResponseCacheInterface $responseCache
+     * @param InventoryResponseCacheInterface $inventoryResponseCache
+     * @param ResponseCacheKeyInterface $responseCacheKey
      */
     public function __construct(
         InventoryServiceInterface              $inventoryService,
         InventoryRepositoryInterface           $inventoryRepository,
         InventoryHistoryRepositoryInterface    $inventoryHistoryRepository,
         InventoryElasticSearchServiceInterface $inventoryElasticSearchService,
-        ResponseCacheInterface                 $responseCache,
+        InventoryResponseCacheInterface        $inventoryResponseCache,
         ResponseCacheKeyInterface              $responseCacheKey
     )
     {
@@ -96,8 +98,8 @@ class InventoryController extends RestfulControllerV2
         $this->inventoryRepository = $inventoryRepository;
         $this->inventoryHistoryRepository = $inventoryHistoryRepository;
         $this->inventoryElasticSearchService = $inventoryElasticSearchService;
-        $this->responseCache = $responseCache;
         $this->responseCacheKey = $responseCacheKey;
+        $this->inventoryResponseCache = $inventoryResponseCache;
     }
 
     /**
@@ -237,8 +239,8 @@ class InventoryController extends RestfulControllerV2
 
         $response = $this->itemResponse($data, new InventoryTransformer());
 
-        if (config('cache.inventory')) {
-            $this->responseCache->set(
+        if (Inventory::isCacheEnabledByFeatureFlag()) {
+            $this->inventoryResponseCache->set(
                 $this->responseCacheKey->single($data->inventory_id, $data->dealer_id),
                 $response->morph('json')->getContent()
             );
@@ -542,12 +544,14 @@ class InventoryController extends RestfulControllerV2
             }
 
             //Cache only if there are results
-            if ($result->hints->count() && config('cache.inventory')) {
-                $this->responseCache->set(
+            // @todo we need to find a way to setup cache even in search with zero results
+            if (Inventory::isCacheEnabledByFeatureFlag() && $result->hints->count()) {
+                $this->inventoryResponseCache->set(
                     $this->responseCacheKey->collection($searchRequest->requestId(), $result),
                     $response->morph('json')->getContent()
                 );
             }
+
             return $response;
         }
 

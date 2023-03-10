@@ -2,17 +2,20 @@
 
 namespace App\Providers;
 
+use App\Contracts\LoggerServiceInterface;
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
+use App\Jobs\Inventory\ReIndexInventoriesByDealerLocationJob;
+use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
 use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
 use App\Services\ElasticSearch\Cache\RedisResponseCache;
 use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
-use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
-use App\Services\ElasticSearch\Cache\UniqueCacheInvalidation;
-use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobService;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobServiceInterface;
 use App\Services\Export\Inventory\Bulk\BulkPdfJobService;
@@ -67,6 +70,8 @@ use App\Services\ElasticSearch\Inventory\FieldMapperService;
 use App\Services\ElasticSearch\Inventory\InventoryFieldMapperServiceInterface;
 use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
 use App\Services\Import\Inventory\CsvImportService;
+use App\Services\Inventory\ImageService;
+use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Import\Inventory\CsvImportServiceInterface;
 use App\Services\Inventory\CustomOverlay\CustomOverlayService;
 use App\Services\Inventory\CustomOverlay\CustomOverlayServiceInterface;
@@ -76,8 +81,6 @@ use App\Services\Inventory\InventoryAttributeService;
 use App\Services\Inventory\InventoryAttributeServiceInterface;
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
-use App\Services\Inventory\InventoryUpdateSource;
-use App\Services\Inventory\InventoryUpdateSourceInterface;
 use App\Services\Inventory\Packages\PackageService;
 use App\Services\Inventory\Packages\PackageServiceInterface;
 use Illuminate\Support\Facades\Redis;
@@ -90,7 +93,6 @@ use Validator;
  */
 class InventoryServiceProvider extends ServiceProvider
 {
-
     public function boot(): void
     {
         Validator::extend('inventory_valid', ValidInventory::class . '@passes');
@@ -147,19 +149,37 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(BulkPdfJobServiceInterface::class, BulkPdfJobService::class);
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
 
+        $this->app->bind(ImageServiceInterface::class, ImageService::class);
+
         $this->app->bind(ResponseCacheKeyInterface::class, RedisResponseCacheKey::class);
-        $this->app->bind(UniqueCacheInvalidationInterface::class, function (): UniqueCacheInvalidation {
-            return new UniqueCacheInvalidation(Redis::connection('inventory-job-cache')->client());
+
+        $this->app->bind(InventoryResponseCacheInterface::class, function (): InventoryResponseRedisCache {
+            return new InventoryResponseRedisCache(
+                $this->app->make(ResponseCacheKeyInterface::class),
+                new RedisResponseCache(Redis::connection('sdk-search-cache')->client()),
+                new RedisResponseCache(Redis::connection('sdk-single-cache')->client())
+            );
         });
 
         $this->app->bindMethod(InvalidateCacheJob::class . '@handle', function (InvalidateCacheJob $job): void {
-            $job->handle($this->app->make(ResponseCacheInterface::class), $this->app->make(UniqueCacheInvalidationInterface::class));
+            $job->handle($this->app->make(InventoryResponseCacheInterface::class));
         });
 
-        $this->app->bind(ResponseCacheInterface::class, function (): RedisResponseCache {
-            return new RedisResponseCache(Redis::connection('sdk-cache')->client(), $this->app->make(UniqueCacheInvalidationInterface::class));
+        $this->app->bindMethod(ReIndexInventoriesByDealersJob::class . '@handle', function (ReIndexInventoriesByDealersJob $job): void {
+            $job->handle(
+                $this->app->make(InventoryResponseCacheInterface::class),
+                $this->app->make(ResponseCacheKeyInterface::class),
+                $this->app->make(LoggerServiceInterface::class)
+            );
         });
-        
-        $this->app->bind(InventoryUpdateSourceInterface::class, InventoryUpdateSource::class);
+
+        $this->app->bindMethod(ReIndexInventoriesByDealerLocationJob::class . '@handle', function (ReIndexInventoriesByDealerLocationJob $job): void {
+            $job->handle(
+                $this->app->make(DealerLocationRepositoryInterface::class),
+                $this->app->make(InventoryResponseCacheInterface::class),
+                $this->app->make(ResponseCacheKeyInterface::class),
+                $this->app->make(LoggerServiceInterface::class)
+            );
+        });
     }
 }

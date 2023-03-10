@@ -4,20 +4,9 @@ namespace App\Services\ElasticSearch\Cache;
 
 interface ResponseCacheInterface
 {
-    /**
-     * @param  string  $key
-     * @param  string  $value
-     * @return mixed
-     */
-    public function set(string $key, string $value);
+    public function set(string $key, string $value): void;
 
-    /**
-     * @param  string  ...$keyPatterns
-     */
-    public function forget(string ...$keyPatterns);
+    public function forget(string ...$keyPatterns): void;
 
-    /**
-     * @param  string  ...$keyPatterns
-     */
-    public function invalidate(string ...$keyPatterns);
+    public function invalidate(string ...$keyPatterns): void;
 }

@@ -156,6 +156,7 @@ class CampaignSeeder extends Seeder
                     'drip_campaigns_id' => $this->createdCampaigns[0]->getKey(),
                     'lead_id' => $lead->getKey()
                 ]);
+                $sent->setRelation('lead', $lead);
 
                 $this->campaignsSent[] = $sent;
                 return;
@@ -166,6 +167,7 @@ class CampaignSeeder extends Seeder
                 'drip_campaigns_id' => $this->createdCampaigns[0]->getKey(),
                 'lead_id' => $lead->getKey()
             ]);
+            $sent->setRelation('lead', $lead);
 
             $this->campaignsUnsent[] = $sent;
         });

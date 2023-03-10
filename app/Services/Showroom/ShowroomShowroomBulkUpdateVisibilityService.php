@@ -45,7 +45,7 @@ class ShowroomShowroomBulkUpdateVisibilityService implements ShowroomBulkUpdateV
 
             foreach ($manufacturers as $key => $manufacturer) {
                 $this->manufacturerRepository->bulkUpdate(
-                    $this->params['manufacturer'],
+                    $manufacturer,
                     [
                         'is_visible' => $this->params['visibility']
                     ]

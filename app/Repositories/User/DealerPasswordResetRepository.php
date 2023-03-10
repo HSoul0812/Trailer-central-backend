@@ -86,6 +86,11 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
     {
        $this->guardPasswordLength($password);
 
+        if (empty($dealer->salt)) {
+            $salt = uniqid();
+            DB::statement("UPDATE dealer SET salt = '{$salt}' WHERE dealer_id = {$dealer->dealer_id}");
+        }
+
         DB::statement("UPDATE dealer SET password = ENCRYPT('{$password}', salt) WHERE dealer_id = {$dealer->dealer_id}");
     }
 

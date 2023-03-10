@@ -6,41 +6,19 @@ use App\Http\Clients\ElasticSearch\ElasticSearchQueryResult;
 
 interface ResponseCacheKeyInterface
 {
-    /**
-     * @param string $requestId
-     * @param ElasticSearchQueryResult $result
-     * @return string
-     */
     public function collection(string $requestId, ElasticSearchQueryResult $result): string;
 
-    /**
-     * @param $inventoryId
-     * @param $dealerId
-     * @return string
-     */
-    public function single($inventoryId, $dealerId): string;
+    public function single(int $inventoryId, int $dealerId): string;
 
-    /**
-     * @param int $id
-     * @return string
-     */
-    public function deleteSingle(int $id): string;
+    public function deleteSingle(int $inventoryId, int $dealerId): string;
 
-    /**
-     * @param int $id
-     * @return string
-     */
-    public function deleteSingleFromCollection(int $id): string;
+    public function deleteSingleFromCollection(int $inventoryId): string;
 
-    /**
-     * @param int $id
-     * @return string
-     */
-    public function deleteByDealer(int $id): string;
+    public function deleteByDealer(int $dealerId): string;
 
-    /**
-     * @param int $id
-     * @return string
-     */
-    public function deleteSingleByDealer(int $id): string;
+    public function deleteSingleByDealer(int $dealerId): string;
+
+    public function isSingleKey(string $key): bool;
+
+    public function isSearchKey(string $key): bool;
 }

@@ -4,18 +4,17 @@ namespace App\Exceptions\ElasticSearch;
 
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use \Throwable;
 
-class ResponseException extends \RuntimeException
+class ResponseException extends HttpException
 {
     /** @var Response */
     protected $response;
 
     public function __construct(ResponseInterface $response, Throwable $previous = null)
     {
-        $message = 'Elastic search API responded with http code: ' . $response->getStatusCode();
-
-        parent::__construct($message, 500, $previous);
+        parent::__construct($response->getStatusCode(), $response->getBody()->getContents(), $previous);
     }
 
     public function response(): Response

@@ -7,6 +7,13 @@ use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 use Tests\TestCase;
 
+/**
+ * @group DW
+ * @group DW_INVENTORY
+ * @group DW_ELASTICSEARCH
+ *
+ * @todo This suit should be updated accordingly to past changes
+ */
 class BooleanQueryBuilderTest extends TestCase
 {
     /** @var array */

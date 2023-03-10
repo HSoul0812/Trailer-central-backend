@@ -14,6 +14,8 @@ use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Models\CRM\Leads\LeadStatus;
 use Illuminate\Support\Facades\Log;
+use Faker\Factory as Faker;
+use App\Models\CRM\User\Customer;
 
 class InquiryControllerTest extends IntegrationTestCase
 {
@@ -77,7 +79,7 @@ class InquiryControllerTest extends IntegrationTestCase
 
         $seeder->seed();
 
-        // send a new inquiry
+        // send an inquiry with the same customer details but different letter case
         $params = [
             'website_id' => $seeder->website->getKey(),
             'inquiry_type' => InquiryLead::INQUIRY_TYPE_DEFAULT,
@@ -205,6 +207,99 @@ class InquiryControllerTest extends IntegrationTestCase
             'identifier' => $seeder->lead->getKey(),
             'is_archived' => Lead::NOT_ARCHIVED
         ]);
+
+        $seeder->cleanUp();
+    }
+
+    public function testCreate()
+    {
+        $seeder = new InquirySeeder;
+        $faker = Faker::create();
+
+        $firstName = $faker->firstName();
+        $lastName = $faker->lastName();
+        $email = $faker->email();
+
+        $seeder->seed();
+
+        // send a new inquiry
+        $params = [
+            'website_id' => $seeder->website->getKey(),
+            'inquiry_type' => InquiryLead::INQUIRY_TYPE_DEFAULT,
+            'lead_types' => [LeadType::TYPE_MANUAL],
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email_address' => $email,
+        ];
+
+        $response = $this->json(
+            'PUT',
+            '/api/inquiry/create',
+            $params,
+            ['access-token' => $seeder->authToken->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        // confirm Lead is created
+        $this->assertDatabaseHas(Lead::getTableName(), [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email_address' => $email,
+        ]);
+
+        // confirm Customer is created
+        $this->assertDatabaseHas(Customer::getTableName(), [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $email,
+        ]);
+
+        $seeder->cleanUp();
+    }
+
+    public function testCreateWithExistingCustomer()
+    {
+        $seeder = new InquirySeeder;
+
+        $seeder->seed();
+
+        $firstName = $seeder->customer->first_name;
+        $lastName = $seeder->customer->last_name;
+        $email = $seeder->customer->email;
+
+        // send a new inquiry
+        $params = [
+            'website_id' => $seeder->website->getKey(),
+            'inquiry_type' => InquiryLead::INQUIRY_TYPE_DEFAULT,
+            'lead_types' => [LeadType::TYPE_MANUAL],
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email_address' => $email,
+        ];
+
+        $response = $this->json(
+            'PUT',
+            '/api/inquiry/create',
+            $params,
+            ['access-token' => $seeder->authToken->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        // confirm Lead is created
+        $this->assertDatabaseHas(Lead::getTableName(), [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email_address' => $email,
+        ]);
+
+        // confirm new Customer is not created
+        $this->assertEquals(1, Customer::where([
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $email,
+        ])->count());
 
         $seeder->cleanUp();
     }
