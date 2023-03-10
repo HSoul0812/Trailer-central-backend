@@ -22,7 +22,7 @@
                     @else
                       <td valign="top">
                           <a href="{{ $logoUrl }}">
-                            <img src="{{ $logo }}" alt="{{ $fromName }}" style="margin-bottom:10px;margin-top:10px;height:20px;" border="0"/>              
+                            <img src="{{ $logo }}" alt="{{ $fromName }}" style="margin-bottom:10px;margin-top:10px;height:20px;" border="0"/>
                           </a>
                       </td>
                     @endif
@@ -35,15 +35,12 @@
                         @else
                           <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">New Inventory Information Request on {{ $website }}</h3>
                         @endif
-                        
+
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Inventory Stock: <strong>{{ $stock }}</strong></p>
 
-                        @if ($website == $simpleDomain)
-                        <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Inventory Item: <a href="https://{{ $simpleDomain . $url }}"><strong>{{ $title }}</strong></a></p>
-                        @else
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Inventory Item: <a href="{{ $url }}"><strong>{{ $title }}</strong></a></p>
-                        @endif
+
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Full Name: <strong>{{ $fullName }}</strong></p>
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Preferred Contact: <strong>{{ $preferred }}</strong></p>
@@ -86,9 +83,9 @@
 @if (!empty($isSpam))
     <div style='width: 650px; margin: 0 auto; background: #ffeb3b; color: #000; border: 1px solid #333; padding: 10px; font-family: monospace'>
 
-        <strong style='text-align: right; display: block; margin: 0; padding: 0;'>SPAM MESSAGE</strong><br /> 
+        <strong style='text-align: right; display: block; margin: 0; padding: 0;'>SPAM MESSAGE</strong><br />
 
-        
+
         @if (!empty($forwardedFor))
             / Visible Proxy: {{ $forwardedFor }}
         @endif
