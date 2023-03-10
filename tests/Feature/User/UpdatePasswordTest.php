@@ -76,7 +76,7 @@ class UpdatePasswordTest extends TestCase
 
         $response = $this->json(
             'PUT', '/api/user/password/update',
-            ['password' => $this->faker->password(6,8)],
+            ['password' => 'abcdabcd'],
             ['access-token' => $this->token->access_token]
         );
 
@@ -91,7 +91,7 @@ class UpdatePasswordTest extends TestCase
      *
      * @return void
      */
-    public function testUpdatePasswordForUserWithDealerTypeWithTooLongPassword(): void
+    public function testUpdatePasswordForUserWithDealerTypeWithShortPassword(): void
     {
         $this->token = factory(AuthToken::class)->create([
             'user_id' => $this->dealer->dealer_id,
@@ -100,7 +100,7 @@ class UpdatePasswordTest extends TestCase
 
         $response = $this->json(
             'PUT', '/api/user/password/update',
-            ['password' => $this->faker->password(9, 10)],
+            ['password' => $this->faker->password(5, 7)],
             ['access-token' => $this->token->access_token]
         );
 
@@ -113,7 +113,7 @@ class UpdatePasswordTest extends TestCase
         self::assertArrayHasKey('password', $json['errors']);
 
         $this->assertSame('Validation Failed', $json['message']);
-        $this->assertContains('The password should not be greater than 8 characters.', $json['errors']['password']);
+        $this->assertContains('The password should be at least 8 characters.', $json['errors']['password']);
     }
 
     /**
@@ -135,7 +135,7 @@ class UpdatePasswordTest extends TestCase
 
         $response = $this->json(
             'PUT', '/api/user/password/update',
-            ['password' => $this->faker->password(6,8)],
+            ['password' => 'ABcd##123123#_'],
             ['access-token' => $this->token->access_token]
         );
 
@@ -150,7 +150,7 @@ class UpdatePasswordTest extends TestCase
      *
      * @return void
      */
-    public function testUpdatePasswordForUserWithDealerUserTypeWithTooLongPassword(): void
+    public function testUpdatePasswordForUserWithDealerUserTypeWithShortPassword(): void
     {
         $this->dealerUser = factory(DealerUser::class)->create([
             'dealer_id' => $this->dealer->dealer_id
@@ -163,7 +163,7 @@ class UpdatePasswordTest extends TestCase
 
         $response = $this->json(
             'PUT', '/api/user/password/update',
-            ['password' => $this->faker->password(9, 10)],
+            ['password' => $this->faker->password(5, 7)],
             ['access-token' => $this->token->access_token]
         );
 
@@ -176,7 +176,7 @@ class UpdatePasswordTest extends TestCase
         self::assertArrayHasKey('password', $json['errors']);
 
         $this->assertSame('Validation Failed', $json['message']);
-        $this->assertContains('The password should not be greater than 8 characters.', $json['errors']['password']);
+        $this->assertContains('The password should be at least 8 characters.', $json['errors']['password']);
     }
 
     public function setUp(): void

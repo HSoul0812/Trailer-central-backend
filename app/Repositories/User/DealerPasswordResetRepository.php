@@ -84,8 +84,6 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
      */
     public function updateDealerPassword(User $dealer, string $password) : void
     {
-       $this->guardPasswordLength($password);
-
         if (empty($dealer->salt)) {
             $salt = uniqid();
             DB::statement("UPDATE dealer SET salt = '{$salt}' WHERE dealer_id = {$dealer->dealer_id}");
@@ -100,31 +98,6 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
      */
     public function updateDealerUserPassword(DealerUser $user, string $password) : void
     {
-        $this->guardPasswordLength($password);
-
         DB::statement("UPDATE dealer_users SET password = ENCRYPT('{$password}', salt) WHERE dealer_user_id = {$user->dealer_user_id}");
-    }
-
-    /**
-     * @param string $password
-     * @return void
-     * @throws TooLongPasswordException when the password is greater than eighth characters
-     */
-    private function guardPasswordLength(string $password): void
-    {
-        if (strlen($password) > 8) {
-            /**
-             * Sadly this is technical debt which we need to pay, at least while we make a space to really fix it.
-             *
-             * @see https://www.php.net/manual/en/function.crypt.php
-             * @see https://dev.mysql.com/doc/refman/5.6/en/encryption-functions.html#function_encrypt
-             *
-             * MySQL ENCRYPT() and PHP encrypt() relies on the crypt() system call.
-             *
-             * It ignores all but the first eight characters of str, at least on some systems. This behavior is determined
-             * by the implementation of the underlying crypt() system call.
-             */
-            throw new TooLongPasswordException();
-        }
     }
 }

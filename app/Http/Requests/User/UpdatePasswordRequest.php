@@ -17,12 +17,7 @@ class UpdatePasswordRequest extends Request
         'password' => [
             'required',
             'string',
-            'min:6',
-            'max:8',
-            'regex:/[a-z]/',      // must contain at least one lowercase letter
-            'regex:/[A-Z]/',      // must contain at least one uppercase letter
-            'regex:/[0-9]/',      // must contain at least one digit
-            'regex:/[@$!%*#?&_]/', // must contain a special character
+            'min:8',
         ],
     ];
 
@@ -30,7 +25,6 @@ class UpdatePasswordRequest extends Request
     {
         return [
             'password.min' => 'The :attribute should be at least :min characters.',
-            'password.max' => 'The :attribute should not be greater than :max characters.',
             'password.regex' => 'The :attribute should have at least 1 Capital Letter, 1 Small Letter, 1 Digit and 1 symbol [Allowed Symbols - @$!%*#?&_]'
         ];
     }

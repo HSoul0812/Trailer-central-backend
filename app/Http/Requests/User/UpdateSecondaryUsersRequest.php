@@ -7,6 +7,7 @@ use App\Models\User\DealerUser;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Rules\Shared\EmailValidation;
 use Illuminate\Validation\Rule;
+use App\Rules\IsPasswordValid;
 
 /**
  * Class UpdateSecondaryUsersRequest
@@ -41,12 +42,8 @@ class UpdateSecondaryUsersRequest extends Request
             'users.*.password' => [
                 'nullable',
                 'string',
-                'min:6',
-                'max:8',
-                'regex:/[a-z]/',      // must contain at least one lowercase letter
-                'regex:/[A-Z]/',      // must contain at least one uppercase letter
-                'regex:/[0-9]/',      // must contain at least one digit
-                'regex:/[@$!%*#?&_]/', // must contain a special character
+                'min:8',
+                new IsPasswordValid(),
             ],
             'users.*.user_permissions' => [
                 'array',
