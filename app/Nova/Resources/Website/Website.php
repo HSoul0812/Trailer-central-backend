@@ -9,10 +9,12 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\Boolean;
-use Laravel\Nova\Fields\HasMany;
-use App\Models\Website\Config\WebsiteConfig;
 use App\Models\Website\Website as DealerWebsite;
 use Laravel\Nova\Fields\Select;
+
+use Laravel\Nova\Panel;
+use Laravel\Nova\Fields\DateTime;
+use Spatie\SslCertificate\SslCertificate;
 
 use App\Nova\Resource;
 
@@ -53,6 +55,8 @@ class Website extends Resource
      */
     public function fields(Request $request)
     {
+        $certificate = $this->ssl_certificate;
+
         return [
             Text::make('Website ID', 'id')->exceptOnForms(),
 
@@ -60,8 +64,34 @@ class Website extends Resource
 
             Text::make('App ID', 'identifier')->exceptOnForms(),
 
-            Text::make('Domain')
-                ->sortable(),
+            new Panel('Domain', [
+                Boolean::make('Certified', function () use ($certificate) {
+                    return $certificate ? $certificate->isValid() : null;
+                }),
+
+                Text::make('Domain')
+                    ->sortable(),
+
+                Text::make('Issuer', function () use ($certificate) {
+                    return $certificate ? $certificate->getIssuer() : null;
+                })
+                    ->hideFromIndex()
+                    ->exceptOnForms(),
+
+                DateTime::make('Valid From', function () use ($certificate) {
+                    return $certificate ? $certificate->validFromDate() : null;
+                })
+                    ->hideFromIndex()
+                    ->exceptOnForms()
+                    ->format('DD MMM, YYYY - LT'),
+
+                DateTime::make('Expiration Date', function () use ($certificate) {
+                    return $certificate ? $certificate->expirationDate() : null;
+                })
+                    ->hideFromIndex()
+                    ->exceptOnForms()
+                    ->format('DD MMM, YYYY - LT')
+            ]),
 
             Select::make('Type', 'type')
                 ->options($this->websiteTypes())
@@ -193,7 +223,10 @@ class Website extends Resource
     public function actions(Request $request)
     {
         return [
-            app()->make(IssueCertificateSsl::class),
+            app()->make(IssueCertificateSsl::class)
+                ->canSee(function ($request) {
+                    return !$this->ssl_certificate;
+                }),
             app()->make(EnableProxiedDomainsSsl::class)
         ];
     }
