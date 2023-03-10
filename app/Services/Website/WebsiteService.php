@@ -5,6 +5,8 @@ namespace App\Services\Website;
 use App\Repositories\Website\DealerProxyRepositoryInterface;
 use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Support\Facades\Log;
+use GuzzleHttp\Client;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class WebsiteService
@@ -23,21 +25,28 @@ class WebsiteService
     private $websiteRepository;
 
     /**
+     * @var Client
+     */
+    private $httpClient;
+
+    /**
      * WebsiteService constructor.
      * @param DealerProxyRepositoryInterface $dealerProxyRepository
      * @param WebsiteRepositoryInterface $websiteRepository
      */
     public function __construct(DealerProxyRepositoryInterface $dealerProxyRepository, WebsiteRepositoryInterface $websiteRepository)
     {
+        $this->httpClient = new Client();
+
         $this->dealerProxyRepository = $dealerProxyRepository;
         $this->websiteRepository = $websiteRepository;
     }
 
     /**
      * @param int $websiteId
-     * @return bool
+     * @return ResponseInterface
      */
-    public function certificateDomainSsl(int $websiteId): bool
+    public function certificateDomainSsl(int $websiteId): ResponseInterface
     {
         $www = 'www.';
         $website = $this->websiteRepository->get(['id' => $websiteId]);
@@ -48,18 +57,22 @@ class WebsiteService
             "DomainName" => $domain
         ];
 
-        $ch = curl_init("https://i2o2ut7e95.execute-api.us-east-1.amazonaws.com/dev/cloudfront-setup/start");
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        $result = curl_exec($ch);
-        curl_close($ch);
+        $setupEndpoint = config('integrations.cloudfront.setup.endpoint');
 
-        if (!$result) {
-            Log::error('An error occurred issuing certificate for Website ID - ' . $websiteId . "\n Error: " . $result);
+        $response = $this->httpClient->post(
+            $setupEndpoint,
+            [
+                'json' => $data
+            ]
+        );
+
+        if (!$response) {
+            Log::error('An error occurred issuing certificate for Website ID - ' . $websiteId . "\n Error: " . $response->getBody());
+            return $response;
         }
 
         Log::info('Certificate issued successfully for Website ID - ' . $websiteId);
-        return $result;
+        return $response;
     }
 
     /**
