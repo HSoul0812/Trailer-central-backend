@@ -31,6 +31,7 @@ class SetCreatedAtForZeroDates extends Migration
         /** @var InventoryServiceInterface $service */
         $service = app(InventoryServiceInterface::class);
 
+        // we use 10 potential dates to avoid any other nearest `0000-00-00 00:00:00`date value
         $heuristicDates = <<<SQL
            (SELECT _i.created_at FROM inventory _i WHERE _i.inventory_id = i.inventory_id - 1) AS created_at_1,
            (SELECT _i.created_at FROM inventory _i WHERE _i.inventory_id = i.inventory_id - 5) AS created_at_2,
@@ -50,7 +51,7 @@ class SetCreatedAtForZeroDates extends Migration
            (SELECT _i.created_at FROM inventory _i WHERE _i.inventory_id = i.inventory_id + 30) AS created_at_16,
            (SELECT _i.created_at FROM inventory _i WHERE _i.inventory_id = i.inventory_id + 40) AS created_at_17,
            (SELECT _i.created_at FROM inventory _i WHERE _i.inventory_id = i.inventory_id + 50) AS created_at_18,
-           (SELECT _i.created_at FROM inventory _i WHERE _i.inventory_id = i.inventory_id + 60) AS created_at_29
+           (SELECT _i.created_at FROM inventory _i WHERE _i.inventory_id = i.inventory_id + 60) AS created_at_19
 SQL;
 
         $inventories = Query::table('inventory AS i')
@@ -63,6 +64,7 @@ SQL;
         $dealerIds = [];
 
         $inventories->each(function (Row $inventory) use (&$dealerIds): void {
+            // we use the latest date of 19 potential dates
             $heuristicDate = collect($inventory)->except(['inventory_id', 'dealer_id'])->max();
 
             $replaceableDate = $heuristicDate === null || $heuristicDate === self::ZERO_DATE || $heuristicDate === '' ?
