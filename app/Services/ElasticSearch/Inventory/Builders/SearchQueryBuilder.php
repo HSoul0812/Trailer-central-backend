@@ -57,37 +57,46 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
             $fields = [$fields];
         }
 
-        // to be able quoting special chars
-        $terms = array_map(static function ($term): string {
-            return preg_replace(
-                "/[\\+\\-\\=\\&\\|\\!\\(\\)\\{\\}\\[\\]\\^\\\"\\~\\*\\<\\>\\?\\:\\\\\\/]/",
-                addslashes('\\$0'),
-                $term
-            );
-        },
-            array_filter(explode(' ', strtolower(trim($termAsString))))
-        );
+        // to sanitize term string by trimming it, and replacing `/**/` used in common SQL exploits
+        $termAsString = strtolower(trim(str_replace('/**/', ' ', $termAsString)));
+        $termsList = array_filter(explode(' ', $termAsString));
 
-        $numberOfTerms = count($terms);
+        // to be able quoting special chars and `query_string` special keywords
+        $termsList = array_map(static function ($term): string {
+            return str_replace(
+                ['and','or', 'not'],
+                ['\\a\\n\\d', '\\o\\r','\\n\\o\\t'],
+                preg_replace(
+                    "/[\\+\\-\\=\\&\\|\\!\\(\\)\\{\\}\\[\\]\\^\\\"\\~\\*\\<\\>\\?\\:\\\\\\/]/",
+                    addslashes('\\$0'),
+                    substr($term, 0, 25) // to avoid too long strings
+                )
+            );
+        }, $termsList);
+
+        // to limit the query string to only 6 words and avoid stressing the cluster
+        $termsList = array_slice($termsList, 0, 6);
+
+        $numberOfTerms = count($termsList);
 
         if($numberOfTerms === 0) {
             return [];
         }
 
-        $query = sprintf('*%s*', $terms[0]);
+        $query = sprintf('*%s*', $termsList[0]);
 
         if ($numberOfTerms > 1) {
             $queries = [
-                sprintf('*%s', $terms[0])
+                sprintf('*%s', $termsList[0])
             ];
 
-            array_shift($terms);
+            array_shift($termsList);
 
-            $lastQuery = sprintf('%s*', $terms[$numberOfTerms - 2]);
+            $lastQuery = sprintf('%s*', $termsList[$numberOfTerms - 2]);
 
-            array_pop($terms);
+            array_pop($termsList);
 
-            foreach ($terms as $term) {
+            foreach ($termsList as $term) {
                 $queries[] = $term;
             }
 
