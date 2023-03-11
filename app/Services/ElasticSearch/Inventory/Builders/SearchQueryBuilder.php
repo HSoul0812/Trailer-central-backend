@@ -59,10 +59,10 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
         // to sanitize term string by trimming it, and replacing `/**/` used in common SQL exploits
         $termAsString = strtolower(trim(str_replace('/**/', ' ', $termAsString)));
-        $termsList = array_filter(explode(' ', $termAsString));
+        $terms = array_filter(explode(' ', $termAsString));
 
         // to be able quoting special chars and `query_string` special keywords
-        $termsList = array_map(static function ($term): string {
+        $terms = array_map(static function ($term): string {
             return str_replace(
                 ['and','or', 'not'],
                 ['\\a\\n\\d', '\\o\\r','\\n\\o\\t'],
@@ -72,31 +72,31 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                     substr($term, 0, 25) // to avoid too long strings
                 )
             );
-        }, $termsList);
+        }, $terms);
 
         // to limit the query string to only 6 words and avoid stressing the cluster
-        $termsList = array_slice($termsList, 0, 6);
+        $terms = array_slice($terms, 0, 6);
 
-        $numberOfTerms = count($termsList);
+        $numberOfTerms = count($terms);
 
         if($numberOfTerms === 0) {
             return [];
         }
 
-        $query = sprintf('*%s*', $termsList[0]);
+        $query = sprintf('*%s*', $terms[0]);
 
         if ($numberOfTerms > 1) {
             $queries = [
-                sprintf('*%s', $termsList[0])
+                sprintf('*%s', $terms[0])
             ];
 
-            array_shift($termsList);
+            array_shift($terms);
 
-            $lastQuery = sprintf('%s*', $termsList[$numberOfTerms - 2]);
+            $lastQuery = sprintf('%s*', $terms[$numberOfTerms - 2]);
 
-            array_pop($termsList);
+            array_pop($terms);
 
-            foreach ($termsList as $term) {
+            foreach ($terms as $term) {
                 $queries[] = $term;
             }
 
