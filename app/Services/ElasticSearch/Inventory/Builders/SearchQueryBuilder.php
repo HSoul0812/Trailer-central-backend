@@ -57,20 +57,30 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
             $fields = [$fields];
         }
 
-        // to be able quoting special chars
+        /**  @see https://github.com/elastic/go-elasticsearch/issues/152#issuecomment-631457028 */
+        // to sanitize term string by trimming it, and replacing `/**/` used in common SQL exploits
+        $termAsString = strtolower(trim(str_replace('/**/', ' ', $termAsString)));
+        $terms = array_filter(explode(' ', $termAsString));
+
+        // to be able quoting special chars and `query_string` special keywords
         $terms = array_map(static function ($term): string {
-            return preg_replace(
-                "/[\\+\\-\\=\\&\\|\\!\\(\\)\\{\\}\\[\\]\\^\\\"\\~\\*\\<\\>\\?\\:\\\\\\/]/",
-                addslashes('\\$0'),
-                $term
+            return str_replace(
+                ['and', 'or', 'not'],
+                ['\\a\\n\\d', '\\o\\r', '\\n\\o\\t'],
+                preg_replace(
+                    "/[\\+\\-\\=\\&\\|\\!\\(\\)\\{\\}\\[\\]\\^\\\"\\~\\*\\<\\>\\?\\:\\\\\\/]/",
+                    addslashes('\\$0'),
+                    substr($term, 0, 25) // to avoid too long strings
+                )
             );
-        },
-            array_filter(explode(' ', strtolower(trim($termAsString))))
-        );
+        }, $terms);
+
+        // to limit the query string to only 6 words and avoid stressing the cluster
+        $terms = array_slice($terms, 0, 6);
 
         $numberOfTerms = count($terms);
 
-        if($numberOfTerms === 0) {
+        if ($numberOfTerms === 0) {
             return [];
         }
 
