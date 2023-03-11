@@ -64,8 +64,8 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
         // to be able quoting special chars and `query_string` special keywords
         $terms = array_map(static function ($term): string {
             return str_replace(
-                ['and','or', 'not'],
-                ['\\a\\n\\d', '\\o\\r','\\n\\o\\t'],
+                ['and', 'or', 'not'],
+                ['\\a\\n\\d', '\\o\\r', '\\n\\o\\t'],
                 preg_replace(
                     "/[\\+\\-\\=\\&\\|\\!\\(\\)\\{\\}\\[\\]\\^\\\"\\~\\*\\<\\>\\?\\:\\\\\\/]/",
                     addslashes('\\$0'),
@@ -79,7 +79,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
         $numberOfTerms = count($terms);
 
-        if($numberOfTerms === 0) {
+        if ($numberOfTerms === 0) {
             return [];
         }
 
