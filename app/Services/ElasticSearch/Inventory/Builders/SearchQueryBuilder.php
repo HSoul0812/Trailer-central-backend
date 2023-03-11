@@ -57,6 +57,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
             $fields = [$fields];
         }
 
+        /**  @see https://github.com/elastic/go-elasticsearch/issues/152#issuecomment-631457028 */
         // to sanitize term string by trimming it, and replacing `/**/` used in common SQL exploits
         $termAsString = strtolower(trim(str_replace('/**/', ' ', $termAsString)));
         $terms = array_filter(explode(' ', $termAsString));
