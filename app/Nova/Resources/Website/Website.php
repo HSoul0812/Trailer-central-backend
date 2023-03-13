@@ -99,7 +99,7 @@ class Website extends Resource
 
             Text::make('Template')->help("This will apply as the CertificateName on SSL certificates")->hideFromIndex(),
 
-            Text::make('Template','template')->sortable(),
+            Text::make('Template', 'template')->hideFromIndex()->sortable(),
 
             Boolean::make('Active', 'is_active')->sortable(),
 
