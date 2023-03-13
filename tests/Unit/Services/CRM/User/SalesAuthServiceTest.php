@@ -167,11 +167,12 @@ class SalesAuthServiceTest extends TestCase
         // Mock Sales Person Repository
         $this->salesPersonRepositoryMock
             ->shouldReceive('get')
-            ->twice()
+            ->once()
             ->with(['sales_person_id' => $accessToken->relation_id])
             ->andReturn($salesPerson);
         $this->salesPersonRepositoryMock
             ->shouldReceive('getByEmail')
+            ->twice()
             ->with($createRequestParams['user_id'], $createRequestParams['email'])
             ->andReturn($salesPerson);
         $this->salesPersonRepositoryMock

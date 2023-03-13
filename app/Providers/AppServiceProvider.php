@@ -161,6 +161,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
         \Validator::extend('website_exists', 'App\Rules\Website\WebsiteExists@passes');
         \Validator::extend('lead_exists', 'App\Rules\CRM\Leads\LeadExists@passes');
+        \Validator::extendDependent('lead_trade_valid', 'App\Rules\CRM\Leads\ValidLeadTrade@passes');
         \Validator::extend('lead_type_valid', 'App\Rules\CRM\Leads\ValidLeadType@passes');
         \Validator::extend('lead_status_valid', 'App\Rules\CRM\Leads\ValidLeadStatus@passes');
         \Validator::extend('lead_source_valid', 'App\Rules\CRM\Leads\ValidLeadSource@passes');

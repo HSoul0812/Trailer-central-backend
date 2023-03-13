@@ -11,7 +11,8 @@ class ValidInteractionNote
     {
         $interactionType = data_get($validator->getData(), $parameters[0]);
 
-        if (strtoupper($interactionType) == Interaction::TYPE_CONTACT)
+        // only not required if interaction type is contact
+        if (strtoupper($interactionType) === Interaction::TYPE_CONTACT)
             return true;
         
         return !empty($value) && is_string($value);
