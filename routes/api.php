@@ -723,7 +723,11 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->group(['prefix' => 'leads/{leadId}/documents'], function ($route) {
+        $route->group([
+            'prefix' => 'leads/{leadId}/documents',
+            'middleware' => 'leads.document.validate'
+        
+        ], function ($route) {
 
             $route->get('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
             $route->post('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@create');
