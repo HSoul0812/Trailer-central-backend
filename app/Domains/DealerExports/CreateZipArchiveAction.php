@@ -51,12 +51,12 @@ class CreateZipArchiveAction
                 try {
                     $fileToArchive = Storage::disk('s3')->get($file);
                     $zip->addFromString(basename($file), $fileToArchive);
+                    $zip->setEncryptionName(basename($file), ZipArchive::EM_AES_256, decrypt($dealerExport->zip_password, false));
                 } catch (Exception $e) {
                     dd($e);
                 }
             }
         }
-        $zip->setPassword(decrypt($dealerExport->zip_password, false));
         if ($zip->close()) {
             Storage::disk('s3')->put($s3ZipFilePath, file_get_contents($tmpZipFilePath));
             $dealerExport->update([
