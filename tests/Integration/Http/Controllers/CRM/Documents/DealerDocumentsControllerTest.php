@@ -220,4 +220,32 @@ class DealerDocumentsControllerTest extends IntegrationTestCase
 
         $documentsSeeder->cleanUp();
     }
+
+    public function testMiddleware()
+    {
+        $documentsSeeder = new DealerDocumentsSeeder();
+        $documentsSeeder->seed();
+
+        $nonExistingId = PHP_INT_MAX - 1;
+        $leadId = $documentsSeeder->lead->getKey();
+
+        $response = $this->json(
+            'GET',
+            str_replace('{leadId}', $nonExistingId, self::API_URL),
+            [],
+            ['access-token' => $documentsSeeder->authToken->access_token]
+        );
+        $response->assertStatus(422);
+
+        $response = $this->json(
+            'DELETE',
+            str_replace('{leadId}', $leadId, self::API_URL) . '/'. $nonExistingId,
+            [],
+            ['access-token' => $documentsSeeder->authToken->access_token]
+        );
+        $response->assertStatus(422);
+
+
+        $documentsSeeder->cleanUp();
+    }
 }
