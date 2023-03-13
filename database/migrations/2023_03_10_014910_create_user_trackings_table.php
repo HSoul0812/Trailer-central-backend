@@ -28,6 +28,7 @@ class CreateUserTrackingsTable extends Migration
             $table->index(['website_user_id']);
             $table->index(['event']);
             $table->index(['url']);
+            $table->index(['created_at']);
         });
     }
 
