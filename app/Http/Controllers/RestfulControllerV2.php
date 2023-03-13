@@ -156,4 +156,15 @@ class RestfulControllerV2 extends Controller
 
         return $this->response->array(['data' => $responseData]);
     }
+
+    /**
+     * @param string $xml
+     * @return \Illuminate\Http\Response
+     */
+    protected function xmlResponse(string $xml): \Illuminate\Http\Response
+    {
+        return response($xml, 200, [
+            'Content-Type' => 'application/xml'
+        ]);
+    }
 }

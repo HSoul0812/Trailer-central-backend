@@ -91,7 +91,7 @@ class TemplateSeeder extends Seeder
 
         // Database clean up
         Template::where('user_id', $userId)->delete();
-        SalesPerson::where('user_id', $userId)->delete();
+        SalesPerson::where('user_id', $userId)->forceDelete();
         NewUser::destroy($userId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();                

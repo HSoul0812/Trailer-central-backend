@@ -192,7 +192,8 @@ class ListingRepository implements ListingRepositoryInterface {
                 ->where(Error::getTableName() . '.dismissed', 0);
         })->where(function (Builder $query) {
             return $query->whereNull(Error::getTableName() . '.id')
-                ->orWhere(Error::getTableName() . '.expires_at', '<', DB::raw('NOW()'));
+                ->orWhere(Error::getTableName() . '.expires_at', '<', DB::raw('NOW()'))
+                ->whereColumn(Error::getTableName() . '.created_at', '<', Inventory::getTableName() . '.updated_at', 'or');
         });
 
         // Append Location

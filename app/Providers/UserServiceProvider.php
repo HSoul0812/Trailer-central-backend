@@ -2,8 +2,12 @@
 
 namespace App\Providers;
 
+use App\Repositories\User\DealerLogoRepository;
+use App\Repositories\User\DealerLogoRepositoryInterface;
 use App\Repositories\User\GeoLocationRepository;
 use App\Repositories\User\GeoLocationRepositoryInterface;
+use App\Services\User\DealerLogoService;
+use App\Services\User\DealerLogoServiceInterface;
 use App\Services\User\GeolocationService;
 use App\Services\User\GeoLocationServiceInterface;
 use Illuminate\Support\ServiceProvider;
@@ -49,5 +53,7 @@ class UserServiceProvider extends ServiceProvider
         $this->app->bind(DealerPartRepositoryInterface::class, DealerPartRepository::class);
         $this->app->bind(GeoLocationRepositoryInterface::class, GeoLocationRepository::class);
         $this->app->bind(GeoLocationServiceInterface::class, GeolocationService::class);
+        $this->app->bind(DealerLogoRepositoryInterface::class, DealerLogoRepository::class);
+        $this->app->bind(DealerLogoServiceInterface::class, DealerLogoService::class);
     }
 }
