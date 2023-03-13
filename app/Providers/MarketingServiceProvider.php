@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Repositories\CRM\Text\VerifyRepository;
 use App\Repositories\CRM\Text\VerifyRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\BillingRepository;
+use App\Repositories\Marketing\Craigslist\BillingRepositoryInterface;
 use App\Repositories\Marketing\TunnelRedisRepository;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Repositories\Marketing\VirtualCardRepository;
@@ -83,6 +85,7 @@ class MarketingServiceProvider extends ServiceProvider
         $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
         $this->app->bind(ActivePostRepositoryInterface::class, ActivePostRepository::class);
         $this->app->bind(BalanceRepositoryInterface::class, BalanceRepository::class);
+        $this->app->bind(BillingRepositoryInterface::class, BillingRepository::class);
         $this->app->bind(CityRepositoryInterface::class, CityRepository::class);
         $this->app->bind(DealerRepositoryInterface::class, DealerRepository::class);
         $this->app->bind(DraftRepositoryInterface::class, DraftRepository::class);

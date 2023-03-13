@@ -2,15 +2,22 @@
 
 namespace App\Models\Marketing\Craigslist;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 class Balance extends Model {
+    use TableAware;
+
+
+    // Define Table Name Constant
+    const TABLE_NAME = 'clapp_balance';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'clapp_balance';
+    protected $table = self::TABLE_NAME;
 
     /**
      * The primary key associated with the table.

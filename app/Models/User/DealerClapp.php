@@ -90,6 +90,23 @@ class DealerClapp extends Model
     }
 
     /**
+     * Get Next Sessions
+     * 
+     * @return HasMany
+     */
+    public function nextSession(): HasMany {
+        return $this->sessions()->whereNotNull('session_scheduled')
+                    ->where('session_scheduled', '<=', DB::raw('NOW()'))
+                    ->where('session_slot_id', '=', 99)
+                    ->where('status', '<>', 'done')
+                    ->where('state', '<>', 'error')
+                    ->where(function (Builder $query) {
+                        $query->where('status', '=', 'scheduled')
+                              ->orWhere('status', '=', 'new');
+                    });
+    }
+
+    /**
      * Get Virtual Cards
      * 
      * @return HasMany
@@ -123,15 +140,7 @@ class DealerClapp extends Model
      */
     public function getNextSessionAttribute(): string {
         // Get Session
-        $session = $this->sessions()->whereNotNull('session_scheduled')
-                        ->where('session_scheduled', '<=', DB::raw('NOW()'))
-                        ->where('session_slot_id', '=', 99)
-                        ->where('status', '<>', 'done')
-                        ->where('state', '<>', 'error')
-                        ->where(function (Builder $query) {
-                            $query->where('status', '=', 'scheduled')
-                                  ->orWhere('status', '=', 'new');
-                        })->first();
+        $session = $this->nextSession()->first();
 
         // Return Session Scheduled
         return $session->session_scheduled ?? '';

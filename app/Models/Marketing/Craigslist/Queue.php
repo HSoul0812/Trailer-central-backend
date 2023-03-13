@@ -65,7 +65,7 @@ class Queue extends Model
         'inventory_id',
         'status',
         'state',
-        'img_status',
+        'img_state',
         'costs',
         'log'
     ];
@@ -323,7 +323,7 @@ class Queue extends Model
         }
 
         // Return Cleaned Description
-        return $desc;
+        return $desc . "<br /><br />\n\n";
     }
 
     /**

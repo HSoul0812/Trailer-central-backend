@@ -66,7 +66,11 @@ use App\Repositories\CRM\User\SettingsRepository;
 use App\Repositories\CRM\User\SettingsRepositoryInterface;
 use App\Repositories\Dms\Customer\InventoryRepositoryInterface as CustomerInventoryRepositoryInterface;
 use App\Repositories\Dms\Customer\InventoryRepository as CustomerInventoryRepository;
+use App\Services\CRM\Documents\DealerDocumentsServiceInterface;
+use App\Services\CRM\Documents\DealerDocumentsService;
 use Illuminate\Support\ServiceProvider;
+use App\Services\CRM\Leads\LeadTradeService;
+use App\Services\CRM\Leads\LeadTradeServiceInterface;
 
 class CrmServiceProvider extends ServiceProvider
 {
@@ -90,6 +94,8 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(ImportServiceInterface::class, ImportService::class);
         $this->app->bind(CampaignServiceInterface::class, CampaignService::class);
         $this->app->bind(BlastServiceInterface::class, BlastService::class);
+        $this->app->bind(DealerDocumentsServiceInterface::class, DealerDocumentsService::class);
+        $this->app->bind(LeadTradeServiceInterface::class, LeadTradeService::class);
 
         // Repositories
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);

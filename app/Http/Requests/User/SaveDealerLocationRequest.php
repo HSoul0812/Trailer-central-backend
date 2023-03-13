@@ -15,19 +15,19 @@ class SaveDealerLocationRequest extends Request
     protected function getRules(): array
     {
         return [
-            'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
+            'dealer_id' => 'integer|min:1|required_without:id|exists:dealer,dealer_id',
             'name' => $this->validLocationName(),
-            'contact' => 'required|string|min:1,max:255',
+            'contact' => 'required_without:id|string|min:1,max:255',
             'website' => 'nullable|string|min:0,max:255',
             'email' => 'nullable|valid_location_email|string|min:0,max:255',
-            'address' => 'required|string|min:3,max:255|regex:/^[^&]+$/',
-            'city' => 'required|string|min:2,max:255',
-            'county' => 'required|string|min:2,max:255',
-            'region' => 'required|string|min:2,max:255',
-            'country' => 'required|string|min:2,max:255|in:US,CA,CL',
-            'postalcode' => 'required|string',
+            'address' => 'required_without:id|string|min:3,max:255|regex:/^[^&]+$/',
+            'city' => 'required_without:id|string|min:2,max:255',
+            'county' => 'required_without:id|string|min:2,max:255',
+            'region' => 'required_without:id|string|min:2,max:255',
+            'country' => 'required_without:id|string|min:2,max:255|in:US,CA,CL',
+            'postalcode' => 'required_without:id|string',
             'fax' => 'nullable|string|min:1,max:20',
-            'phone' => 'required|string|max:20|phone:country',
+            'phone' => 'required_without:id|string|max:20|phone:country',
             'is_default' => 'checkbox|in:0,1',
             'sms' => 'checkbox|in:0,1',
             'sms_phone' => 'nullable|string|max:20|phone:country|required_if:sms,1',
@@ -85,7 +85,7 @@ class SaveDealerLocationRequest extends Request
             'fees.*.fee_type' => 'required_with:fees|min:1,max:50',
             'fees.*.amount' => ['required_with:fees','numeric','min:0','regex:/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,2})?$/'],
             'fees.*.cost_amount' => 'required_if:fees.*.fee_charged_type,combined|numeric|min:0',
-            // 'fees.*.cost_handler' => 'required|in:set_default_cost,set_amount',
+            // 'fees.*.cost_handler' => 'required_without:id|in:set_default_cost,set_amount',
             'fees.*.is_additional' => 'checkbox|in:0,1',
             'fees.*.is_state_taxed' => 'checkbox|in:0,1',
             'fees.*.is_county_taxed' => 'checkbox|in:0,1',
@@ -99,7 +99,7 @@ class SaveDealerLocationRequest extends Request
     private function validLocationName(): string
     {
         return sprintf(
-            'required|string|min:3,max:255|unique_dealer_location_name:%s,%s',
+            'required_without:id|string|min:3,max:255|unique_dealer_location_name:%s,%s',
             $this->getDealerId(),
             $this->getId()
         );

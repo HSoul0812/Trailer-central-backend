@@ -20,7 +20,7 @@ class TemplateExists implements Rule
      */
     public function passes($attribute, $value): bool
     {
-        $userId = app('request')->get('user_id');
+        $userId = request()->input('user_id');
 
         return Template::query()->where('id', $value)->where('user_id', $userId)->exists();
     }
