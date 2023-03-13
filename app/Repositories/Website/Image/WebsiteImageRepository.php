@@ -14,8 +14,8 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
 {
     /**
      * @param $params
-     * @throws InvalidArgumentException if dealer_id is not set
      * @return Builder
+     * @throws InvalidArgumentException if dealer_id is not set
      */
     private function getQueryBuilder(array $params): Builder
     {
@@ -42,14 +42,18 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
      * Updates a dealer image
      *
      * @param array $params
-     * @throws InvalidArgumentException if id is not set
-     * @throws ModelNotFoundException if website_image is not found
      * @return WebsiteImage
+     * @throws ModelNotFoundException if website_image is not found
+     * @throws InvalidArgumentException if id is not set
      */
     public function update($params)
     {
         if (!isset($params['id'])) {
             throw new InvalidArgumentException("Website Image ID is required");
+        }
+
+        if (isset($params['starts_from'])) {
+            $params['is_active'] = intval(Carbon::parse($params['starts_from'])->isPast());
         }
 
         if (isset($params['expires_at'])) {

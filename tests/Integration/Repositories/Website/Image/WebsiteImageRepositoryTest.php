@@ -12,6 +12,9 @@ use Tests\TestCase;
 /**
  * Class WebsiteImageRepositoryTest
  *
+ * @group DW
+ * @group DW_SLIDESHOW
+ *
  * @package Tests\Integration\Repositories\Website\Image
  * @coversDefaultClass \App\Repositories\Website\WebsiteUserRepository
  */
