@@ -24,6 +24,14 @@ class TransactionExecuteQueue extends Model
     public $timestamps = false;
 
     /**
+     * The name of the "created at" column.
+     *
+     * @var string
+     */
+    const CREATED_AT = 'queued_at';
+
+
+    /**
      * The attributes that should be cast to native types.
      *
      * @var array
