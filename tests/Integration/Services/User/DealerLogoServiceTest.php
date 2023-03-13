@@ -6,6 +6,7 @@ use App\Models\User\DealerLogo;
 use App\Services\User\DealerLogoService;
 use App\Services\User\DealerLogoServiceInterface;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -30,7 +31,10 @@ class DealerLogoServiceTest extends TestCase
         parent::setUp();
         $this->dealerLogoService = $this->app->make(DealerLogoServiceInterface::class);
         $this->dealerId = $this->getTestDealerId();
-        $this->uploadedFilename = "dealer_logos/{$this->dealerId}_logo.png";
+        $now = now();
+        Carbon::setTestNow($now);
+
+        $this->uploadedFilename = "dealer_logos/{$this->dealerId}_{$now->getTimestamp()}_logo.png";
     }
 
     public function test_it_can_upload_a_logo()
@@ -67,5 +71,12 @@ class DealerLogoServiceTest extends TestCase
         Storage::disk(DealerLogoService::STORAGE_DISK)->assertMissing($this->uploadedFilename);
 
         $logo->delete();
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        
+        Carbon::setTestNow();
     }
 }

@@ -5,6 +5,7 @@ namespace Tests\Integration\Http\Controllers\User;
 use App\Models\User\DealerLogo;
 use App\Services\User\DealerLogoService;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
@@ -17,11 +18,17 @@ use Tests\TestCase;
 class DealerLogoControllerTest extends TestCase
 {
     private $dealerId;
+    private $timestamp;
 
     public function setUp(): void
     {
         parent::setUp();
         $this->dealerId = TestCase::getTestDealerId();
+
+        $now = now();
+        Carbon::setTestNow($now);
+
+        $this->timestamp = $now->getTimestamp();
     }
 
     public function test_it_can_create_a_dealer_logo()
@@ -37,7 +44,7 @@ class DealerLogoControllerTest extends TestCase
             ]);
         $response->assertStatus(Response::HTTP_OK);
 
-        Storage::disk(DealerLogoService::STORAGE_DISK)->assertExists("dealer_logos/{$this->dealerId}_logo.png");
+        Storage::disk(DealerLogoService::STORAGE_DISK)->assertExists("dealer_logos/{$this->dealerId}_{$this->timestamp}_logo.png");
 
         $this->assertDatabaseHas(DealerLogo::getTableName(), [
             'dealer_id' => $this->dealerId,
@@ -81,7 +88,7 @@ class DealerLogoControllerTest extends TestCase
             ]);
         $response->assertStatus(Response::HTTP_OK);
 
-        Storage::disk(DealerLogoService::STORAGE_DISK)->assertExists("dealer_logos/{$this->dealerId}_logo.png");
+        Storage::disk(DealerLogoService::STORAGE_DISK)->assertExists("dealer_logos/{$this->dealerId}_{$this->timestamp}_logo.png");
 
         $id = $response->json('data.id');
 
@@ -95,7 +102,7 @@ class DealerLogoControllerTest extends TestCase
             ]);
         $response->assertStatus(Response::HTTP_OK);
 
-        Storage::disk(DealerLogoService::STORAGE_DISK)->assertMissing("dealer_logos/{$this->dealerId}_logo.png");
+        Storage::disk(DealerLogoService::STORAGE_DISK)->assertMissing("dealer_logos/{$this->dealerId}_{$this->timestamp}_logo.png");
 
         $this->assertDatabaseHas(DealerLogo::getTableName(), [
             'dealer_id' => $this->dealerId,
@@ -103,5 +110,41 @@ class DealerLogoControllerTest extends TestCase
             'benefit_statement' => $newStatement
         ]);
         DealerLogo::whereId($id)->delete();
+    }
+
+    public function test_it_removes_the_existing_logo_when_uploading()
+    {
+        Storage::fake(DealerLogoService::STORAGE_DISK);
+
+        $response = $this
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->post('/api/user/logo', [
+                'logo' => UploadedFile::fake()->create('image.png', 1024, 'image/png')
+            ]);
+        $response->assertStatus(Response::HTTP_OK);
+
+        Storage::disk(DealerLogoService::STORAGE_DISK)->assertExists("dealer_logos/{$this->dealerId}_{$this->timestamp}_logo.png");
+
+        //clear timestamps
+        Carbon::setTestNow();
+        $now = now();
+        Carbon::setTestNow($now);
+
+        $response = $this
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->post('/api/user/logo', [
+                'logo' => UploadedFile::fake()->create('newImage.png', 1024, 'image/png')
+            ]);
+        $response->assertStatus(Response::HTTP_OK);
+
+        Storage::disk(DealerLogoService::STORAGE_DISK)->assertMissing("dealer_logos/{$this->dealerId}_{$this->timestamp}_logo.png");
+        Storage::disk(DealerLogoService::STORAGE_DISK)->assertExists("dealer_logos/{$this->dealerId}_{$now->getTimestamp()}_logo.png");
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+
+        Carbon::setTestNow();
     }
 }
