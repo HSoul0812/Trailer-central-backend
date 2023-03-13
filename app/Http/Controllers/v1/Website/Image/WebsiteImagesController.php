@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\Website\Image;
 
+use App\Http\Requests\Website\Image\CreateWebsiteImageRequest;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 use App\Http\Controllers\RestfulControllerV2;
@@ -59,6 +60,17 @@ class WebsiteImagesController extends RestfulControllerV2
 
         if ($request->validate()) {
             $image = $this->websiteImage->update($request->all());
+            return $this->response->item($image, $this->transformer);
+        }
+
+        $this->response->errorBadRequest();
+    }
+
+    public function create(int $websiteId, Request $request)
+    {
+        $request = new CreateWebsiteImageRequest(['website_id' => $websiteId] + $request->all());
+        if ($request->validate()) {
+            $image = $this->websiteImage->create($request->all());
             return $this->response->item($image, $this->transformer);
         }
 
