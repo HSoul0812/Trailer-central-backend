@@ -186,7 +186,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
 
             'image'                => $defaultImage,
             'images'               => $primaryImages,
-            'originalimages'       => $originalImages,
+            'originalImages'       => $originalImages,
             'imagesSecondary'      => $secondaryImages,
             'numberOfImages'       => count($primaryImages) + count($secondaryImages),
             'widthInches'          => TypesHelper::ensureNumeric($model->width_inches),
@@ -237,9 +237,9 @@ class InventoryElasticSearchInputTransformer implements Transformer
             return !$image->isSecondary();
         })->map(function (InventoryImage $image) use ($inventory) {
             if ($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_ALL) {
-                return $image->image->filename_noverlay;
+                return $image->image->filename_noverlay ? $image->image->filename_noverlay  : $image->image->filename;
             } elseif($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_PRIMARY && $image->image->is_default)  {
-                return $image->image->filename_noverlay;
+                return $image->image->filename_noverlay ? $image->image->filename_noverlay  : $image->image->filename;
             } else {
                 return $image->image->filename;
             }

@@ -32,9 +32,9 @@ class InventoryImageTransformer extends MediaFileTransformer
     private function originalImageUrl(Inventory $inventory, InventoryImage $inventoryImage): ?string
     {
         if ($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_ALL) {
-            return $inventoryImage->image->filename_noverlay;
-        } elseif($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_PRIMARY && $image->image->is_default)  {
-            return $inventoryImage->image->filename_noverlay;
+            return $inventoryImage->image->filename_noverlay ? $inventoryImage->image->filename_noverlay : $inventoryImage->image->filename;
+        } elseif($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_PRIMARY && $inventoryImage->image->is_default)  {
+            return $inventoryImage->image->filename_noverlay ? $inventoryImage->image->filename_noverlay : $inventoryImage->image->filename;
         } else {
             return $inventoryImage->image->filename;
         }
