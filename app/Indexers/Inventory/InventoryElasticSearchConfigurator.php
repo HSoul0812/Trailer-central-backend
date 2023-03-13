@@ -227,6 +227,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         ],
         'image'                => ['type' => 'keyword'],
         'images'               => ['type' => 'keyword'],
+        'originalimages'       => ['type' => 'keyword'],
         'imagesSecondary'      => ['type' => 'keyword'],
         'numberOfImages'       => ['type' => 'integer'],
         'widthInches'          => ['type' => 'float'],
