@@ -90,6 +90,12 @@ class RepairOrdersExport extends BaseExportAction implements EntityActionExporta
                 DB::raw('other_items.notes as repair_order_other_items_notes'),
                 DB::raw('other_items.taxable as repair_order_other_items_taxable'),
                 DB::raw('other_items.is_custom_amount as repair_order_other_items_is_custom_amount'),
+                DB::raw('payments.id as repair_order_payments_id'),
+                DB::raw('payments.amount as repair_order_payments_amount'),
+                DB::raw('payments.date as repair_order_payments_date'),
+                DB::raw('payments.created_at as repair_order_payments_created_at'),
+                DB::raw('payment_methods.name as repair_order_payments_payment_method_name'),
+                DB::raw('payment_methods.type as repair_order_payments_payment_method_type'),
             ])
             ->leftJoin('dealer_location as dl', 'dl.dealer_location_id', '=', 'dms_repair_order.location')
             ->leftJoin('dms_customer as customer', 'customer.id', '=', 'dms_repair_order.customer_id')
@@ -103,6 +109,9 @@ class RepairOrdersExport extends BaseExportAction implements EntityActionExporta
             ->leftJoin('dms_repair_misc_part_item as misc_parts', 'misc_parts.id', '=', 'dms_repair_order.id')
             ->leftJoin('dms_other_item as other_items', 'other_items.repair_order_id', '=', 'dms_repair_order.id')
             ->leftJoin('qb_vendors as other_items_vendors', 'other_items_vendors.id', '=', 'other_items.vendor_id')
+            ->leftJoin('qb_invoices as invoices', 'invoices.repair_order_id', '=', 'dms_repair_order.id')
+            ->leftJoin('qb_payment as payments', 'payments.invoice_id', '=', 'invoices.id')
+            ->leftJoin('qb_payment_methods as payment_methods', 'payment_methods.id', '=', 'payments.payment_method_id')
             ->leftJoinSub($groupedPayments, 'invoice', function ($join) {
                 $join->on('dms_repair_order.id', '=', 'invoice.repair_order_id');
             })
@@ -184,6 +193,12 @@ class RepairOrdersExport extends BaseExportAction implements EntityActionExporta
                 'repair_order_other_items_notes' => 'Repair Order Other Items Notes',
                 'repair_order_other_items_taxable' => 'Repair Order Other Items Taxable',
                 'repair_order_other_items_is_custom_amount' => 'Repair Order Other Items Is Custom Amount',
+                'repair_order_payments_id' => 'Repair Order Payments Identifier',
+                'repair_order_payments_amount' => 'Repair Order Payments Amount',
+                'repair_order_payments_date' => 'Repair Order Payments Date',
+                'repair_order_payments_created_at' => 'Repair Order Payments Created Date',
+                'repair_order_payments_payment_method_name' => 'Repair Order Payments Payment Method Name',
+                'repair_order_payments_payment_method_type' => 'Repair Order Payments Payment Method Type',
             ])
             ->export();
     }
