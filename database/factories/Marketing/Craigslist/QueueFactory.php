@@ -2,28 +2,29 @@
 
 use App\Models\Inventory\Inventory;
 use App\Models\Parts\Part;
+use App\Models\Marketing\Craigslist\Queue;
 use App\Models\Marketing\Craigslist\Profile;
-use App\Models\Marketing\Craigslist\Session;
 use App\Models\User\User;
 use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
 
 /** @var Factory $factory */
-
-$factory->define(Session::class, static function (Faker $faker, array $attributes): array {
+$factory->define(Queue::class, static function (Faker $faker, array $attributes): array {
     // Get Dealer ID
     $user = isset($attributes['dealer_id']) ? null : factory(User::class)->create();
     $dealerId = $user ? $user->getKey() : $attributes['dealer_id'];
 
     // Get Inventory ID
-    if(isset($attributes['inventory_id'])) {
-        if(!empty($attributes['parameter']['type']) && $attributes['parameter']['type'] === 'parts') {
-            $inventory = isset($attributes['inventory_id']) ? null : factory(Part::class)->create();
-            $inventoryId = $inventory ? $inventory->getKey() : $attributes['inventory_id'];
-        } else {
-            $inventory = isset($attributes['inventory_id']) ? null : factory(Inventory::class)->create();
-            $inventoryId = $inventory ? $inventory->getKey() : $attributes['inventory_id'];
-        }
+    if(!empty($attributes['parameter']['type']) && $attributes['parameter']['type'] === 'parts') {
+        $inventory = isset($attributes['inventory_id']) ? null : factory(Part::class)->create([
+            'dealer_id' => $dealerId
+        ]);
+        $inventoryId = $inventory ? $inventory->getKey() : $attributes['inventory_id'];
+    } else {
+        $inventory = isset($attributes['inventory_id']) ? null : factory(Inventory::class)->create([
+            'dealer_id' => $dealerId
+        ]);
+        $inventoryId = $inventory ? $inventory->getKey() : $attributes['inventory_id'];
     }
 
     // Get Profile ID
@@ -58,26 +59,19 @@ $factory->define(Session::class, static function (Faker $faker, array $attribute
         $parameters = json_encode($parameters);
     }
 
-    // Get Session ID
-    $sessionId = $attributes['session_id'] ?? '';
-    while(strlen($sessionId) < 32) {
-        $letter = $faker->randomElement($faker->randomDigit(), strtoupper($faker->randomDigit()));
-        $sessionId .= $faker->randomElement($faker->randomDigit(), $letter);
-    }
-
     // Configure Return Array
     return [
-        'session_id' => $sessionId,
+        'session_id' => $attributes['session_id'] ?? $faker->regexify('[A-Za-z0-9]{20}'),
         'parent_id' => $attributes['parent_id'] ?? 0,
         'time' => $attributes['time'] ?? time(),
         'command' => $attributes['command'] ?? 'postAdd',
-        'parameter' => $parameters,
+        'parameter' => $attributes['parameter'] ?? $parameters,
         'dealer_id' => $dealerId,
         'profile_id' => $profileId,
         'inventory_id' => $inventoryId,
-        'status' => $attributes['status'] ?? 'new',
+        'status' => $attributes['status'] ?? 'unprocessed',
         'state' => $attributes['state'] ?? 'new',
-        'img_status' => $attributes['img_status'] ?? '',
+        'img_state' => $attributes['img_state'] ?? '',
         'costs' => $attributes['costs'] ?? 0,
         'log' => $attributes['log'] ?? ''
     ];

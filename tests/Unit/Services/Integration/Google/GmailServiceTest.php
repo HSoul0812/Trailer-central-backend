@@ -9,6 +9,7 @@ use App\Exceptions\Integration\Google\InvalidGoogleAuthCodeException;
 use App\Exceptions\Integration\Google\InvalidToEmailAddressException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Google\MissingGmailLabelsException;
+use App\Exceptions\Integration\Google\MissingGapiAccessTokenException;
 use App\Exceptions\PropertyDoesNotExists;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
@@ -1174,11 +1175,11 @@ class GmailServiceTest extends TestCase
      * @param Google_Client $googleClient
      * @throws MissingGapiIdTokenException
      */
-    public function testSetAccessTokenWithoutIdToken(AccessToken $accessToken, Google_Client $googleClient)
+    public function testSetAccessTokenWithoutAccessToken(AccessToken $accessToken, Google_Client $googleClient)
     {
-        $accessToken->id_token = null;
+        $accessToken->access_token = null;
 
-        $this->expectException(MissingGapiIdTokenException::class);
+        $this->expectException(MissingGapiAccessTokenException::class);
 
         $this->gmailService
             ->shouldReceive('setAccessToken')
@@ -1242,11 +1243,11 @@ class GmailServiceTest extends TestCase
      * @param Google_Client $googleClient
      * @throws MissingGapiIdTokenException
      */
-    public function testSetEmailTokenWithoutIdToken(EmailToken $emailToken, Google_Client $googleClient)
+    public function testSetEmailTokenWithoutAccessToken(EmailToken $emailToken, Google_Client $googleClient)
     {
-        $emailToken->setIdToken('');
+        $emailToken->setAccessToken('');
 
-        $this->expectException(MissingGapiIdTokenException::class);
+        $this->expectException(MissingGapiAccessTokenException::class);
 
         $this->gmailService
             ->shouldReceive('setEmailToken')

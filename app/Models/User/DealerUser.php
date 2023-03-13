@@ -87,7 +87,7 @@ class DealerUser extends Model implements Authenticatable, PermissionsInterface
     /**
      * Set the token value for the "remember me" session.
      *
-     * @param  string  $value
+     * @param string $value
      *
      * @return void
      */
@@ -224,5 +224,10 @@ class DealerUser extends Model implements Authenticatable, PermissionsInterface
     public function getEmailAttribute(): ?string
     {
         return !empty($this->attributes['email']) ? strtolower($this->attributes['email']) : null;
+    }
+
+    public function logo(): HasOne
+    {
+        return $this->hasOne(DealerLogo::class, 'dealer_id', 'dealer_id');
     }
 }

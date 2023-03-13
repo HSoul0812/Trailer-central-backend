@@ -4,6 +4,12 @@ namespace Tests\Integration\Http\Controllers\CRM\Documents;
 
 use Tests\database\seeds\CRM\Documents\DealerDocumentsSeeder;
 use Tests\Integration\IntegrationTestCase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use App\Models\CRM\Documents\DealerDocuments;
+use Mockery;
+use Mockery\LegacyMockInterface;
+use App\Helpers\ImageHelper;
 
 /**
  * Class DealerDocumentsControllerTest
@@ -13,29 +19,42 @@ use Tests\Integration\IntegrationTestCase;
  */
 class DealerDocumentsControllerTest extends IntegrationTestCase
 {
+    const API_URL = '/api/leads/{leadId}/documents';
+
+    /**
+     * @var LegacyMockInterface|ImageHelper
+     */
+    protected $imageHelper;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->instanceMock('imageHelper', ImageHelper::class);
+        
+    }
+
     /**
      * @covers ::index
      * @group CRM
      */
     public function testIndex()
     {
-        $leadTradeSeeder = new DealerDocumentsSeeder();
-        $leadTradeSeeder->seed();
-
-        $params = ['lead_id' => $leadTradeSeeder->lead->getKey()];
+        $documentsSeeder = new DealerDocumentsSeeder();
+        $documentsSeeder->seed();
 
         $response = $this->json(
             'GET',
-            '/api/user/documents',
-            $params,
-            ['access-token' => $leadTradeSeeder->authToken->access_token]
+            str_replace('{leadId}', $documentsSeeder->lead->getKey(), self::API_URL),
+            [],
+            ['access-token' => $documentsSeeder->authToken->access_token]
         );
 
-        $leadTrades = $leadTradeSeeder->documents;
+        $documents = $documentsSeeder->documents;
 
-        $this->assertResponseDataEquals($response, $leadTrades, false);
+        $this->assertResponseDataEquals($response, $documents, false);
 
-        $leadTradeSeeder->cleanUp();
+        $documentsSeeder->cleanUp();
     }
 
     /**
@@ -44,15 +63,13 @@ class DealerDocumentsControllerTest extends IntegrationTestCase
      */
     public function testIndexWithWrongAccessToken()
     {
-        $leadTradeSeeder = new DealerDocumentsSeeder();
-        $leadTradeSeeder->seed();
-
-        $params = ['lead_id' => $leadTradeSeeder->lead->getKey()];
+        $documentsSeeder = new DealerDocumentsSeeder();
+        $documentsSeeder->seed();
 
         $response = $this->json(
             'GET',
-            '/api/user/documents',
-            $params,
+            str_replace('{leadId}', $documentsSeeder->lead->getKey(), self::API_URL),
+            [],
             ['access-token' => 'wrong_access_token']
         );
 
@@ -60,27 +77,147 @@ class DealerDocumentsControllerTest extends IntegrationTestCase
             ->assertStatus(403)
             ->assertSee('Invalid access token.');
 
-        $leadTradeSeeder->cleanUp();
+        $documentsSeeder->cleanUp();
     }
 
     /**
-     * @covers ::index
+     * @covers ::create
      * @group CRM
      */
-    public function testIndexWithoutLeadId()
+    public function testCreate()
     {
-        $leadTradeSeeder = new DealerDocumentsSeeder();
-        $leadTradeSeeder->seed();
+        $documentsSeeder = new DealerDocumentsSeeder();
+        $documentsSeeder->seed();
+
+        $kiloBytes = 200;
+        $fakeDocument1 = UploadedFile::fake()->create('document.pdf', $kiloBytes);
+        $randomString = md5(time());
+
+        $this->imageHelper
+            ->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('getRandomString')
+            ->andReturn($randomString);
 
         $response = $this->json(
-            'GET',
-            '/api/user/documents',
-            [],
-            ['access-token' => $leadTradeSeeder->authToken->access_token]
+            'POST',
+            str_replace('{leadId}', $documentsSeeder->lead->getKey(), self::API_URL),
+            [
+                'files' => [
+                    $fakeDocument1
+                ]
+            ],
+            ['access-token' => $documentsSeeder->authToken->access_token]
         );
 
-        $response->assertStatus(422);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'lead_id',
+                        'dealer_id',
+                        'filename',
+                        'full_path'
+                    ]
+                ]
+            ]);
 
-        $leadTradeSeeder->cleanUp();
+        $this->assertDatabaseHas(DealerDocuments::getTableName(), [
+            'lead_id' => $documentsSeeder->lead->getKey(),
+            'dealer_id' => $documentsSeeder->dealer->getKey(),
+            'filename' => 'document.pdf',
+            'full_path' => Storage::disk('s3')->url($randomString)
+        ]);
+        Storage::disk('s3')->assertExists($randomString);
+
+        // clear data
+        $documentsSeeder->cleanUp();
+        Storage::disk('s3')->delete($randomString);
+    }
+
+    /**
+     * @covers ::create
+     * @group CRM
+     */
+    public function testCreateWithoutFiles()
+    {
+        $documentsSeeder = new DealerDocumentsSeeder();
+        $documentsSeeder->seed();
+
+        $response = $this->json(
+            'POST',
+            str_replace('{leadId}', $documentsSeeder->lead->getKey(), self::API_URL),
+            [],
+            ['access-token' => $documentsSeeder->authToken->access_token]
+        );
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['files']);
+
+        $response = $this->json(
+            'POST',
+            str_replace('{leadId}', $documentsSeeder->lead->getKey(), self::API_URL),
+            [
+                'files' => []
+            ],
+            ['access-token' => $documentsSeeder->authToken->access_token]
+        );
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['files']);
+
+        $documentsSeeder->cleanUp();
+    }
+
+    /**
+     * @covers ::destroy
+     * @group CRM
+     */
+    public function testDestroy()
+    {
+        $documentsSeeder = new DealerDocumentsSeeder();
+        $documentsSeeder->seed();
+
+        // prepare test data
+        // upload file
+        $randomString = md5(time());
+        Storage::disk('s3')->put($randomString, '');
+        $uploadedFile = Storage::disk('s3')->url($randomString);
+
+        // update document data with uploaded file
+        $docId = $documentsSeeder->documents[0]['id'];
+        DealerDocuments::find($docId)->update([
+            'filename' => 'document.pdf',
+            'full_path' => $uploadedFile
+        ]);
+        // end prepate test data
+
+        // confirm test data
+        $this->assertDatabaseHas(DealerDocuments::getTableName(), [
+            'lead_id' => $documentsSeeder->lead->getKey(),
+            'dealer_id' => $documentsSeeder->dealer->getKey(),
+            'filename' => 'document.pdf',
+            'full_path' => Storage::disk('s3')->url($randomString)
+        ]);
+        Storage::disk('s3')->assertExists($randomString);
+        // end confirm test data
+
+        $apiUrl = str_replace('{leadId}', $documentsSeeder->lead->getKey(), self::API_URL);
+        $deleteApiUrl = $apiUrl .'/'. $docId;
+        $response = $this->json(
+            'DELETE',
+            $deleteApiUrl,
+            [],
+            ['access-token' => $documentsSeeder->authToken->access_token]
+        );
+
+        $response->assertStatus(200);
+    
+        $this->assertDatabaseMissing(DealerDocuments::getTableName(), [
+            'id' => $docId
+        ]);
+        Storage::disk('s3')->assertMissing($randomString);
+
+        $documentsSeeder->cleanUp();
     }
 }
