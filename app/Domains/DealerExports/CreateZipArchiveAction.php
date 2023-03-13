@@ -4,10 +4,10 @@ namespace App\Domains\DealerExports;
 
 use App\Models\DealerExport;
 use App\Models\User\User;
-use ZipArchive;
-use Illuminate\Support\Facades\Storage;
 use Exception;
+use Illuminate\Support\Facades\Storage;
 use League\Flysystem\Filesystem;
+use ZipArchive;
 
 /**
  * Class CreateZipArchiveAction
@@ -38,7 +38,7 @@ class CreateZipArchiveAction
             ->where('entity_type', 'zip')
             ->first();
 
-        $s3ZipFilePath = 'exports/'. $this->dealer->dealer_id . '/dealer-archive.zip';
+        $s3ZipFilePath = 'exports/' . $this->dealer->dealer_id . '/dealer-archive.zip';
         $tmpZipFilePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $s3ZipFilePath;
 
         $zip = new ZipArchive;
@@ -46,12 +46,13 @@ class CreateZipArchiveAction
 
         $files = Storage::disk('s3')->files('exports/' . $this->dealer->dealer_id);
 
-        foreach($files as $file) {
+        foreach ($files as $file) {
             if ($file !== $s3ZipFilePath) {
                 try {
                     $fileToArchive = Storage::disk('s3')->get($file);
                     $zip->addFromString(basename($file), $fileToArchive);
                 } catch (Exception $e) {
+                    dd($e);
                 }
             }
         }

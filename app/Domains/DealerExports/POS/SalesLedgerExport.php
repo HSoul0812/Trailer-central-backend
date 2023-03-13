@@ -55,11 +55,11 @@ class SalesLedgerExport extends BaseExportAction implements EntityActionExportab
         $this->setEntity(self::ENTITY_TYPE)
             ->setHeaders([
                 'customer_id' => 'Customer Identifier',
-                'customer_name' => 'Customer Name',
-                'sales_total' => 'Sales Total',
+                'display_name' => 'Customer Name',
+                'saleTotal' => 'Sales Total',
                 'refund_amount' => 'Refund Amount',
                 'date' => 'Date',
-                'paymen_method' => 'Payment Method',
+                'payment_method_name' => 'Payment Method',
                 'reference_number' => 'Reference Number',
                 'receipt_path' => 'Receipt',
                 'parts_sku' => 'Parts SKU',
