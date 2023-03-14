@@ -6,6 +6,12 @@ use App\Domains\TrailerTrader\TrailerTraderDomain;
 
 class GetPageNameFromUrlAction
 {
+    const PAGE_NAMES = [
+        'TT_PLP' => 'TT_PLP',
+        'TT_PDP' => 'TT_PDP',
+        'TT_DEALER' => 'TT_DEALER',
+    ];
+
     public function __construct(private TrailerTraderDomain $trailerTraderDomain)
     {
     }
@@ -46,13 +52,18 @@ class GetPageNameFromUrlAction
         return [[
             'check' => $this->trailerTraderFrontendDomainCheck(),
             // Example: https://trailertrader.com/trailers-for-sale/watercraft-trailers-for-sale?sort=-createdAt
-            'regex' => '/[http|https]:\/\/.*\/(trailers-for-sale).*/',
-            'page_name' => 'TT_PLP',
+            'regex' => '/(http|https):\/\/.*\/(trailers-for-sale).*/',
+            'page_name' => self::PAGE_NAMES['TT_PLP'],
         ], [
             'check' => $this->trailerTraderFrontendDomainCheck(),
             // Example: https://trailertrader.com/new-2023-load-rite-146-v-bunk-boat-trailer--QS9o.html
-            'regex' => '/[http|https]:\/\/.*\/(.*).html/',
-            'page_name' => 'TT_PDP',
+            'regex' => '/(http|https):\/\/.*\/(.*).html/',
+            'page_name' => self::PAGE_NAMES['TT_PDP'],
+        ], [
+            'check' => $this->trailerTraderFrontendDomainCheck(),
+            // Example: https://trailertrader.com/trailer-dealer-in-West-Berlin-NJ/Franklin-Trailers,-Inc.-trailer-sales
+            'regex' => '/(http|https):\/\/.*\/(trailer-dealer-.*)\/.*/',
+            'page_name' => self::PAGE_NAMES['TT_DEALER'],
         ]];
     }
 
