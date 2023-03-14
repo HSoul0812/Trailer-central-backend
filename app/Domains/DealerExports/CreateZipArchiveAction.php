@@ -53,7 +53,6 @@ class CreateZipArchiveAction
                     $zip->addFromString(basename($file), $fileToArchive);
                     $zip->setEncryptionName(basename($file), ZipArchive::EM_AES_256, decrypt($dealerExport->zip_password, false));
                 } catch (Exception $e) {
-                    dd($e);
                 }
             }
         }

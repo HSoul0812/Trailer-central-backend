@@ -4,10 +4,10 @@ namespace App\Domains\DealerExports\Quotes;
 
 use App\Contracts\DealerExports\EntityActionExportable;
 use App\Domains\DealerExports\BaseExportAction;
-use Illuminate\Support\Facades\DB;
-use App\Models\CRM\Dms\Quickbooks\Item;
 use App\Models\CRM\Account\InvoiceItem;
+use App\Models\CRM\Dms\Quickbooks\Item;
 use App\Models\CRM\Dms\ServiceOrder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class QuotesExportAction
@@ -104,20 +104,20 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                 DB::raw("coalesce(qb_vendors.name, '') as unit_floorplan_vendor"),
                 DB::raw("coalesce(if(inventory.fp_committed = '0000-00-00', '', inventory.fp_committed), '') as unit_floorplan_committed_date"),
                 DB::raw('coalesce(inventory.fp_balance, 0) as unit_floorplan_balance'),
-                DB::raw("
+                DB::raw('
                     coalesce((
                         select sum(trade_in_trade_value_trade_in.trade_value)
                         from dms_unit_sale_trade_in_v1 as trade_in_trade_value_trade_in
                         where trade_in_trade_value_trade_in.unit_sale_id = dms_unit_sale.id
                     ), 0) as trade_in_trade_value
-                "),
-                DB::raw("
+                '),
+                DB::raw('
                     coalesce((
                         select sum(coalesce(trade_in_trade_value_trade_in.lien_payoff_amount, 0))
                         from dms_unit_sale_trade_in_v1 as trade_in_trade_value_trade_in
                         where trade_in_trade_value_trade_in.unit_sale_id = dms_unit_sale.id
                     ), 0) as trade_in_lien_payoff_amount
-                "),
+                '),
                 DB::raw('0 as trade_in_net_trade'),
                 DB::raw(sprintf("
                     coalesce((
@@ -234,22 +234,22 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                     ), 0) as part_discount
                 ", 'Part Discount')),
                 DB::raw('0 as part_tax_rate_applied'),
-                DB::raw("
+                DB::raw('
                     (
                         select sum(part_total_taxable_amount_accessory.qty * part_total_taxable_amount_accessory.price)
                         from dms_unit_sale_accessory as part_total_taxable_amount_accessory
                         where qb_invoices.unit_sale_id = part_total_taxable_amount_accessory.unit_sale_id
                         and part_total_taxable_amount_accessory.taxable = 1
                     ) as part_total_taxable_amount
-                "),
-                DB::raw("
+                '),
+                DB::raw('
                     (
                         select sum(part_total_taxable_amount_accessory.qty * part_total_taxable_amount_accessory.price)
                         from dms_unit_sale_accessory as part_total_taxable_amount_accessory
                         where qb_invoices.unit_sale_id = part_total_taxable_amount_accessory.unit_sale_id
                         and part_total_taxable_amount_accessory.taxable = 0
                     ) as part_total_nontaxable_amount
-                "),
+                '),
                 DB::raw('0 as part_total_taxable_amount_after_discount'),
                 DB::raw('0 as part_state_tax_amount'),
                 DB::raw('0 as part_county_tax_amount'),
@@ -356,6 +356,8 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
     {
         $this->setEntity(self::ENTITY_TYPE)
             ->setHeaders([
+                'unit_sale_id' => 'Quote/Deal Identifier',
+                'title' => 'Quote/Deal Title',
                 'invoice_no' => 'Invoice No.',
                 'invoice_date' => 'Invoice Date',
                 'invoice_type' => 'Invoice Type',
