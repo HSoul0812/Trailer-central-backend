@@ -71,12 +71,10 @@ class ExportManagerAction
             // We will update the entry if it already exists, else will create a new one.
             DealerExport::updateOrCreate(
                 ['dealer_id' => $this->dealer->dealer_id, 'entity_type' => constant($exportAction . '::ENTITY_TYPE')],
-                ['status' => DealerExport::STATUS_QUEUED]
+                ['status' => DealerExport::STATUS_QUEUED, 'file_path' => '']
             );
 
             DealerDataExportJob::dispatch($this->dealer, $exportAction);
         }
-
-        (new CreateZipArchiveAction($this->dealer))->execute();
     }
 }

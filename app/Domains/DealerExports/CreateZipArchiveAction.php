@@ -39,6 +39,11 @@ class CreateZipArchiveAction
             ->first();
 
         $s3ZipFilePath = 'exports/' . $this->dealer->dealer_id . '/dealer-archive.zip';
+
+        // We want to delete the existing archive so that it creates a new one always with the up to date data.
+        if (Storage::disk('s3')->exists($s3ZipFilePath)) {
+            Storage::disk('s3')->delete($s3ZipFilePath);
+        }
         $tmpZipFilePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $s3ZipFilePath;
 
         $zip = new ZipArchive;
