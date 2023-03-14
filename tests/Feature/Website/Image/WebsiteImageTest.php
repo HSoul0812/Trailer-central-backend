@@ -6,6 +6,10 @@ use App\Models\Website\Image\WebsiteImage;
 use Tests\TestCase;
 use App\Models\Website\Website;
 
+/**
+ * @group DW
+ * @group DW_SLIDESHOW
+ */
 class WebsiteImageTest extends TestCase
 {
     protected $website;
@@ -159,9 +163,9 @@ class WebsiteImageTest extends TestCase
         $response->assertStatus(200);
 
         $this->assertDatabaseHas(WebsiteImage::getTableName(), [
-            'identifier' => $image->identifier,
-            'website_id' => $this->website->id
-        ] + $data);
+                'identifier' => $image->identifier,
+                'website_id' => $this->website->id
+            ] + $data);
     }
 
     public function testUpdateImageRequestValidation()
@@ -219,6 +223,28 @@ class WebsiteImageTest extends TestCase
             'identifier' => $image->identifier,
             'website_id' => $this->website->id,
             'is_active' => 1
+        ]);
+    }
+
+    public function testUpdatingAnImageToShowInAFutureDateUpdatesTheIsActive()
+    {
+        $image = $this->images->first();
+
+        $data = [
+            'starts_from' => now()->addDays(5)->toDateTimeString(),
+            'is_active' => 1
+        ];
+
+        $response = $this
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->post('/api/website/' . $this->website->id . '/image/' . $image->identifier, $data);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas(WebsiteImage::getTableName(), [
+            'identifier' => $image->identifier,
+            'website_id' => $this->website->id,
+            'is_active' => 0
         ]);
     }
 }

@@ -444,6 +444,10 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query->where('dealer_id', $params['dealer_id']);
         }
 
+        if (isset($params['vin'])) {
+            $query->where('vin', $params['vin']);
+        }
+
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query->where($params[self::CONDITION_AND_WHERE]);
         }

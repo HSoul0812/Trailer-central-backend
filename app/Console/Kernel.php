@@ -28,7 +28,7 @@ use App\Console\Commands\Inventory\FixFloorplanBillStatus;
 use App\Console\Commands\Parts\Import\GetTextrailParts;
 use App\Console\Commands\Export\ExportFavoritesCommand;
 use App\Console\Commands\User\GenerateCrmUsers;
-use App\Console\Commands\Website\HideExpiredImages;
+use App\Console\Commands\Website\UpdateWebsiteImagesVisibility;
 
 class Kernel extends ConsoleKernel
 {
@@ -61,7 +61,7 @@ class Kernel extends ConsoleKernel
         MyScheduleWorkCommand::class,
         ExportFavoritesCommand::class,
         GenerateCrmUsers::class,
-        HideExpiredImages::class,
+        UpdateWebsiteImagesVisibility::class,
         PruneSSNCommand::class,
     ];
 
@@ -208,7 +208,7 @@ class Kernel extends ConsoleKernel
             ->onOneServer()
             ->runInBackground();
 
-        $schedule->command('website:hide-expired-images')
+        $schedule->command('website:update-images-visibility')
             ->daily()
             ->onOneServer()
             ->runInBackground();

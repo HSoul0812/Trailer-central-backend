@@ -13,6 +13,7 @@ $factory->define(Interaction::class, function (Faker $faker, array $attributes =
         'user_id' => $attributes['user_id'] ?? TestCase::getTestDealerId(),
         'sales_person_id' => $attributes['sales_person_id'] ?? NULL,
         'interaction_type' => $attributes['interaction_type'] ?? 'EMAIL',
-        'interaction_time' => $faker->dateTimeThisMonth
+        'interaction_time' => $faker->dateTimeThisMonth,
+        'interaction_notes' => $attributes['interaction_notes'] ?? ''
     ];
 });
