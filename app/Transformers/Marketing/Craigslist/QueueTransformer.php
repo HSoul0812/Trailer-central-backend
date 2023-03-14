@@ -31,7 +31,7 @@ class QueueTransformer extends TransformerAbstract
             'title' => $queue->title,
             'stock' => $queue->stock,
             'price' => $queue->price,
-            'image' => $queue->primary_image ? config('app.cdn_url') . $queue->primary_image : '',
+            'image' => $queue->primary_image,
             'parameters' => $queue->parameters,
             'time' => strtotime($queue->session->session_scheduled),
             'queue_time' => $queue->time,
