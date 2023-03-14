@@ -12,7 +12,7 @@ class InventoryImageTransformer extends MediaFileTransformer
     {
         $position = $inventoryImage->position ?? InventoryImage::LAST_IMAGE_POSITION;
         $inventory = $inventoryImage->inventory;
-        $originalImageUrl = $this->originalImageUrl($inventory, $inventoryImage);
+        $originalImageUrl = $this->originalImageUrl($inventory->overlay_enabled, $inventoryImage);
 
         return [
             'image_id' => $inventoryImage->image_id,
@@ -25,15 +25,15 @@ class InventoryImageTransformer extends MediaFileTransformer
     }
 
     /**
-     * @param Inventory $inventory
+     * @param null|int $inventory_overlay_enabled
      * @param InventoryImage $inventoryImage
      * @return string|null
      */
-    private function originalImageUrl(Inventory $inventory, InventoryImage $inventoryImage): ?string
+    private function originalImageUrl(?int $inventory_overlay_enabled = null, InventoryImage $inventoryImage): ?string
     {
-        if ($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_ALL) {
+        if ($inventory_overlay_enabled == Inventory::OVERLAY_ENABLED_ALL) {
             return $inventoryImage->image->filename_noverlay ? $inventoryImage->image->filename_noverlay : $inventoryImage->image->filename;
-        } elseif($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_PRIMARY && ($inventoryImage->image->is_default == 1 || $inventoryImage->image->position == 1))  {
+        } elseif($inventory_overlay_enabled == Inventory::OVERLAY_ENABLED_PRIMARY && ($inventoryImage->image->is_default == 1 || $inventoryImage->image->position == 1))  {
             return $inventoryImage->image->filename_noverlay ? $inventoryImage->image->filename_noverlay : $inventoryImage->image->filename;
         } else {
             return $inventoryImage->image->filename;
