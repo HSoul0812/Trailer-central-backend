@@ -3,6 +3,7 @@
 namespace App\Transformers\Marketing\Craigslist;
 
 use App\Models\Marketing\Craigslist\Queue;
+use App\Traits\CompactHelper;
 use League\Fractal\TransformerAbstract;
 
 /**
@@ -23,10 +24,16 @@ class ScheduleTransformer extends TransformerAbstract
 
         return [
             "queue_id" => "queue_{$queue->queue_id}",
-            "title" => "Inv #" . $queue->inventory->inventory_id,
-            "inventory_id" => $queue->inventory->inventory_id,
             "session_id" => $queue->session_id,
-            "archived" => boolval($queue->inventory->is_archived),
+            "inventory_id" => CompactHelper::shorten($queue->inventory_id),
+            "real_inventory_id" => $queue->inventory_id,
+            "archived" => boolval($queue->is_archived),
+            "title" => $queue->title,
+            "stock" => $queue->stock,
+            "price" => $queue->price,
+            "manufacturer" => $queue->make,
+            "category" => $queue->category_label,
+            "image" => $queue->primary_image,
             "allDay" => boolval($startAndEndTimes['allDay']),
             "start" => $startAndEndTimes['start'],
             "end" => $startAndEndTimes['end'],
@@ -45,7 +52,6 @@ class ScheduleTransformer extends TransformerAbstract
             $timing = explode(" ", $queue->session_started);
         }
 
-        $allDayConfig = config('marketing.cl.settings.scheduler.allDay');
         $queueDate = date('Y-m-d', $queue->time);
         $queueTime = date('H:i:s', $queue->time);
 
@@ -56,11 +62,7 @@ class ScheduleTransformer extends TransformerAbstract
             $queueTime = $timing[1];
         }
 
-        $startDate = $queueDate;
-
-        if (!$allDayConfig) {
-            $startDate .= 'T' . $queueTime . '+00:00';
-        }
+        $startDate = $queueDate . 'T' . $queueTime . '+00:00';
 
         // Set End Time
         $endTime = strtotime($queueDate . ' ' . $queueTime) + (60 * 30);
@@ -69,7 +71,7 @@ class ScheduleTransformer extends TransformerAbstract
         $endDate .= '+00:00';
 
         return [
-            'allDay' => $allDayConfig,
+            'allDay' => false,
             'start' => $startDate,
             'end' => $endDate
         ];
@@ -104,8 +106,13 @@ class ScheduleTransformer extends TransformerAbstract
             $className = 'billing';
             $color = 'purple';
         } elseif ($queue->status === 'done') {
-            $className = 'completed';
-            $color = 'green';
+            if(!empty($queue->parameters->autoPost)) {
+                $className = 'autopost';
+                $color = 'blue';
+            } else {
+                $className = 'completed';
+                $color = 'green';
+            }
         } else {
             if ($queue->i_status == '2') {
                 $className = 'sold';
