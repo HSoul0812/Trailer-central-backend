@@ -16,10 +16,20 @@ class CloudWatchLoggerFactory
     /**
      * Create a custom Monolog instance.
      *
-     * @param  array  $config
-     * @return \Monolog\Logger
+     * @param array{
+     *     sdk: array{
+     *          region: string,
+     *          version: string
+     *     },
+     *     tags: string[],
+     *     name: string,
+     *     stream_name: string,
+     *     retention: int
+     * } $config
+     *
+     * @return Logger
      */
-    public function __invoke(array $config)
+    public function __invoke(array $config): Logger
     {
         $sdkParams = $config["sdk"];
         $tags = $config["tags"] ?? [ ];
@@ -32,10 +42,10 @@ class CloudWatchLoggerFactory
         $groupName = config('app.name') . '-' . config('app.env');
 
         // Log stream name, will be created if none
-        $streamName = $config["stream_name"];
+        $streamName = $config["stream_name"] ?? null;
 
         // Days to keep logs, 14 by default. Set to `null` to allow indefinite retention.
-        $retentionDays = $config["retention"];
+        $retentionDays = $config["retention"] ?? null;
 
         // Instantiate handler (tags are optional)
         $handler = new CloudWatch($client, $groupName, $streamName, $retentionDays, 10000, $tags);
