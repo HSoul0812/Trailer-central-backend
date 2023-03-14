@@ -48,7 +48,7 @@ class ExportFinishedAction
             ->where('status', DealerExport::STATUS_PROCESSED)
             ->count();
 
-        if ($otherEntityExportCount=== ($allExportCount - 1)) {
+        if ($otherEntityExportCount === ($allExportCount - 1)) {
             (new CreateZipArchiveAction($this->dealer))->execute();
         }
     }

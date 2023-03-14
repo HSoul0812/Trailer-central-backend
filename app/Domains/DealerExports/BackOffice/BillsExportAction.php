@@ -20,7 +20,12 @@ class BillsExportAction extends BaseExportAction implements EntityActionExportab
     {
         return Bill::query()
             ->where('qb_bills.dealer_id', $this->dealer->dealer_id)
-            ->selectRaw('qb_bills.*,qb_vendors.name as vendor_name, bill_payments.paid as amount_paid, (qb_bills.total - bill_payments.paid) as remaining_balance')
+            ->select([
+                'qb_bills.*',
+                'qb_vendors.name as vendor_name',
+                'bill_payments.paid as amount_paid',
+            ])
+            ->selectRaw('(qb_bills.total - bill_payments.paid) as remaining_balance')
             ->leftJoin('qb_vendors', 'qb_bills.vendor_id', '=', 'qb_vendors.id')
             ->leftJoin(
                 DB::raw('(SELECT sum(amount) as paid, bill_id FROM qb_bill_payment GROUP BY bill_id) as bill_payments'),
@@ -45,5 +50,20 @@ class BillsExportAction extends BaseExportAction implements EntityActionExportab
                 'remaining_balance' => 'Remaining Balance',
             ])
             ->export();
+    }
+
+    public function transformRow($row)
+    {
+        $headers = array_keys($this->headers);
+
+        return array_map(function (string $header) use ($row) {
+            if ($header === 'due_date'
+                && $row->getAttributes()['due_date'] === '0000-00-00'
+            ) {
+                return null;
+            }
+
+            return object_get($row, $header);
+        }, $headers);
     }
 }
