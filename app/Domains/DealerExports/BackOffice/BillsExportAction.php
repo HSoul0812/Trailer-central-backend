@@ -38,7 +38,7 @@ class BillsExportAction extends BaseExportAction implements EntityActionExportab
                 'vendor_name' => 'Vendor Name',
                 'doc_num' => 'Bill Number',
                 'status' => 'Status',
-                'bill_date' => 'Bill Date',
+                'received_date' => 'Bill Date',
                 'due_date' => 'Due Date',
                 'total' => 'Total Amount',
                 'amount_paid' => 'Amount Paid',
