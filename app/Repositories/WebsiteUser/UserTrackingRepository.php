@@ -2,10 +2,15 @@
 
 namespace App\Repositories\WebsiteUser;
 
+use App\Domains\UserTracking\Actions\GetPageNameFromUrlAction;
 use App\Models\UserTracking;
 
 class UserTrackingRepository implements UserTrackingRepositoryInterface
 {
+    public function __construct(private GetPageNameFromUrlAction $getPageNameFromUrlAction)
+    {
+    }
+
     public function create(array $params): UserTracking
     {
         if (!array_key_exists('website_user_id', $params)) {
@@ -19,6 +24,8 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
         if (empty($params['meta'])) {
             $params['meta'] = null;
         }
+
+        $params['page_name'] = $this->getPageName($params['url']);
 
         return UserTracking::create($params);
     }
@@ -41,5 +48,10 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
             ->latest()
             ->first(['website_user_id'])
             ?->website_user_id;
+    }
+
+    private function getPageName(mixed $url): ?string
+    {
+        return $this->getPageNameFromUrlAction->execute($url);
     }
 }

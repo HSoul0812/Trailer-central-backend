@@ -16,7 +16,6 @@ class UserTrackingTest extends IntegrationTestCase
         $this->postJson(self::USER_TRACK_ENDPOINT)
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertSeeText('The visitor id field is required.')
-            ->assertSeeText('The event field is required.')
             ->assertSeeText('The url field is required.');
     }
 
@@ -40,6 +39,7 @@ class UserTrackingTest extends IntegrationTestCase
             ->assertJsonPath('user_tracking.visitor_id', $visitorId)
             ->assertJsonPath('user_tracking.event', $event)
             ->assertJsonPath('user_tracking.url', $url)
+            ->assertJsonPath('user_tracking.page_name', null)
             ->assertJsonPath('user_tracking.meta.foo', 'bar');
 
         $this->assertNotNull($response->json('user_tracking.id'));
@@ -121,5 +121,30 @@ class UserTrackingTest extends IntegrationTestCase
             )
             ->assertCreated()
             ->assertJsonPath('user_tracking.website_user_id', null);
+    }
+
+    public function testItCanDetectPageNameFromUrl()
+    {
+        $visitorId = Str::random();
+
+        $urls = [[
+            'url' => 'https://trailertrader.com/trailers-for-sale/watercraft-trailers-for-sale?sort=-createdAt',
+            'expected_page_name' => 'TT_PLP',
+        ], [
+            'url' => 'https://trailertrader.com/new-2023-load-rite-146-v-bunk-boat-trailer--QS9o.html',
+            'expected_page_name' => 'TT_PDP',
+        ]];
+
+        foreach ($urls as $url) {
+            $this
+                ->postJson(self::USER_TRACK_ENDPOINT, [
+                    'visitor_id' => $visitorId,
+                    'url' => $url['url'],
+                ])
+                ->assertCreated()
+                ->assertJsonPath('user_tracking.visitor_id', $visitorId)
+                ->assertJsonPath('user_tracking.url', $url['url'])
+                ->assertJsonPath('user_tracking.page_name', $url['expected_page_name']);
+        }
     }
 }
