@@ -5,19 +5,19 @@ namespace App\Domains\DealerExports;
 use App\Domains\DealerExports\BackOffice\BillsExportAction;
 use App\Domains\DealerExports\BackOffice\CustomersExportAction;
 use App\Domains\DealerExports\BackOffice\FinancingCompaniesExportAction;
+use App\Domains\DealerExports\BackOffice\PurchaseOrdersExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\BrandsExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\EmployeesExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\ExpensesExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\PaymentMethodsExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\VendorsExportAction;
+use App\Domains\DealerExports\POS\RefundsExportAction;
+use App\Domains\DealerExports\POS\SalesLedgerExport;
+use App\Domains\DealerExports\Quotes\QuotesExportAction;
+use App\Domains\DealerExports\Service\RepairOrdersExport;
 use App\Jobs\DealerExports\DealerDataExportJob;
 use App\Models\DealerExport;
 use App\Models\User\User;
-use App\Domains\DealerExports\POS\SalesLedgerExport;
-use App\Domains\DealerExports\POS\RefundsExportAction;
-use App\Domains\DealerExports\Service\RepairOrdersExport;
-use App\Domains\DealerExports\Quotes\QuotesExportAction;
-use App\Domains\DealerExports\BackOffice\PurchaseOrdersExportAction;
 
 /**
  * Class ExportManagerAction
@@ -50,7 +50,7 @@ class ExportManagerAction
         // Service
         RepairOrdersExport::class,
         // Quotes
-        QuotesExportAction::class
+        QuotesExportAction::class,
     ];
 
     /**
