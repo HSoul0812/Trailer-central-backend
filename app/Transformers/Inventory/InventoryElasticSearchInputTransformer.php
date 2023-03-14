@@ -238,7 +238,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
         })->map(function (InventoryImage $image) use ($inventory) {
             if ($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_ALL) {
                 return $image->image->filename_noverlay ? $image->image->filename_noverlay  : $image->image->filename;
-            } elseif($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_PRIMARY && ($image->image->position == 0 || $image->image->is_default == 1))  {
+            } elseif($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_PRIMARY && ($image->position == 1 || $image->is_default == 1))  {
                 return $image->image->filename_noverlay ? $image->image->filename_noverlay  : $image->image->filename;
             } else {
                 return $image->image->filename;
