@@ -28,13 +28,13 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                 'qb_invoices.invoice_date as invoice_date',
                 DB::raw("'Unit Sale' as invoice_type"),
                 'dealer_location.name as invoice_sales_location',
-                'dealer_location.id as invoice_sales_location_id',
+                DB::raw('dealer_location.dealer_location_id as invoice_sales_location_id'),
                 'dms_customer.id as buyer_id',
                 'dms_customer.display_name as buyer_display_name',
                 'dms_customer.address as buyer_address',
                 'dms_customer.city as buyer_city',
                 'dms_customer.county as buyer_county',
-                'dms_customer.state as buyer_state',
+                'dms_customer.region as buyer_state',
                 'dms_customer.postal_code as buyer_postal_code',
                 'dms_customer.cell_phone as buyer_phone',
                 'dms_customer.email as buyer_email',
@@ -326,10 +326,10 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                 ", 'qb_payment')),
                 DB::raw('0 as remaining_balance'),
             ])
-            ->from('qb_invoice_item_inventories')
-            ->leftJoin('qb_invoice_items', 'qb_invoice_items.id', '=', 'qb_invoice_item_inventories.invoice_item_id')
-            ->leftJoin('qb_invoices', 'qb_invoice_items.invoice_id', '=', 'qb_invoices.id')
-            ->leftJoin('dms_unit_sale', 'qb_invoices.unit_sale_id', '=', 'dms_unit_sale.id')
+            ->from('dms_unit_sale')
+            ->leftJoin('qb_invoices', 'qb_invoices.unit_sale_id', '=', 'dms_unit_sale.id')
+            ->leftJoin('qb_invoice_items', 'qb_invoice_items.invoice_id', '=', 'qb_invoices.id')
+            ->leftJoin('qb_invoice_item_inventories', 'qb_invoice_item_inventories.invoice_item_id', '=', 'qb_invoice_items.item_id')
             ->leftJoin('dealer_location', 'dealer_location.dealer_location_id', '=', 'qb_invoices.dealer_location_id')
             ->leftJoin('dealer_location_sales_tax', 'dealer_location_sales_tax.dealer_location_id', '=', 'qb_invoices.dealer_location_id')
             ->leftJoin('dms_customer', 'dms_customer.id', '=', 'qb_invoices.customer_id')
