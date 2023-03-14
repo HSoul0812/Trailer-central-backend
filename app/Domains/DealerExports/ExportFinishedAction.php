@@ -44,11 +44,11 @@ class ExportFinishedAction
         $allExportCount = DealerExport::query()->where('dealer_id', $this->dealer->dealer_id)->count();
         $otherEntityExportCount = DealerExport::query()
             ->where('dealer_id', $this->dealer->dealer_id)
-            ->where('entity_type', 'zip')
+            ->where('entity_type', '!=', 'zip')
             ->where('status', DealerExport::STATUS_PROCESSED)
             ->count();
 
-        if ($otherEntityExportCount=== ($allExportCount - 1)) {
+        if ($otherEntityExportCount === ($allExportCount - 1)) {
             (new CreateZipArchiveAction($this->dealer))->execute();
         }
     }
