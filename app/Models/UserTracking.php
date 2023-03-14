@@ -16,6 +16,7 @@ class UserTracking extends Model
         'website_user_id',
         'event',
         'url',
+        'page_name',
         'meta',
     ];
 

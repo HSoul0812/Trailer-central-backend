@@ -16,4 +16,28 @@ return [
             'allow_ips' => env('TT_MIDDLEWARES_HUMAN_ONLY_ALLOW_IPS', ''),
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Domain  configs
+    |--------------------------------------------------------------------------
+    |
+    | We can use this array to see which domain are hosting frontend and backend
+    | code
+    |
+    */
+
+    'domains' => [
+        'frontend' => [
+            'localhost',
+            'qa.trailertrader.com',
+            'deployment.trailertrader.com',
+            'trailertrader.com',
+        ],
+        'backend' => [
+            'localhost',
+            'https://trailertrader-staging.trailercentral.com',
+            'https://backend.trailertrader.com'
+        ],
+    ],
 ];

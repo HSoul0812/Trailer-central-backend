@@ -21,6 +21,7 @@ class CreateUserTrackingsTable extends Migration
             $table->foreignIdFor(WebsiteUser::class)->nullable()->constrained()->cascadeOnDelete();
             $table->string('event')->default(UserTrackingEvent::PAGE_VIEW);
             $table->string('url', 1000);
+            $table->string('page_name')->nullable();
             $table->jsonb('meta')->nullable()->default(null);
             $table->timestamps();
 
@@ -28,6 +29,7 @@ class CreateUserTrackingsTable extends Migration
             $table->index(['website_user_id']);
             $table->index(['event']);
             $table->index(['url']);
+            $table->index(['page_name']);
             $table->index(['created_at']);
         });
     }
