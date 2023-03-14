@@ -4,10 +4,10 @@ namespace App\Domains\DealerExports\Quotes;
 
 use App\Contracts\DealerExports\EntityActionExportable;
 use App\Domains\DealerExports\BaseExportAction;
-use Illuminate\Support\Facades\DB;
-use App\Models\CRM\Dms\Quickbooks\Item;
 use App\Models\CRM\Account\InvoiceItem;
+use App\Models\CRM\Dms\Quickbooks\Item;
 use App\Models\CRM\Dms\ServiceOrder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class QuotesExportAction
@@ -22,23 +22,25 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
     {
         return DB::query()
             ->select([
+                'dms_unit_sale.*',
                 'qb_invoices.unit_sale_id as unit_sale_id',
                 'qb_invoices.id as invoice_no',
                 'qb_invoices.invoice_date as invoice_date',
                 DB::raw("'Unit Sale' as invoice_type"),
                 'dealer_location.name as invoice_sales_location',
+                'dealer_location.dealer_location_id as invoice_sales_location_id',
+                'dms_customer.id as buyer_id',
                 'dms_customer.display_name as buyer_display_name',
-                DB::raw("if(dms_customer.tax_exempt = 1, 'TRUE', 'FALSE') as tax_exempt"),
-                DB::raw("coalesce(dms_customer.tax_id_number, '') as tax_id_number"),
+                'dms_customer.address as buyer_address',
+                'dms_customer.city as buyer_city',
+                'dms_customer.county as buyer_county',
+                'dms_customer.region as buyer_state',
+                'dms_customer.postal_code as buyer_postal_code',
+                'dms_customer.cell_phone as buyer_phone',
+                'dms_customer.email as buyer_email',
+                DB::raw("if(dms_customer.tax_exempt = 1, 'TRUE', 'FALSE') as buyer_tax_exempt"),
+                'dms_customer.tax_id_number as buyer_tax_id',
                 DB::raw("if(dms_customer.is_wholesale = 1, 'TRUE', 'FALSE') as wholesale_customer"),
-                'dms_customer.default_discount_percent as default_discount',
-                DB::raw("coalesce(dms_customer.address, '') as billing_address"),
-                DB::raw("coalesce(dms_customer.city, '') as billing_city"),
-                DB::raw("coalesce(dms_customer.county, '') as billing_county"),
-                DB::raw("coalesce(dms_customer.region, '') as billing_state"),
-                DB::raw("coalesce(dms_customer.postal_code, '') as billing_postal_code"),
-                DB::raw("coalesce(dms_customer.country, '') as billing_country"),
-                'dms_unit_sale.sales_person_id',
                 DB::raw("CONCAT(sales_person_1.first_name, ' ', sales_person_1.last_name) as sales_person_1"),
                 DB::raw("coalesce(concat(sales_person_2.first_name, ' ', sales_person_2.last_name), '') as sales_person_2"),
                 'dms_unit_sale.tax_profile as tax_profile',
@@ -102,20 +104,20 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                 DB::raw("coalesce(qb_vendors.name, '') as unit_floorplan_vendor"),
                 DB::raw("coalesce(if(inventory.fp_committed = '0000-00-00', '', inventory.fp_committed), '') as unit_floorplan_committed_date"),
                 DB::raw('coalesce(inventory.fp_balance, 0) as unit_floorplan_balance'),
-                DB::raw("
+                DB::raw('
                     coalesce((
                         select sum(trade_in_trade_value_trade_in.trade_value)
                         from dms_unit_sale_trade_in_v1 as trade_in_trade_value_trade_in
                         where trade_in_trade_value_trade_in.unit_sale_id = dms_unit_sale.id
                     ), 0) as trade_in_trade_value
-                "),
-                DB::raw("
+                '),
+                DB::raw('
                     coalesce((
                         select sum(coalesce(trade_in_trade_value_trade_in.lien_payoff_amount, 0))
                         from dms_unit_sale_trade_in_v1 as trade_in_trade_value_trade_in
                         where trade_in_trade_value_trade_in.unit_sale_id = dms_unit_sale.id
                     ), 0) as trade_in_lien_payoff_amount
-                "),
+                '),
                 DB::raw('0 as trade_in_net_trade'),
                 DB::raw(sprintf("
                     coalesce((
@@ -232,22 +234,22 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                     ), 0) as part_discount
                 ", 'Part Discount')),
                 DB::raw('0 as part_tax_rate_applied'),
-                DB::raw("
+                DB::raw('
                     (
                         select sum(part_total_taxable_amount_accessory.qty * part_total_taxable_amount_accessory.price)
                         from dms_unit_sale_accessory as part_total_taxable_amount_accessory
                         where qb_invoices.unit_sale_id = part_total_taxable_amount_accessory.unit_sale_id
                         and part_total_taxable_amount_accessory.taxable = 1
                     ) as part_total_taxable_amount
-                "),
-                DB::raw("
+                '),
+                DB::raw('
                     (
                         select sum(part_total_taxable_amount_accessory.qty * part_total_taxable_amount_accessory.price)
                         from dms_unit_sale_accessory as part_total_taxable_amount_accessory
                         where qb_invoices.unit_sale_id = part_total_taxable_amount_accessory.unit_sale_id
                         and part_total_taxable_amount_accessory.taxable = 0
                     ) as part_total_nontaxable_amount
-                "),
+                '),
                 DB::raw('0 as part_total_taxable_amount_after_discount'),
                 DB::raw('0 as part_state_tax_amount'),
                 DB::raw('0 as part_county_tax_amount'),
@@ -354,13 +356,24 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
     {
         $this->setEntity(self::ENTITY_TYPE)
             ->setHeaders([
+                'unit_sale_id' => 'Quote/Deal Identifier',
+                'title' => 'Quote/Deal Title',
                 'invoice_no' => 'Invoice No.',
                 'invoice_date' => 'Invoice Date',
                 'invoice_type' => 'Invoice Type',
+                'invoice_sales_location_id' => 'Invoice (Sales) Location Identifier',
                 'invoice_sales_location' => 'Invoice (Sales) Location',
-                'buyer_display_name' => 'Buyer Display Name',
-                'tax_exempt' => 'Tax Exempt: True/False',
-                'tax_id_number' => 'Tax ID Number',
+                'buyer_id' => 'Buyer Identifier',
+                'buyer_display_name' => 'Buyer Name',
+                'buyer_address' => 'Buyer Address',
+                'buyer_city' => 'Buyer City',
+                'buyer_county' => 'Buyer County',
+                'buyer_state' => 'Buyer State',
+                'buyer_postal_code' => 'Buyer Zip Code',
+                'buyer_phone' => 'Buyer Phone',
+                'buyer_email' => 'Buyer Email',
+                'buyer_tax_exempt' => 'Buyer Is Tax Exempt',
+                'buyer_tax_id' => 'Buyer Tax ID',
                 'wholesale_customer' => 'Wholesale Customer: True/False',
                 'default_discount' => 'Default Discount',
                 'billing_address' => 'Billing Address',
@@ -369,8 +382,11 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                 'billing_state' => 'Billing State',
                 'billing_postal_code' => 'Billing Postal Code',
                 'billing_country' => 'Billing Country',
-                'sales_person_1' => 'Sales Person 1',
-                'sales_person_2' => 'Sales Person 2',
+                'sales_person_id' => 'Sales Person 1 Identifier',
+                'sales_person_1' => 'Sales Person 1 Name',
+                'sales_person1_id' => 'Sales Person 2 Identifier',
+                'sales_person_2' => 'Sales Person 2 Name',
+                'deliver_at' => 'Delivery Date',
                 'tax_profile' => 'Tax Profile',
                 'unit_stock' => 'Unit Stock #',
                 'unit_vin' => 'Unit VIN',
