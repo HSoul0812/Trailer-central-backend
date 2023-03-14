@@ -20,7 +20,7 @@ class InventoryImageTransformer extends MediaFileTransformer
             'is_secondary' => $inventoryImage->is_secondary,
             'position' => $inventoryImage->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION : $position,
             'url' => $this->getBaseUrl() . (is_object($inventoryImage->image) ? $inventoryImage->image->filename : ''),
-            'original_url' => $originalImageUrl
+            'original_url' => $this->getBaseUrl() . $originalImageUrl
         ];
     }
 
@@ -33,7 +33,7 @@ class InventoryImageTransformer extends MediaFileTransformer
     {
         if ($inventory_overlay_enabled == Inventory::OVERLAY_ENABLED_ALL) {
             return $inventoryImage->image->filename_noverlay ? $inventoryImage->image->filename_noverlay : $inventoryImage->image->filename;
-        } elseif($inventory_overlay_enabled == Inventory::OVERLAY_ENABLED_PRIMARY && ($inventoryImage->image->is_default == 1 || $inventoryImage->image->position == 1))  {
+        } elseif($inventory_overlay_enabled == Inventory::OVERLAY_ENABLED_PRIMARY && ($inventoryImage->is_default == 1 || $inventoryImage->position == 1))  {
             return $inventoryImage->image->filename_noverlay ? $inventoryImage->image->filename_noverlay : $inventoryImage->image->filename;
         } else {
             return $inventoryImage->image->filename;
