@@ -15,6 +15,10 @@ class GetPageNameFromUrlActionTest extends TestCase
 
     const PDP_URL_OTHER_DOMAIN = 'https://otherdomain.com/new-2023-load-rite-146-v-bunk-boat-trailer--QS9o.html';
 
+    const DEALER_URL = 'https://trailertrader.com/trailer-dealer-in-West-Berlin-NJ/Franklin-Trailers,-Inc.-trailer-sales';
+
+    const DEALER_URL_OTHER_DOMAIN = 'https://otherdomain.com/trailer-dealer-in-West-Berlin-NJ/Franklin-Trailers,-Inc.-trailer-sales';
+
     const OTHER_URL = 'https://google.com';
 
     public function testItCanGetPageNameFromUrl()
@@ -27,11 +31,14 @@ class GetPageNameFromUrlActionTest extends TestCase
             ],
         ]);
 
-        $this->assertEquals('TT_PLP', $action->execute(self::PLP_URL));
+        $this->assertEquals(GetPageNameFromUrlAction::PAGE_NAMES['TT_PLP'], $action->execute(self::PLP_URL));
         $this->assertNull($action->execute(self::PLP_URL_OTHER_DOMAIN));
 
-        $this->assertEquals('TT_PDP', $action->execute(self::PDP_URL));
+        $this->assertEquals(GetPageNameFromUrlAction::PAGE_NAMES['TT_PDP'], $action->execute(self::PDP_URL));
         $this->assertNull($action->execute(self::PDP_URL_OTHER_DOMAIN));
+
+        $this->assertEquals(GetPageNameFromUrlAction::PAGE_NAMES['TT_DEALER'], $action->execute(self::DEALER_URL));
+        $this->assertNull($action->execute(self::DEALER_URL_OTHER_DOMAIN));
 
         $this->assertNull($action->execute(self::OTHER_URL));
     }
