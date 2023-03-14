@@ -35,6 +35,10 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
      */
     public function create($params): WebsiteImage
     {
+        if (!isset($params['is_active'])) {
+            $params['is_active'] = 1;
+        }
+
         if (isset($params['starts_from'])) {
             $params['is_active'] = intval(Carbon::parse($params['starts_from'])->isPast());
         }
@@ -42,7 +46,7 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
         if (isset($params['expires_at'])) {
             $params['is_active'] = intval(Carbon::parse($params['expires_at'])->isFuture());
         }
-        
+
         return WebsiteImage::create($params);
     }
 
@@ -89,7 +93,18 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
      */
     public function delete($params)
     {
-        throw new NotImplementedException;
+        if (!isset($params['id'])) {
+            throw new InvalidArgumentException("Website Image ID is required");
+        }
+
+        if (!isset($params['website_id'])) {
+            throw new InvalidArgumentException("Website ID is required");
+        }
+
+        WebsiteImage::where([
+            'identifier' => $params['id'],
+            'website_id' => $params['website_id']
+        ])->delete();
     }
 
     /**
