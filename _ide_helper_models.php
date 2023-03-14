@@ -424,6 +424,7 @@ namespace App\Models{
  * @property int|null $website_user_id
  * @property string $event
  * @property string $url
+ * @property string|null $page_name
  * @property array|null $meta
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -436,6 +437,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereEvent($value)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereMeta($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking wherePageName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereUrl($value)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereVisitorId($value)
