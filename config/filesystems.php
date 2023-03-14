@@ -35,6 +35,11 @@ return [
             'root'   => storage_path('app'),
         ],
 
+        'inventory-view-and-impression-reports' => [
+            'driver' => 'local',
+            'root' => storage_path('app/reports/inventory/view-and-impression'),
+        ],
+
         'public' => [
             'driver'     => 'local',
             'root'       => storage_path('app/public'),
