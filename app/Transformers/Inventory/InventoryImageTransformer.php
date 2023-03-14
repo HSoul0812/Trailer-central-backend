@@ -33,7 +33,7 @@ class InventoryImageTransformer extends MediaFileTransformer
     {
         if ($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_ALL) {
             return $inventoryImage->image->filename_noverlay ? $inventoryImage->image->filename_noverlay : $inventoryImage->image->filename;
-        } elseif($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_PRIMARY && $inventoryImage->image->is_default)  {
+        } elseif($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_PRIMARY && ($inventoryImage->image->is_default == 1 || $inventoryImage->image->position == 1))  {
             return $inventoryImage->image->filename_noverlay ? $inventoryImage->image->filename_noverlay : $inventoryImage->image->filename;
         } else {
             return $inventoryImage->image->filename;
