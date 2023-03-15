@@ -163,6 +163,7 @@ return [
                     'crm-users',
                     'manufacturers',
                     //'hot-potato'
+                    'dealer-exports',
                 ],
                 'balance' => 'auto',
                 'processes' => 1,
@@ -210,6 +211,7 @@ return [
                     'crm-users',
                     'manufacturers',
                     //'hot-potato'
+                    'dealer-exports',
                 ],
                 'balance' => 'auto',
                 'processes' => 1,
@@ -285,7 +287,7 @@ return [
             ],
             'supervisor-5' => [
                 'connection' => 'redis',
-                'queue' => ['reports', 'emailbuilder'],
+                'queue' => ['reports', 'emailbuilder', 'dealer-exports'],
                 'balance' => 'auto',
                 'minProcesses' => 1,
                 'maxProcesses' => 3,
@@ -360,7 +362,7 @@ return [
             ],
             'supervisor-5' => [
                 'connection' => 'redis',
-                'queue' => ['reports', 'emailbuilder'],
+                'queue' => ['reports', 'emailbuilder', 'dealer-exports'],
                 'balance' => 'auto',
                 'minProcesses' => 3,
                 'maxProcesses' => 30,
