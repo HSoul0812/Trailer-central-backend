@@ -37,7 +37,6 @@ use Illuminate\Support\Facades\Queue;
  */
 class UploadControllerTest extends IntegrationTestCase
 {
-
     /**
      * @var FactoryUpload
      */
@@ -90,7 +89,7 @@ class UploadControllerTest extends IntegrationTestCase
         $response = $controller->upload($request, $code);
 
         // Then I should see that job wit a specific name was enqueued
-        Queue::assertPushedOn('factory-feeds', DealerFeedImporterJob::class, function($job) use ($code) {
+        Queue::assertPushedOn('factory-feeds', DealerFeedImporterJob::class, function ($job) use ($code) {
             $job->handle($this->factoryUpload);
             return true;
         });
@@ -109,6 +108,8 @@ class UploadControllerTest extends IntegrationTestCase
      */
     public function testHttpUploadWithValidParameters($code, $request)
     {
+        Bus::fake();
+
         $seeder = new UserSeeder();
         $seeder->seed();
 
@@ -118,12 +119,10 @@ class UploadControllerTest extends IntegrationTestCase
             'access-token' => $seeder->authToken->access_token
         ];
 
-        $this->factoryUpload
-             ->shouldReceive('run')
-             ->once();
-
         $this->json('POST', "/api/feed/uploader/{$code}", $decode, $headers)
              ->assertStatus(200);
+
+        Bus::assertDispatched(DealerFeedImporterJob::class);
 
         $seeder->cleanUp();
     }
