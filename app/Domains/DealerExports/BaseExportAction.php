@@ -7,6 +7,8 @@ use Exception;
 use Illuminate\Filesystem\FilesystemAdapter;
 use League\Csv\Writer;
 use Storage;
+use Illuminate\Support\Facades\Log;
+use App\Models\DealerExport;
 
 /**
  * Class BaseExportAction
@@ -126,13 +128,29 @@ abstract class BaseExportAction
     {
         (new ExportStartAction($this->dealer, $this->entity))->execute();
 
-        $this->setFileName()
-            ->initiateWriter()
-            ->writeHeader()
-            ->fetchResults()
-            ->writeResults()
-            ->generateFile()
-            ->uploadFile();
+        try {
+            $this->setFileName()
+                ->initiateWriter()
+                ->writeHeader()
+                ->fetchResults()
+                ->writeResults()
+                ->generateFile()
+                ->uploadFile();
+        } catch (Exception $e) {
+            Log::channel('dealer-export')->error('Error occurred while exporting ' . $this->entity . ' Line #: ' . $e->getLine());
+            Log::channel('dealer-export')->error(
+                'Exception: ' . $e->getMessage()
+            );
+
+            DealerExport::query()
+                ->where('dealer_id', $this->dealer->dealer_id)
+                ->where('entity_type', $this->entity)
+                ->update([
+                    'status' => DealerExport::STATUS_ERROR,
+                ]);
+
+            return;
+        }
 
         (new ExportFinishedAction($this->dealer, $this->entity, $this->storage->url($this->filename)))->execute();
     }
