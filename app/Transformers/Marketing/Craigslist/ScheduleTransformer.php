@@ -23,10 +23,11 @@ class ScheduleTransformer extends TransformerAbstract
         $itemStyling = $this->itemStyling($queue);
 
         return [
-            "queue_id" => "queue_{$queue->queue_id}",
+            "id" => "queue_{$queue->queue_id}",
+            "queue_id" => $queue->queue_id,
             "session_id" => $queue->session_id,
-            "inventory_id" => CompactHelper::shorten($queue->inventory_id),
-            "real_inventory_id" => $queue->inventory_id,
+            "inventory" => CompactHelper::shorten($queue->inventory_id),
+            "inventory_id" => $queue->inventory_id,
             "archived" => boolval($queue->is_archived),
             "title" => $queue->title,
             "stock" => $queue->stock,
@@ -37,7 +38,7 @@ class ScheduleTransformer extends TransformerAbstract
             "allDay" => boolval($startAndEndTimes['allDay']),
             "start" => $startAndEndTimes['start'],
             "end" => $startAndEndTimes['end'],
-            "text_status" => $queue->text_status,
+            "error" => ($queue->status === 'error') ? $queue->text_status : '',
             "durationEditable" => false,
             "className" => $itemStyling['className'],
             "editable" => $itemStyling['editable'],
