@@ -227,6 +227,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         ],
         'image'                => ['type' => 'keyword'],
         'images'               => ['type' => 'keyword'],
+        'originalImages'       => ['type' => 'keyword'],
         'imagesSecondary'      => ['type' => 'keyword'],
         'numberOfImages'       => ['type' => 'integer'],
         'widthInches'          => ['type' => 'float'],
@@ -295,6 +296,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
                 ]
             ]
         ])->index([
+            'mapping.ignore_malformed' => true,
             'number_of_shards' => config('elastic.scout_driver.settings.inventory.number_of_shards'),
             'number_of_replicas' => config('elastic.scout_driver.settings.inventory.number_of_replicas'),
             'refresh_interval' => config('elastic.scout_driver.settings.inventory.refresh_interval')
