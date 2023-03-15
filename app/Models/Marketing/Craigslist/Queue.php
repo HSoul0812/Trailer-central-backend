@@ -31,6 +31,28 @@ class Queue extends Model
     const RENTAL_SUFFIX = ' [Rental]';
 
 
+    /**
+     * Command Add
+     * 
+     * @const string
+     */
+    const COMMAND_ADD = 'postAdd';
+
+    /**
+     * Command Edit
+     * 
+     * @const string
+     */
+    const COMMAND_EDIT = 'postEdit';
+
+    /**
+     * Command Delete
+     * 
+     * @const string
+     */
+    const COMMAND_DELETE = 'postDelete';
+
+
     // Define Table Name Constant
     const TABLE_NAME = 'clapp_queue';
 
@@ -119,6 +141,51 @@ class Queue extends Model
     {
         return $this->belongsTo(Session::class, ['session_id', 'dealer_id', 'profile_id'],
                                 ['session_id', 'session_dealer_id', 'session_profile_id']);
+    }
+
+    /**
+     * Get Updates for Queue
+     * 
+     * @return HasMany
+     */
+    public function updates(): BelongsTo
+    {
+        return $this->hasMany(Queue::class, 'queue_id', 'parent_id');
+    }
+
+    /**
+     * Get Edit Updates for Queue
+     * 
+     * @return HasMany
+     */
+    public function edits(): HasMany
+    {
+        return $this->updates()->where('command', self::COMMAND_EDIT)
+                    ->where('status', '<>', 'done')
+                    ->where('status', '<>', 'error');
+    }
+
+    /**
+     * Get Unfinished Deletes for Queue
+     * 
+     * @return HasMany
+     */
+    public function deleting(): HasMany
+    {
+        return $this->updates()->where('command', self::COMMAND_DELETE)
+                    ->where('status', '<>', 'done');
+                    ->where('status', '<>', 'error');
+    }
+
+    /**
+     * Get Finished Deletes for Queue
+     * 
+     * @return HasMany
+     */
+    public function deleted(): HasMany
+    {
+        return $this->updates()->where('command', self::COMMAND_DELETE)
+                    ->where('status', '=', 'done');
     }
 
     /**

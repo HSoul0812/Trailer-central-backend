@@ -3,6 +3,7 @@
 namespace App\Transformers\Marketing\Craigslist;
 
 use App\Models\Marketing\Craigslist\Queue;
+use App\Models\Inventory\Inventory;
 use App\Traits\CompactHelper;
 use League\Fractal\TransformerAbstract;
 
@@ -85,19 +86,22 @@ class ScheduleTransformer extends TransformerAbstract
         $editable = false;
         $color = '';
 
-        if (!empty($queue->q_status)) {
+        if (!empty($queue->edits)) {
             $className = 'edit';
             $color = 'darkolivegreen';
-        } elseif (!empty($queue->d_status)) {
-            if ($queue->d_status === 'done') {
+        } elseif (!empty($queue->deleted)) {
                 $className = 'deleted';
                 $color = 'black';
-            }
+        } elseif (!empty($queue->deleting)) {
+            $className = 'deleting';
+            $color = 'darkred';
         } elseif ($queue->status === 'error' || $queue->status === 'canceled') {
-            if ($queue->state === 'missing-data' || $queue->s_state === 'missing-data') {
+            if ($queue->state === 'missing-data' ||
+                $queue->session->state === 'missing-data' ||
+                strpos('invalid-', $queue->session->state) !== FALSE) {
                 $className = 'data';
                 $color = 'orangered';
-            } elseif ($queue->s_state === 'manual-stop' || $queue->staus === 'canceled') {
+            } elseif ($queue->session->state === 'manual-stop' || $queue->staus === 'canceled') {
                 $className = 'stopped';
                 $color = 'gray';
             } else {
@@ -116,7 +120,7 @@ class ScheduleTransformer extends TransformerAbstract
                 $color = 'green';
             }
         } else {
-            if ($queue->i_status == '2') {
+            if ($queue->inventory->status === Inventory::STATUS_SOLD) {
                 $className = 'sold';
                 $color = 'brown';
             } else {
