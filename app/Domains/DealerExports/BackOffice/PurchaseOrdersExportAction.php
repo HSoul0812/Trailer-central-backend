@@ -36,7 +36,7 @@ class PurchaseOrdersExportAction extends BaseExportAction implements EntityActio
             ->setHeaders([
                 'user_defined_id' => 'PO #',
                 'date_opened' => 'Created Date',
-                'shiping_date' => 'Ordered Date',
+                'shipping_date' => 'Ordered Date',
                 'status' => 'Status',
                 'vendor_id' => 'Vendor Identifier',
                 'vendor_name' => 'Vendor Name',
