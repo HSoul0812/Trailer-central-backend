@@ -531,7 +531,7 @@ class Queue extends Model
     public function getPrimaryImageAttribute(): string {
         // Return Primary Image for Parts
         if($this->type === 'parts' && !empty($this->part->images)) {
-            return $this->images[0];
+            return $this->part->images[0];
         } elseif(!empty($this->inventory) && !empty($this->inventory->primary_image)) {
             // Return Primary Image for Inventory
             return config('app.cdn_url') . $this->inventory->primary_image->image->filename;
@@ -541,6 +541,6 @@ class Queue extends Model
         }
 
         // Return First Image in Parameters If Available
-        return $this->parameters->images[0] ? config('app.cdn_url') . $this->parameters->images[0] : '';
+        return !empty($this->parameters->images[0]) ? config('app.cdn_url') . $this->parameters->images[0] : '';
     }
 }
