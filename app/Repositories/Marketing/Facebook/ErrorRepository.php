@@ -219,10 +219,6 @@ class ErrorRepository implements ErrorRepositoryInterface {
      */
     public function dismissAllActiveForIntegration(int $marketplaceId): Collection
     {
-        $fbMarketplaceIntegration = Marketplace::find($marketplaceId);
-        $fbMarketplaceIntegration->retry_after_ts = NULL;
-        $fbMarketplaceIntegration->save();
-        
         // Get Errors
         $errors = $this->getAll([
             'marketplace_id' => $marketplaceId,
