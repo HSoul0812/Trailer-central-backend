@@ -97,6 +97,22 @@ class RepairOrdersExport extends BaseExportAction implements EntityActionExporta
                 DB::raw('payments.created_at as repair_order_payments_created_at'),
                 DB::raw('payment_methods.name as repair_order_payments_payment_method_name'),
                 DB::raw('payment_methods.type as repair_order_payments_payment_method_type'),
+                // Quote
+                DB::raw('dms_repair_order.unit_sale_id as dms_repair_order_quote_id'),
+                // DB::raw('dms_unit_sale.title as dms_repair_order_quote_title'),
+                // Inventories or Unit
+                DB::raw('dms_repair_order.inventory_id as dms_repair_order_inventory_id'),
+                DB::raw('inventory.title as inventory_title'),
+                DB::raw('inventory.vin as inventory_vin'),
+                DB::raw('inventory.weight as inventory_weight'),
+                DB::raw('inventory.length as inventory_length'),
+                DB::raw('inventory.width as inventory_width'),
+                DB::raw('inventory.manufacturer as inventory_manufacturer'),
+                DB::raw('inventory.condition as inventory_condition'),
+                DB::raw('inventory.year as inventory_year'),
+                DB::raw('inventory.brand as inventory_brand'),
+                DB::raw('inventory.category as inventory_category'),
+
             ])
             ->leftJoin('dealer_location as dl', 'dl.dealer_location_id', '=', 'dms_repair_order.location')
             ->leftJoin('dms_customer as customer', 'customer.id', '=', 'dms_repair_order.customer_id')
@@ -113,6 +129,8 @@ class RepairOrdersExport extends BaseExportAction implements EntityActionExporta
             ->leftJoin('qb_invoices as invoices', 'invoices.repair_order_id', '=', 'dms_repair_order.id')
             ->leftJoin('qb_payment as payments', 'payments.invoice_id', '=', 'invoices.id')
             ->leftJoin('qb_payment_methods as payment_methods', 'payment_methods.id', '=', 'payments.payment_method_id')
+            // ->leftJoin('dms_unit_sale', 'dms_unit_sale.unit_sale_id', '=', 'dms_repair_order.unit_sale_id')
+            ->leftJoin('inventory', 'inventory.inventory_id', '=', 'dms_repair_order.inventory_id')
             ->leftJoinSub($groupedPayments, 'invoice', function ($join) {
                 $join->on('dms_repair_order.id', '=', 'invoice.repair_order_id');
             })
@@ -205,6 +223,21 @@ class RepairOrdersExport extends BaseExportAction implements EntityActionExporta
                 'repair_order_payments_created_at' => 'Payment Created Date',
                 'repair_order_payments_payment_method_name' => 'Payment Method Name',
                 'repair_order_payments_payment_method_type' => 'Payment Method Type',
+                // Quote Details
+                'dms_repair_order_quote_id' => 'Quote Id',
+                // 'dms_repair_order_quote_title' => 'Quote Title',
+                // Inventory Details
+                'dms_repair_order_inventory_id' => 'Inventory Id',
+                'inventory_title' => 'Inventory Title',
+                'inventory_vin' => 'Inventory Vin',
+                'inventory_weight' => 'Inventory Weight',
+                'inventory_length' => 'Inventory Length',
+                'inventory_width' => 'Inventory Width',
+                'inventory_manufacturer' => 'Inventory Manufacturer',
+                'inventory_condition' => 'Inventory Condition',
+                'inventory_year' => 'Inventory Year',
+                'inventory_brand' => 'Inventory Brand',
+                'inventory_category' => 'Inventory Category',
             ])
             ->export();
     }
