@@ -343,7 +343,7 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
             ->leftJoin('dms_customer', 'dms_customer.id', '=', 'qb_invoices.customer_id')
             ->leftJoin('crm_sales_person as sales_person_1', 'sales_person_1.id', '=', 'dms_unit_sale.sales_person_id')
             ->leftJoin('crm_sales_person as sales_person_2', 'sales_person_2.id', '=', 'dms_unit_sale.sales_person1_id')
-            ->leftJoin('inventory', 'inventory.inventory_id', '=', 'qb_invoice_item_inventories.inventory_id')
+            ->leftJoin('inventory', 'inventory.inventory_id', '=', 'dms_unit_sale.inventory_id')
             ->leftJoin('dms_purchase_order_inventory', 'inventory.inventory_id', '=', 'dms_purchase_order_inventory.inventory_id')
             ->leftJoin('dms_purchase_order', 'dms_purchase_order.id', '=', 'dms_purchase_order_inventory.purchase_order_id')
             ->leftJoin('eav_entity_type', 'eav_entity_type.entity_type_id', '=', 'inventory.entity_type_id')
@@ -362,8 +362,8 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                 $query->on('dealer_refunds.tb_primary_id', '=', 'dms_unit_sale.id')
                     ->where('dealer_refunds.tb_name', 'dms_unit_sale');
             })
-            ->where('qb_invoices.dealer_id', $this->dealer->dealer_id)
-            ->orderBy('qb_invoices.invoice_date');
+            ->where('dms_unit_sale.dealer_id', $this->dealer->dealer_id)
+            ->orderBy('dms_unit_sale.id', 'desc');
     }
 
     public function execute(): void
