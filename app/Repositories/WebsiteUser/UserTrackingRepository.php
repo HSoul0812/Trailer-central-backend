@@ -15,10 +15,6 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
     {
         if (!array_key_exists('website_user_id', $params)) {
             $params['website_user_id'] = $this->getWebsiteUserIdFromAuth();
-
-            if ($params['website_user_id'] === null) {
-                $params['website_user_id'] = $this->getWebsiteUserIdFromLatestRecordWithWebsiteUserId($params);
-            }
         }
 
         if (empty($params['meta'])) {
@@ -38,16 +34,6 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
             callback: fn() => auth('api')->user()?->id,
             report: false,
         );
-    }
-
-    private function getWebsiteUserIdFromLatestRecordWithWebsiteUserId(array $params): ?int
-    {
-        return UserTracking::query()
-            ->where('visitor_id', $params['visitor_id'])
-            ->whereNotNull('website_user_id')
-            ->latest()
-            ->first(['website_user_id'])
-            ?->website_user_id;
     }
 
     private function getPageName(mixed $url): ?string
