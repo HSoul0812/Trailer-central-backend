@@ -158,7 +158,7 @@ class Queue extends Model
      * 
      * @return HasMany
      */
-    public function edits(): HasMany
+    public function queueEdits(): HasMany
     {
         return $this->updates()->where('command', self::COMMAND_EDIT)
                     ->where('status', '<>', 'done')
@@ -170,7 +170,7 @@ class Queue extends Model
      * 
      * @return HasMany
      */
-    public function deletes(): HasMany
+    public function queueDeleting(): HasMany
     {
         return $this->updates()->where('command', self::COMMAND_DELETE)
                     ->where('status', '<>', 'done')
@@ -182,7 +182,7 @@ class Queue extends Model
      * 
      * @return HasMany
      */
-    public function deleted(): HasMany
+    public function queueDeleted(): HasMany
     {
         return $this->updates()->where('command', self::COMMAND_DELETE)
                     ->where('status', '=', 'done');
