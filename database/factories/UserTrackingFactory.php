@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Domains\UserTracking\Types\UserTrackingEvent;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Str;
 
 class UserTrackingFactory extends Factory
 {

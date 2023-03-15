@@ -1,14 +1,18 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Report;
 
 use App\Domains\UserTracking\Exporters\InventoryViewAndImpressionCsvExporter;
+use App\Domains\UserTracking\Mail\ReportInventoryViewAndImpressionEmail;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Mail;
 use Throwable;
 
 class ReportInventoryViewAndImpressionCommand extends Command
 {
+    const DATE_FORMAT = 'Y-m-d';
+
     /**
      * The name and signature of the console command.
      *
@@ -28,7 +32,7 @@ class ReportInventoryViewAndImpressionCommand extends Command
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(private InventoryViewAndImpressionCsvExporter $exporter)
     {
         parent::__construct();
     }
@@ -36,28 +40,34 @@ class ReportInventoryViewAndImpressionCommand extends Command
     /**
      * Execute the console command.
      *
-     * @param InventoryViewAndImpressionCsvExporter $exporter
      * @return int
      */
-    public function handle(InventoryViewAndImpressionCsvExporter $exporter): int
+    public function handle(): int
     {
-        $dateFormat = 'Y-m-d';
         $date = $this->argument('date');
 
         try {
-            $from = Carbon::createFromFormat($dateFormat, $date)->startOfDay();
+            $from = Carbon::createFromFormat(self::DATE_FORMAT, $date)->startOfDay();
         } catch (Throwable) {
-            $this->error("Invalid date format, accepting only Y-m-d format.");
+            $this->error(sprintf("Invalid date format, accepting only %s format.", self::DATE_FORMAT));
 
             return 1;
         }
 
         $to = $from->clone()->endOfDay();
 
-        $exporter
+        $filePath = $this->exporter
             ->setFrom($from)
             ->setTo($to)
             ->export();
+
+        $sendMail = config('trailertrader.report.inventory-view-and-impression.send_mail');
+
+        if ($sendMail) {
+            $mailTo = config('trailertrader.report.inventory-view-and-impression.mail_to');
+
+            Mail::to($mailTo)->send(new ReportInventoryViewAndImpressionEmail($filePath, $date));
+        }
 
         return 0;
     }
