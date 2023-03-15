@@ -803,7 +803,6 @@ class Validation
                     'validation' => array('sold', 'available', 'on_order')
                 ),
                 'length'              => array(
-                    'required'   => true,
                     'validation' => '/.+/'
                 ),
                 'width'               => array(
