@@ -173,7 +173,7 @@ class Queue extends Model
     public function deleting(): HasMany
     {
         return $this->updates()->where('command', self::COMMAND_DELETE)
-                    ->where('status', '<>', 'done');
+                    ->where('status', '<>', 'done')
                     ->where('status', '<>', 'error');
     }
 
