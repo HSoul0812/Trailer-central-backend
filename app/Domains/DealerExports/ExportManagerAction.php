@@ -74,7 +74,7 @@ class ExportManagerAction
                 ['status' => DealerExport::STATUS_QUEUED, 'file_path' => '']
             );
 
-            DealerDataExportJob::dispatch($this->dealer, $exportAction);
+            DealerDataExportJob::dispatch($this->dealer, $exportAction)->onQueue('dealer-exports');
         }
     }
 }
