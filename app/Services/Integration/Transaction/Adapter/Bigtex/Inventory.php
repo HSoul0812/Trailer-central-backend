@@ -10,7 +10,7 @@ use App\Services\Integration\Transaction\Adapter\Pj\Inventory as PjInventory;
  */
 class Inventory extends PjInventory
 {
-    private const MANUFACTURE_NAME = 'BigTex';
+    private const MANUFACTURE_NAME = 'Big Tex Trailers';
 
     /**
      * @return string
