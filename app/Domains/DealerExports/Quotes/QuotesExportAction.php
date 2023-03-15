@@ -44,6 +44,8 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                 DB::raw("CONCAT(sales_person_1.first_name, ' ', sales_person_1.last_name) as sales_person_1"),
                 DB::raw("coalesce(concat(sales_person_2.first_name, ' ', sales_person_2.last_name), '') as sales_person_2"),
                 'dms_unit_sale.tax_profile as tax_profile',
+                'dms_unit_sale.inventory_id as unit_id',
+                'inventory.title as unit_title',
                 'inventory.stock as unit_stock',
                 DB::raw("coalesce(inventory.vin, '') as unit_vin"),
                 'eav_entity_type.title as unit_type',
@@ -51,6 +53,9 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                 'inventory.year as unit_year',
                 'inventory.manufacturer as unit_mfg',
                 'inventory.model as unit_model',
+                'inventory.gvwr as unit_gvwr',
+                'inventory.brand as unit_brand',
+                'unit_location.dealer_location_id as unit_location_id',
                 'unit_location.name as unit_location',
                 DB::raw("if(inventory.condition = 'new', 'New', if(inventory.condition = 'used', 'Used', 'Dealer')) as unit_condition"),
                 'qb_invoice_items.unit_price as unit_retail_price',
@@ -388,6 +393,8 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                 'sales_person_2' => 'Sales Person 2 Name',
                 'deliver_at' => 'Delivery Date',
                 'tax_profile' => 'Tax Profile',
+                'unit_id' => 'Unit Identifier',
+                'unit_title' => 'Unit Title',
                 'unit_stock' => 'Unit Stock #',
                 'unit_vin' => 'Unit VIN',
                 'unit_type' => 'Unit Type',
@@ -395,6 +402,9 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                 'unit_year' => 'Unit Year',
                 'unit_mfg' => 'Unit Mfg',
                 'unit_model' => 'Unit Model',
+                'unit_gvwr' => 'Unit GVWR',
+                'unit_brand' => 'Unit Make',
+                'unit_location_id' => 'Unit Location Identifier',
                 'unit_location' => 'Unit Location',
                 'unit_condition' => 'Unit N/U/D',
                 'unit_retail_price' => 'Unit Retail Price',
@@ -461,6 +471,7 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                 'payment_date' => 'Payment Date',
                 'payment_received_total_amount' => 'Payments Received Total Amount',
                 'remaining_balance' => 'Remaining Balance',
+                'use_local_tax' => 'Use Customer address for tax'
             ])
             ->export();
     }
