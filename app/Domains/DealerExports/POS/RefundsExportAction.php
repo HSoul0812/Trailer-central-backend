@@ -34,6 +34,7 @@ class RefundsExportAction extends BaseExportAction implements EntityActionExport
     {
         $this->setEntity(self::ENTITY_TYPE)
             ->setHeaders([
+                'id' => 'Refund Identifier',
                 'amount' => 'Amount',
                 'created_at' => 'Created Date',
                 'doc_num' => 'Document #',

@@ -320,6 +320,7 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                 DB::raw('dms_unit_sale.total_price as total_amount_due'),
                 'qb_payment_methods.name as payment_type',
                 'qb_payment.date as payment_date',
+                'qb_payment.id as payment_id',
                 DB::raw(sprintf("
                     (
                         select coalesce(sum(qb_payment.amount), 0) - coalesce(sum(payment_dealer_refunds.amount), 0)
@@ -330,6 +331,8 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                     ) as payment_received_total_amount
                 ", 'qb_payment')),
                 DB::raw('0 as remaining_balance'),
+                DB::raw('dealer_refunds.id as refund_id'),
+                DB::raw('dms_purchase_order.user_defined_id as po_number'),
             ])
             ->from('dms_unit_sale')
             ->leftJoin('qb_invoices', 'qb_invoices.unit_sale_id', '=', 'dms_unit_sale.id')
@@ -341,6 +344,8 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
             ->leftJoin('crm_sales_person as sales_person_1', 'sales_person_1.id', '=', 'dms_unit_sale.sales_person_id')
             ->leftJoin('crm_sales_person as sales_person_2', 'sales_person_2.id', '=', 'dms_unit_sale.sales_person1_id')
             ->leftJoin('inventory', 'inventory.inventory_id', '=', 'qb_invoice_item_inventories.inventory_id')
+            ->leftJoin('dms_purchase_order_inventory', 'inventory.inventory_id', '=', 'dms_purchase_order_inventory.inventory_id')
+            ->leftJoin('dms_purchase_order', 'dms_purchase_order.id', '=', 'dms_purchase_order_inventory.purchase_order_id')
             ->leftJoin('eav_entity_type', 'eav_entity_type.entity_type_id', '=', 'inventory.entity_type_id')
             ->leftJoin('inventory_category', 'inventory_category.category', '=', 'inventory.category')
             ->leftJoin('inventory_category as inventory_category_legacy', 'inventory_category_legacy.legacy_category', '=', 'inventory.category')
@@ -353,6 +358,10 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
             ->leftJoin('manufacturers as trade_in_manufacturers', 'trade_in_manufacturers.id', '=', 'dms_unit_sale_trade_in_v1.temp_inv_mfg')
             ->leftJoin('qb_payment', 'qb_payment.invoice_id', '=', 'qb_invoices.id')
             ->leftJoin('qb_payment_methods', 'qb_payment_methods.id', '=', 'qb_payment.payment_method_id')
+            ->leftJoin('dealer_refunds', function ($query) {
+                $query->on('dealer_refunds.tb_primary_id', '=', 'dms_unit_sale.id')
+                    ->where('dealer_refunds.tb_name', 'dms_unit_sale');
+            })
             ->where('qb_invoices.dealer_id', $this->dealer->dealer_id)
             ->orderBy('qb_invoices.invoice_date');
     }
@@ -471,7 +480,10 @@ class QuotesExportAction extends BaseExportAction implements EntityActionExporta
                 'payment_date' => 'Payment Date',
                 'payment_received_total_amount' => 'Payments Received Total Amount',
                 'remaining_balance' => 'Remaining Balance',
-                'use_local_tax' => 'Use Customer address for tax'
+                'use_local_tax' => 'Use Customer address for tax',
+                'refund_id' => 'Refund Identifier',
+                'payment_id' => 'Payment Identifier',
+                'po_number' => 'PO #',
             ])
             ->export();
     }
