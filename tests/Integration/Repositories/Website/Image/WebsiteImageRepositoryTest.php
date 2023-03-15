@@ -6,6 +6,7 @@ use App\Models\Website\Image\WebsiteImage;
 use App\Models\Website\Website;
 use App\Repositories\Website\Image\WebsiteImageRepository;
 use App\Repositories\Website\Image\WebsiteImageRepositoryInterface;
+use InvalidArgumentException;
 use Laravel\Lumen\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -24,6 +25,8 @@ class WebsiteImageRepositoryTest extends TestCase
 
     protected $website;
     protected $images;
+    /** @var WebsiteImageRepository */
+    protected $repository;
 
     const DEFAULT_DEALER_ID = 1001;
     const NUMBER_OF_IMAGES = 10;
@@ -31,7 +34,7 @@ class WebsiteImageRepositoryTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-
+        $this->repository = $this->app->make(WebsiteImageRepositoryInterface::class);
         $this->createWebsiteAndImages();
     }
 
@@ -72,7 +75,7 @@ class WebsiteImageRepositoryTest extends TestCase
             'description' => $image->description
         ]);
 
-        $updatedImage = $this->getConcreteRepository()->update([
+        $updatedImage = $this->repository->update([
             'id' => $image->identifier,
             'title' => 'this is a new image title',
             'description' => 'this is a new image description',
@@ -90,7 +93,7 @@ class WebsiteImageRepositoryTest extends TestCase
 
     public function testGetAll()
     {
-        $images = $this->getConcreteRepository()->getAll([
+        $images = $this->repository->getAll([
             'website_id' => $this->website->id
         ]);
 
@@ -104,7 +107,7 @@ class WebsiteImageRepositoryTest extends TestCase
             $image->update(['expires_at' => now()->subHour()]);
         });
 
-        $images = $this->getConcreteRepository()->getAll([
+        $images = $this->repository->getAll([
             'expired' => 1,
             'website_id' => $this->website->id
         ]);
@@ -123,7 +126,7 @@ class WebsiteImageRepositoryTest extends TestCase
             $image->update(['expires_at' => now()->subHour()]);
         });
 
-        $images = $this->getConcreteRepository()->getAll([
+        $images = $this->repository->getAll([
             'expired' => 0,
             'website_id' => $this->website->id
         ]);
@@ -144,7 +147,7 @@ class WebsiteImageRepositoryTest extends TestCase
             $image->update(['expires_at' => $dateExpired]);
         });
 
-        $images = $this->getConcreteRepository()->getAll([
+        $images = $this->repository->getAll([
             'expires_at' => $dateExpired->toDateString(),
             'website_id' => $this->website->id
         ]);
@@ -156,8 +159,38 @@ class WebsiteImageRepositoryTest extends TestCase
         })->count());
     }
 
-    protected function getConcreteRepository(): WebsiteImageRepository
+    public function testCreate()
     {
-        return $this->app->make(WebsiteImageRepositoryInterface::class);
+        $data = [
+            'image' => 'http://dashboard.trailercentral.com/website/media/dev/33E98FA3-1273-4878-BB73-6C203F2A61EB.png',
+            'title' => 'Test Image Create',
+            'is_active' => 1
+        ];
+        $image = $this->repository->create($data);
+        $this->assertDatabaseHas(WebsiteImage::getTableName(), $data);
+        $image->delete();
+    }
+
+    public function testItValidatesTheDeleteParams()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->repository->delete([]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->repository->delete(['id']);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->repository->delete(['website_id']);
+    }
+
+    public function testDelete()
+    {
+        $image = $this->images->first();
+        $params = ['id' => $image->identifier, 'website_id' => $image->website_id];
+        $this->repository->delete($params);
+        $this->assertDatabaseMissing(WebsiteImage::getTableName(), [
+            'identifier' => $params['id'],
+            'website_id' => $params['website_id']
+        ]);
     }
 }
