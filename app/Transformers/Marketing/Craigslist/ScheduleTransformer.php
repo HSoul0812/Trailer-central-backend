@@ -95,7 +95,8 @@ class ScheduleTransformer extends TransformerAbstract
         } elseif ($queue->queueDeleting->count() > 0) {
             $className = 'deleting';
             $color = 'darkred';
-        } elseif ($queue->status === 'error' || $queue->status === 'canceled') {
+        } elseif ($queue->status === 'error' || $queue->status === 'canceled' ||
+                  $queue->session->status === 'error') {
             if ($queue->state === 'missing-data' ||
                 $queue->session->state === 'missing-data' ||
                 strpos('invalid-', $queue->session->state) !== FALSE) {
