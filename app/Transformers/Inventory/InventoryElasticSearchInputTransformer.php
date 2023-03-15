@@ -22,6 +22,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
     public function transform($model): array
     {
         $primaryImages = $this->transformPrimaryImages($model->inventoryImages);
+        $originalImages = $this->transformOriginalImages($model);
         $secondaryImages = $this->transformSecondaryImages($model->inventoryImages);
         $defaultImage = $primaryImages[0] ?? null;
         $geolocation = $model->geolocationPoint();
@@ -185,6 +186,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
 
             'image'                => $defaultImage,
             'images'               => $primaryImages,
+            'originalImages'       => $originalImages,
             'imagesSecondary'      => $secondaryImages,
             'numberOfImages'       => count($primaryImages) + count($secondaryImages),
             'widthInches'          => TypesHelper::ensureNumeric($model->width_inches),
@@ -223,6 +225,26 @@ class InventoryElasticSearchInputTransformer implements Transformer
         return $images->sortBy($this->imageSorter())->values()->filter(function (InventoryImage $image) {
             return !$image->isSecondary();
         })->map(function (InventoryImage $image) { return $image->image->filename; })->values()->toArray();
+    }
+
+    /**
+     * @param Model $inventory
+     * @return array
+     */
+    private function transformOriginalImages(Inventory $inventory): array
+    {
+        return $inventory->inventoryImages->sortBy($this->imageSorter())->values()->filter(function (InventoryImage $image) {
+            return !$image->isSecondary();
+        })->map(function (InventoryImage $image) use ($inventory) {
+            if ($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_ALL) {
+                return $image->image->filename_noverlay ? $image->image->filename_noverlay  : $image->image->filename;
+            } elseif($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_PRIMARY && ($image->position == 1 || $image->is_default == 1))  {
+                return $image->image->filename_noverlay ? $image->image->filename_noverlay  : $image->image->filename;
+            }
+
+            return $image->image->filename;
+
+        })->values()->toArray();
     }
 
     /**
