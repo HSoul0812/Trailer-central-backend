@@ -148,7 +148,7 @@ class Queue extends Model
      * 
      * @return HasMany
      */
-    public function updates(): BelongsTo
+    public function updates(): HasMany
     {
         return $this->hasMany(Queue::class, 'queue_id', 'parent_id');
     }
