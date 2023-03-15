@@ -39,6 +39,7 @@ class ScheduleTransformer extends TransformerAbstract
             "start" => $startAndEndTimes['start'],
             "end" => $startAndEndTimes['end'],
             "error" => ($queue->status === 'error') ? $queue->text_status : '',
+            "text_status" => $queue->text_status,
             "durationEditable" => false,
             "className" => $itemStyling['className'],
             "editable" => $itemStyling['editable'],
