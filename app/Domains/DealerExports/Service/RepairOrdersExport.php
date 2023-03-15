@@ -216,6 +216,7 @@ class RepairOrdersExport extends BaseExportAction implements EntityActionExporta
                 'repair_order_other_items_notes' => 'Other Items Notes',
                 'repair_order_other_items_taxable' => 'Other Items Taxable',
                 'repair_order_other_items_is_custom_amount' => 'Other Items Is Custom Amount',
+                'shipping' => 'Shipping',
                 // Payment Details
                 'repair_order_payments_id' => 'Payment Identifier',
                 'repair_order_payments_amount' => 'Payment Amount',
