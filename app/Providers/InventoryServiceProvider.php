@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Contracts\LoggerServiceInterface;
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Jobs\Inventory\ReIndexInventoriesByDealerLocationJob;
-use App\Jobs\Website\ReIndexInventoriesByDealersJob;
+use App\Jobs\Inventory\ReIndexInventoriesByDealersJob;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;

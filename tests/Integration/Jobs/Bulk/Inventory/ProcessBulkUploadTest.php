@@ -2,7 +2,7 @@
 
 namespace Tests\Integration\Jobs\Bulk\Inventory;
 
-use App\Jobs\Website\ReIndexInventoriesByDealersJob;
+use App\Jobs\Inventory\ReIndexInventoriesByDealersJob;
 use App\Services\Import\Inventory\CsvImportServiceInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Jobs\Bulk\Inventory\ProcessBulkUpload;

@@ -138,7 +138,7 @@ class Dealer extends Resource
                     if (!empty($request[$requestAttribute])) {
                         $model->{$attribute} = $request[$requestAttribute];
                     }
-                })->help("Password must contain 3 of the following: Uppercase letter, lowercase letter, 0-9 number, non-alphanumeric character, unicode character"),
+                })->help("The password must contain at least three of uppercase letters, lowercase letters, or numbers and at least one of the following !$#%"),
 
         ];
     }
