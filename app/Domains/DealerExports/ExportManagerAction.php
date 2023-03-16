@@ -6,6 +6,7 @@ use App\Domains\DealerExports\BackOffice\BillsExportAction;
 use App\Domains\DealerExports\BackOffice\CustomersExportAction;
 use App\Domains\DealerExports\BackOffice\FinancingCompaniesExportAction;
 use App\Domains\DealerExports\BackOffice\PurchaseOrdersExportAction;
+use App\Domains\DealerExports\BackOffice\InvoicesExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\BrandsExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\EmployeesExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\ExpensesExportAction;
@@ -43,6 +44,8 @@ class ExportManagerAction
         BillsExportAction::class,
         // BackOffice -> Purchase Order
         PurchaseOrdersExportAction::class,
+        // BackOffice -> Invoices
+        InvoicesExportAction::class,
         // POS -> Sales
         SalesLedgerExport::class,
         // POS -> Sales -> Refunds
