@@ -20,7 +20,7 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
     private $dealerIds;
 
     /** @var string */
-    public $queue = 'scout';
+    public $queue = 'overlay-images';
 
     /**  @var array|null */
     private $context;
