@@ -45,6 +45,10 @@ class InvoicesExportAction extends BaseExportAction implements EntityActionExpor
                 'qi.name as item_name',
                 'qi.type as item_type',
                 DB::raw("if(i.unit_sale_id is null, '', concat('/bill-of-sale/edit/', i.unit_sale_id)) as link"),
+                'i.unit_sale_id',
+                DB::raw('us.title as unit_sale_title'),
+                'i.repair_order_id',
+                DB::raw('ro.user_defined_id as repair_order_number'),
             ])
             ->from('qb_invoices as i')
             ->leftJoin('dms_customer as c', 'c.id', '=', 'i.customer_id')
@@ -96,6 +100,10 @@ class InvoicesExportAction extends BaseExportAction implements EntityActionExpor
                 'remain' => 'Invoice Remaining Balance',
                 'memo' => 'Invoice Notes',
                 'warranty_customer' => 'Invoice Warranty Customer',
+                'repair_order_id' => 'Repair Order Identifier',
+                'repair_order_number' => 'RO #',
+                'unit_sale_id' => 'Quote/Deal Identifier',
+                'unit_sale_title' => 'Quote/Deal Title',
             ])
             ->export();
     }
