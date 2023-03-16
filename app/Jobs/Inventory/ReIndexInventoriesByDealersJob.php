@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Website;
+namespace App\Jobs\Inventory;
 
 use App\Contracts\LoggerServiceInterface;
 use App\Jobs\Job;

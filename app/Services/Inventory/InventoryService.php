@@ -6,8 +6,9 @@ use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\File\FileUploadException;
 use App\Exceptions\File\ImageUploadException;
 use App\Exceptions\Inventory\InventoryException;
+use App\Jobs\Inventory\GenerateOverlayAndReIndexInventoriesByDealersJob;
 use App\Jobs\Inventory\ReIndexInventoriesByDealerLocationJob;
-use App\Jobs\Website\ReIndexInventoriesByDealersJob;
+use App\Jobs\Inventory\ReIndexInventoriesByDealersJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Inventory;
@@ -1312,6 +1313,10 @@ class InventoryService implements InventoryServiceInterface
     /**
      * Reindex the inventory by dealer ids, then it will invalidate cache by dealer ids
      *
+     * Real processing order:
+     *      1. ElasticSearch indexation by dealer location id
+     *      2. Redis Cache invalidation by dealer id
+     *
      * @param  int[]  $dealerIds
      * @return void
      */
@@ -1321,7 +1326,29 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
+     * Generate images overlays by dealer id, then reindex the inventory by dealer ids, finally it will invalidate cache by dealer ids
+     *
+     * Method name say nothing about real process order, it is only to be consistent with legacy naming convention
+     *
+     * Real processing order:
+     *      1. Image overlays generation by dealer id
+     *      2. ElasticSearch indexation by dealer location id
+     *      3. Redis Cache invalidation by dealer id
+     *
+     * @param  int[]  $dealerIds
+     * @return void
+     */
+    public function invalidateCacheReindexAndGenerateImageOverlaysByDealerIds(array $dealerIds): void
+    {
+        $this->dispatch(new GenerateOverlayAndReIndexInventoriesByDealersJob($dealerIds));
+    }
+
+    /**
      * Reindex the inventory by dealer location id, then it will invalidate cache by dealer id
+     *
+     * Real processing order:
+     *      1. ElasticSearch indexation by dealer location id
+     *      2. Redis Cache invalidation by dealer id
      *
      * @param  DealerLocation  $dealerLocation
      * @return void
