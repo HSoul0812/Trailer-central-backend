@@ -13,6 +13,7 @@ use App\Models\Inventory\File;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryImage;
 use App\Models\User\DealerLocation;
+use App\Models\User\User;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
@@ -23,6 +24,7 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
 use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
@@ -129,9 +131,15 @@ class InventoryService implements InventoryServiceInterface
     private $fileService;
 
     /**
+     * @var UserRepositoryInterface
+     */
+    private $dealerRepository;
+
+    /**
      * @var DealerLocationRepositoryInterface
      */
     private $dealerLocationRepository;
+
     /**
      * @var DealerLocationMileageFeeRepositoryInterface
      */
@@ -177,6 +185,7 @@ class InventoryService implements InventoryServiceInterface
      * @param WebsiteConfigRepositoryInterface $websiteConfigRepository
      * @param ImageService $imageService
      * @param FileService $fileService
+     * @param UserRepositoryInterface $dealerRepository
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      * @param DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository
      * @param CategoryRepositoryInterface $categoryRepository
@@ -196,6 +205,7 @@ class InventoryService implements InventoryServiceInterface
         WebsiteConfigRepositoryInterface $websiteConfigRepository,
         ImageService $imageService,
         FileService $fileService,
+        UserRepositoryInterface $dealerRepository,
         DealerLocationRepositoryInterface $dealerLocationRepository,
         DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository,
         CategoryRepositoryInterface $categoryRepository,
@@ -211,6 +221,7 @@ class InventoryService implements InventoryServiceInterface
         $this->billRepository = $billRepository;
         $this->quickbookApprovalRepository = $quickbookApprovalRepository;
         $this->websiteConfigRepository = $websiteConfigRepository;
+        $this->dealerRepository = $dealerRepository;
         $this->dealerLocationRepository = $dealerLocationRepository;
         $this->dealerLocationMileageFeeRepository = $dealerLocationMileageFeeRepository;
         $this->imageService = $imageService;
@@ -242,6 +253,15 @@ class InventoryService implements InventoryServiceInterface
                 $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
 
                 $addBill = $params['add_bill'] ?? false;
+
+                if (!empty($params['dealer_id'])) {
+                    /** @var User $dealer */
+                    $dealer = $this->dealerRepository->get(['dealer_id' => $params['dealer_id']]);
+
+                    if ($dealer->overlay_default && $dealer->overlay_enabled) {
+                        $params['overlay_enabled'] = $dealer->overlay_enabled;
+                    }
+                }
 
                 if (!empty($params['dealer_location_id'])) {
                     $location = $this->dealerLocationRepository->get(['dealer_location_id' => $params['dealer_location_id']]);
