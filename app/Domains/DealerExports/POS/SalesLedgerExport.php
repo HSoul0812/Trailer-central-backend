@@ -112,7 +112,6 @@ class SalesLedgerExport extends BaseExportAction implements EntityActionExportab
                 'parts_qty' => 'Parts Qty',
                 'parts_total_tax' => 'Parts Total Tax',
                 'sales_subtotal' => 'Sales Subtotal',
-                'sales_total' => 'Sales Total',
             ])
             ->export();
     }
