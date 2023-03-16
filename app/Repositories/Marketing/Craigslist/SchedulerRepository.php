@@ -9,8 +9,8 @@ use App\Models\Marketing\Craigslist\Queue;
 use App\Models\Marketing\Craigslist\Session;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as DBCollection;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Pagination\LengthAwarePaginator;
 
