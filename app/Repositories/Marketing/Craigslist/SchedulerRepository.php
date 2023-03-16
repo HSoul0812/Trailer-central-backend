@@ -10,6 +10,7 @@ use App\Models\Marketing\Craigslist\Session;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection as DBCollection;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -204,55 +205,15 @@ class SchedulerRepository implements SchedulerRepositoryInterface
      */
     public function getAll($params)
     {
-        $query = Queue::leftJoin(Session::getTableName(), function (JoinClause $join) {
-            $join->on(Queue::getTableName().'.session_id', '=', Session::getTableName().'.session_id')
-                         ->on(Queue::getTableName().'.dealer_id', '=', Session::getTableName().'.session_dealer_id')
-                         ->on(Queue::getTableName().'.profile_id', '=', Session::getTableName().'.session_profile_id');
-        })->where(Session::getTableName().'.session_dealer_id', $params['dealer_id'])
-                  ->whereNotNull(Session::getTableName().'.session_scheduled');
+        // Initialize Query
+        $query = $this->initQuery($params);
 
+        // Set Default Per Page
         if (!isset($params['per_page'])) {
             $params['per_page'] = 10000;
         }
 
-        if (isset($params['profile_id'])) {
-            $query = $query->where(Queue::getTableName().'.profile_id', $params['profile_id']);
-        }
-
-        if (isset($params['slot_id'])) {
-            $query = $query->where(Session::getTableName().'.session_slot_id', $params['slot_id']);
-        }
-
-        if(isset($params['s_status'])) {
-            if(!is_array($params['s_status'])) {
-                $params['s_status'] = array($params['s_status']);
-            }
-            $query = $query->whereIn(Session::getTableName().'.status', $params['s_status']);
-        }
-
-        if (isset($params['s_status_not'])) {
-            $query = $query->whereNotIn(Session::getTableName().'.status', $params['s_status_not']);
-        }
-
-        if(isset($params['q_status'])) {
-            if(!is_array($params['q_status'])) {
-                $params['q_status'] = array($params['q_status']);
-            }
-            $query = $query->whereIn(Queue::getTableName().'.status', $params['q_status']);
-        }
-
-        if (isset($params['q_status_not'])) {
-            $query = $query->whereNotIn(Queue::getTableName().'.status', $params['q_status_not']);
-        }
-
-        // Limit within a certain range of dates
-        if (isset($params['start'])) {
-            $query->whereDate(Session::getTableName() . '.session_scheduled', '>=', $params['start']);
-        }
-        if (isset($params['end'])) {
-            $query->whereDate(Session::getTableName() . '.session_scheduled', '<=', $params['end']);
-        }
-
+        // Append Sort Query
         if (!isset($params['sort'])) {
             $params['sort'] = '-scheduled';
         }
@@ -260,8 +221,12 @@ class SchedulerRepository implements SchedulerRepositoryInterface
             $query = $this->addSortQuery($query, $params['sort']);
         }
 
-        return $query->has('inventory')->with('inventory')->with('inventory.orderedImages')
-                     ->paginate($params['per_page'])->appends($params);
+        // Return Results
+        return $query->has('inventory')
+                     ->with('inventory')
+                     ->with('inventory.orderedImages')
+                     ->paginate($params['per_page'])
+                     ->appends($params);
     }
 
     /**
@@ -361,5 +326,109 @@ class SchedulerRepository implements SchedulerRepositoryInterface
 
         // Return Special Formatted
         return $this->getAll($params);
+    }
+
+
+    /**
+     * Get Posts Past Due
+     * 
+     * @array $params
+     * @return int
+     */
+    public function duePast(array $params): int {
+        // Append Status Restrictions
+        $params['s_status'] = ['scheduled', 'new'];
+        $params['s_status_not'] = ['error', 'done'];
+        $params['q_status_not'] = ['error', 'done'];
+
+        // Only Get Slot 99
+        $params['slot_id'] = 99;
+
+        // Scheduled End
+        $params['end'] = DB::raw('NOW()');
+
+        // Return Counts of Posts
+        return $this->initQuery($params)->count();
+    }
+
+    /**
+     * Get Posts Due Today
+     * 
+     * @array $params
+     * @return int
+     */
+    public function dueToday(array $params): int {
+        // Append Status Restrictions
+        $params['s_status'] = ['scheduled', 'new'];
+        $params['s_status_not'] = ['error', 'done'];
+        $params['q_status_not'] = ['error', 'done'];
+
+        // Only Get Slot 99
+        $params['slot_id'] = 99;
+
+        // Scheduled End
+        $params['after'] = DB::raw('NOW()');
+        $params['end'] = Carbon::now()->endOfDay()->toDateTimeString();
+
+        // Return Counts of Posts
+        return $this->initQuery($params)->count();
+    }
+
+
+    /**
+     * Init Query
+     * 
+     * @param $params
+     * @return Builder
+     */
+    private function initQuery(array $params): Builder {
+        // Create Initial Query
+        $query = Queue::leftJoin(Session::getTableName(), function (JoinClause $join) {
+            $join->on(Queue::getTableName().'.session_id', '=', Session::getTableName().'.session_id')
+                         ->on(Queue::getTableName().'.dealer_id', '=', Session::getTableName().'.session_dealer_id')
+                         ->on(Queue::getTableName().'.profile_id', '=', Session::getTableName().'.session_profile_id');
+        })->where(Session::getTableName().'.session_dealer_id', $params['dealer_id'])
+                  ->whereNotNull(Session::getTableName().'.session_scheduled');
+
+        if (isset($params['profile_id'])) {
+            $query = $query->where(Queue::getTableName().'.profile_id', $params['profile_id']);
+        }
+
+        if (isset($params['slot_id'])) {
+            $query = $query->where(Session::getTableName().'.session_slot_id', $params['slot_id']);
+        }
+
+        if(isset($params['s_status'])) {
+            if(!is_array($params['s_status'])) {
+                $params['s_status'] = array($params['s_status']);
+            }
+            $query = $query->whereIn(Session::getTableName().'.status', $params['s_status']);
+        }
+
+        if (isset($params['s_status_not'])) {
+            $query = $query->whereNotIn(Session::getTableName().'.status', $params['s_status_not']);
+        }
+
+        if(isset($params['q_status'])) {
+            if(!is_array($params['q_status'])) {
+                $params['q_status'] = array($params['q_status']);
+            }
+            $query = $query->whereIn(Queue::getTableName().'.status', $params['q_status']);
+        }
+
+        if (isset($params['q_status_not'])) {
+            $query = $query->whereNotIn(Queue::getTableName().'.status', $params['q_status_not']);
+        }
+
+        // Limit within a certain range of dates
+        if (isset($params['start'])) {
+            $query->whereDate(Session::getTableName() . '.session_scheduled', '>=', $params['start']);
+        }
+        if (isset($params['end'])) {
+            $query->whereDate(Session::getTableName() . '.session_scheduled', '<=', $params['end']);
+        }
+
+        // Return Query
+        return $query;
     }
 }
