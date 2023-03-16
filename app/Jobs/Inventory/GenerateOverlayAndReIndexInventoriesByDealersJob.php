@@ -42,27 +42,28 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
         foreach ($this->dealerIds as $dealerId) {
             $this->context['dealer_id'] = $dealerId;
 
-            $inventories = $repository->getAll(
-                [
-                    'dealer_id' => $dealerId,
-                    'images_greater_than' => 1
-                ], false, false, [Inventory::getTableName().'.inventory_id']
-            );
-
-            if ($inventories->count() > 0) {
-                $logger->info(
-                    'Enqueueing the job to generate inventory image overlays for dealer id',
-                    ['dealer_id' => $dealerId]
-                );
-
-                Job::batch(static function (BatchedJob $job) use ($inventories) {
-                    foreach ($inventories as $inventory) {
-                        dispatch(
-                            new GenerateOverlayImageJob($inventory->inventory_id, false)
-                        )->onQueue('overlay-images');
-                    }
-                }, __CLASS__, 2, array_merge($this->context, ['process' => 'image-overlay-generation']));
-            }
+            // we need to find a way to avoid AWS rate limiting
+//            $inventories = $repository->getAll(
+//                [
+//                    'dealer_id' => $dealerId,
+//                    'images_greater_than' => 1
+//                ], false, false, [Inventory::getTableName().'.inventory_id']
+//            );
+//
+//            if ($inventories->count() > 0) {
+//                $logger->info(
+//                    'Enqueueing the job to generate inventory image overlays for dealer id',
+//                    ['dealer_id' => $dealerId]
+//                );
+//
+//                Job::batch(static function (BatchedJob $job) use ($inventories) {
+//                    foreach ($inventories as $inventory) {
+//                        dispatch(
+//                            new GenerateOverlayImageJob($inventory->inventory_id, false)
+//                        )->onQueue('overlay-images');
+//                    }
+//                }, __CLASS__, 2, array_merge($this->context, ['process' => 'image-overlay-generation']));
+//            }
 
             $logger->info('Enqueueing the job to reindex inventory by dealer id', ['dealer_id' => $dealerId]);
 
