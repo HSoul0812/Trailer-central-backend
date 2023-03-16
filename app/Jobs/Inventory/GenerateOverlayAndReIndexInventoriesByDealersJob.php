@@ -28,7 +28,7 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
     public function __construct(array $dealerIds, ?array $context = null)
     {
         $this->dealerIds = $dealerIds;
-        $this->context = $context ?? ['dealer_ids' => $dealerIds, 'parent' => __CLASS__];
+        $this->context = $context ?? ['dealer_ids' => $dealerIds];
     }
 
     public function handle(
