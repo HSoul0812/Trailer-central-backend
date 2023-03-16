@@ -91,7 +91,7 @@ class ValidateExtensionRunning extends Command
                     'Per Allowed Internal Email Address');
         $messages = $this->service->status($validation);
 
-        // Send Slack Messages,,?
+        // Send Slack Messages?
         if($messages->count() > 0) {
             $log->info('Sending ' . $messages->count() . ' Slack Messages for ' .
                         $clients->count() . ' CL Clients');
