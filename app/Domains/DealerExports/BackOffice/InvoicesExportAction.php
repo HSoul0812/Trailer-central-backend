@@ -21,27 +21,27 @@ class InvoicesExportAction extends BaseExportAction implements EntityActionExpor
         return DB::query()
             ->select([
                 'i.*',
-                'c.display_name as customer_name',
+                DB::raw('c.display_name as customer_name'),
                 't.name as sales_term_name',
-                'pm.name'
-                'us.title as quote_title',
+                'pm.name',
+                DB::raw('us.title as quote_title'),
                 'us.is_po as us_is_po',
                 'c.home_phone',
                 'c.work_phone',
                 'c.cell_phone',
                 'cw.display_name as warranty_customer',
                 DB::raw("concat(coalesce(us.inventory_vin, ''), ' ', coalesce(ius.vin, ''), ' ', coalesce(iro.vin, '')) as vin"),
-                'COALESCE(sum(p.amount), 0) as amount_received',
-                'pm.name as payment_method',
+                DB::raw('COALESCE(sum(p.amount), 0) as amount_received'),
+                DB::raw('pm.name as payment_method'),
                 'p.payment_method_id',
                 'outlet.register_name',
                 'p.register_id',
-                '(i.total - coalesce(sum(p.amount), 0)) as remain',
+                DB::raw('(i.total - coalesce(sum(p.amount), 0)) as remain'),
                 'qii.item_id',
                 'qii.qty as item_qty',
                 'qii.description as item_desc',
                 'qii.unit_price as item_rate',
-                '(COALESCE(qii.qty, 0) * COALESCE(qii.unit_price, 0)) as item_amount',
+                DB::raw('(COALESCE(qii.qty, 0) * COALESCE(qii.unit_price, 0)) as item_amount'),
                 'qi.name as item_name',
                 'qi.type as item_type',
                 DB::raw("if(i.unit_sale_id is null, '', concat('/bill-of-sale/edit/', i.unit_sale_id)) as link"),
@@ -58,10 +58,10 @@ class InvoicesExportAction extends BaseExportAction implements EntityActionExpor
             ->leftJoin('dms_unit_sale as us', 'us.id', '=', 'i.unit_sale_id')
             ->leftJoin('dms_repair_order as ro', 'ro.id', '=', 'i.repair_order_id')
             ->leftJoin('dms_customer as cw', 'cw.id', '=', 'ro.warranty_customer_id')
-            ->leftJoin('inventory as ius', 'ius.id', '=', 'us.inventory_id')
-            ->leftJoin('inventory as iro', 'iro.id', '=', 'ro.inventory_id')
-            ->where('i.dealer_id', $this->dealer->dealer_id);
-            ->groupBy('i.id')
+            ->leftJoin('inventory as ius', 'ius.inventory_id', '=', 'us.inventory_id')
+            ->leftJoin('inventory as iro', 'iro.inventory_id', '=', 'ro.inventory_id')
+            ->where('i.dealer_id', $this->dealer->dealer_id)
+            ->groupBy('i.id');
     }
 
     /**
@@ -73,7 +73,6 @@ class InvoicesExportAction extends BaseExportAction implements EntityActionExpor
             ->setHeaders([
                 'doc_num' => 'Invoice Number',
                 'qb_doc_num' => 'QB Invoice Number',
-                'display_name' => 'Customer Name',
                 'invoice_date' => 'Invoice Date',
                 'due_date' => 'Invoice Due Date',
                 'vin' => 'Invoice VIN',
@@ -97,7 +96,6 @@ class InvoicesExportAction extends BaseExportAction implements EntityActionExpor
                 'remain' => 'Invoice Remaining Balance',
                 'memo' => 'Invoice Notes',
                 'warranty_customer' => 'Invoice Warranty Customer',
-                'link' => 'Invoice Link',
             ])
             ->export();
     }
