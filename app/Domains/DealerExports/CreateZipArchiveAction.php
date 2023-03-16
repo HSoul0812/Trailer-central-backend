@@ -7,6 +7,7 @@ use App\Models\User\User;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 use League\Flysystem\Filesystem;
+use Log;
 use ZipArchive;
 
 /**
@@ -58,6 +59,7 @@ class CreateZipArchiveAction
                     $zip->addFromString(basename($file), $fileToArchive);
                     $zip->setEncryptionName(basename($file), ZipArchive::EM_AES_256, decrypt($dealerExport->zip_password, false));
                 } catch (Exception $e) {
+                    Log::channel('dealer-export')->error($e->getMessage());
                 }
             }
         }
