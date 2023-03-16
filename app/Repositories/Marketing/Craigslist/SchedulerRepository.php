@@ -387,8 +387,11 @@ class SchedulerRepository implements SchedulerRepositoryInterface
             $join->on(Queue::getTableName().'.session_id', '=', Session::getTableName().'.session_id')
                          ->on(Queue::getTableName().'.dealer_id', '=', Session::getTableName().'.session_dealer_id')
                          ->on(Queue::getTableName().'.profile_id', '=', Session::getTableName().'.session_profile_id');
-        })->where(Session::getTableName().'.session_dealer_id', $params['dealer_id'])
-                  ->whereNotNull(Session::getTableName().'.session_scheduled');
+        })->whereNotNull(Session::getTableName().'.session_scheduled');
+
+        if (isset($params['dealer_id'])) {
+            $query = $query->where(Session::getTableName().'.session_dealer_id', $params['dealer_id']);
+        }         
 
         if (isset($params['profile_id'])) {
             $query = $query->where(Queue::getTableName().'.profile_id', $params['profile_id']);
