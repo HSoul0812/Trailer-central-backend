@@ -258,7 +258,8 @@ class InventoryService implements InventoryServiceInterface
                     /** @var User $dealer */
                     $dealer = $this->dealerRepository->get(['dealer_id' => $params['dealer_id']]);
 
-                    if ($dealer->overlay_default && $dealer->overlay_enabled) {
+                    // when `overlay_enabled` is not provided, it should use what dealer does have configured
+                    if ($dealer->overlay_default && $dealer->overlay_enabled && !isset($params['overlay_enabled'])) {
                         $params['overlay_enabled'] = $dealer->overlay_enabled;
                     }
                 }
