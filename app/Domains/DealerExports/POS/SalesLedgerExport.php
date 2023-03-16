@@ -56,7 +56,7 @@ class SalesLedgerExport extends BaseExportAction implements EntityActionExportab
             s.related_payment_intent AS payment_intent, s.id as pos_sale_id, CONCAT(sp.first_name, ' ', sp.last_name, ' (', sp.email, ')') AS sales_person, sp.id as sales_person_id,
             s.total as saleTotal, 'pos' as type, s.amount_received as amountReceived, s.id AS refNum, qb_items.qty_on_hand as part_qty, sales_products.subtotal as part_total,
             qb_items.name as sales_product_name, qb_items.description as sales_product_name, qb_items.unit_price as sales_products_price, sales_products.subtotal as parts_total,
-            sales_products.qty as parts_qty
+            sales_products.qty as parts_qty, s.po_no as sales_po_no, s.subTotal as sales_subtotal, s.total as sales_total
              ")
             ->leftJoin(
                 DB::raw("(SELECT refund.tb_primary_id, SUM(refund.amount) AS totalOfRefundAmount, GROUP_CONCAT(dealer_sales_receipt.receipt_path) AS refund_receipts
@@ -94,6 +94,7 @@ class SalesLedgerExport extends BaseExportAction implements EntityActionExportab
         $this->setEntity(self::ENTITY_TYPE)
             ->setHeaders([
                 'reference_number' => 'Reference Number',
+                'sales_po_no' => 'PO #',
                 'customer_id' => 'Customer Identifier',
                 'display_name' => 'Customer Name',
                 'sales_person_id' => 'Sales Person Identifier',
@@ -110,6 +111,8 @@ class SalesLedgerExport extends BaseExportAction implements EntityActionExportab
                 'parts_total' => 'Parts Total',
                 'parts_qty' => 'Parts Qty',
                 'parts_total_tax' => 'Parts Total Tax',
+                'sales_subtotal' => 'Sales Subtotal',
+                'sales_total' => 'Sales Total',
             ])
             ->export();
     }
