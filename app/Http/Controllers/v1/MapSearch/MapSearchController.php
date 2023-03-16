@@ -13,7 +13,9 @@ use App\Http\Requests\MapService\GeocodeRequest;
 use App\Http\Requests\MapService\ReverseRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\MapSearch\MapSearchServiceInterface;
+use Cache;
 use Dingo\Api\Http\Response;
+use Str;
 
 class MapSearchController extends AbstractRestfulController
 {
@@ -33,7 +35,7 @@ class MapSearchController extends AbstractRestfulController
         }
 
         $queryText = $request->input('q');
-        $json = \Cache::rememberWithNewTTL("mapsearch/autocomplete/$queryText", self::MAP_SEARCH_CACHE_EXPIRY,
+        $json = Cache::rememberWithNewTTL("mapsearch/autocomplete/$queryText", self::MAP_SEARCH_CACHE_EXPIRY,
             function () use ($queryText){
                 $data = $this->mapSearchService->autocomplete($queryText);
                 $transformer = $this->mapSearchService->getTransformer(get_class($data));
@@ -50,7 +52,14 @@ class MapSearchController extends AbstractRestfulController
         }
 
         $queryText = $request->input('q');
-        $json = \Cache::rememberWithNewTTL("mapsearch/geocode/$queryText", self::MAP_SEARCH_CACHE_EXPIRY,
+
+        if (Str::of($queryText)->contains('undefined')) {
+            return $this->response->array([
+                'data' => [],
+            ]);
+        }
+
+        $json = Cache::rememberWithNewTTL("mapsearch/geocode/$queryText", self::MAP_SEARCH_CACHE_EXPIRY,
             function () use ($queryText) {
                 $data = $this->mapSearchService->geocode($queryText);
                 $transformer = $this->mapSearchService->getTransformer(get_class($data));
@@ -68,7 +77,7 @@ class MapSearchController extends AbstractRestfulController
 
         $lat = floatval($request->input('lat'));
         $lng = floatval($request->input('lng'));
-        $json = \Cache::rememberWithNewTTL("mapsearch/reverse/$lat,$lng", self::MAP_SEARCH_CACHE_EXPIRY,
+        $json = Cache::rememberWithNewTTL("mapsearch/reverse/$lat,$lng", self::MAP_SEARCH_CACHE_EXPIRY,
             function () use ($lat, $lng) {
                 $data = $this->mapSearchService->reverse($lat, $lng);
                 $transformer = $this->mapSearchService->getTransformer(get_class($data));
