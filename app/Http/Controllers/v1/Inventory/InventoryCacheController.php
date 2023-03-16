@@ -32,7 +32,7 @@ class InventoryCacheController extends RestfulControllerV2
         $request = new InvalidateByDealerRequest($request->all());
 
         if ($request->validate()) {
-            $this->inventoryService->invalidateCacheAndReindexByDealerIds($request->dealerIds());
+            $this->inventoryService->invalidateCacheReindexAndGenerateImageOverlaysByDealerIds($request->dealerIds());
 
             return $this->acceptedResponse();
         }

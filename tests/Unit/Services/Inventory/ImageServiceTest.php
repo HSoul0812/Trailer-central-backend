@@ -3,7 +3,7 @@
 namespace Tests\Unit\Services\Inventory;
 
 use App\Jobs\Inventory\GenerateOverlayImageJobByDealer;
-use App\Jobs\Website\ReIndexInventoriesByDealersJob;
+use App\Jobs\Inventory\ReIndexInventoriesByDealersJob;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use Mockery;
