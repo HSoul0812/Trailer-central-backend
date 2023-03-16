@@ -45,7 +45,10 @@ class CreateZipArchiveAction
         if (Storage::disk('s3')->exists($s3ZipFilePath)) {
             Storage::disk('s3')->delete($s3ZipFilePath);
         }
-        $tmpZipFilePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $s3ZipFilePath;
+
+        $localDisk = Storage::disk('local');
+        $localDisk->put($s3ZipFilePath, '');
+        $tmpZipFilePath = $localDisk->path($s3ZipFilePath);
 
         $zip = new ZipArchive;
         $zip->open($tmpZipFilePath, ZipArchive::CREATE);
