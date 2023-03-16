@@ -54,6 +54,7 @@ class HorizonCleanCompletedJobs extends Command
 
                     if ($status === self::COMPLETED) {
                         $client->del($jobId);
+
                         $deletedJobs++;
                     }
                 }
