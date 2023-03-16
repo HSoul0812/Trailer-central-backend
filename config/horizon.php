@@ -163,6 +163,7 @@ return [
                     'crm-users',
                     'manufacturers',
                     //'hot-potato'
+                    'dealer-exports',
                 ],
                 'balance' => 'auto',
                 'processes' => 1,
@@ -210,6 +211,7 @@ return [
                     'crm-users',
                     'manufacturers',
                     //'hot-potato'
+                    'dealer-exports',
                 ],
                 'balance' => 'auto',
                 'processes' => 1,
@@ -285,7 +287,7 @@ return [
             ],
             'supervisor-5' => [
                 'connection' => 'redis',
-                'queue' => ['reports', 'emailbuilder'],
+                'queue' => ['reports', 'emailbuilder', 'dealer-exports'],
                 'balance' => 'auto',
                 'minProcesses' => 1,
                 'maxProcesses' => 3,
@@ -334,9 +336,9 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout', 'inventory-cache'],
+                'queue' => ['scout', 'inventory-cache'],
                 'balance' => 'auto',
-                'minProcesses' => 45,
+                'minProcesses' => 10,
                 'maxProcesses' => 60,
                 'tries' => 3,
                 'delay' => 3,
@@ -360,7 +362,7 @@ return [
             ],
             'supervisor-5' => [
                 'connection' => 'redis',
-                'queue' => ['reports', 'emailbuilder'],
+                'queue' => ['reports', 'emailbuilder', 'dealer-exports'],
                 'balance' => 'auto',
                 'minProcesses' => 3,
                 'maxProcesses' => 30,
@@ -384,6 +386,16 @@ return [
                 'maxProcesses' => 100,
                 'tries' => 1,
                 'timeout' => 600,
+            ],
+            'supervisor-8' => [
+                'connection' => 'redis',
+                'queue' => ['overlay-images'],
+                'balance' => 'auto',
+                'minProcesses' => 5,
+                'maxProcesses' => 100,
+                'tries' => 3,
+                'delay' => 3,
+                'timeout' => 900,
             ],
         ],
     ],

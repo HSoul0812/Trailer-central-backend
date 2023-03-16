@@ -43,7 +43,7 @@ class GenerateOverlayImageJobByDealer extends Job
                 foreach ($inventories as $inventory) {
                     dispatch(new GenerateOverlayImageJob($inventory->inventory_id,false))->onQueue('overlay-images');
                 }
-            },__CLASS__, 5);
+            },__CLASS__, 2);
 
             // we can not inject `InventoryServiceInterface` into constructor to avoid cyclic dependency
             $service->invalidateCacheAndReindexByDealerIds([$this->dealerId]);
