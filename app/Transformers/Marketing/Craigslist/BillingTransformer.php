@@ -38,7 +38,6 @@ class BillingTransformer extends TransformerAbstract
             $timing = explode(" ", $transaction->session_started);
         }
 
-        $allDayConfig = config('marketing.cl.settings.scheduler.allDay');
         $queueDate = date('Y-m-d', $transaction->time);
         $queueTime = date('H:i:s', $transaction->time);
 
@@ -49,11 +48,7 @@ class BillingTransformer extends TransformerAbstract
             $queueTime = $timing[1];
         }
 
-        $startDate = $queueDate;
-
-        if (!$allDayConfig) {
-            $startDate .= 'T' . $queueTime . '+00:00';
-        }
+        $startDate = $queueDate . 'T' . $queueTime . '+00:00';
 
         // Set End Time
         $endTime = strtotime($queueDate . ' ' . $queueTime) + (60 * 30);
@@ -62,7 +57,7 @@ class BillingTransformer extends TransformerAbstract
         $endDate .= '+00:00';
 
         return [
-            'allDay' => $allDayConfig,
+            'allDay' => false,
             'start' => $startDate,
             'end' => $endDate
         ];

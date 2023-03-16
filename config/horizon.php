@@ -177,7 +177,6 @@ return [
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 3600,
             ],
             'supervisor-3' => [
@@ -186,7 +185,6 @@ return [
                 'balance' => 'auto',
                 'processes' => 5,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 3600,
             ]
         ],
@@ -225,7 +223,6 @@ return [
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 900,
             ],
             'supervisor-3' => [
@@ -234,7 +231,6 @@ return [
                 'balance' => 'auto',
                 'processes' => 5,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 3600,
             ]
         ],
@@ -266,7 +262,6 @@ return [
                 'maxProcesses' => 14,
                 'balance' => 'auto',
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 900,
             ],
             'supervisor-3' => [
@@ -336,12 +331,11 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout', 'inventory-cache'],
+                'queue' => ['scout', 'inventory-cache'],
                 'balance' => 'auto',
-                'minProcesses' => 45,
+                'minProcesses' => 10,
                 'maxProcesses' => 60,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 900,
             ],
             'supervisor-3' => [
@@ -386,6 +380,15 @@ return [
                 'maxProcesses' => 100,
                 'tries' => 1,
                 'timeout' => 600,
+            ],
+            'supervisor-8' => [
+                'connection' => 'redis',
+                'queue' => ['overlay-images'],
+                'balance' => 'auto',
+                'minProcesses' => 5,
+                'maxProcesses' => 100,
+                'tries' => 3,
+                'timeout' => 14400
             ],
         ],
     ],

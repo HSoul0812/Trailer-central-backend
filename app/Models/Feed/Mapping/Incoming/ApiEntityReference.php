@@ -36,6 +36,7 @@ class ApiEntityReference extends Model {
     const NOVAE_API_KEY = 'novae';
     const LAMAR_API_KEY = 'lamar';
     const NORSTAR_API_KEY = 'norstar';
+    const BIGTEX_API_KEY = 'bigtex';
 
     public const TYPE_LOCATION = 'dealer_location';
 

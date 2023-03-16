@@ -7,6 +7,7 @@ use App\Models\User\User;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 use League\Flysystem\Filesystem;
+use Log;
 use ZipArchive;
 
 /**
@@ -44,7 +45,10 @@ class CreateZipArchiveAction
         if (Storage::disk('s3')->exists($s3ZipFilePath)) {
             Storage::disk('s3')->delete($s3ZipFilePath);
         }
-        $tmpZipFilePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $s3ZipFilePath;
+
+        $localDisk = Storage::disk('local');
+        $localDisk->put($s3ZipFilePath, '');
+        $tmpZipFilePath = $localDisk->path($s3ZipFilePath);
 
         $zip = new ZipArchive;
         $zip->open($tmpZipFilePath, ZipArchive::CREATE);
@@ -58,6 +62,7 @@ class CreateZipArchiveAction
                     $zip->addFromString(basename($file), $fileToArchive);
                     $zip->setEncryptionName(basename($file), ZipArchive::EM_AES_256, decrypt($dealerExport->zip_password, false));
                 } catch (Exception $e) {
+                    Log::channel('dealer-export')->error($e->getMessage());
                 }
             }
         }
