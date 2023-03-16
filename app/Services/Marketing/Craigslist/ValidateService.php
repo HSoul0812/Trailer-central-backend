@@ -285,7 +285,7 @@ class ValidateService implements ValidateServiceInterface
      * @param null|int
      * @return array{string: string}
      */
-    private function getConfig(?int $dealerId): array {
+    private function getConfig(?int $dealerId = null): array {
         // Loop Config Paths
         $config = [];
         foreach(self::CONFIG_PATHS as $path) {
