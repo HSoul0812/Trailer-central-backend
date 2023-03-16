@@ -200,6 +200,11 @@ class Kernel extends ConsoleKernel
         //            ->onOneServer()
         //            ->runInBackground();
 
+        $schedule->command('horizon:clean-completed-jobs')
+            ->dailyAt('2:00')
+            ->onOneServer()
+            ->runInBackground();
+
         $schedule->command('horizon:snapshot')
             ->everyFiveMinutes()
             ->onOneServer()

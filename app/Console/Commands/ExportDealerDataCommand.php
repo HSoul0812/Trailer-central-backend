@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Domains\DealerExports\CreateZipArchiveAction;
 use App\Domains\DealerExports\ExportManagerAction;
 use App\Models\DealerExport;
 use App\Models\User\User;
@@ -43,9 +44,9 @@ class ExportDealerDataCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $dealerId = $this->argument('dealerId');
         $zipPassword = $this->argument('zipPassword');
@@ -54,6 +55,8 @@ class ExportDealerDataCommand extends Command
             $dealer = User::query()->where('dealer_id', $dealerId)->firstOrFail();
         } catch (ModelNotFoundException $e) {
             $this->error('No dealer found!');
+
+            return 1;
         }
 
         DealerExport::updateOrCreate(
@@ -66,8 +69,35 @@ class ExportDealerDataCommand extends Command
         $action->execute();
 
         $this->info('Export process has been initiated for the dealer: ' . $dealer->dealer_id);
-        // This is just for the dramatic pause :D
-        sleep(1);
-        $this->info('Once the process is finished, you can get the file URL from the database.');
+
+        $done = false;
+
+        do {
+            $this->info('Wait for 10 seconds and see if all jobs are done...');
+
+            sleep(10);
+
+            $allExportCount = DealerExport::query()->where('dealer_id', $dealer->dealer_id)->count();
+
+            $otherEntityExportCount = DealerExport::query()
+                ->where('dealer_id', $dealer->dealer_id)
+                ->where('entity_type', '!=', 'zip')
+                ->where('status', DealerExport::STATUS_PROCESSED)
+                ->count();
+
+            if ($otherEntityExportCount === ($allExportCount - 1)) {
+                $this->info('Jobs are done, generating the zip file...');
+
+                (new CreateZipArchiveAction($dealer))->execute();
+
+                $done = true;
+            } else {
+                $this->info('Jobs are not done yet, damn it!');
+            }
+        } while (!$done);
+
+        $this->info('All is done, have a nice day!');
+
+        return 0;
     }
 }
