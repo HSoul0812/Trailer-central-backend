@@ -5,6 +5,7 @@ namespace App\Repositories\Marketing\Craigslist;
 use App\Models\Marketing\Craigslist\Queue;
 use App\Repositories\Repository;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection as DBCollection;
 
 interface SchedulerRepositoryInterface extends Repository {
     /**
