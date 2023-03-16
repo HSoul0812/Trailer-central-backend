@@ -174,7 +174,7 @@ class ValidateService implements ValidateServiceInterface
      * 
      * @return null|ClientMessage
      */
-    public function count(): ?ClientMessage {
+    public function counts(): ?ClientMessage {
         // Get Past Due Scheduled Posts
         $duePast = $this->scheduler->duePast();
         $this->log->info('Cl Scheduler Currently has ' . $duePast . ' Posts Due to be Submitted Now');

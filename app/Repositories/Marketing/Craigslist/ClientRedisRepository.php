@@ -313,8 +313,8 @@ class ClientRedisRepository implements ClientRepositoryInterface
         // Loop Clients
         $clients->sort(function($a, $b) use($order) {
             // Get Column
-            $aVal = (int) $a->{$order['field']};
-            $bVal = (int) $b->{$order['field']};
+            $aVal = isset($a->{$order['field']}) ? (int) $a->{$order['field']} : 0;
+            $bVal = isset($b->{$order['field']}) ? (int) $b->{$order['field']} : 0;
 
             // Equal Values on Both Sides?
             if($aVal === $bVal) {
