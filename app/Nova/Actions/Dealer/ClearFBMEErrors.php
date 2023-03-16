@@ -43,6 +43,9 @@ class ClearFBMEErrors extends Action
         $nrErrorsCleared = 0;
         /** @var DealerFBMOverview $model */
         foreach ($models as $model) {
+            $model->retry_after_ts = NULL;
+            $model->save();
+            
             $nrErrorsCleared += $this->fbErrors->dismissAllActiveForIntegration($model->id)->count();
         }
 

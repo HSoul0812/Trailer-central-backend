@@ -3,7 +3,7 @@
 namespace Tests\Feature\Inventory\ElasticSearch;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
-use App\Jobs\Website\ReIndexInventoriesByDealersJob;
+use App\Jobs\Inventory\GenerateOverlayAndReIndexInventoriesByDealersJob;
 use App\Models\Inventory\Inventory;
 use App\Models\User\AuthToken;
 use App\Models\User\User;
@@ -124,7 +124,7 @@ class CacheInvalidationSearchSyncingTest extends TestCase
 
         $response->assertStatus(202);
 
-        Bus::assertDispatchedTimes(ReIndexInventoriesByDealersJob::class, 1);
+        Bus::assertDispatchedTimes(GenerateOverlayAndReIndexInventoriesByDealersJob::class, 1);
     }
 
     public function setUp(): void
