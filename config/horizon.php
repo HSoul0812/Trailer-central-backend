@@ -177,7 +177,6 @@ return [
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 3600,
             ],
             'supervisor-3' => [
@@ -186,7 +185,6 @@ return [
                 'balance' => 'auto',
                 'processes' => 5,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 3600,
             ]
         ],
@@ -225,7 +223,6 @@ return [
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 900,
             ],
             'supervisor-3' => [
@@ -234,7 +231,6 @@ return [
                 'balance' => 'auto',
                 'processes' => 5,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 3600,
             ]
         ],
@@ -266,7 +262,6 @@ return [
                 'maxProcesses' => 14,
                 'balance' => 'auto',
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 900,
             ],
             'supervisor-3' => [
@@ -341,7 +336,6 @@ return [
                 'minProcesses' => 10,
                 'maxProcesses' => 60,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 900,
             ],
             'supervisor-3' => [
@@ -394,8 +388,7 @@ return [
                 'minProcesses' => 5,
                 'maxProcesses' => 100,
                 'tries' => 3,
-                'delay' => 3,
-                'timeout' => 900,
+                'timeout' => 14400
             ],
         ],
     ],
