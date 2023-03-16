@@ -368,7 +368,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         $params['slot_id'] = 99;
 
         // Scheduled End
-        $params['after'] = DB::raw('NOW()');
+        $params['start'] = DB::raw('NOW()');
         $params['end'] = Carbon::now()->endOfDay()->toDateTimeString();
 
         // Return Counts of Posts
