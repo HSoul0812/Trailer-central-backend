@@ -103,6 +103,6 @@ class ValidateExtensionRunning extends Command
         }
 
         // Count Scheduled Posts and Send Back to Server
-        $this->service->count();
+        $this->service->counts();
     }
 }
