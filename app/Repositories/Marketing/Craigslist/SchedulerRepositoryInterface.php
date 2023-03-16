@@ -49,7 +49,7 @@ interface SchedulerRepositoryInterface extends Repository {
      * @array $params
      * @return int
      */
-    public function duePast(array $params): int;
+    public function duePast(array $params = []): int;
 
     /**
      * Get Posts Due Today
@@ -57,5 +57,5 @@ interface SchedulerRepositoryInterface extends Repository {
      * @array $params
      * @return int
      */
-    public function dueToday(array $params): int;
+    public function dueToday(array $params = []): int;
 }

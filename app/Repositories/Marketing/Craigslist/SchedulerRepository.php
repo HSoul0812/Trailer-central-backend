@@ -335,7 +335,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
      * @array $params
      * @return int
      */
-    public function duePast(array $params): int {
+    public function duePast(array $params = []): int {
         // Append Status Restrictions
         $params['s_status'] = ['scheduled', 'new'];
         $params['s_status_not'] = ['error', 'done'];
@@ -357,7 +357,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
      * @array $params
      * @return int
      */
-    public function dueToday(array $params): int {
+    public function dueToday(array $params = []): int {
         // Append Status Restrictions
         $params['s_status'] = ['scheduled', 'new'];
         $params['s_status_not'] = ['error', 'done'];
