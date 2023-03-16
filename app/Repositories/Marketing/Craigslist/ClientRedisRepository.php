@@ -214,7 +214,7 @@ class ClientRedisRepository implements ClientRepositoryInterface
                     $clients->push($uuid);
                 }
             } else {
-                $clients->push($behaviour);
+                $clients->push(Client::fromBehaviour($behaviour));
             }
             $this->log->info('Merged ' . $uuids->count() . ' Clients For Total ' . $clients->count());
         }
@@ -313,8 +313,8 @@ class ClientRedisRepository implements ClientRepositoryInterface
         // Loop Clients
         $clients->sort(function($a, $b) use($order) {
             // Get Column
-            $aVal = isset($a->{$order['field']}) ? (int) $a->{$order['field']} : 0;
-            $bVal = isset($b->{$order['field']}) ? (int) $b->{$order['field']} : 0;
+            $aVal = (int) $a->{$order['field']};
+            $bVal = (int) $b->{$order['field']};
 
             // Equal Values on Both Sides?
             if($aVal === $bVal) {
