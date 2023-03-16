@@ -28,7 +28,7 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
     public function __construct(array $dealerIds, ?array $context = null)
     {
         $this->dealerIds = $dealerIds;
-        $this->context = $context ?? ['dealer_ids' => $dealerIds];
+        $this->context = $context ?? [];
     }
 
     public function handle(
@@ -40,6 +40,8 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
     ): void {
 
         foreach ($this->dealerIds as $dealerId) {
+            $this->context['dealer_id'] = $dealerId;
+
             $inventories = $repository->getAll(
                 [
                     'dealer_id' => $dealerId,
@@ -59,14 +61,14 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
                             new GenerateOverlayImageJob($inventory->inventory_id, false)
                         )->onQueue('overlay-images');
                     }
-                }, __CLASS__, 2);
+                }, __CLASS__, 2, array_merge($this->context, ['process' => 'image-overlay-generation']));
             }
 
             $logger->info('Enqueueing the job to reindex inventory by dealer id', ['dealer_id' => $dealerId]);
 
             Job::batch(function (BatchedJob $batch) use ($dealerId): void {
                 Inventory::makeAllSearchableByDealers([$dealerId]);
-            }, __CLASS__, self::WAIT_TIME, $this->context);
+            }, __CLASS__, self::WAIT_TIME, array_merge($this->context, ['process' => 'indexation']));
 
             $logger->info('Enqueueing the job to invalidate cache by dealer id', ['dealer_id' => $dealerId]);
 
