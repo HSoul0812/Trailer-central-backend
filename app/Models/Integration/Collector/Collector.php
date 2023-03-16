@@ -97,6 +97,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $override_descriptions
  * @property \DateTime|null $last_run
  * @property \DateTime|null $scheduled_for
+ * @property bool $use_partial_update
+ * @property int $days_till_full_run
+ * @property \DateTime|null $last_full_run
  *
  */
 class Collector extends Model implements Filterable
@@ -223,7 +226,11 @@ class Collector extends Model implements Filterable
         'override_video',
         'override_prices',
         'override_attributes',
-        'override_descriptions'
+        'override_descriptions',
+        'use_partial_update',
+        'days_till_full_run',
+        'last_full_run',
+        'not_archive_manually_items',
     ];
 
     protected $casts = [

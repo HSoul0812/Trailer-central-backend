@@ -3,6 +3,7 @@
 namespace App\Nova\Resources\Integration;
 
 use App\Models\Integration\Collector\CollectorFields;
+use App\Models\Integration\Collector\CollectorSpecificationAction as CollectorSpecificationActionModel;
 use App\Nova\Actions\Exports\CollectorExport;
 use App\Nova\Actions\Importer\CollectorImporter;
 use App\Nova\Resource;
@@ -249,9 +250,23 @@ class Collector extends Resource
                 Boolean::make('Create Items')->withMeta(['value' => $this->create_items ?? true])->hideFromIndex(),
                 Boolean::make('Update Items')->withMeta(['value' => $this->update_items ?? true])->hideFromIndex(),
                 Boolean::make('Archive Items')->withMeta(['value' => $this->archive_items ?? true])->hideFromIndex(),
+                NovaDependencyContainer::make([
+                    Boolean::make('Don\'t archive manually added items', 'not_archive_manually_items')->hideFromIndex()->help(
+                        'If checked, added to the dashboard items won\'t be archived if they are absent in the source file'
+                    ),
+                ])->dependsOn('archive_items', true),
                 Boolean::make('Unarchive Sold Items', 'unarchive_sold_items')->hideFromIndex()->help(
                     'If item exists, but is archived, it will be unarchived upon selecting this option'
                 ),
+                Boolean::make('Use Partial Update', 'use_partial_update')->hideFromIndex()->help(
+                    'Relevant for collectors, that spend a lot of time on running processes. This feature is able to set how often the full run will be. The partial run will be at another time (without images update)'
+                ),
+                NovaDependencyContainer::make([
+                    Number::make('Days Till Full Run', 'days_till_full_run')->hideFromIndex()->help(
+                        "The number of days that should pass before the next full run"
+                    ),
+                    DateTime::make('Last Full Run', 'last_full_run')->format('DD MMM, YYYY - LT')->readonly()->onlyOnDetail(),
+                ])->dependsOn('use_partial_update', true),
             ]),
 
             new Panel('Prices', [
