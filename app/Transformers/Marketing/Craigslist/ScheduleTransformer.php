@@ -85,6 +85,7 @@ class ScheduleTransformer extends TransformerAbstract
         $className = '';
         $editable = false;
         $color = '';
+        var_dump($queue);
 
         if ($queue->queueEdits->count() > 0) {
             $className = 'edit';
