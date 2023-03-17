@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Repositories\WebsiteUser\UserTrackingRepository;
+use App\Repositories\WebsiteUser\UserTrackingRepositoryInterface;
 use App\Services\LoggerService;
 use App\Services\LoggerServiceInterface;
 use Illuminate\Support\Facades\Artisan;
@@ -51,5 +53,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
+
+        $this->app->bind(UserTrackingRepositoryInterface::class, UserTrackingRepository::class);
     }
 }

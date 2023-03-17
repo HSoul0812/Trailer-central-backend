@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\v1\WebsiteUser\AuthController;
 use App\Http\Controllers\v1\WebsiteUser\PasswordResetController;
+use App\Http\Controllers\v1\WebsiteUser\TrackController;
 use App\Http\Controllers\v1\WebsiteUser\VerificationController;
 use App\Http\Controllers\v1\WebsiteUser\LocationController;
 use App\Http\Controllers\v1\Image\ImageController;
@@ -45,6 +46,8 @@ $api->version('v1', function ($api) {
             '/email/verification-notification',
             [VerificationController::class, 'resend']
         )->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
+
+        $api->post('/track', [TrackController::class, 'create'])->middleware(['human-only']);
     });
 
     $api->group(['prefix' => '/user', 'middleware' => 'auth:api'], function ($api) {
