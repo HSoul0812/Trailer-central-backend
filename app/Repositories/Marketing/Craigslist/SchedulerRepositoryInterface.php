@@ -15,6 +15,22 @@ interface SchedulerRepositoryInterface extends Repository {
      */
     public function getUpcoming(array $params): LengthAwarePaginator;
 
+    /*
+     * Get All Scheduled Posts Now Ready
+     *
+     * @param array $params
+     * @return LengthAwarePaginator<Queue>
+     */
+    public function getReady(array $params): LengthAwarePaginator;
+
+    /**
+     * Get All Queued Updated Posts Now Ready
+     *
+     * @param array $params
+     * @return LengthAwarePaginator<Queue>
+     */
+    public function getUpdates(array $params): LengthAwarePaginator;
+
     /**
      * Get the records for the scheduler
      *
@@ -22,7 +38,24 @@ interface SchedulerRepositoryInterface extends Repository {
      *
      * @throws InvalidDealerIdException
      *
-     * @return LengthAwarePaginator
+     * @return LengthAwarePaginator<Queue>
      */
     public function getScheduler($params): LengthAwarePaginator;
+
+
+    /**
+     * Get Posts Past Due
+     * 
+     * @array $params
+     * @return int
+     */
+    public function duePast(array $params = []): int;
+
+    /**
+     * Get Posts Due Today
+     * 
+     * @array $params
+     * @return int
+     */
+    public function dueToday(array $params = []): int;
 }
