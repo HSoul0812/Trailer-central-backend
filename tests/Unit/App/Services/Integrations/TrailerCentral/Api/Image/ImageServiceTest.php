@@ -2,9 +2,8 @@
 
 namespace Tests\Unit\App\Services\Integrations\TrailerCentral\Api\Image;
 
+use App\Domains\Images\Actions\DeleteOldLocalImagesAction;
 use App\Repositories\Integrations\TrailerCentral\AuthTokenRepository;
-use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
-use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Api\Image\ImageService;
 use App\Services\Integrations\TrailerCentral\Api\Image\ImageServiceInterface;
 use GuzzleHttp\Client;
@@ -39,11 +38,20 @@ class ImageServiceTest extends TestCase
         ], $response);
     }
 
+    public function testItCanDeleteOldLocalImages()
+    {
+        // $this->instance(DeleteOldLocalImagesAction::class)
+    }
+
     private function getConcreteService(): ImageServiceInterface
     {
         $httpClient = $this->mockHttpClient();
+
         $authRepo = new AuthTokenRepository();
-        return new ImageService($httpClient, $authRepo);
+
+        $deleteOldLocalImagesAction = resolve(DeleteOldLocalImagesAction::class);
+
+        return new ImageService($httpClient, $authRepo, $deleteOldLocalImagesAction);
     }
 
     private function mockHttpClient(): Client {
