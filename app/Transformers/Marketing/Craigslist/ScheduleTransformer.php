@@ -86,12 +86,12 @@ class ScheduleTransformer extends TransformerAbstract
         $editable = false;
         $color = '';
 
-        if ($queue->queueEdits->count() > 0) {
+        if ($queue->queueDeleted->count() > 0) {
+            $className = 'deleted';
+            $color = 'black';
+        } elseif ($queue->queueEdits->count() > 0) {
             $className = 'edit';
             $color = 'darkolivegreen';
-        } elseif ($queue->queueDeleted->count() > 0) {
-                $className = 'deleted';
-                $color = 'black';
         } elseif ($queue->queueDeleting->count() > 0) {
             $className = 'deleting';
             $color = 'darkred';
