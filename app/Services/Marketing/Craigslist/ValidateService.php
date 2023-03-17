@@ -3,6 +3,7 @@
 namespace App\Services\Marketing\Craigslist;
 
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
 use App\Services\Marketing\Craigslist\DTOs\Behaviour;
 use App\Services\Marketing\Craigslist\DTOs\Client;
 use App\Services\Marketing\Craigslist\DTOs\ClientMessage;
@@ -27,7 +28,9 @@ class ValidateService implements ValidateServiceInterface
         'elapse.error',
         'elapse.critical',
         'clients.low',
-        'clients.edit'
+        'clients.edit',
+        'counts.warning',
+        'counts.critical'
     ];
 
     /**
@@ -36,14 +39,22 @@ class ValidateService implements ValidateServiceInterface
     protected $repo;
 
     /**
+     * @var SchedulerRepositoryInterface
+     */
+    protected $scheduler;
+
+    /**
      * Construct Facebook Marketplace Service
      * 
      * @param ClientRepositoryInterface $repo
+     * @param SchedulerRepositoryInterface $scheduler
      */
     public function __construct(
-        ClientRepositoryInterface $repo
+        ClientRepositoryInterface $repo,
+        SchedulerRepositoryInterface $scheduler
     ) {
         $this->repo = $repo;
+        $this->scheduler = $scheduler;
 
         // Create Marketplace Logger
         $this->log = Log::channel('cl-client');
@@ -159,6 +170,43 @@ class ValidateService implements ValidateServiceInterface
     }
 
     /**
+     * Count Posts Needed to be Sent
+     * 
+     * @return null|ClientMessage
+     */
+    public function counts(): ?ClientMessage {
+        // Get Past Due Scheduled Posts
+        $duePast = $this->scheduler->duePast();
+        $this->log->info('Cl Scheduler Currently has ' . $duePast . ' Posts Due to be Submitted Now');
+
+        // Get Warning From Past Due
+        $level = 'info';
+        $config = $this->getConfig();
+        if($duePast > (int) $config['counts.warning']) {
+            $level = 'warning';
+        }
+
+        // Get Critical From Past Due
+        if($duePast > (int) $config['counts.critical']) {
+            $level = 'critical';
+        }
+        $this->log->info('Cl Scheduler Counts Reported a Log Level of ' . $level);
+
+        // Get Remaining Scheduled Posts
+        $dueToday = $this->scheduler->dueToday();
+        $this->log->info('Cl Scheduler Currently has ' . $dueToday . ' Posts Due to be Submitted The Rest of the Day');
+
+        // Get Client Message
+        $message = ClientMessage::counts($level, $duePast, $dueToday);
+
+        // Return ClientMessage
+        if($this->send($message)) {
+            return $message;
+        }
+        return null;
+    }
+
+    /**
      * Validate if Its Time to Send Message Now, If So, Send It
      * 
      * @param ClientMessage $message
@@ -234,19 +282,21 @@ class ValidateService implements ValidateServiceInterface
     /**
      * Get Config From Environment Variables
      * 
-     * @param int
+     * @param null|int
      * @return array{string: string}
      */
-    private function getConfig(int $dealerId): array {
+    private function getConfig(?int $dealerId = null): array {
         // Loop Config Paths
         $config = [];
         foreach(self::CONFIG_PATHS as $path) {
             $value = config('marketing.cl.settings.warning.' . $path);
 
             // Check Override Instead
-            $override = $this->getOverride($path, $dealerId);
-            if(!empty($override)) {
-                $value = $override;
+            if(!empty($dealerId)) {
+                $override = $this->getOverride($path, $dealerId);
+                if(!empty($override)) {
+                    $value = $override;
+                }
             }
 
             // Add Config
