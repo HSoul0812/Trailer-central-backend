@@ -25,10 +25,14 @@ class DeleteOldLocalImagesCommand extends Command
         parent::__construct();
     }
 
-    public function handle()
+    public function handle(): int
     {
         $days = Carbon::now()->subMonths(self::DELETE_OLDER_THAN_MONTHS)->diffInDays();
 
         $this->imageService->deleteOldLocalImages($days);
+
+        $this->info("Images that are older than $days days have been deleted!");
+
+        return 0;
     }
 }

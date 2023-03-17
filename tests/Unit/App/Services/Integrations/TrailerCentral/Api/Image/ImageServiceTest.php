@@ -12,6 +12,8 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\Storage;
+use Mockery;
+use Mockery\MockInterface;
 use Tests\Common\TestCase;
 
 class ImageServiceTest extends TestCase
@@ -25,7 +27,8 @@ class ImageServiceTest extends TestCase
         $this->service = $this->getConcreteService();
     }
 
-    public function testUploadImage() {
+    public function testUploadImage()
+    {
         $this->markTestSkipped("This test is skipped because it requires TC");
 
         $response = $this->service->uploadImage(1001, Storage::path('koala.png'));
@@ -40,7 +43,18 @@ class ImageServiceTest extends TestCase
 
     public function testItCanDeleteOldLocalImages()
     {
-        // $this->instance(DeleteOldLocalImagesAction::class)
+        $olderThanDays = 20;
+
+        $this->instance(
+            abstract: DeleteOldLocalImagesAction::class,
+            instance: Mockery::mock(DeleteOldLocalImagesAction::class, function (MockInterface $mock) use ($olderThanDays) {
+                $mock->shouldReceive('execute')->with($olderThanDays)->once()->andReturns();
+            })
+        );
+
+        $service = $this->getConcreteService();
+
+        $service->deleteOldLocalImages($olderThanDays);
     }
 
     private function getConcreteService(): ImageServiceInterface
@@ -54,7 +68,8 @@ class ImageServiceTest extends TestCase
         return new ImageService($httpClient, $authRepo, $deleteOldLocalImagesAction);
     }
 
-    private function mockHttpClient(): Client {
+    private function mockHttpClient(): Client
+    {
         $mockData = '{
           "data": {
             "url": "https:\/\/api-v1.zhao.dev.trailercentral.com\/storage\/tmp\/media\/eQNHLd\/GGoOHI\/7wQz0Sxumbsb.png"
