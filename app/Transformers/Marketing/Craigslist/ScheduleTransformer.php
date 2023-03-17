@@ -89,12 +89,12 @@ class ScheduleTransformer extends TransformerAbstract
         if ($queue->queueDeleted->count() > 0) {
             $className = 'deleted';
             $color = 'black';
-        } elseif ($queue->queueEdits->count() > 0) {
-            $className = 'edit';
-            $color = 'darkolivegreen';
         } elseif ($queue->queueDeleting->count() > 0) {
             $className = 'deleting';
             $color = 'darkred';
+        } elseif ($queue->queueEdits->count() > 0) {
+            $className = 'edit';
+            $color = 'darkolivegreen';
         } elseif ($queue->status === 'error' || $queue->status === 'canceled' ||
                   $queue->session->status === 'error') {
             if ($queue->state === 'missing-data' ||
