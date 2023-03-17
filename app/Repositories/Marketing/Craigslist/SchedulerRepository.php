@@ -72,7 +72,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         }
 
         // Start the query
-        $query = Queue::query();
+        $query = Queue::where('queue_id', '>', '0');
 
         // Get the needed fields
         /*$query->select(
