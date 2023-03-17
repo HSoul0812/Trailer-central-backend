@@ -14,4 +14,15 @@ interface SchedulerRepositoryInterface extends Repository {
      * @return LengthAwarePaginator<Queue>
      */
     public function getUpcoming(array $params): LengthAwarePaginator;
+
+    /**
+     * Get the records for the scheduler
+     *
+     * @param $params
+     *
+     * @throws InvalidDealerIdException
+     *
+     * @return LengthAwarePaginator
+     */
+    public function getScheduler($params): LengthAwarePaginator;
 }
