@@ -75,7 +75,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         $query = Queue::query();
 
         // Get the needed fields
-        $query->select(
+        /*$query->select(
             Session::getTableName(). '.session_id',
             Session::getTableName() . '.session_scheduled',
             Session::getTableName() . '.session_started',
@@ -93,7 +93,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
             Session::getTableName() . '.text_status',
             'postEdit.status as q_status',
             'postDelete.status as d_status'
-        );
+        );*/
 
         // Conditions on the join
         $query->leftJoin(Session::getTableName(), function ($join) {
