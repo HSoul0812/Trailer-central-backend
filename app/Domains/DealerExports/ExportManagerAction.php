@@ -19,6 +19,7 @@ use App\Domains\DealerExports\Service\RepairOrdersExport;
 use App\Jobs\DealerExports\DealerDataExportJob;
 use App\Models\DealerExport;
 use App\Models\User\User;
+use App\Domains\DealerExports\POS\SalesLedgerOtherExport;
 
 /**
  * Class ExportManagerAction
@@ -48,6 +49,8 @@ class ExportManagerAction
         InvoicesExportAction::class,
         // POS -> Sales
         SalesLedgerExport::class,
+        // POS -> Other Sales
+        SalesLedgerOtherExport::class,
         // POS -> Sales -> Refunds
         RefundsExportAction::class,
         // Service
