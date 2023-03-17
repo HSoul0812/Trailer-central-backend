@@ -171,8 +171,8 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_code' => $integration->tfa_code,
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
-            'missing' => !$integration->is_up_to_date ? $this->getInventory($integration, 'missing', $params) : null,
-            'sold' => !$integration->is_up_to_date ? $this->getInventory($integration, 'sold', $params) : null,
+            'missing' => $this->getInventory($integration, 'missing', $params),
+            'sold' => $this->getInventory($integration, 'sold', $params),
             'posts_per_day' => $integration->posts_per_day ?? intval(config('marketing.fb.settings.limit.listings', 3))
 
         ]);
