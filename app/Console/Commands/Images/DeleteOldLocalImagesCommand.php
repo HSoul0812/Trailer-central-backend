@@ -2,12 +2,16 @@
 
 namespace App\Console\Commands\Images;
 
+use App\Domains\Commands\Traits\PrependsOutput;
+use App\Domains\Commands\Traits\PrependsTimestamp;
 use App\Services\Integrations\TrailerCentral\Api\Image\ImageServiceInterface;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class DeleteOldLocalImagesCommand extends Command
 {
+    use PrependsOutput, PrependsTimestamp;
+
     const DELETE_OLDER_THAN_MONTHS = 6;
 
     /**

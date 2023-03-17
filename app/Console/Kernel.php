@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console;
 
-use App\Console\Commands\Report\ReportInventoryViewAndImpressionCommand;
+use App\Console\Commands\Images\DeleteOldLocalImagesCommand;
 use App\Console\Commands\UserTracking\PopulateMissingWebsiteUserIdCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -55,14 +55,12 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule
-            ->command(ReportInventoryViewAndImpressionCommand::class, [
-                // Send the yesterday time to the command
-                'date' => now()->subMinutes(10)->format(ReportInventoryViewAndImpressionCommand::DATE_FORMAT),
-            ])
+            ->command(DeleteOldLocalImagesCommand::class)
             ->daily()
             ->withoutOverlapping()
             ->onOneServer()
-            ->runInBackground();
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/commands/delete-old-local-images.log'));
     }
 
     /**
