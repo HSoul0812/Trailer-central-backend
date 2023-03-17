@@ -22,7 +22,8 @@ class SalesLedgerOtherExport extends BaseExportAction implements EntityActionExp
             pm.name AS payment_method_name, pm.type AS payment_method_type, COALESCE(groupedRefund.totalOfRefundAmount, 0) AS totalOfRefundAmount,
             qb_payment.related_payment_intent AS payment_intent, i.id as invoice_id, qb_payment.id AS payment_id, '' AS sales_person, '' as sales_person_id,
             i.total as sale_total, i.doc_num AS reference_number, GROUP_CONCAT(parts_v1.sku) as parts_sku, GROUP_CONCAT(parts_v1.title) as parts_title, 'other' as type,
-            qb_invoice_items.qty as parts_qty, (qb_invoice_items.qty * qb_invoice_items.unit_price) as parts_total, i.total_tax as sales_total_tax")
+            qb_invoice_items.qty as parts_qty, (qb_invoice_items.qty * qb_invoice_items.unit_price) as parts_total, i.total_tax as sales_total_tax,
+            qb_invoice_items.taxes_amount as parts_tax, qb_invoice_items.unit_price as parts_price")
             ->leftJoin(
                 DB::raw("(SELECT refund.tb_primary_id, SUM(refund.amount) AS totalOfRefundAmount
                     FROM dealer_refunds AS refund
@@ -71,8 +72,10 @@ class SalesLedgerOtherExport extends BaseExportAction implements EntityActionExp
                 'part_id' => 'Part Identifier',
                 'parts_title' => 'Parts Title',
                 'parts_sku' => 'Parts SKU',
+                'parts_price' => 'Parts Prices',
                 'parts_total' => 'Parts Total',
                 'parts_qty' => 'Parts Qty',
+                'parts_tax' => 'Parts Tax',
                 'sales_total_tax' => 'Sales Total Tax',
                 'sales_subtotal' => 'Sales Subtotal',
                 'type' => 'Sales Type',
