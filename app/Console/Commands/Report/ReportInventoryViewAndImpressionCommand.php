@@ -61,12 +61,18 @@ class ReportInventoryViewAndImpressionCommand extends Command
             ->setTo($to)
             ->export();
 
+        $this->info("Csv file is being generated at $filePath!");
+
         $sendMail = config('trailertrader.report.inventory-view-and-impression.send_mail');
 
         if ($sendMail) {
+            $this->line("Sending email...");
+
             $mailTo = config('trailertrader.report.inventory-view-and-impression.mail_to');
 
             Mail::to($mailTo)->send(new ReportInventoryViewAndImpressionEmail($filePath, $date));
+
+            $this->info("Email sent!");
         }
 
         return 0;
