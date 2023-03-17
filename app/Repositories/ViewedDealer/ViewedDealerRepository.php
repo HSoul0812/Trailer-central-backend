@@ -71,6 +71,10 @@ class ViewedDealerRepository implements ViewedDealerRepositoryInterface
         /** @var TcApiResponseDealer $dealer */
         $dealer = $dealers->first();
 
+        if ($dealer === null) {
+            throw new ModelNotFoundException("Not found dealer with name $name.");
+        }
+
         // Get the first inventory from ES
         $inventories = $this->inventoryService->list([
             'dealer_id' => $dealer->id,
