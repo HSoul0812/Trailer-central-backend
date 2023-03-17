@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console;
 
 use App\Console\Commands\Images\DeleteOldLocalImagesCommand;
+use App\Console\Commands\Report\ReportInventoryViewAndImpressionCommand;
 use App\Console\Commands\UserTracking\PopulateMissingWebsiteUserIdCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -48,6 +49,16 @@ class Kernel extends ConsoleKernel
             ->command(PopulateMissingWebsiteUserIdCommand::class, [
                 // Send the yesterday time to the command
                 'date' => now()->subMinutes(10)->format(PopulateMissingWebsiteUserIdCommand::DATE_FORMAT),
+            ])
+            ->daily()
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground();
+
+        $schedule
+            ->command(ReportInventoryViewAndImpressionCommand::class, [
+                // Send the yesterday time to the command
+                'date' => now()->subMinutes(10)->format(ReportInventoryViewAndImpressionCommand::DATE_FORMAT),
             ])
             ->daily()
             ->withoutOverlapping()
