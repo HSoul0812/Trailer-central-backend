@@ -9,7 +9,6 @@ use App\Models\Marketing\Craigslist\Queue;
 use App\Models\Marketing\Craigslist\Session;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Collection as DBCollection;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -50,111 +49,6 @@ class SchedulerRepository implements SchedulerRepositoryInterface
     ];
 
     public const DEFAULT_SLOT = 99;
-
-    /**
-     * Get the records for the scheduler
-     *
-     * @param $params
-     *
-     * @throws InvalidDealerIdException
-     *
-     * @return DBCollection
-     */
-    public function scheduler($params): DBCollection
-    {
-        // Dealer id is always required
-        if (empty($params['dealer_id'])) {
-            throw new InvalidDealerIdException();
-        }
-
-        if (empty($params['slot_id'])) {
-            $params['slot_id'] = self::DEFAULT_SLOT;
-        }
-
-        // Start the query
-        $query = Queue::where('queue_id', '>', '0');
-
-        // Get the needed fields
-        /*$query->select(
-            Session::getTableName(). '.session_id',
-            Session::getTableName() . '.session_scheduled',
-            Session::getTableName() . '.session_started',
-            Session::getTableName() . '.notify_error_init',
-            Session::getTableName() . '.notify_error_timeout',
-            Queue::getTableName() . '.queue_id',
-            Queue::getTableName() . '.time',
-            Queue::getTableName() . '.command',
-            Queue::getTableName() . '.parameter',
-            Queue::getTableName() . '.inventory_id',
-            Queue::getTableName() . '.status',
-            Queue::getTableName() . '.state',
-            Session::getTableName() . '.status AS s_status',
-            Session::getTableName() . '.state AS s_state',
-            Session::getTableName() . '.text_status',
-            'postEdit.status as q_status',
-            'postDelete.status as d_status'
-        );*/
-
-        // Conditions on the join
-        $query->leftJoin(Session::getTableName(), function ($join) {
-            $join->on(Session::getTableName() . '.session_id', '=', Queue::getTableName() . '.session_id');
-            $join->on(Session::getTableName() . '.session_dealer_id', '=', Queue::getTableName() . '.dealer_id');
-            $join->on(Session::getTableName() . '.session_profile_id', '=', Queue::getTableName() . '.profile_id');
-        });
-
-        // Join posts with postEdit
-        $postEditQuery = Queue::select('status', 'parent_id', 'command')
-            ->whereNotNull('parent_id')
-            ->where('command', '=', 'postEdit')
-            ->where('status', '<>', 'done')
-            ->where('status', '<>', 'error');
-
-        $query->leftJoinSub($postEditQuery, 'postEdit', function ($join) {
-            $join->on(Queue::getTableName().'.queue_id', '=', 'postEdit.parent_id');
-        });
-
-        // Join posts with postDelete
-        $postDeleteQuery = Queue::select('status', 'parent_id', 'command')
-            ->whereNotNull('parent_id')
-            ->where('command', '=', 'postDelete')
-            ->where('status', '<>', 'error');
-
-        $query->leftJoinSub($postDeleteQuery, 'postDelete', function ($join) {
-            $join->on(Queue::getTableName().'.queue_id', '=', 'postDelete.parent_id');
-        });
-
-        // Last conditions
-        $query->where(Session::getTableName() . '.session_dealer_id', '=', $params['dealer_id']);
-        $query->where(Session::getTableName() . '.session_profile_id', '=', $params['profile_id']);
-        $query->where(Session::getTableName() . '.session_slot_id', '=', $params['slot_id']);
-        $query->where(Queue::getTableName() . '.command', '<>', 'directEdit');
-        $query->where(Queue::getTableName() . '.command', '<>', 'postEdit');
-        $query->whereNotNull(Session::getTableName() . '.session_scheduled');
-
-        // Limit within a certain range of dates
-        if (isset($params['start'])) {
-            $query->whereDate(Session::getTableName() . '.session_scheduled', '>=', $params['start']);
-        }
-        if (isset($params['end'])) {
-            $query->whereDate(Session::getTableName() . '.session_scheduled', '<=', $params['end']);
-        }
-
-        // If no dates are received, set a default
-        if (!isset($params['start']) && !isset($params['end'])) {
-            $query->whereDate(Session::getTableName() . '.session_scheduled', '>=', 'LAST_DAY(CURRENT_DATE) + INTERVAL 1 DAY - INTERVAL 2 MONTH');
-        }
-
-        // Group by session
-        $query->groupBy(Session::getTableName() . '.session_id');
-
-        // Make sure it also includes inventories with images
-        $query->has('inventory')->with('inventory')->with('inventory.orderedImages');
-
-        // Also order chronologically
-        $query->orderBy(Session::getTableName() . '.session_scheduled');
-
-        return $query->get();
-    }
 
     /**
      * Create Facebook Page
@@ -243,6 +137,17 @@ class SchedulerRepository implements SchedulerRepositoryInterface
 
         if (isset($params['q_status_not'])) {
             $query = $query->whereNotIn(Queue::getTableName().'.status', $params['q_status_not']);
+        }
+
+        if(isset($params['command'])) {
+            if(!is_array($params['command'])) {
+                $params['command'] = array($params['command']);
+            }
+            $query = $query->whereIn(Queue::getTableName().'.command', $params['command']);
+        }
+
+        if (isset($params['command_not'])) {
+            $query = $query->whereNotIn(Queue::getTableName().'.status', $params['command_not']);
         }
 
         // Limit within a certain range of dates
@@ -357,6 +262,38 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         // Restrict Per Page Limit
         if (!isset($params['per_page'])) {
             $params['per_page'] = 10;
+        }
+
+        // Return Special Formatted
+        return $this->getAll($params);
+    }
+
+    /**
+     * Get the records for the scheduler
+     *
+     * @param $params
+     *
+     * @throws InvalidDealerIdException
+     *
+     * @return LengthAwarePaginator
+     */
+    public function getScheduler($params): LengthAwarePaginator
+    {
+        // Dealer id is always required
+        if (empty($params['dealer_id'])) {
+            throw new InvalidDealerIdException();
+        }
+
+        // Ignore Command
+        $params['command_not'] = ['directEdit', 'postEdit'];
+
+        if (empty($params['slot_id'])) {
+            $params['slot_id'] = self::DEFAULT_SLOT;
+        }
+
+        // If no dates are received, set a default
+        if (!isset($params['start']) && !isset($params['end'])) {
+            $params['start'] = DB::raw('LAST_DAY(CURRENT_DATE) + INTERVAL 1 DAY - INTERVAL 2 MONTH');
         }
 
         // Return Special Formatted
