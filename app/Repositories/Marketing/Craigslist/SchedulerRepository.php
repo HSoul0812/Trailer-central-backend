@@ -158,6 +158,15 @@ class SchedulerRepository implements SchedulerRepositoryInterface
             $query->whereDate(Session::getTableName() . '.session_scheduled', '<=', $params['end']);
         }
 
+        if (isset($params['with'])) {
+            if(!is_array($params['with'])) {
+                $params['with'] = [$params['with']];
+            }
+            foreach($params['with'] as $with) {
+                $query->with($with);
+            }
+        }
+
         if (!isset($params['sort'])) {
             $params['sort'] = '-scheduled';
         }
@@ -295,6 +304,9 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         if (!isset($params['start']) && !isset($params['end'])) {
             $params['start'] = DB::raw('LAST_DAY(CURRENT_DATE) + INTERVAL 1 DAY - INTERVAL 2 MONTH');
         }
+
+        // Get Updates
+        $params['with'] = ['queueEdits', 'queueDeleting', 'queueDeleted'];
 
         // Return Special Formatted
         return $this->getAll($params);
