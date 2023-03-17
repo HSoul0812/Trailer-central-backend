@@ -17,8 +17,6 @@ class HorizonCleanCompletedJobs extends Command
 {
     private const COMPLETED = 'completed';
 
-    private const CURSOR_COUNTER = 10000;
-
     /**
      * The name and signature of the console command.
      *
@@ -42,7 +40,7 @@ class HorizonCleanCompletedJobs extends Command
 
         $deletedJobs = 0;
 
-        while (false !== ($keys = $client->scan($cursor, 'horizon:[0-9]*', self::CURSOR_COUNTER))) {
+        while (false !== ($keys = $client->scan($cursor, 'horizon:[0-9]*', 50))) {
 
             foreach ($keys as $key) {
                 $parts = explode(':', $key);
