@@ -9,6 +9,7 @@ use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\WebsiteUser\TrackUserRequest;
 use App\Repositories\WebsiteUser\UserTrackingRepositoryInterface;
+use Throwable;
 
 class TrackController extends AbstractRestfulController
 {
@@ -28,9 +29,13 @@ class TrackController extends AbstractRestfulController
     {
         $request->validate();
 
-        return $this->response->created(
-            content: $this->userTrackingRepository->create($request->all()),
-        );
+        try {
+            return $this->response->created(
+                content: $this->userTrackingRepository->create($request->all()),
+            );
+        } catch (Throwable $e) {
+            $this->response->errorBadRequest($e->getMessage());
+        }
     }
 
     public function show(int $id)
