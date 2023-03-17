@@ -2,11 +2,12 @@
 
 namespace App\Repositories\CRM\Email;
 
-use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Email\Template;
-use App\Repositories\CRM\Email\TemplateRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
-class TemplateRepository implements TemplateRepositoryInterface {
+class TemplateRepository implements TemplateRepositoryInterface
+{
+    private $model;
 
     private $sortOrders = [
         'name' => [
@@ -27,20 +28,29 @@ class TemplateRepository implements TemplateRepositoryInterface {
         ]
     ];
 
-    public function create($params) {
-        throw new NotImplementedException;
+    public function __construct(Template $template)
+    {
+        $this->model = $template;
     }
 
-    public function delete($params) {
-        throw new NotImplementedException;
+    public function create($params)
+    {
+        return $this->model::create($params);
     }
 
-    public function get($params) {
-        return Template::findOrFail($params['id']);
+    public function delete($params)
+    {
+        return $this->model::destroy($params['id']);
     }
 
-    public function getAll($params) {
-        $query = Template::where('id', '>', 0);
+    public function get($params)
+    {
+        return $this->model::findOrFail($params['id']);
+    }
+
+    public function getAll($params)
+    {
+        $query = $this->model::where('id', '>', 0);
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
@@ -61,11 +71,22 @@ class TemplateRepository implements TemplateRepositoryInterface {
         return $query->paginate($params['per_page'])->appends($params);
     }
 
-    public function update($params) {
-        throw new NotImplementedException;
+    public function update($params)
+    {
+        // Get Template
+        $template = $this->model::findOrFail($params['id']);
+
+        // Update Template
+        DB::transaction(function () use (&$template, $params) {
+            $template->fill($params)->save();
+        });
+
+        // Return Full Template
+        return $template;
     }
 
-    private function addSortQuery($query, $sort) {
+    private function addSortQuery($query, $sort)
+    {
         if (!isset($this->sortOrders[$sort])) {
             return;
         }

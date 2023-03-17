@@ -84,6 +84,15 @@ class PostRepository implements PostRepositoryInterface {
      * @return Post
      */
     public function get($params) {
+        // Inventory and/or Profile ID Exists?
+        if(isset($params['inventory_id']) && isset($params['profile_id'])) {
+            $post = Post::where('inventory_id', $params['inventory_id'])
+                       ->where('profile_id', $params['profile_id'])->first();
+            if(!empty($post->id)) {
+                return $post;
+            }
+        }
+
         // CLID Exists?
         if(isset($params['clid']) && $params['clid']) {
             return Post::where('clid', $params['clid'])->firstOrFail();
@@ -142,7 +151,7 @@ class PostRepository implements PostRepositoryInterface {
      * @return Post
      */
     public function update($params) {
-        $post = $this->find($params);
+        $post = $this->get($params);
 
         DB::transaction(function() use (&$post, $params) {
             // Set Dates if Not Provided
@@ -171,6 +180,15 @@ class PostRepository implements PostRepositoryInterface {
      * @return null|Post
      */
     public function find(array $params): ?Post {
+        // Inventory and/or Profile ID Exists?
+        if(isset($params['inventory_id']) && isset($params['profile_id'])) {
+            $post = Post::where('inventory_id', $params['inventory_id'])
+                        ->where('profile_id', $params['profile_id'])->first();
+            if(!empty($post->id)) {
+                return $post;
+            }
+        }
+
         // CLID Exists?
         if(isset($params['clid']) && $params['clid']) {
             return Post::where('clid', $params['clid'])->first();
@@ -188,7 +206,7 @@ class PostRepository implements PostRepositoryInterface {
      */
     public function createOrUpdate(array $params): Post {
         // Get Post
-        $post = $this->get($params);
+        $post = $this->find($params);
 
         // Post Exists? Update!
         if(!empty($post->id)) {

@@ -4,6 +4,7 @@ namespace App\Models\CRM\Leads;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -26,9 +27,39 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class LeadTrade extends Model
 {
-    const UPDATED_AT = NULL;
-
     protected $table = 'website_lead_trades';
+
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string
+     */
+    public const UPDATED_AT = null;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'lead_id',
+        'type',
+        'make',
+        'model',
+        'year',
+        'price',
+        'length',
+        'width',
+        'notes'
+    ];
+
+    /**
+     * @return BelongsTo
+     */
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(Lead::class, 'lead_id', 'identifier');
+    }
 
     /**
      * @return HasMany

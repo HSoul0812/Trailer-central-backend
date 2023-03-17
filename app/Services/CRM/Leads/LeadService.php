@@ -20,6 +20,7 @@ use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Services\CRM\Leads\DTOs\LeadFilters;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -179,9 +180,33 @@ class LeadService implements LeadServiceInterface
             $this->updateUnitsOfInterest($lead, $params['inventory']);
         }
 
-        // Create Customer if Not Exists and BOTH First/Last Name Provided
-        if (!empty($params['first_name']) && !empty($params['last_name'])) {
-            $this->customerRepository->createFromLead($lead);
+        // Create or Update Customer
+        if (isset($params['customer_id'])) {
+
+            // Update Customer with new Lead ID
+            $this->customerRepository->update([
+                'id' => $params['customer_id'],
+                'dealer_id' => $params['dealer_id'],
+                'website_lead_id' => $params['lead_id']
+            ]);
+
+        } else {
+
+            // Create Customer if Not Exists and BOTH First/Last Name Provided
+            if (!empty($params['first_name']) && !empty($params['last_name'])) {
+                $this->customerRepository->createFromLead($lead);
+            }
+        }
+
+        // Add Interaction if Exists
+        if (isset($params['interaction']['type'])) {
+
+            $this->interactions->create([
+                'lead_id' => $params['lead_id'],
+                'interaction_type' => $params['interaction']['type'],
+                'interaction_notes' => $params['interaction']['note'],
+                'interaction_time' => $params['interaction']['time']
+            ]);
         }
 
         // Return Full Lead Details
@@ -200,7 +225,11 @@ class LeadService implements LeadServiceInterface
 
         // Start Transaction
         $lead = null;
-        DB::transaction(function() use (&$lead, $params) {
+
+        try {
+
+            $this->beginTransaction();
+
             // Update Lead
             $lead = $this->leads->update($params);
             $params = $this->appendRelationParams($lead, $params);
@@ -224,7 +253,21 @@ class LeadService implements LeadServiceInterface
 
             // Update Units of Interest
             $this->updateUnitsOfInterest($lead, $params['inventory']);
-        });
+
+            // Append Units of Interest
+            if (isset($params['append_inventory']))
+                $this->appendUnitsOfInterest($lead, $params['append_inventory']);
+
+            // Update Customer
+            $this->updateCustomer($lead, $params);
+
+            $this->commitTransaction();
+
+        } catch (\Exception $e) {
+
+            Log::error('Update leads error. Message - ' . $e->getMessage() , $e->getTrace());
+            $this->rollbackTransaction();
+        }
 
         // Return Full Lead Details
         return $lead;
@@ -342,7 +385,7 @@ class LeadService implements LeadServiceInterface
         }
 
         // Get Inventory
-        $inventory = $this->inventory->getAll([
+        $inventories = $this->inventory->getAll([
             'dealer_id' => $lead->dealer_id,
             InventoryRepositoryInterface::CONDITION_AND_WHERE_IN => [
                 'inventory_id' => $inventoryIds
@@ -350,10 +393,80 @@ class LeadService implements LeadServiceInterface
         ]);
 
         // Set Units of Interest to Lead
-        $lead->setRelation('units', $inventory);
+        $lead->setRelation('units', $inventories);
 
         // Return Array of Inventory Lead
         return $units;
+    }
+
+    /**
+     * Add new Units of Interest without deleting existing one
+     *
+     * @param Lead $lead
+     * @param array $inventoryIds
+     * @return Collection<InventoryLead>
+     */
+    protected function appendUnitsOfInterest(Lead $lead, array $inventoryIds) {
+
+        // Nothing to Update
+        if (empty($inventoryIds)) {
+            return collect([]);
+        }
+
+        $existingUnitIds = $this->units->getUnitIds($lead->identifier);
+
+        $missingUnitIds = array_diff($inventoryIds, $existingUnitIds);
+
+        $units = new Collection();
+        foreach ($missingUnitIds as $missingUnitId) {
+
+            $unit = $this->units->create([
+                'inventory_id' => $missingUnitId,
+                'website_lead_id' => $lead->identifier
+            ]);
+            $units->push($unit);
+        }
+
+        $allUnitIds = array_merge($existingUnitIds, $missingUnitIds);
+
+        // Get Inventory
+        $inventories = $this->inventory->getAll([
+            'dealer_id' => $lead->dealer_id,
+            InventoryRepositoryInterface::CONDITION_AND_WHERE_IN => [
+                'inventory_id' => $allUnitIds
+            ]
+        ]);
+
+        // Set Units of Interest to Lead
+        $lead->setRelation('units', $inventories);
+
+        // Return Array of Inventory Lead
+        return $units;
+    }
+
+    /**
+     * Update Customer details when related fields are updated too
+     * 
+     * @param Lead $lead
+     * @param array $params
+     * @return void
+     */
+    public function updateCustomer(Lead $lead, array $params)
+    {
+        $customerLeadParams = array_intersect_key($params, array_flip(array_keys(Lead::CUSTOMER_FIELDS)));
+
+        if (count($customerLeadParams) > 0) {
+
+            $customerTableParams = [];
+            foreach ($customerLeadParams as $leadField => $value) {
+                $customerField = Lead::CUSTOMER_FIELDS[$leadField];
+                $customerTableParams[$customerField] = $value;
+            }
+
+            $customerTableParams['search'] = ['website_lead_id' => $lead->identifier];
+
+            $this->customerRepository->bulkUpdate($customerTableParams);
+        }
     }
 
     /**
@@ -468,6 +581,28 @@ class LeadService implements LeadServiceInterface
     public function getMatches(array $params)
     {
         return $this->leads->getMatches($params['dealer_id'], $params);
+    }
+
+    /**
+     * Get Filters for Leads
+     *
+     * @param array $params
+     * @return LeadFilters
+     */
+    public function getFilters(array $params): LeadFilters
+    {
+        // Get Core CRM Sort Fields
+        $sorts = $this->leads->getSortOrderNamesCrm();
+
+        // Get Popular Filters
+        $popular = $this->leads->getPopularFilters();
+
+        // Return LeadFilters
+        return new LeadFilters([
+            'sorts' => $sorts,
+            'archived' => Lead::ARCHIVED_STATUSES,
+            'popular' => $popular
+        ]);
     }
 
     /**

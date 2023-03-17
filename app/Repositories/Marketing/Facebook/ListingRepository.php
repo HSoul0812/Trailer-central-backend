@@ -157,53 +157,51 @@ class ListingRepository implements ListingRepositoryInterface {
         $query = Inventory::select(Inventory::getTableName() . '.*')
             ->where('dealer_id', '=', $integration->dealer_id)
             ->where('show_on_website', 1)
+            ->whereRaw("IFNULL({$inventoryTableName}.manufacturer, '') <> ''")
+            ->whereRaw("IFNULL({$inventoryTableName}.model, '') <> ''")
+            ->whereRaw("IFNULL({$inventoryTableName}.is_archived, 0) = 0")
+            ->whereRaw("IFNULL({$inventoryTableName}.status, -1) NOT IN (2,6)")
             ->where("{$inventoryTableName}.year", '<', '2025')
+            ->whereNotIn("{$inventoryTableName}.entity_type_id", [EntityType::ENTITY_TYPE_BUILDING, EntityType::ENTITY_TYPE_VEHICLE])
             ->where(function ($query) use ($inventoryTableName, $fbMinPrice) {
                 $query->whereRaw("IFNULL($inventoryTableName.sales_price, 0) > $fbMinPrice")
                     ->orWhereRaw("($inventoryTableName.use_website_price AND IFNULL($inventoryTableName.website_price, 0) > $fbMinPrice)")
                     ->orWhereRaw("IFNULL($inventoryTableName.price, 0) > $fbMinPrice");
             })
-            ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_BUILDING)
-            ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_VEHICLE)
-            ->whereRaw("IFNULL({$inventoryTableName}.manufacturer, '') <> ''")
-            ->whereRaw("IFNULL({$inventoryTableName}.model, '') <> ''")
-            ->whereRaw("IFNULL(is_archived, 0) = 0")
-            ->whereRaw("IFNULL({$inventoryTableName}.status, -1) NOT IN (2,6)")
+
             ->where(function ($query) use ($inventoryTableName, $minDescriptionLength) {
                 $query->whereRaw("LENGTH({$inventoryTableName}.description) >= " . $minDescriptionLength)
                     ->orWhereRaw("LENGTH({$inventoryTableName}.description_html) >= " . (2 * $minDescriptionLength));
             })
             ->has('orderedImages');
 
-        // Append Join
+        // Join with Listings
         $query = $query->leftJoin(Listings::getTableName(), function ($join) use ($integration) {
-            $join->on(Listings::getTableName() . '.inventory_id', '=', Inventory::getTableName() . '.inventory_id')
-                ->where(Listings::getTableName() . '.username', '=', $integration->fb_username)
-                ->where(Listings::getTableName() . '.page_id', '=', $integration->page_id ?? '0');
-        });
-        $query = $query->where(function (Builder $query) use ($listingsTableName) {
-            $query = $query->whereNull("{$listingsTableName}.facebook_id")
-            ->orWhereIn("{$listingsTableName}.status", [Listings::STATUS_DELETED, Listings::STATUS_EXPIRED]);
+            $join->on(Listings::getTableName() . '.inventory_id', '=', Inventory::getTableName() . '.inventory_id');
+            $join->on(Listings::getTableName() . '.username', '=', DB::raw("'" . $integration->fb_username . "'"));
+            $join->on(Listings::getTableName() . '.page_id', '=', DB::raw($integration->page_id ?? '0'));
+        })->where(function (Builder $query) use ($listingsTableName) {
+            $query->whereNull("{$listingsTableName}.facebook_id")
+                ->orWhereIn("{$listingsTableName}.status", [Listings::STATUS_DELETED, Listings::STATUS_EXPIRED]);
         });
 
         // Skip Integrations With Non-Expired Errors
         $query = $query->leftJoin(Error::getTableName(), function ($join) {
-            $join->on(Error::getTableName() . '.marketplace_id', '=', Inventory::getTableName() . '.inventory_id')
-                ->where(Error::getTableName() . '.dismissed', 0);
-        })->where(function (Builder $query) {
-            return $query->whereNull(Error::getTableName() . '.id')
-                ->orWhere(Error::getTableName() . '.expires_at', '<', DB::raw('NOW()'));
-        });
+            $join->on(Error::getTableName() . '.inventory_id', '=', Inventory::getTableName() . '.inventory_id');
+            $join->on(Error::getTableName() . '.dismissed', '=', DB::raw(0));
+            $join->on(Error::getTableName() . '.expires_at', '>', DB::raw('NOW()'));
+            $join->on(Error::getTableName() . '.created_at', '>', Inventory::getTableName() . '.updated_at');
+        })->whereNull(Error::getTableName() . '.id');
 
-        // Append Location
+        // Append Location if needed
         if (!empty($integration->dealer_location_id)) {
             $query = $query->where('dealer_location_id', '=', $integration->dealer_location_id);
         }
 
         // Append Filters
         if (!empty($integration->filter_map)) {
-            $query = $query->where(function(Builder $query) use($integration) {
-                foreach($integration->filter_map as $type => $values) {
+            $query = $query->where(function (Builder $query) use ($integration) {
+                foreach ($integration->filter_map as $type => $values) {
                     $query = $query->orWhereIn(Filter::FILTER_COLUMNS[$type], $values);
                 }
             });

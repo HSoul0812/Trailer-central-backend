@@ -28,7 +28,7 @@ use App\Console\Commands\Inventory\FixFloorplanBillStatus;
 use App\Console\Commands\Parts\Import\GetTextrailParts;
 use App\Console\Commands\Export\ExportFavoritesCommand;
 use App\Console\Commands\User\GenerateCrmUsers;
-use App\Console\Commands\Website\HideExpiredImages;
+use App\Console\Commands\Website\UpdateWebsiteImagesVisibility;
 
 class Kernel extends ConsoleKernel
 {
@@ -61,7 +61,7 @@ class Kernel extends ConsoleKernel
         MyScheduleWorkCommand::class,
         ExportFavoritesCommand::class,
         GenerateCrmUsers::class,
-        HideExpiredImages::class,
+        UpdateWebsiteImagesVisibility::class,
         PruneSSNCommand::class,
     ];
 
@@ -188,13 +188,20 @@ class Kernel extends ConsoleKernel
            ->runInBackground();
 
         /**
-         * @todo Calo say we could schedule this to be removed in next scheduled release (Feb 20th)
+         * @todo Calo say we could schedule this to be removed in next scheduled release (Early May of 2023)
          *
          * Temporary scheduled command to mitigate the integration issue,
          * we need to make time so they will be able to move everything inventory related to the API side
          */
-        $schedule->command('command:inventory:reindex')
-            ->dailyAt('1:00')
+        // this has to be disabled momentarily because it is being dispatched three times, so we need to investigate why
+        // this is happening
+        //        $schedule->command('inventory:recreate-index')
+        //            ->dailyAt('1:00')
+        //            ->onOneServer()
+        //            ->runInBackground();
+
+        $schedule->command('horizon:clean-completed-jobs')
+            ->dailyAt('2:00')
             ->onOneServer()
             ->runInBackground();
 
@@ -208,7 +215,7 @@ class Kernel extends ConsoleKernel
             ->onOneServer()
             ->runInBackground();
 
-        $schedule->command('website:hide-expired-images')
+        $schedule->command('website:update-images-visibility')
             ->daily()
             ->onOneServer()
             ->runInBackground();

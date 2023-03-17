@@ -99,8 +99,41 @@ interface InventoryServiceInterface
      */
     public function convertMarkdown(string $markDown): string;
 
+    /**
+     * Method name say nothing about real process order, it is only to be consistent with legacy naming convention
+     *
+     * Real processing order:
+     *      1. ElasticSearch indexation by dealer location id
+     *      2. Redis Cache invalidation by dealer id
+     *
+     * @param  array  $dealerIds
+     * @return void
+     */
     public function invalidateCacheAndReindexByDealerIds(array $dealerIds): void;
 
+    /**
+     * Method name say nothing about real process order, it is only to be consistent with legacy naming convention
+     *
+     *  Real processing order:
+     *      1. Image overlays generation by dealer id
+     *      2. ElasticSearch indexation by dealer location id
+     *      3. Redis Cache invalidation by dealer id
+     *
+     * @param  array  $dealerIds
+     * @return void
+     */
+    public function invalidateCacheReindexAndGenerateImageOverlaysByDealerIds(array $dealerIds): void;
+
+    /**
+     * Method name say nothing about real process order, it is only to be consistent with legacy naming convention
+     *
+     * Real processing order:
+     *      1. ElasticSearch indexation by dealer location id
+     *      2. Redis Cache invalidation by dealer id
+     *
+     * @param  DealerLocation  $dealerLocation
+     * @return void
+     */
     public function invalidateCacheAndReindexByDealerLocation(DealerLocation $dealerLocation): void;
 
     /**

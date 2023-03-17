@@ -11,6 +11,7 @@ use App\Exceptions\Integration\Google\InvalidGoogleAuthCodeException;
 use App\Exceptions\Integration\Google\InvalidToEmailAddressException;
 use App\Exceptions\Integration\Google\FailedInitializeGmailMessageException;
 use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
+use App\Exceptions\Integration\Google\MissingGapiAccessTokenException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;

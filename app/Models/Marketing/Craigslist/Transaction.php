@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class Transaction
+ *
  * 
  * @package App\Models\Marketing\Craigslist
  */
@@ -20,12 +21,20 @@ class Transaction extends Model
     /**
      * @const string Type Post
      * @const string Type Debut
-     * @const string Type 
+     * @const string Type Adjustment
      */
-    const TYPE_CREDIT = 'credit';
-    const TYPE_POST = 'post';
-    const TYPE_ADJUST = 'adjustment';
-    
+    public const TYPE_POST = 'post';
+    public const TYPE_CREDIT = 'credit';
+    public const TYPE_ADJUST = 'adjustment';
+
+    /**
+     * @const array<string>
+     */
+    public const TYPES = [
+      self::TYPE_POST,
+      self::TYPE_CREDIT,
+      self::TYPE_ADJUST,
+    ];
 
 
     // Define Table Name Constant
@@ -37,9 +46,14 @@ class Transaction extends Model
     protected $table = self::TABLE_NAME;
 
     /**
-     * @var array<string>
+     * @var string
      */
     protected $primaryKey = 'clapp_txn_id';
+
+    /**
+     * @var bool
+     */
+    public $timestamps = false;
 
     /**
      * The attributes that are mass assignable.
@@ -55,9 +69,8 @@ class Transaction extends Model
         'inventory_id',
         'amount',
         'balance',
-        'type'
+        'type',
     ];
-
 
     /**
      * Get Dealer

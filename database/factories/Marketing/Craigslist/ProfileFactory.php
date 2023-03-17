@@ -1,15 +1,14 @@
 <?php
 
-use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\Marketing\Craigslist\Category;
 use App\Models\Marketing\Craigslist\Market;
 use App\Models\Marketing\Craigslist\Profile;
+use App\Models\User\User;
 use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
 
 /** @var Factory $factory */
-
 $factory->define(Profile::class, static function (Faker $faker, array $attributes): array {
     // Get Dealer
     $user = isset($attributes['dealer_id']) ? null : factory(User::class)->create();
@@ -77,7 +76,7 @@ $factory->define(Profile::class, static function (Faker $faker, array $attribute
         'embed_lower' => isset($attributes['embed_lower']) ? $attributes['embed_lower'] : 'phone',
         'embed_bg_lower' => isset($attributes['embed_bg_lower']) ? $attributes['embed_bg_lower'] : '#000000',
         'embed_text_lower' => isset($attributes['embed_text_lower']) ? $attributes['embed_text_lower'] : '#ffffff',
-        'keywords' => isset($attributes['keywords']) ? $attributes['keywords'] : implode(", ", $faker->words(12)),
+        'keywords' => isset($attributes['keywords']) ? $attributes['keywords'] : $faker->words(12, true),
         'scramble' => isset($attributes['scramble']) ? (int) $attributes['scramble'] : 0,
         'blurb' => isset($attributes['blurb']) ? $attributes['blurb'] : $faker->paragraph,
         'proxy_type' => 0,
@@ -89,6 +88,6 @@ $factory->define(Profile::class, static function (Faker $faker, array $attribute
         'use_website_price' => isset($attributes['use_website_price']) ? (int) $attributes['use_website_price'] : 0,
         'market_city' => $market->city_code,
         'market_subarea' => $market->subarea_code,
-        'profile_type' => isset($attributes['profile_type']) ? $attributes['profile_type'] : 'inventory',
+        'profile_type' => isset($attributes['profile_type']) ? $attributes['profile_type'] : 'inventory'
     ];
 });

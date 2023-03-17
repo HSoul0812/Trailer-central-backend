@@ -10,8 +10,10 @@ use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\User\User;
 
 class MarketplaceRepository implements MarketplaceRepositoryInterface {
     use SortTrait, Transaction;
@@ -188,16 +190,34 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
         }
 
         return $query->groupBy(Marketplace::getTableName() . '.id')
-                     ->paginate($params['per_page'])->appends($params);
+            ->paginate($params['per_page'])->appends($params);
+    }
+
+    public function getAllIntegrations($params): Collection
+    {
+        $query = Marketplace::where('retry_after_ts', '<', DB::raw('NOW()'))->orWhereNull('retry_after_ts');
+
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 100;
+        }
+
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        } else {
+            $query->orderBy('last_attempt_ts', 'ASC');
+        }
+
+        return $query->limit($params['per_page'])->get();
     }
 
     /**
      * Update Marketplace
-     * 
+     *
      * @param array $params
      * @return Marketplace
      */
-    public function update($params) {
+    public function update($params)
+    {
         $marketplace = Marketplace::findOrFail($params['id']);
 
         DB::transaction(function() use (&$marketplace, $params) {

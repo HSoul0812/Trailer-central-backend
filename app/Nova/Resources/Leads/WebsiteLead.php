@@ -13,9 +13,9 @@ use App\Nova\Filters\Leads\ArchivedFilter;
 use App\Nova\Resource;
 
 class WebsiteLead extends Resource
-{ 
+{
     public static $group = 'Leads';
-    
+
     /**
      * The model the resource corresponds to.
      *
@@ -57,25 +57,25 @@ class WebsiteLead extends Resource
         return [
             Text::make('Title')
                 ->sortable(),
-            
+
             Text::make('First Name')
                 ->sortable(),
-            
+
             Text::make('Last Name')
                 ->sortable(),
-            
+
             Text::make('Dealer ID', 'dealer_id')->sortable(),
-            
+
             Text::make('Email Address')->sortable(),
-            
+
             Text::make('Phone Number')->sortable(),
-            
+
             Text::make('Address')->sortable(),
-            
+
             Text::make('Archived', 'is_archived')->sortable(),
-            
+
             Text::make('Date Submitted')->sortable(),
-            
+
             Text::make('Note')
         ];
     }
@@ -135,9 +135,9 @@ class WebsiteLead extends Resource
                 }),
             (new DeleteLeads)
                 ->canSee(function ($request) {
-                    return true;
+                    return false;
                 })->canRun(function ($request, $user) {
-                    return true;
+                    return false;
                 })
         ];
     }

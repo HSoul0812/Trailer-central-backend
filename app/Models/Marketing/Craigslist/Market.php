@@ -4,17 +4,18 @@ namespace App\Models\Marketing\Craigslist;
 
 use App\Models\Traits\Inventory\CompositePrimaryKeys;
 use App\Models\Traits\TableAware;
+use Awobaz\Compoships\Compoships;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Market
- * 
+ *
  * @package App\Models\Marketing\Craigslist
  */
 class Market extends Model
 {
-    use TableAware, CompositePrimaryKeys;
+    use TableAware, CompositePrimaryKeys, Compoships;
 
 
     // Define Table Name Constant
@@ -34,6 +35,11 @@ class Market extends Model
      * @var bool
      */
     public $timestamps = false;
+
+    /**
+     * @var bool
+     */
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.
