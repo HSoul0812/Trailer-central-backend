@@ -250,7 +250,8 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
     {
         return $this->aliasName().
             '_'.
-            now()->format('Y_m_d_H_i_s')
+            now()->format('Y_m_d_H_i_s').
+            '-'
             .str_replace('-', '_', getHostName());
     }
 
