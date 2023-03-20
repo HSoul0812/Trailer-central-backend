@@ -32,13 +32,14 @@ interface ValidateServiceInterface {
      * @return Collection<ClientMessage>
      */
     public function status(Collection $validation): Collection;
-    
+
     /**
      * Count Posts Needed to be Sent
      * 
+     * @param int $slotId default: 99
      * @return null|ClientMessage
      */
-    public function counts(): ?ClientMessage;
+    public function counts(int $slotId = 99): ?ClientMessage;
 
     /**
      * Validate if Its Time to Send Message Now, If So, Send It
