@@ -5,6 +5,8 @@ namespace App\Services\Website;
 use App\Repositories\Website\DealerProxyRepositoryInterface;
 use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Support\Facades\Log;
+use GuzzleHttp\Client;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class WebsiteService
@@ -23,14 +25,54 @@ class WebsiteService
     private $websiteRepository;
 
     /**
+     * @var Client
+     */
+    private $httpClient;
+
+    /**
      * WebsiteService constructor.
      * @param DealerProxyRepositoryInterface $dealerProxyRepository
      * @param WebsiteRepositoryInterface $websiteRepository
      */
     public function __construct(DealerProxyRepositoryInterface $dealerProxyRepository, WebsiteRepositoryInterface $websiteRepository)
     {
+        $this->httpClient = new Client();
+
         $this->dealerProxyRepository = $dealerProxyRepository;
         $this->websiteRepository = $websiteRepository;
+    }
+
+    /**
+     * @param int $websiteId
+     * @return ResponseInterface
+     */
+    public function certificateDomainSsl(int $websiteId): ResponseInterface
+    {
+        $www = 'www.';
+        $website = $this->websiteRepository->get(['id' => $websiteId]);
+        $domain = strpos($website, $www) !== 0 ? $www . $website->domain : $website->domain;
+
+        $data = [
+            "CertificateName" => $website->template,
+            "DomainName" => $domain
+        ];
+
+        $setupEndpoint = config('integrations.cloudfront.setup.endpoint');
+
+        $response = $this->httpClient->post(
+            $setupEndpoint,
+            [
+                'json' => $data
+            ]
+        );
+
+        if (!$response) {
+            Log::error('An error occurred issuing certificate for Website ID - ' . $websiteId . "\n Error: " . $response->getBody());
+            return $response;
+        }
+
+        Log::info('Certificate issued successfully for Website ID - ' . $websiteId);
+        return $response;
     }
 
     /**
