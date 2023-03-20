@@ -250,10 +250,19 @@ doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
         if ($sale) {
             $filter .= " && salesPrice > 0.0 && salesPrice < websitePrice";
         }
+        $salesPriceFilter = "";
 
-        if (count($price)) {
-            $filter .= " && price  > " . $price[0] . "&& price < " . $price[1];
+        if (!empty($price[0])) {
+            $salesPriceFilter .= " && salesPrice > " . $price[0];
+            $filter .= " && price  > " . $price[0];
         }
+
+        if (!empty($price[1])) {
+            $filter .= " && price < " . $price[1];
+            $salesPriceFilter .= " && salesPrice < " . $price[1];
+        }
+
+        $filter .= $salesPriceFilter;
 
         return [
             'script' => [
