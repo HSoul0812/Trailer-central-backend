@@ -268,12 +268,14 @@ class SchedulerRepository implements SchedulerRepositoryInterface
      */
     public function duePast(array $params = []): int {
         // Append Status Restrictions
-        $params['s_status'] = ['scheduled', 'new'];
+        $params['s_status'] = ['scheduled', 'queued', 'new'];
         $params['s_status_not'] = ['error', 'done'];
         $params['q_status_not'] = ['error', 'done'];
 
         // Only Get Slot 99
-        $params['slot_id'] = 99;
+        if(!isset($params['slot_id'])) {
+            $params['slot_id'] = 99;
+        }
 
         // Scheduled End
         $params['end'] = DB::raw('NOW()');
@@ -290,12 +292,14 @@ class SchedulerRepository implements SchedulerRepositoryInterface
      */
     public function dueToday(array $params = []): int {
         // Append Status Restrictions
-        $params['s_status'] = ['scheduled', 'new'];
+        $params['s_status'] = ['scheduled', 'queued', 'new'];
         $params['s_status_not'] = ['error', 'done'];
         $params['q_status_not'] = ['error', 'done'];
 
         // Only Get Slot 99
-        $params['slot_id'] = 99;
+        if(!isset($params['slot_id'])) {
+            $params['slot_id'] = 99;
+        }
 
         // Scheduled End
         $params['start'] = DB::raw('NOW()');

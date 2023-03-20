@@ -172,11 +172,12 @@ class ValidateService implements ValidateServiceInterface
     /**
      * Count Posts Needed to be Sent
      * 
+     * @param int $slotId default: 99
      * @return null|ClientMessage
      */
-    public function counts(): ?ClientMessage {
+    public function counts(int $slotId = 99): ?ClientMessage {
         // Get Past Due Scheduled Posts
-        $duePast = $this->scheduler->duePast();
+        $duePast = $this->scheduler->duePast($slotId);
         $this->log->info('Cl Scheduler Currently has ' . $duePast . ' Posts Due to be Submitted Now');
 
         // Get Warning From Past Due
@@ -193,7 +194,7 @@ class ValidateService implements ValidateServiceInterface
         $this->log->info('Cl Scheduler Counts Reported a Log Level of ' . $level);
 
         // Get Remaining Scheduled Posts
-        $dueToday = $this->scheduler->dueToday();
+        $dueToday = $this->scheduler->dueToday($slotId);
         $this->log->info('Cl Scheduler Currently has ' . $dueToday . ' Posts Due to be Submitted The Rest of the Day');
 
         // Get Client Message
