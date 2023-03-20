@@ -29,7 +29,6 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\User\GeolocationService;
 use App\Services\User\GeoLocationServiceInterface;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -49,7 +48,6 @@ use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Inventory\ImageService as ImageTableService;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
-use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 
 /**
  * Test for App\Services\Inventory\InventoryService
@@ -110,6 +108,11 @@ class InventoryServiceTest extends TestCase
     private $fileServiceMock;
 
     /**
+     * @var UserRepositoryInterface|LegacyMockInterface|Mockery\MockInterface
+     */
+    private $dealerRepositoryMock;
+
+    /**
      * @var DealerLocationRepositoryInterface|LegacyMockInterface|Mockery\MockInterface
      */
     private $dealerLocationRepositoryMock;
@@ -143,11 +146,6 @@ class InventoryServiceTest extends TestCase
      * @var LegacyMockInterface|ResponseCacheKeyInterface
      */
     private $responseCacheKeyMock;
-
-    /**
-     * @var LegacyMockInterface|UniqueCacheInvalidationInterface
-     */
-    private $uniqueCacheInvalidationMock;
 
     /**
      * @var LegacyMockInterface|InventoryResponseCacheInterface
@@ -184,6 +182,9 @@ class InventoryServiceTest extends TestCase
         $this->fileServiceMock = Mockery::mock(FileService::class);
         $this->app->instance(FileService::class, $this->fileServiceMock);
 
+        $this->dealerRepositoryMock = Mockery::mock(UserRepositoryInterface::class);
+        $this->app->instance(UserRepositoryInterface::class, $this->dealerRepositoryMock);
+
         $this->dealerLocationRepositoryMock = Mockery::mock(DealerLocationRepositoryInterface::class);
         $this->app->instance(DealerLocationRepositoryInterface::class, $this->dealerLocationRepositoryMock);
 
@@ -218,9 +219,6 @@ class InventoryServiceTest extends TestCase
         $this->responseCacheKeyMock = Mockery::mock(ResponseCacheKeyInterface::class);
         $this->app->instance(ResponseCacheKeyInterface::class, $this->responseCacheKeyMock);
 
-        $this->uniqueCacheInvalidationMock = Mockery::mock(UniqueCacheInvalidationInterface::class);
-        $this->app->instance(UniqueCacheInvalidationInterface::class, $this->uniqueCacheInvalidationMock);
-
         $this->inventoryResponseCacheMock = Mockery::mock(InventoryResponseRedisCache::class);
         $this->app->instance(InventoryResponseCacheInterface::class, $this->inventoryResponseCacheMock);
 
@@ -246,7 +244,7 @@ class InventoryServiceTest extends TestCase
      * @group DMS_INVENTORY
      *
      * @param array $params
-     * @throws BindingResolutionException
+     *
      * @throws InventoryException
      */
     public function testCreateWithoutFilesAndBill(array $params)
@@ -255,9 +253,11 @@ class InventoryServiceTest extends TestCase
 
         /** @var Inventory|LegacyMockInterface $inventory */
         $inventory = $this->getEloquentMock(Inventory::class);
-        $inventory->inventory_id = self::TEST_INVENTORY_ID;
-        $inventory->dealer_id = $this->faker->numberBetween(1222, 3333);
+        $inventory->inventory_id = $this->faker->numberBetween(300, 4000);
+        $inventory->dealer_id = $params['dealer_id'];
         $inventory->shouldReceive('searchable');
+
+        $dealer = $this->getDealerModelMock($inventory->dealer_id);
 
         $expectedCacheKey = sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $inventory->dealer_id);
 
@@ -265,6 +265,12 @@ class InventoryServiceTest extends TestCase
             ->shouldReceive('beginTransaction')
             ->once()
             ->with();
+
+        $this->dealerRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $inventory->dealer_id])
+            ->andReturn($dealer);
 
         $this->inventoryRepositoryMock
             ->shouldReceive('create')
@@ -307,10 +313,10 @@ class InventoryServiceTest extends TestCase
         $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
         $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
 
-        /** @var InventoryService $service */
-        $service = $this->app->make(InventoryService::class);
+        /** @var InventoryService $serviceMock */
+        $serviceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $result = $service->create($params);
+        $result = $serviceMock->create($params);
 
         $this->assertEquals($inventory, $result);
     }
@@ -328,16 +334,18 @@ class InventoryServiceTest extends TestCase
      * @group DW_ELASTICSEARCH
      *
      * @param array $params
-     * @throws BindingResolutionException
+     *
      * @throws InventoryException
      */
     public function testCreateWithImages(array $params)
     {
         /** @var Inventory|LegacyMockInterface $inventory */
         $inventory = $this->getEloquentMock(Inventory::class);
-        $inventory->inventory_id = self::TEST_INVENTORY_ID;
-        $inventory->dealer_id = $this->faker->numberBetween(1222, 3333);
+        $inventory->inventory_id = $this->faker->numberBetween(300, 4000);
+        $inventory->dealer_id = $params['dealer_id'];
         $inventory->shouldReceive('searchable');
+
+        $dealer = $this->getDealerModelMock($inventory->dealer_id);
 
         $expectedCacheKey = sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $inventory->dealer_id);
 
@@ -362,25 +370,31 @@ class InventoryServiceTest extends TestCase
             ->once()
             ->with();
 
+        $this->dealerRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $inventory->dealer_id])
+            ->andReturn($dealer);
+
         $newImage = new FileDto('path', 'hash');
         $newImageWithOverlay = new FileDto('path_with_overlay', 'hash_with_overlay');
 
         $this->imageServiceMock
             ->shouldReceive('upload')
             ->once()
-            ->with($params['new_images'][1]['url'], $params['title'], self::TEST_DEALER_ID, null, $overlayEnabledParams)
+            ->with($params['new_images'][1]['url'], $params['title'], $inventory->dealer_id, null, $overlayEnabledParams)
             ->andReturn($newImage);
 
         $this->imageServiceMock
             ->shouldReceive('upload')
             ->once()
-            ->with($params['new_images'][0]['url'], $params['title'], self::TEST_DEALER_ID, null, $overlayEnabledParams)
+            ->with($params['new_images'][0]['url'], $params['title'], $inventory->dealer_id, null, $overlayEnabledParams)
             ->andReturn($newImage);
 
         $this->imageServiceMock
             ->shouldReceive('upload')
             ->once()
-            ->with($params['new_images'][0]['url'], $params['title'], self::TEST_DEALER_ID, null, $overlayEnabledParams)
+            ->with($params['new_images'][0]['url'], $params['title'], $inventory->dealer_id, null, $overlayEnabledParams)
             ->andReturn($newImageWithOverlay);
 
         $this->inventoryRepositoryMock
@@ -416,10 +430,10 @@ class InventoryServiceTest extends TestCase
         Log::shouldReceive('info')
             ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
 
-        /** @var InventoryService $service */
-        $service = $this->app->make(InventoryService::class);
+        /** @var InventoryService $serviceMock */
+        $serviceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $result = $service->create($params);
+        $result = $serviceMock->create($params);
 
         $this->assertEquals($inventory, $result);
     }
@@ -435,16 +449,18 @@ class InventoryServiceTest extends TestCase
      * @group DW_ELASTICSEARCH
      *
      * @param array $params
-     * @throws BindingResolutionException
+     *
      * @throws InventoryException
      */
     public function testCreateWithFiles(array $params)
     {
         /** @var Inventory|LegacyMockInterface $inventory */
         $inventory = $this->getEloquentMock(Inventory::class);
-        $inventory->inventory_id = self::TEST_INVENTORY_ID;
-        $inventory->dealer_id = $this->faker->numberBetween(1333, 7777);
+        $inventory->inventory_id = $this->faker->numberBetween(300, 4000);
+        $inventory->dealer_id = $params['dealer_id'];
         $inventory->shouldReceive('searchable');
+
+        $dealer = $this->getDealerModelMock($inventory->dealer_id);
 
         $expectedCacheKey = sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $inventory->dealer_id);
 
@@ -471,6 +487,12 @@ class InventoryServiceTest extends TestCase
             ->once()
             ->with();
 
+        $this->dealerRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $inventory->dealer_id])
+            ->andReturn($dealer);
+
         $expectedParams = $params;
         $expectedParams['new_files'] = array_merge($expectedParams['new_files'], $expectedParams['hidden_files']);
         unset($expectedParams['hidden_files']);
@@ -481,7 +503,7 @@ class InventoryServiceTest extends TestCase
             $this->fileServiceMock
                 ->shouldReceive('upload')
                 ->once()
-                ->with($file['url'], $file['title'], self::TEST_DEALER_ID, null)
+                ->with($file['url'], $file['title'], $inventory->dealer_id, null)
                 ->andReturn($newFile);
 
             $expectedParams['new_files'][$key] = array_merge($expectedParams['new_files'][$key], [
@@ -523,10 +545,10 @@ class InventoryServiceTest extends TestCase
         $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
         $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
 
-        /** @var InventoryService $service */
-        $service = $this->app->make(InventoryService::class);
+        /** @var InventoryService $serviceMock */
+        $serviceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $result = $service->create($params);
+        $result = $serviceMock->create($params);
 
         $this->assertEquals($inventory, $result);
     }
@@ -539,7 +561,7 @@ class InventoryServiceTest extends TestCase
      * @group DMS_INVENTORY
      *
      * @param array $params
-     * @throws BindingResolutionException
+     *
      * @throws InventoryException
      */
     public function testCreateWithNewBillVendorAndBillExists(array $params)
@@ -548,15 +570,17 @@ class InventoryServiceTest extends TestCase
 
         /** @var Inventory|LegacyMockInterface $inventory */
         $inventory = $this->getEloquentMock(Inventory::class);
-        $inventory->inventory_id = self::TEST_INVENTORY_ID;
-        $inventory->dealer_id = self::TEST_DEALER_ID;
+        $inventory->inventory_id = $this->faker->numberBetween(300, 4000);
+        $inventory->dealer_id = $params['dealer_id'];
         $inventory->shouldReceive('searchable');
+
+        $dealer = $this->getDealerModelMock($inventory->dealer_id);
 
         $expectedCacheKey = sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $inventory->dealer_id);
 
         /** @var Bill|LegacyMockInterface $bill */
         $bill = $this->getEloquentMock(Bill::class);
-        $bill->id = self::TEST_INVENTORY_ID;
+        $bill->id = $inventory->inventory_id;
 
         $billInfo = $this->getBillInfo($inventory, $params);
 
@@ -568,6 +592,12 @@ class InventoryServiceTest extends TestCase
             ->shouldReceive('beginTransaction')
             ->once()
             ->with();
+
+        $this->dealerRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $inventory->dealer_id])
+            ->andReturn($dealer);
 
         $this->inventoryRepositoryMock
             ->shouldReceive('create')
@@ -595,7 +625,7 @@ class InventoryServiceTest extends TestCase
         $this->quickbookApprovalRepositoryMock
             ->shouldReceive('deleteByTbPrimaryId')
             ->once()
-            ->with($bill->id, 'qb_bills', self::TEST_DEALER_ID);
+            ->with($bill->id, 'qb_bills', $inventory->dealer_id);
 
         $this->billRepositoryMock
             ->shouldReceive('update')
@@ -615,10 +645,10 @@ class InventoryServiceTest extends TestCase
         $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
         $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
 
-        /** @var InventoryService $service */
-        $service = $this->app->make(InventoryService::class);
+        /** @var InventoryService $serviceMock */
+        $serviceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $result = $service->create($params);
+        $result = $serviceMock->create($params);
 
         $this->assertEquals($inventory, $result);
     }
@@ -631,7 +661,7 @@ class InventoryServiceTest extends TestCase
      * @group DMS_INVENTORY
      *
      * @param array $params
-     * @throws BindingResolutionException
+     *
      * @throws InventoryException
      */
     public function testCreateWithNewBillVendorAndBillNotExists(array $params)
@@ -641,15 +671,17 @@ class InventoryServiceTest extends TestCase
 
         /** @var Inventory|LegacyMockInterface $inventory */
         $inventory = $this->getEloquentMock(Inventory::class);
-        $inventory->inventory_id = self::TEST_INVENTORY_ID;
-        $inventory->dealer_id = self::TEST_DEALER_ID;
+        $inventory->inventory_id = $this->faker->numberBetween(300, 4000);
+        $inventory->dealer_id = $params['dealer_id'];
         $inventory->shouldReceive('searchable');
+
+        $dealer = $this->getDealerModelMock($inventory->dealer_id);
 
         $expectedCacheKey = sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $inventory->dealer_id);
 
         /** @var Bill|LegacyMockInterface $bill */
         $bill = $this->getEloquentMock(Bill::class);
-        $bill->id = self::TEST_INVENTORY_ID;
+        $bill->id = $inventory->inventory_id;
 
         $billInfo = $this->getBillInfo($inventory, $params);
         $billInfo['total'] = 0;
@@ -664,6 +696,12 @@ class InventoryServiceTest extends TestCase
             ->once()
             ->with();
 
+        $this->dealerRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $inventory->dealer_id])
+            ->andReturn($dealer);
+
         $this->inventoryRepositoryMock
             ->shouldReceive('create')
             ->once()
@@ -709,10 +747,10 @@ class InventoryServiceTest extends TestCase
         $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
         $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
 
-        /** @var InventoryService $service */
-        $service = $this->app->make(InventoryService::class);
+        /** @var InventoryService $serviceMock */
+        $serviceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $result = $service->create($params);
+        $result = $serviceMock->create($params);
 
         $this->assertEquals($inventory, $result);
     }
@@ -725,7 +763,7 @@ class InventoryServiceTest extends TestCase
      * @group DMS_INVENTORY
      *
      * @param array $params
-     * @throws BindingResolutionException
+     *
      * @throws InventoryException
      */
     public function testCreateWithNewBillWithoutInventoryBill(array $params)
@@ -737,18 +775,20 @@ class InventoryServiceTest extends TestCase
 
         /** @var Inventory|LegacyMockInterface $inventory */
         $inventory = $this->getEloquentMock(Inventory::class);
-        $inventory->inventory_id = self::TEST_INVENTORY_ID;
-        $inventory->dealer_id = self::TEST_DEALER_ID;
+        $inventory->inventory_id = $this->faker->numberBetween(300, 4000);
+        $inventory->dealer_id = $params['dealer_id'];
         $inventory->true_cost = 100;
         $inventory->fp_balance = 50;
         $inventory->fp_vendor = 1;
         $inventory->shouldReceive('searchable');
 
+        $dealer = $this->getDealerModelMock($inventory->dealer_id);
+
         $expectedCacheKey = sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $inventory->dealer_id);
 
         /** @var Bill|LegacyMockInterface $bill */
         $bill = $this->getEloquentMock(Bill::class);
-        $bill->id = self::TEST_INVENTORY_ID;
+        $bill->id = $inventory->inventory_id;
 
         $billInfo = $this->getBillInfo($inventory, $params);
 
@@ -771,6 +811,12 @@ class InventoryServiceTest extends TestCase
             ->shouldReceive('beginTransaction')
             ->once()
             ->with();
+
+        $this->dealerRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $inventory->dealer_id])
+            ->andReturn($dealer);
 
         $this->inventoryRepositoryMock
             ->shouldReceive('create')
@@ -817,10 +863,10 @@ class InventoryServiceTest extends TestCase
         $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
         $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
 
-        /** @var InventoryService $service */
-        $service = $this->app->make(InventoryService::class);
+        /** @var InventoryService $serviceMock */
+        $serviceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $result = $service->create($params);
+        $result = $serviceMock->create($params);
 
         $this->assertEquals($inventory, $result);
     }
@@ -836,17 +882,25 @@ class InventoryServiceTest extends TestCase
      * @group DW_ELASTICSEARCH
      *
      * @param array $params
-     * @throws BindingResolutionException
+     *
      * @throws InventoryException
      */
     public function testCreateWithoutInventory(array $params)
     {
         $params['new_files'] = [];
 
+        $dealer = $this->getDealerModelMock($params['dealer_id']);
+
         $this->inventoryRepositoryMock
             ->shouldReceive('beginTransaction')
             ->once()
             ->with();
+
+        $this->dealerRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $dealer->dealer_id])
+            ->andReturn($dealer);
 
         $this->inventoryRepositoryMock
             ->shouldReceive('create')
@@ -863,10 +917,10 @@ class InventoryServiceTest extends TestCase
 
         $this->expectException(InventoryException::class);
 
-        /** @var InventoryService $service */
-        $service = $this->app->make(InventoryService::class);
+        /** @var InventoryService $serviceMock */
+        $serviceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $result = $service->create($params);
+        $result = $serviceMock->create($params);
 
         $this->assertNull($result);
     }
@@ -882,7 +936,7 @@ class InventoryServiceTest extends TestCase
      * @group DW_ELASTICSEARCH
      *
      * @param array $params
-     * @throws BindingResolutionException
+     *
      * @throws InventoryException
      */
     public function testCreateWithException(array $params)
@@ -890,10 +944,18 @@ class InventoryServiceTest extends TestCase
         $exception = new \Exception();
         $params['new_files'] = [];
 
+        $dealer = $this->getDealerModelMock($params['dealer_id']);
+
         $this->inventoryRepositoryMock
             ->shouldReceive('beginTransaction')
             ->once()
             ->with();
+
+        $this->dealerRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $dealer->dealer_id])
+            ->andReturn($dealer);
 
         $this->inventoryRepositoryMock
             ->shouldReceive('create')
@@ -910,10 +972,10 @@ class InventoryServiceTest extends TestCase
 
         $this->expectException(InventoryException::class);
 
-        /** @var InventoryService $service */
-        $service = $this->app->make(InventoryService::class);
+        /** @var InventoryService $serviceMock */
+        $serviceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $result = $service->create($params);
+        $result = $serviceMock->create($params);
 
         $this->assertNull($result);
     }
@@ -930,7 +992,6 @@ class InventoryServiceTest extends TestCase
      *
      * @param $imageParams
      * @param $fileParams
-     * @throws BindingResolutionException
      */
     public function testDeleteWithImagesAndFiles($imageParams, $fileParams)
     {
@@ -1013,7 +1074,6 @@ class InventoryServiceTest extends TestCase
      *
      * @param $imageParams
      * @param $fileParams
-     * @throws BindingResolutionException
      */
     public function testDeleteWithoutImagesAndFiles($imageParams, $fileParams)
     {
@@ -1071,7 +1131,6 @@ class InventoryServiceTest extends TestCase
      *
      * @param $imageParams
      * @param $fileParams
-     * @throws BindingResolutionException
      */
     public function testDeleteWithException($imageParams, $fileParams)
     {
@@ -1274,7 +1333,6 @@ class InventoryServiceTest extends TestCase
      * @group DW_ELASTICSEARCH
      *
      * @return void
-     * @throws BindingResolutionException
      */
     public function testDeliveryPrice() {
         $inventory = $this->getEloquentMock(Inventory::class);
@@ -1326,9 +1384,12 @@ class InventoryServiceTest extends TestCase
      */
     public function createParamsProvider(): array
     {
+        $this->refreshApplication();
+        $this->setUpTraits();
+
         return [[
             [
-                'dealer_id' => self::TEST_DEALER_ID,
+                'dealer_id' => $this->faker->numberBetween(1222, 3333),
                 'vin' => self::TEST_VIN,
                 'stock' => self::TEST_STOCK,
                 'model' => self::TEST_MODEL,
@@ -1796,9 +1857,11 @@ class InventoryServiceTest extends TestCase
     {
         /** @var Inventory|LegacyMockInterface $inventory */
         $inventory = $this->getEloquentMock(Inventory::class);
-        $inventory->inventory_id = self::TEST_INVENTORY_ID;
-        $inventory->dealer_id = $this->faker->numberBetween(1222, 3333);
+        $inventory->inventory_id = $this->faker->numberBetween(300, 4000);
+        $inventory->dealer_id = $params['dealer_id'];
         $inventory->shouldReceive('searchable');
+
+        $dealer = $this->getDealerModelMock($inventory->dealer_id);
 
         $expectedCacheKey = sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $inventory->dealer_id);
 
@@ -1806,6 +1869,12 @@ class InventoryServiceTest extends TestCase
             ->shouldReceive('beginTransaction')
             ->once()
             ->with();
+
+        $this->dealerRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $inventory->dealer_id])
+            ->andReturn($dealer);
 
         $this->inventoryRepositoryMock
             ->shouldReceive('create')
@@ -1823,17 +1892,17 @@ class InventoryServiceTest extends TestCase
             ->never();
 
         Log::shouldReceive('info')
-            ->with('Item has been successfully created', ['inventoryId' => self::TEST_INVENTORY_ID]);
+            ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
 
         Log::shouldReceive('error')->never();
 
         $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
         $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
 
-        /** @var InventoryService $service */
-        $service = $this->app->make(InventoryService::class);
+        /** @var InventoryService $serviceMock */
+        $serviceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $result = $service->create($params);
+        $result = $serviceMock->create($params);
 
         $this->assertEquals($inventory, $result);
 
@@ -1850,10 +1919,11 @@ class InventoryServiceTest extends TestCase
         $params['new_images'] = ['tmp_image_path'];
         /** @var Inventory|LegacyMockInterface $inventory */
         $inventory = $this->getEloquentMock(Inventory::class);
-        $inventory->inventory_id = self::TEST_INVENTORY_ID;
-        $inventory->dealer_id = $this->faker->numberBetween(1222, 3333);
+        $inventory->inventory_id = $this->faker->numberBetween(300, 4000);
+        $inventory->dealer_id = $params['dealer_id'];
         $inventory->shouldReceive('searchable');
 
+        $dealer = $this->getDealerModelMock($inventory->dealer_id);
 
         $expectedCacheKey = sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $inventory->dealer_id);
 
@@ -1861,6 +1931,12 @@ class InventoryServiceTest extends TestCase
             ->shouldReceive('beginTransaction')
             ->once()
             ->with();
+
+        $this->dealerRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $inventory->dealer_id])
+            ->andReturn($dealer);
 
         $this->inventoryRepositoryMock
             ->shouldReceive('create')
@@ -1878,7 +1954,7 @@ class InventoryServiceTest extends TestCase
             ->never();
 
         Log::shouldReceive('info')
-            ->with('Item has been successfully created', ['inventoryId' => self::TEST_INVENTORY_ID]);
+            ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
 
         Log::shouldReceive('error')->never();
 
@@ -2139,6 +2215,25 @@ class InventoryServiceTest extends TestCase
         // so we can not test indexation and invalidation dispatching jobs
     }
 
+    /**
+     * @param  int  $dealerId
+     * @param  int  $overlayEnabled
+     * @param  int  $overlayDefault
+     * @return User|LegacyMockInterface
+     */
+    protected function getDealerModelMock(
+        int $dealerId,
+        int $overlayEnabled = User::OVERLAY_ENABLED_NONE,
+        int $overlayDefault = User::OVERLAY_DISABLED_BY_DEFAULT
+    ) {
+        /** @var User|LegacyMockInterface $dealer */
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = $dealerId;
+        $dealer->overlay_enabled = $overlayEnabled;
+        $dealer->overlay_default = $overlayDefault;
+
+        return $dealer;
+    }
     protected function getInventoryServiceDependencies(): array
     {
         return [
@@ -2150,6 +2245,7 @@ class InventoryServiceTest extends TestCase
             $this->websiteConfigRepositoryMock,
             $this->imageServiceMock,
             $this->fileServiceMock,
+            $this->dealerRepositoryMock,
             $this->dealerLocationRepositoryMock,
             $this->dealerLocationMileageFeeRepositoryMock,
             $this->categoryRepositoryMock,
