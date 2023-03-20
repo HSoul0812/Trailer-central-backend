@@ -101,5 +101,8 @@ class ValidateExtensionRunning extends Command
         } else {
             $log->info('No Slack Messages To Send for CL Clients');
         }
+
+        // Count Scheduled Posts and Send Back to Server
+        $this->service->counts();
     }
 }
