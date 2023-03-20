@@ -45,6 +45,10 @@ return [
             'low' => env('CLAPP_WARNING_CLIENTS_LOW', '1'),
             'edit' => env('CLAPP_WARNING_CLIENTS_EDIT_LOW', '0')
         ],
+        'counts' => [
+            'warning' => env('CLAPP_WARNING_COUNTS_HIGH', '500'),
+            'critical' => env('CLAPP_WARNING_COUNTS_CRITICAL', '1000')
+        ],
         'overrides' => [
             'elapse' => [
                 'warning' => env('CLAPP_WARNING_OVERRIDE_ELAPSE_WARNING'),
@@ -55,6 +59,10 @@ return [
                 'low' => env('CLAPP_WARNING_OVERRIDE_CLIENTS_LOW'),
                 'edit' => env('CLAPP_WARNING_OVERRIDE_CLIENTS_EDIT_LOW')
             ],
+            'counts' => [
+                'warning' => env('CLAPP_WARNING_OVERRIDE_COUNTS_HIGH'),
+                'critical' => env('CLAPP_WARNING_OVERRIDE_COUNTS_CRITICAL')
+            ]
         ]
     ],
 

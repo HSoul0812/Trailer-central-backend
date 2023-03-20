@@ -97,33 +97,6 @@ class Behaviour
                             'rvs - by dealer',
                             'sporting goods - by dealer',
                             'trailers - by dealer']
-        ],
-
-        // Internal Dealer -- For Boats
-        112 => [
-            'profile'  => 3137,
-            'internal' => true,
-            'slotId'   => 99,
-            'dealer'   => 'Internal',
-            'type'     => 'internal',
-            'email'    => 'internal+boats@trailercentral.com',
-            'uuid'     => 'sch0000000000012',
-            'username' => "jconwaycl+boats@gmail.com",
-            'password' => "2genieus1!",
-            'category' => ['boats - by dealer']
-        ],
-        113 => [
-            'profile'  => 3137,
-            'internal' => true,
-            'edit'     => true,
-            'slotId'   => 97,
-            'dealer'   => 'Edit',
-            'type'     => 'edit',
-            'email'    => 'edit+boats@trailercentral.com',
-            'uuid'     => 'sch0000000000013',
-            'username' => "jconwaycl+boats@gmail.com",
-            'password' => "2genieus1!",
-            'category' => ['boats - by dealer']
         ]
     ];
 

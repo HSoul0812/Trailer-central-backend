@@ -95,12 +95,13 @@ class RedisResponseCache implements ResponseCacheInterface
         /** @var null|int $cursor */
         $cursor = null;
 
-        while ($elements = $this->client->hScan($hashKey, $cursor, $pattern, self::HASH_SCAN_COUNTER)) {
-            $keys = array_keys($elements); // it only needs the key
+        do {
+            // it only needs the key
+            $keys = array_keys($this->client->hScan($hashKey, $cursor, $pattern, self::HASH_SCAN_COUNTER));
 
             $this->client->unlink($this->getExactKeysFromLongKeyNames($keys)); // delete by exact key names
             $this->client->hDel($hashKey, ...$keys); // delete keys from hashmap
-        }
+        } while ($cursor);
     }
 
     /**

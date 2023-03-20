@@ -92,7 +92,7 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property bool $show_on_racingjunk
  * @property bool $show_on_website
  * @property \DateTimeInterface|Carbon $tt_payment_expiration_date
- * @property bool $overlay_enabled
+ * @property bool $overlay_enabled 0 -> disabled, 1 -> only primary image, 2 -> all images
  * @property bool $is_special
  * @property bool $is_featured
  * @property double $latitude
@@ -246,8 +246,8 @@ class Inventory extends Model
         self::CONDITION_RE_MFG => 'Re-manufactured',
     ];
 
-    const OVERLAY_ENABLED_PRIMARY = 1;
-    const OVERLAY_ENABLED_ALL = 2;
+    const OVERLAY_ENABLED_PRIMARY = User::OVERLAY_ENABLED_PRIMARY;
+    const OVERLAY_ENABLED_ALL = User::OVERLAY_ENABLED_ALL;
 
     const OVERLAY_CODES = [
         self::OVERLAY_ENABLED_PRIMARY,

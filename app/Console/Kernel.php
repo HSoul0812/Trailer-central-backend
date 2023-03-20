@@ -201,7 +201,7 @@ class Kernel extends ConsoleKernel
         //            ->runInBackground();
 
         $schedule->command('horizon:clean-completed-jobs')
-            ->dailyAt('2:00')
+            ->everyThirtyMinutes()
             ->onOneServer()
             ->runInBackground();
 
