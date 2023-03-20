@@ -28,12 +28,12 @@ class UpdateWebsiteImagesVisibility extends Command
      */
     public function handle()
     {
-        WebsiteImage::whereDate('expires_at', '<=', now())
-            ->where('is_active', true)
-            ->update(['is_active' => false]);
-
         WebsiteImage::whereDate('starts_from', '<=', now())
             ->where('is_active', false)
             ->update(['is_active' => true]);
+
+        WebsiteImage::whereDate('expires_at', '<', now())
+            ->where('is_active', true)
+            ->update(['is_active' => false]);
     }
 }

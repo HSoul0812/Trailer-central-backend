@@ -49,6 +49,6 @@ class IsAfterDate implements Rule
      */
     public function message(): string
     {
-        return 'expires_at must be before starts_from';
+        return 'expires_at must not be before starts_from';
     }
 }
