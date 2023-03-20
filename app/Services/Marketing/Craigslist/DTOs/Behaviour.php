@@ -256,7 +256,7 @@ class Behaviour
 
         // Find Dealer Config Override Based on ID Provided
         foreach(self::DEALER_ID_BEHAVIOURS as $dealerId => $config) {
-            if($slotId === $config['slotId']) {
+            if(isset($config['slotId']) && $slotId === $config['slotId']) {
                 $config['dealerId'] = $dealerId;
                 $behaviour = $config;
                 break;
