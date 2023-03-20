@@ -31,7 +31,7 @@ class ClientMessage
     /**
      * @const string
      */
-    const COUNTS_EMAIL = self::COUNTS_PREFIX . '@trailercentral.com';
+    const COUNTS_EMAIL = self::COUNTS_PREFIX . ':slotId@trailercentral.com';
 
 
     /**
@@ -212,12 +212,14 @@ class ClientMessage
     /**
      * Get Post Counts Message
      * 
+     * @param string $level
      * @param int $duePast
      * @param int $dueToday
+     * @param int $slotId
      * @param string $email
      * @return ClientMessage
      */
-    static public function counts(string $level, int $duePast, int $dueToday, string $email): ClientMessage {
+    static public function counts(string $level, int $duePast, int $dueToday, int $slotId, string $email): ClientMessage {
         // Throw Error if Invalid
         $key = self::COUNTS_PREFIX . ucfirst($level);
         if(!isset(self::WARNING_LEVELS[$key])) {
@@ -234,7 +236,7 @@ class ClientMessage
         // Return ClientMessage
         return new self([
             'dealer_id' => 0,
-            'email'     => self::COUNTS_EMAIL,
+            'email'     => str_replace(':slotId', $slotId, self::COUNTS_EMAIL),
             'level'     => $level,
             'message'   => $message
         ]);

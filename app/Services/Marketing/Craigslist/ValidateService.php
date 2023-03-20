@@ -203,7 +203,7 @@ class ValidateService implements ValidateServiceInterface
                             $dueToday . ' Posts Due to be Submitted The Rest of the Day');
 
         // Get Client Message
-        $message = ClientMessage::counts($level, $duePast, $dueToday, $behaviour->email);
+        $message = ClientMessage::counts($level, $duePast, $dueToday, $slotId, $behaviour->email);
 
         // Return ClientMessage
         if($this->send($message)) {
