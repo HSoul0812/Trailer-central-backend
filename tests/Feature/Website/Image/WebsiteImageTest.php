@@ -225,6 +225,7 @@ class WebsiteImageTest extends TestCase
 
         $data = [
             'starts_from' => now()->addDays(5)->toDateTimeString(),
+            'expires_at' => now()->addDays(10)->toDateTimeString(),
             'is_active' => 1
         ];
 
@@ -379,6 +380,37 @@ class WebsiteImageTest extends TestCase
         $response = $this->delete('/api/website/' . $this->website->id . '/images/' . $image->identifier);
 
         $response->assertStatus(403);
+    }
+
+    public function testExpiresDateMustBeAfterStartDateWhenCreatingAnImage()
+    {
+        $data = [
+            'starts_from' => now()->addDays(5)->toDateTimeString(),
+            'expires_at' => now()->addDays(3)->toDateTimeString()
+        ];
+
+        $response = $this
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->post('/api/website/' . $this->website->id . '/images', $data);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['expires_at']);
+    }
+
+    public function testExpiresDateMustBeAfterStartDateWhenUpdatingAnImage()
+    {
+        $data = [
+            'id' => 0,
+            'starts_from' => now()->addDays(5)->toDateTimeString(),
+            'expires_at' => now()->addDays(3)->toDateTimeString()
+        ];
+
+        $response = $this
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->put('/api/website/' . $this->website->id . '/images/' . 0, $data);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['id', 'expires_at']);
     }
 
     public function testItCanDeleteAnImage()
