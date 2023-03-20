@@ -39,12 +39,12 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
             $params['is_active'] = 1;
         }
 
-        if (isset($params['starts_from'])) {
-            $params['is_active'] = intval(Carbon::parse($params['starts_from'])->isPast());
-        }
-
         if (isset($params['expires_at'])) {
             $params['is_active'] = intval(Carbon::parse($params['expires_at'])->isFuture());
+        }
+
+        if (isset($params['starts_from'])) {
+            $params['is_active'] = intval(Carbon::parse($params['starts_from'])->isPast());
         }
 
         return WebsiteImage::create($params);
@@ -64,12 +64,12 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
             throw new InvalidArgumentException("Website Image ID is required");
         }
 
-        if (isset($params['starts_from'])) {
-            $params['is_active'] = intval(Carbon::parse($params['starts_from'])->isPast());
-        }
-
         if (isset($params['expires_at'])) {
             $params['is_active'] = intval(Carbon::parse($params['expires_at'])->isFuture());
+        }
+
+        if (isset($params['starts_from'])) {
+            $params['is_active'] = intval(Carbon::parse($params['starts_from'])->isPast());
         }
 
         $image = WebsiteImage::findOrFail($params['id']);
