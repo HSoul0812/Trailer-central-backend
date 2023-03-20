@@ -109,64 +109,6 @@ class SchedulerRepository implements SchedulerRepositoryInterface
             $params['per_page'] = 10000;
         }
 
-        if (isset($params['profile_id'])) {
-            $query = $query->where(Queue::getTableName().'.profile_id', $params['profile_id']);
-        }
-
-        if (isset($params['slot_id'])) {
-            $query = $query->where(Session::getTableName().'.session_slot_id', $params['slot_id']);
-        }
-
-        if(isset($params['s_status'])) {
-            if(!is_array($params['s_status'])) {
-                $params['s_status'] = array($params['s_status']);
-            }
-            $query = $query->whereIn(Session::getTableName().'.status', $params['s_status']);
-        }
-
-        if (isset($params['s_status_not'])) {
-            $query = $query->whereNotIn(Session::getTableName().'.status', $params['s_status_not']);
-        }
-
-        if(isset($params['q_status'])) {
-            if(!is_array($params['q_status'])) {
-                $params['q_status'] = array($params['q_status']);
-            }
-            $query = $query->whereIn(Queue::getTableName().'.status', $params['q_status']);
-        }
-
-        if (isset($params['q_status_not'])) {
-            $query = $query->whereNotIn(Queue::getTableName().'.status', $params['q_status_not']);
-        }
-
-        if(isset($params['command'])) {
-            if(!is_array($params['command'])) {
-                $params['command'] = array($params['command']);
-            }
-            $query = $query->whereIn(Queue::getTableName().'.command', $params['command']);
-        }
-
-        if (isset($params['command_not'])) {
-            $query = $query->whereNotIn(Queue::getTableName().'.status', $params['command_not']);
-        }
-
-        // Limit within a certain range of dates
-        if (isset($params['start'])) {
-            $query->whereDate(Session::getTableName() . '.session_scheduled', '>=', $params['start']);
-        }
-        if (isset($params['end'])) {
-            $query->whereDate(Session::getTableName() . '.session_scheduled', '<=', $params['end']);
-        }
-
-        if (isset($params['with'])) {
-            if(!is_array($params['with'])) {
-                $params['with'] = [$params['with']];
-            }
-            foreach($params['with'] as $with) {
-                $query->with($with);
-            }
-        }
-
         // Append Sort Query
         if (!isset($params['sort'])) {
             $params['sort'] = '-scheduled';
@@ -412,12 +354,32 @@ class SchedulerRepository implements SchedulerRepositoryInterface
             $query = $query->whereNotIn(Queue::getTableName().'.status', $params['q_status_not']);
         }
 
+        if(isset($params['command'])) {
+            if(!is_array($params['command'])) {
+                $params['command'] = array($params['command']);
+            }
+            $query = $query->whereIn(Queue::getTableName().'.command', $params['command']);
+        }
+
+        if (isset($params['command_not'])) {
+            $query = $query->whereNotIn(Queue::getTableName().'.status', $params['command_not']);
+        }
+
         // Limit within a certain range of dates
         if (isset($params['start'])) {
             $query->whereDate(Session::getTableName() . '.session_scheduled', '>=', $params['start']);
         }
         if (isset($params['end'])) {
             $query->whereDate(Session::getTableName() . '.session_scheduled', '<=', $params['end']);
+        }
+
+        if (isset($params['with'])) {
+            if(!is_array($params['with'])) {
+                $params['with'] = [$params['with']];
+            }
+            foreach($params['with'] as $with) {
+                $query->with($with);
+            }
         }
 
         // Return Query
