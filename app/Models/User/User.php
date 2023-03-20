@@ -4,7 +4,6 @@ namespace App\Models\User;
 
 use App\Models\Integration\Collector\Collector;
 use App\Models\Integration\Integration;
-use App\Models\Integration\IntegrationDealer;
 use App\Models\Inventory\Inventory;
 use App\Models\CRM\Dms\Quote\QuoteSetting;
 use App\Models\Marketing\Facebook\Marketplace;
@@ -27,7 +26,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Services\User\UserService;
 use App\Traits\CompactHelper;
 use App\Services\Common\EncrypterServiceInterface;
-use App\Models\User\AuthToken;
 use Laravel\Cashier\Billable;
 
 /**
@@ -52,6 +50,8 @@ use Laravel\Cashier\Billable;
  * @property integer $showroom
  * @property string $showroom_dealers a PHP serialized object
  * @property int $auto_import_hide
+ * @property int $overlay_enabled 0 -> disabled, 1 -> only primary image, 2 -> all images
+ * @property bool $overlay_default
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */
@@ -96,6 +96,21 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public const USE_AUTO_MSRP = 1;
 
     public const DONT_USE_AUTO_MSRP = 0;
+
+    public const OVERLAY_ENABLED_NONE = 0;
+
+    public const OVERLAY_ENABLED_PRIMARY = 1;
+
+    public const OVERLAY_ENABLED_ALL = 2;
+
+    public const OVERLAY_DISABLED_BY_DEFAULT = 0;
+
+    public const OVERLAY_ENABLED_BY_DEFAULT = 1;
+
+    const OVERLAY_CODES = [
+        self::OVERLAY_ENABLED_PRIMARY,
+        self::OVERLAY_ENABLED_ALL,
+    ];
 
     public const OVERLAY_LOGO_POSITION_NONE = 'none';
 
