@@ -10,5 +10,5 @@ $api->version('v1', function ($api) {
     |--------------------------------------------------------------------------
     */
 
-    $api->get('sys_config', 'App\Http\Controllers\v1\SysConfig\SysConfigController@index');
+    $api->get('sys_config', 'App\Http\Controllers\v1\SysConfig\SysConfigController@index')->middleware(['gzip']);
 });

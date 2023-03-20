@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DTOs\Inventory;
 
 use App\Traits\TypedPropertyTrait;
+use App\DTOs\Dealer\PrivateDealerCheck;
 use Illuminate\Contracts\Support\Arrayable;
 use JetBrains\PhpStorm\Pure;
 
@@ -55,33 +56,38 @@ class TcApiResponseInventory
     public ?string $axle_capacity;
 
     #[Pure]
- public static function fromData(array $data): self
- {
-     $obj = new self();
-     $obj->id = $data['id'];
-     $obj->identifier = $data['identifier'];
-     $obj->active = $data['active'];
-     $obj->archived_at = $data['archived_at'];
-     $obj->brand = $data['brand'];
-     $obj->category_label = $data['category_label'];
-     $obj->entity_type_id = $data['entity_type_id'];
-     $obj->url = $data['url'];
-     $obj->features = $data['features'];
-     $obj->attributes = $data['attributes'];
-     $obj->description = $data['description'];
-     $obj->payload_capacity = $data['payload_capacity'];
-     $obj->gvwr = $data['gvwr'];
-     $obj->condition = $data['condition'];
-     $obj->weight = $data['weight'];
-     $obj->width = $data['width'];
-     $obj->height = $data['height'];
-     $obj->length = $data['length'];
-     $obj->stock = $data['stock'];
-     $obj->vin = $data['vin'];
-     $obj->pull_type = '';
-     $obj->manufacturer = $data['manufacturer'];
-     $obj->dealer = $data['dealer'];
-     $obj->listing_date = $data['created_at'];
+    public static function fromData(array $data): self
+    {
+        $obj = new self();
+        $obj->id = $data['id'];
+        $obj->identifier = $data['identifier'];
+        $obj->active = $data['active'];
+        $obj->archived_at = $data['archived_at'];
+        $obj->brand = $data['brand'];
+        $obj->category_label = $data['category_label'];
+        $obj->entity_type_id = $data['entity_type_id'];
+        $obj->url = $data['url'];
+        $obj->features = $data['features'];
+        $obj->attributes = $data['attributes'];
+        $obj->description = $data['description'];
+        $obj->payload_capacity = $data['payload_capacity'];
+        $obj->gvwr = $data['gvwr'];
+        $obj->condition = $data['condition'];
+        $obj->weight = $data['weight'];
+        $obj->width = $data['width'];
+        $obj->height = $data['height'];
+        $obj->length = $data['length'];
+        $obj->stock = $data['stock'];
+        $obj->vin = $data['vin'];
+        $obj->pull_type = '';
+        $obj->manufacturer = $data['manufacturer'];
+        $obj->dealer = $data['dealer'];
+
+        if(!empty($obj->dealer)) {
+            $obj->dealer['is_private'] = (new PrivateDealerCheck())->checkArray($obj->dealer);
+        }
+
+        $obj->listing_date = $data['created_at'];
 
      $obj->availability = self::statusToAvailabilityMap[$data['status_id']] ?? '';
      $obj->availability_label = $data['status'] ?? '';

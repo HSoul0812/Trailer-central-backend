@@ -2,6 +2,7 @@
 
 namespace App\Services\WebsiteUser;
 
+use App\DTOs\Dealer\PrivateDealerCheck;
 use App\DTOs\User\TcApiResponseUser;
 use App\Models\WebsiteUser\WebsiteUser;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
@@ -136,6 +137,7 @@ class AuthService implements AuthServiceInterface
         );
         $tcAttributes['clsf_active'] = 1;
         $tcAttributes['password'] = \Str::random(12);
+        $tcAttributes['from'] = PrivateDealerCheck::FROM_TT;
 
         try {
             return $this->tcUsersService->create($tcAttributes);

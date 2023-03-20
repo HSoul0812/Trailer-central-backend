@@ -35,7 +35,7 @@ class InventoryTransformer extends TransformerAbstract
         'show_on_ksl' => 'bool',
         'show_on_racingjunk' => 'bool',
         'show_on_website'=> 'bool',
-        'dealer' => ['name' => 'string', 'email' => 'string'],
+        'dealer' => ['name' => 'string', 'email' => 'string', 'is_private' => 'bool'],
         'location' => [
             'name' => 'string',
             'email' => 'string',
