@@ -180,7 +180,7 @@ class ValidateService implements ValidateServiceInterface
         $behaviour = Behaviour::byDealerSlotId($slotId);
 
         // Get Past Due Scheduled Posts
-        $duePast = $this->scheduler->duePast($slotId);
+        $duePast = $this->scheduler->duePast(['slot_id' => $slotId]);
         $this->log->info('Cl Scheduler ' . $behaviour->email . ' Currently has ' .
                             $duePast . ' Posts Due to be Submitted Now');
 
@@ -198,7 +198,7 @@ class ValidateService implements ValidateServiceInterface
         $this->log->info('Cl Scheduler ' . $behaviour->email . ' Counts Reported a Log Level of ' . $level);
 
         // Get Remaining Scheduled Posts
-        $dueToday = $this->scheduler->dueToday($slotId);
+        $dueToday = $this->scheduler->dueToday(['slot_id' => $slotId]);
         $this->log->info('Cl Scheduler ' . $behaviour->email . ' Currently has ' .
                             $dueToday . ' Posts Due to be Submitted The Rest of the Day');
 
