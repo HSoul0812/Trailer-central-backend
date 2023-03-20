@@ -191,7 +191,9 @@ class Dealer extends Resource
                 Integration::activeHiddenIntegrations()->pluck('name', 'integration_id')
             )->withMeta(['value' =>
                 // We're mapping the active value to bool so Nova can render the tag with the right class
-                array_map(function($v) { return (bool) $v; }, $this->integrations->pluck('active', 'integration_id')->toArray())
+                array_map(function ($v) {
+                    return (bool) $v;
+                }, $this->integrations->pluck('pivot.active', 'pivot.integration_id')->toArray())
             ])->exceptOnForms()
         ];
     }
