@@ -73,22 +73,22 @@ class ClientMessage
     /**
      * @const string
      */
-    const COUNTS_INFO = 'There are currently :past scheduler posts ready to post now, ' .
-            'with :remaining posts anticipated by the end of the current day.';
+    const COUNTS_INFO = 'There are currently :past scheduled posts on :email ready to post now, ' .
+            'with :remaining posts on :email anticipated by the end of the current day.';
 
     /**
      * @const string
      */
-    const COUNTS_WARNING = 'WARNING: There are currently :past past due scheduler posts! ' .
+    const COUNTS_WARNING = 'WARNING: There are currently :past past due scheduler posts on :email! ' .
                         'This must be reviewed and fixed as soon as possible!' .
-            'For the rest of the day there are currently :remaining posts remaining.';
+            'For the rest of the day there are currently :remaining posts on :email remaining.';
 
     /**
      * @const string
      */
-    const COUNTS_CRITICAL = 'CRITICAL!: There are currently :past past due scheduler posts. ' .
+    const COUNTS_CRITICAL = 'CRITICAL!: There are currently :past past due scheduler posts on :email. ' .
                          'This must be fixed IMMEDIATELY! ' .
-            'For the rest of the day there are currently :remaining posts remaining.';
+            'For the rest of the day there are currently :remaining posts on :email remaining.';
 
 
     /**
@@ -214,9 +214,10 @@ class ClientMessage
      * 
      * @param int $duePast
      * @param int $dueToday
+     * @param string $email
      * @return ClientMessage
      */
-    static public function counts(string $level, int $duePast, int $dueToday): ClientMessage {
+    static public function counts(string $level, int $duePast, int $dueToday, string $email): ClientMessage {
         // Throw Error if Invalid
         $key = self::COUNTS_PREFIX . ucfirst($level);
         if(!isset(self::WARNING_LEVELS[$key])) {
@@ -226,7 +227,8 @@ class ClientMessage
         // Discover Client Level
         $message = self::message($key, [
             'past'      => $duePast,
-            'remaining' => $dueToday
+            'remaining' => $dueToday,
+            'email'     => $email
         ]);
 
         // Return ClientMessage

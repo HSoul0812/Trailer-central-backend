@@ -176,9 +176,13 @@ class ValidateService implements ValidateServiceInterface
      * @return null|ClientMessage
      */
     public function counts(int $slotId = 99): ?ClientMessage {
+        // Get Behaviour By Slot ID
+        $behaviour = Behaviour::byDealerSlotId($slotId);
+
         // Get Past Due Scheduled Posts
         $duePast = $this->scheduler->duePast($slotId);
-        $this->log->info('Cl Scheduler Currently has ' . $duePast . ' Posts Due to be Submitted Now');
+        $this->log->info('Cl Scheduler ' . $behaviour->email . ' Currently has ' .
+                            $duePast . ' Posts Due to be Submitted Now');
 
         // Get Warning From Past Due
         $level = 'info';
@@ -191,14 +195,15 @@ class ValidateService implements ValidateServiceInterface
         if($duePast > (int) $config['counts.critical']) {
             $level = 'critical';
         }
-        $this->log->info('Cl Scheduler Counts Reported a Log Level of ' . $level);
+        $this->log->info('Cl Scheduler ' . $behaviour->email . ' Counts Reported a Log Level of ' . $level);
 
         // Get Remaining Scheduled Posts
         $dueToday = $this->scheduler->dueToday($slotId);
-        $this->log->info('Cl Scheduler Currently has ' . $dueToday . ' Posts Due to be Submitted The Rest of the Day');
+        $this->log->info('Cl Scheduler ' . $behaviour->email . ' Currently has ' .
+                            $dueToday . ' Posts Due to be Submitted The Rest of the Day');
 
         // Get Client Message
-        $message = ClientMessage::counts($level, $duePast, $dueToday);
+        $message = ClientMessage::counts($level, $duePast, $dueToday, $behaviour->email);
 
         // Return ClientMessage
         if($this->send($message)) {

@@ -15,6 +15,18 @@ class Behaviour
 {
     use WithConstructor, WithGetter;
 
+    
+    /**
+     * @const int
+     */
+    const SLOT_ID_SCHEDULER = 99;
+
+    /**
+     * @const int
+     */
+    const SLOT_ID_EDIT = 97;
+
+
     /**
      * Defines special behaviours for specific uuid's.  Available behaviours:
      * version, slotId, dev, reset-session, blocked
@@ -225,6 +237,26 @@ class Behaviour
         // Find Dealer Config Override Based on ID Provided
         foreach(self::DEALER_ID_BEHAVIOURS as $dealerId => $config) {
             if($uuid === $config['uuid']) {
+                $config['dealerId'] = $dealerId;
+                $behaviour = $config;
+                break;
+            }
+        }
+
+        // Return Behaviour for Dealer ID
+        return new self($behaviour);
+    }
+
+    /**
+     * Get By Dealer Slot ID
+     */
+    static public function byDealerSlotId(int $slotId): Behaviour {
+        // Initialize Behaviour
+        $behaviour = [];
+
+        // Find Dealer Config Override Based on ID Provided
+        foreach(self::DEALER_ID_BEHAVIOURS as $dealerId => $config) {
+            if($slotId === $config['slotId']) {
                 $config['dealerId'] = $dealerId;
                 $behaviour = $config;
                 break;
