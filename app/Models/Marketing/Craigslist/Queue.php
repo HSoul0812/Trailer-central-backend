@@ -150,7 +150,7 @@ class Queue extends Model
      */
     public function updates(): HasMany
     {
-        return $this->hasMany(Queue::class, 'queue_id', 'parent_id');
+        return $this->hasMany(Queue::class, 'parent_id', 'queue_id');
     }
 
     /**

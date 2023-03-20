@@ -17,8 +17,6 @@ class HorizonCleanCompletedJobs extends Command
 {
     private const COMPLETED = 'completed';
 
-    private const CURSOR_COUNTER = 10000;
-
     /**
      * The name and signature of the console command.
      *
@@ -33,6 +31,10 @@ class HorizonCleanCompletedJobs extends Command
      */
     protected $description = 'Removes all completed jobs';
 
+    /** @var RedisClient */
+    private $client;
+
+
     public function handle()
     {
         /** @var RedisClient $client */
@@ -42,7 +44,9 @@ class HorizonCleanCompletedJobs extends Command
 
         $deletedJobs = 0;
 
-        while (false !== ($keys = $client->scan($cursor, 'horizon:[0-9]*', self::CURSOR_COUNTER))) {
+        $bufferOfJobs = [];
+
+        while (false !== ($keys = $client->scan($cursor, 'horizon:[0-9]*', 10))) {
 
             foreach ($keys as $key) {
                 $parts = explode(':', $key);
@@ -53,14 +57,36 @@ class HorizonCleanCompletedJobs extends Command
                     $status = $client->hGet((int) $jobId, 'status');
 
                     if ($status === self::COMPLETED) {
-                        $client->del($jobId);
+                        $bufferOfJobs[] = $jobId;
 
                         $deletedJobs++;
+                    }
+
+                    if (count($bufferOfJobs) === 50) {
+                        $this->unlink($bufferOfJobs);
                     }
                 }
             }
         }
 
+        $this->unlink($bufferOfJobs);
+
         $this->line(sprintf('Deleted jobs: <comment>%d</comment>', $deletedJobs));
+    }
+
+    private function unlink(array &$jobs): void
+    {
+        if (count($jobs) > 0) {
+            $this->client->del(...$jobs);
+
+            $jobs = [];
+        }
+    }
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->client = Redis::connection('horizon')->client();
     }
 }
