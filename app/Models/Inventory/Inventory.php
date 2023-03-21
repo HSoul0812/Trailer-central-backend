@@ -834,27 +834,30 @@ class Inventory extends Model
      */
     public function getAttributeById(int $id, $default = null)
     {
-        $attributeInfo = $this->getAttributesIndexedByIdAttribute()->get($id);
-        $value = $attributeInfo['current_value'];
-        $attribute = $attributeInfo['attribute'];
+        if($attributeInfo = $this->getAttributesIndexedByIdAttribute()->get($id)){
+            $value = $attributeInfo['current_value'];
+            $attribute = $attributeInfo['attribute'];
 
-        if($attribute && $attribute->isSelect()){
-            $validValues = $attribute->getValuesArray();
-            $value = strtolower($value);
-            if(!isset($validValues[$value])){
-                return null;
+            if($attribute instanceof Attribute && $attribute->isSelect()){
+                $validValues = $attribute->getValuesArray();
+                $value = strtolower($value);
+                if(!isset($validValues[$value])){
+                    return null;
+                }
+
+                if(is_numeric($value)) {
+                    return (int) $value;
+                }
             }
 
-            if(is_numeric($value)) {
-                return (int) $value;
+            if (is_null($value) || (is_string($value) && $value !== '0' && empty($value))) { // we need the attributes with value 0 to be displayed
+                return $default;
             }
+
+            return $value; // to avoid the native default value returned by `Collection::get` method
         }
 
-        if (is_null($value) || (is_string($value) && $value !== '0' && empty($value))) { // we need the attributes with value 0 to be displayed
-            return $default;
-        }
-
-        return $value; // to avoid the native default value returned by `Collection::get` method
+        return $default;
     }
 
     public function getFeatureById(int $id): Collection
