@@ -2,6 +2,7 @@
 
 namespace App\Services\Inventory;
 
+use App\Domains\Inventory\Actions\DeleteLocalImagesFromNewImagesAction;
 use App\DTOs\Inventory\TcApiResponseAttribute;
 use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
@@ -10,13 +11,18 @@ use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepositoryInterface;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
+use App\Services\Integrations\TrailerCentral\Api\Image\ImageService;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
+use Cache;
 use Carbon\Carbon;
 use Dingo\Api\Routing\Helpers;
+use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Collection;
+use Log;
+use Str;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
@@ -73,18 +79,19 @@ class InventoryService implements InventoryServiceInterface
     const INVENTORY_AVAILABLE = 'available';
 
     public function __construct(
-        private GuzzleHttpClient                           $httpClient,
-        private SysConfigRepositoryInterface               $sysConfigRepository,
+        private GuzzleHttpClient $httpClient,
+        private SysConfigRepositoryInterface $sysConfigRepository,
         private ListingCategoryMappingsRepositoryInterface $listingCategoryMappingsRepository,
-        private AuthTokenRepositoryInterface               $authTokenRepository,
-        private InventoryRepositoryInterface               $inventoryRepository
+        private AuthTokenRepositoryInterface $authTokenRepository,
+        private InventoryRepositoryInterface $inventoryRepository,
+        private DeleteLocalImagesFromNewImagesAction $deleteLocalImagesFromNewImagesAction,
     )
     {
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Exception
+     * @throws GuzzleException
+     * @throws Exception
      */
     public function list(array $params): TcEsResponseInventoryList
     {
@@ -117,7 +124,7 @@ class InventoryService implements InventoryServiceInterface
             $response->inventories = $paginator;
             return $response;
         } else {
-            throw new \Exception('Elastic search API responded with http code: ' . $res->getStatusCode());
+            throw new Exception('Elastic search API responded with http code: ' . $res->getStatusCode());
         }
     }
 
@@ -128,8 +135,8 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Exception
+     * @throws GuzzleException
+     * @throws Exception
      */
     public function create(int $userId, array $params): TcApiResponseInventoryCreate
     {
@@ -153,12 +160,15 @@ class InventoryService implements InventoryServiceInterface
             $url,
             ['query' => $params, 'headers' => ['access-token' => $authToken->access_token]]
         );
+
+        $this->deleteLocalImagesFromNewImagesAction->execute(collect(data_get($params, 'new_images', [])));
+
         return TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Exception
+     * @throws GuzzleException
+     * @throws Exception
      */
     public function delete(int $userId, int $id): TcApiResponseInventoryDelete
     {
@@ -177,8 +187,8 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Exception
+     * @throws GuzzleException
+     * @throws Exception
      */
     public function update(int $userId, array $params): TcApiResponseInventoryCreate
     {
@@ -202,7 +212,11 @@ class InventoryService implements InventoryServiceInterface
             $url,
             ['json' => $params, 'headers' => ['access-token' => $authToken->access_token]]
         );
-        \Log::info('inventory update', $params);
+
+        $this->deleteLocalImagesFromNewImagesAction->execute(collect(data_get($params, 'new_images', [])));
+
+        Log::info('inventory update', $params);
+
         $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
 
         return $respObj;
@@ -211,7 +225,7 @@ class InventoryService implements InventoryServiceInterface
     #[ArrayShape(["key" => "string", "type_id" => "int"])]
     private function mapOldCategoryToNew($oldCategory): array
     {
-        return \Cache::remember('category/' . $oldCategory, self::ES_CACHE_EXPIRY, function () use ($oldCategory) {
+        return Cache::remember('category/' . $oldCategory, self::ES_CACHE_EXPIRY, function () use ($oldCategory) {
             $value = [];
             $mappedCategories = CategoryMappings::where('map_to', 'like', '%' . $oldCategory . '%')->get();
             $mappedCategory = null;
@@ -275,7 +289,7 @@ class InventoryService implements InventoryServiceInterface
         $this->addTypeAggregationQuery($queryBuilder, $params);
         $query = $queryBuilder->build();
 
-        return \Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use ($esSearchUrl, $query) {
+        return Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use ($esSearchUrl, $query) {
             $res = $this->httpClient->post($esSearchUrl, [
                 'json' => $query
             ]);
@@ -294,7 +308,7 @@ class InventoryService implements InventoryServiceInterface
         $this->addCategoryAggregationQuery($queryBuilder, $params);
         $query = $queryBuilder->build();
 
-        return \Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use ($esSearchUrl, $query) {
+        return Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use ($esSearchUrl, $query) {
             $res = $this->httpClient->post($esSearchUrl, [
                 'json' => $query
             ]);
@@ -372,7 +386,7 @@ class InventoryService implements InventoryServiceInterface
 
     private function addGeoFiltering(
         ESInventoryQueryBuilder $queryBuilder,
-        array                   $params,
+        array $params,
     )
     {
         $distance = null;
@@ -540,8 +554,8 @@ class InventoryService implements InventoryServiceInterface
     {
         if (isset($params['lat']) && isset($params['lon'])) {
             return new Geolocation([
-                'latitude' => (float)$params['lat'],
-                'longitude' => (float)$params['lon']
+                'latitude' => (float) $params['lat'],
+                'longitude' => (float) $params['lon']
             ]);
         } else if (isset($params['location'])) {
             $response = $this->api->get('map_search/geocode', ['q' => $params['location']]);
@@ -553,8 +567,8 @@ class InventoryService implements InventoryServiceInterface
             if (count($response['data']) > 0) {
                 $position = $response['data'][0]['position'];
                 return new Geolocation([
-                    'latitude' => (float)$position['lat'],
-                    'longitude' => (float)$position['lng']
+                    'latitude' => (float) $position['lat'],
+                    'longitude' => (float) $position['lng']
                 ]);
             }
         }
@@ -677,8 +691,8 @@ class InventoryService implements InventoryServiceInterface
 
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
-            \Log::info('Exception was thrown while calling TrailerCentral API.');
-            \Log::info($e->getCode() . ': ' . $e->getMessage());
+            Log::info('Exception was thrown while calling TrailerCentral API.');
+            Log::info($e->getCode() . ': ' . $e->getMessage());
 
             throw new HttpException(422, $e->getMessage());
         }
