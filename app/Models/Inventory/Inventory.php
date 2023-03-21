@@ -838,7 +838,7 @@ class Inventory extends Model
         $value = $attributeInfo['current_value'];
         $attribute = $attributeInfo['attribute'];
 
-        if($attribute->isSelect()){
+        if($attribute && $attribute->isSelect()){
             $validValues = $attribute->getValuesArray();
             $value = strtolower($value);
             if(!isset($validValues[$value])){
