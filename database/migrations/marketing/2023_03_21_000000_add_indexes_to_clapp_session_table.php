@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class AddTimestampsToClappTransactionTable extends Migration
+class AddIndexesToClappSessionTable extends Migration
 {
     /**
      * Dispatch Activity Equals
