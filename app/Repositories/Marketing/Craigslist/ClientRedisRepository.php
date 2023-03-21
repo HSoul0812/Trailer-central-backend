@@ -214,7 +214,7 @@ class ClientRedisRepository implements ClientRepositoryInterface
                     $clients->push($uuid);
                 }
             } else {
-                $clients->push($behaviour);
+                $clients->push(Client::fromBehaviour($behaviour));
             }
             $this->log->info('Merged ' . $uuids->count() . ' Clients For Total ' . $clients->count());
         }
