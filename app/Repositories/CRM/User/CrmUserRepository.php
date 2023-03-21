@@ -5,6 +5,7 @@ namespace App\Repositories\CRM\User;
 use App\Exceptions\NotImplementedException;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
+use App\Models\User\User;
 
 /**
  * Class CrmUserRepository
@@ -39,11 +40,19 @@ class CrmUserRepository implements CrmUserRepositoryInterface
     }
 
     /**
-     * @throws NotImplementedException
+     * @param array $params containing user_id or dealer_id
+     * @return CrmUser
      */
-    public function get($params)
+    public function get($params): CrmUser
     {
-        throw new NotImplementedException;
+        if (isset($params['user_id'])) {
+
+            return CrmUser::where('user_id', $params['user_id'])->first();
+
+        } elseif (isset($params['dealer_id'])) {
+
+            return User::findOrFail($params['dealer_id'])->crmUser;
+        }
     }
 
     /**

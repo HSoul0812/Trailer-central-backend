@@ -54,7 +54,7 @@ class LeadRepository implements LeadRepositoryInterface {
         'interacted_week'  => ['label' => 'Interacted This Week', 'type' => 'interacted', 'time' => 'week']
     ];
 
-    private $sortOrdersCrm = [
+    const SORT_ORDERS_CRM = [
         'no_due_past_due_future_due',
         'created_at',
         'future_due_past_due_no_due',
@@ -599,7 +599,7 @@ class LeadRepository implements LeadRepositoryInterface {
     public function getLeadsSortFieldsCrm(): array
     {
         return array_values(array_filter($this->getSortFields(), function ($item) {
-            return in_array($item['param'], $this->sortOrdersCrm);
+            return in_array($item['param'], self::SORT_ORDERS_CRM);
         }));
     }
 
