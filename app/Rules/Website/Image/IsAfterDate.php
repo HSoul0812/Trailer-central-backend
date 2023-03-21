@@ -5,6 +5,7 @@ namespace App\Rules\Website\Image;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Validation\Rule;
+use function PHPUnit\Framework\greaterThanOrEqual;
 
 class IsAfterDate implements Rule
 {
@@ -34,7 +35,9 @@ class IsAfterDate implements Rule
     {
         if ($this->startDate) {
             try {
-                return Carbon::parse($value)->isAfter($this->startDate);
+                $current = Carbon::parse($value);
+                $startDate = Carbon::parse($this->startDate);
+                return $current->isSameDay($startDate) || $current->isAfter($startDate);
             } catch (Exception $exception) {
                 return false;
             }
