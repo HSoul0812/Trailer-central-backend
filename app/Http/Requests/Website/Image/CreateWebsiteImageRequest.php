@@ -24,7 +24,7 @@ class CreateWebsiteImageRequest extends Request
             'is_active' => ['nullable', 'integer'],
             'promo_id' => ['nullable', 'integer'],
             'expires_at' => ['nullable', 'date_format:Y-m-d H:i:s', new IsAfterDate($this->starts_from)],
-            'starts_from' => ['nullable', 'date_format:Y-m-d H:i:s']
+            'starts_from' => ['nullable', 'after_or_equal:today', 'date_format:Y-m-d H:i:s']
         ];
     }
 }

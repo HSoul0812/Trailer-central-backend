@@ -413,6 +413,47 @@ class WebsiteImageTest extends TestCase
         $response->assertJsonValidationErrors(['id', 'expires_at']);
     }
 
+    public function testIsActiveIsTrueWhenBothStartAndEndDatesAreTheSame()
+    {
+        $data = [
+            'image' => 'http://img.com/image.png',
+            'title' => 'Test Image Activation',
+            'starts_from' => now()->toDateTimeString(),
+            'expires_at' => now()->toDateTimeString()
+        ];
+
+        $response = $this
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->post('/api/website/' . $this->website->id . '/images', $data);
+
+        $response->assertOk();
+        $this->assertDatabaseHas(WebsiteImage::getTableName(), [
+            'identifier' => $response->json('data.id'),
+            'is_active' => 1
+        ]);
+        WebsiteImage::whereIdentifier($response->json('data.id'))->delete();
+    }
+
+    public function testUpdatingAnExpiryToAPastDateDeactivatesTheImage()
+    {
+        $image = $this->images->first();
+        $image->update([
+            'starts_from' => now()->subDays(10)->toDateTimeString(),
+            'is_active' => 1
+        ]);
+
+        $this
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->put('/api/website/' . $this->website->id . '/images/' . $image->identifier, [
+                'expires_at' => now()->subDays(3)->toDateTimeString()
+            ]);
+
+        $this->assertDatabaseHas(WebsiteImage::getTableName(), [
+            'identifier' => $image->identifier,
+            'is_active' => 0
+        ]);
+    }
+
     public function testItCanDeleteAnImage()
     {
         $image = $this->images->first();
