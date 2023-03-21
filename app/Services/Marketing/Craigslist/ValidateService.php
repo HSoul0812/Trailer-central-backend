@@ -317,7 +317,7 @@ class ValidateService implements ValidateServiceInterface
 
         // Get Last Activity
         $latest = $this->sessions->getAll([
-            'uuid' => $client->uiid,
+            'uuid' => $client->uuid,
             'sort' => '-dispatch_activity'
         ])->first();
 
