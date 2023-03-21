@@ -620,6 +620,9 @@ $api->version('v1', function ($route) {
         $route->get('user/overlay/settings', 'App\Http\Controllers\v1\User\OverlaySettingsController@index');
         $route->post('user/overlay/settings', 'App\Http\Controllers\v1\User\OverlaySettingsController@updateSettings');
 
+        $route->get('user/crm/settings', 'App\Http\Controllers\v1\CRM\User\SettingsController@index');
+        $route->post('user/crm/settings', 'App\Http\Controllers\v1\CRM\User\SettingsController@updateSettings');
+
         $route->put('user/newsletter', 'App\Http\Controllers\v1\User\SettingsController@updateNewsletter');
         $route->get('user/newsletter', 'App\Http\Controllers\v1\User\SettingsController@getNewsletter');
 
