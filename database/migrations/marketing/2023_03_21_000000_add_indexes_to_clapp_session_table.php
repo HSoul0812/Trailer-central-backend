@@ -43,6 +43,7 @@ class AddIndexesToClappSessionTable extends Migration
             ->where('dispatch_last_activity', '=', self::DISPATCH_ACTIVITY_EMPTY)
             ->where('session_last_activity', '>', self::LAST_ACTIVITY_START)
             ->where('session_scheduled', '>', self::SCHEDULED_START)
+            ->orderBy('session_last_activity')
             ->chunk(500, function (Collection $sessions) {
                 $rows = [];
                 foreach ($sessions as $session) {
