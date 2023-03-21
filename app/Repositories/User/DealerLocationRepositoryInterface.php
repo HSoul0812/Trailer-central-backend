@@ -100,7 +100,7 @@ interface DealerLocationRepositoryInterface extends Repository, TransactionalRep
      * @param array $params
      * @throws InvalidArgumentException when `dealer_location_id` has not been provided
      */
-    public function update($params): bool;
+    public function update($params): DealerLocation;
 
     /**
      * @param string $name

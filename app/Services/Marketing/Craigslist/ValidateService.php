@@ -3,6 +3,8 @@
 namespace App\Services\Marketing\Craigslist;
 
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
+use App\Services\Marketing\Craigslist\DTOs\Behaviour;
 use App\Services\Marketing\Craigslist\DTOs\Client;
 use App\Services\Marketing\Craigslist\DTOs\ClientMessage;
 use App\Services\Marketing\Craigslist\DTOs\ClientValidate;
@@ -26,7 +28,9 @@ class ValidateService implements ValidateServiceInterface
         'elapse.error',
         'elapse.critical',
         'clients.low',
-        'clients.edit'
+        'clients.edit',
+        'counts.warning',
+        'counts.critical'
     ];
 
     /**
@@ -35,14 +39,22 @@ class ValidateService implements ValidateServiceInterface
     protected $repo;
 
     /**
+     * @var SchedulerRepositoryInterface
+     */
+    protected $scheduler;
+
+    /**
      * Construct Facebook Marketplace Service
      * 
      * @param ClientRepositoryInterface $repo
+     * @param SchedulerRepositoryInterface $scheduler
      */
     public function __construct(
-        ClientRepositoryInterface $repo
+        ClientRepositoryInterface $repo,
+        SchedulerRepositoryInterface $scheduler
     ) {
         $this->repo = $repo;
+        $this->scheduler = $scheduler;
 
         // Create Marketplace Logger
         $this->log = Log::channel('cl-client');
@@ -93,6 +105,32 @@ class ValidateService implements ValidateServiceInterface
     }
 
     /**
+     * Validate Behaviours With All Clients Expired
+     * 
+     * @param Behaviour $behaviour
+     * @return ClientValidate
+     */
+    public function expired(Behaviour $behaviour): ClientValidate {
+        // No Active Clients For The Given Behaviour, Its AUTOMATICALLY Critical
+        $level = 'critical';
+
+        // Report Log Level
+        $this->log->info('Behaviour ' . $behaviour->email . ' Has No Active Clients!');
+
+        // Return ClientValidate
+        return new ClientValidate([
+            'dealer_id' => $behaviour->dealerId,
+            'slot_id'   => $behaviour->slotId,
+            'uuid'      => $behaviour->uuid,
+            'email'     => $behaviour->email,
+            'label'     => 'Unknown',
+            'isEdit'    => $behaviour->isEdit,
+            'level'     => $level,
+            'elapsed'   => Client::MAX_ELAPSED
+        ]);
+    }
+
+    /**
      * Return Status of All Clients
      * 
      * @param Collection<ClientValidate> $validation
@@ -106,6 +144,9 @@ class ValidateService implements ValidateServiceInterface
         // Loop All Validated Clients
         foreach($validation as $client) {
             // Level is a Warning?
+            if(empty($client->email)) {
+                continue;
+            }
             if($client->isWarning()) {
                 if(!isset($warnings[$client->email])) {
                     $warnings[$client->email] = [];
@@ -126,6 +167,49 @@ class ValidateService implements ValidateServiceInterface
 
         // Return Collection<ClientMessage)
         return $this->messages($active, $warnings);
+    }
+
+    /**
+     * Count Posts Needed to be Sent
+     * 
+     * @param int $slotId default: 99
+     * @return null|ClientMessage
+     */
+    public function counts(int $slotId = 99): ?ClientMessage {
+        // Get Behaviour By Slot ID
+        $behaviour = Behaviour::byDealerSlotId($slotId);
+
+        // Get Past Due Scheduled Posts
+        $duePast = $this->scheduler->duePast(['slot_id' => $slotId]);
+        $this->log->info('Cl Scheduler ' . $behaviour->email . ' Currently has ' .
+                            $duePast . ' Posts Due to be Submitted Now');
+
+        // Get Warning From Past Due
+        $level = 'info';
+        $config = $this->getConfig();
+        if($duePast > (int) $config['counts.warning']) {
+            $level = 'warning';
+        }
+
+        // Get Critical From Past Due
+        if($duePast > (int) $config['counts.critical']) {
+            $level = 'critical';
+        }
+        $this->log->info('Cl Scheduler ' . $behaviour->email . ' Counts Reported a Log Level of ' . $level);
+
+        // Get Remaining Scheduled Posts
+        $dueToday = $this->scheduler->dueToday(['slot_id' => $slotId]);
+        $this->log->info('Cl Scheduler ' . $behaviour->email . ' Currently has ' .
+                            $dueToday . ' Posts Due to be Submitted The Rest of the Day');
+
+        // Get Client Message
+        $message = ClientMessage::counts($level, $duePast, $dueToday, $slotId, $behaviour->email);
+
+        // Return ClientMessage
+        if($this->send($message)) {
+            return $message;
+        }
+        return null;
     }
 
     /**
@@ -204,19 +288,21 @@ class ValidateService implements ValidateServiceInterface
     /**
      * Get Config From Environment Variables
      * 
-     * @param int
+     * @param null|int
      * @return array{string: string}
      */
-    private function getConfig(int $dealerId): array {
+    private function getConfig(?int $dealerId = null): array {
         // Loop Config Paths
         $config = [];
         foreach(self::CONFIG_PATHS as $path) {
             $value = config('marketing.cl.settings.warning.' . $path);
 
             // Check Override Instead
-            $override = $this->getOverride($path, $dealerId);
-            if(!empty($override)) {
-                $value = $override;
+            if(!empty($dealerId)) {
+                $override = $this->getOverride($path, $dealerId);
+                if(!empty($override)) {
+                    $value = $override;
+                }
             }
 
             // Add Config

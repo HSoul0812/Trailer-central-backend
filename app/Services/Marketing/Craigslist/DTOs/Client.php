@@ -16,6 +16,12 @@ class Client
     use WithConstructor, WithGetter;
 
     /**
+     * @const int elapsed time
+     */
+    const MAX_ELAPSED = 60 * 60 * 7;
+
+
+    /**
      * @var int
      */
     private $dealerId;
@@ -103,5 +109,25 @@ class Client
 
         // Return Null
         return false;
+    }
+
+
+    /**
+     * Get Client From Behaviour
+     * 
+     * @return Client
+     */
+    public static function fromBehaviour(Behaviour $behaviour): Client {
+        // Get Client
+        return new self([
+            'dealer_id' => $behaviour->dealerId,
+            'slot_id' => $behaviour->slotId,
+            'uuid' => $behaviour->uuid,
+            'version' => null,
+            'label' => 'Offline ' . $behaviour->email,
+            'last_ip' => null,
+            'count' => 0,
+            'last_checkin' => Carbon::now()->subSeconds(self::MAX_ELAPSED)->toDateTimeString()
+        ]);
     }
 }

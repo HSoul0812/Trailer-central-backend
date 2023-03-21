@@ -6,13 +6,15 @@ use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\File\FileUploadException;
 use App\Exceptions\File\ImageUploadException;
 use App\Exceptions\Inventory\InventoryException;
+use App\Jobs\Inventory\GenerateOverlayAndReIndexInventoriesByDealersJob;
 use App\Jobs\Inventory\ReIndexInventoriesByDealerLocationJob;
-use App\Jobs\Website\ReIndexInventoriesByDealersJob;
+use App\Jobs\Inventory\ReIndexInventoriesByDealersJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryImage;
 use App\Models\User\DealerLocation;
+use App\Models\User\User;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
@@ -23,6 +25,7 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
 use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
@@ -57,6 +60,8 @@ class InventoryService implements InventoryServiceInterface
     private const RESOURCE_KEY = 'children';
     private const OPTION_GROUP_TEXT_CUSTOMER_OWNED = 'Customer Owned Inventories';
     private const OPTION_GROUP_TEXT_DEALER_OWNED = 'All Inventories';
+
+    private const REMOVE_EMPTY_LINE_FIRST_AND_LAST = '/^(<br\s*\/?>)*|(<br\s*\/?>)*$/i';
 
     private const CHANGED_FIELDS_IN_DASHBOARD_UNLOCK_MAPPING = [
         'unlock_type_code' => [
@@ -127,9 +132,15 @@ class InventoryService implements InventoryServiceInterface
     private $fileService;
 
     /**
+     * @var UserRepositoryInterface
+     */
+    private $dealerRepository;
+
+    /**
      * @var DealerLocationRepositoryInterface
      */
     private $dealerLocationRepository;
+
     /**
      * @var DealerLocationMileageFeeRepositoryInterface
      */
@@ -175,6 +186,7 @@ class InventoryService implements InventoryServiceInterface
      * @param WebsiteConfigRepositoryInterface $websiteConfigRepository
      * @param ImageService $imageService
      * @param FileService $fileService
+     * @param UserRepositoryInterface $dealerRepository
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      * @param DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository
      * @param CategoryRepositoryInterface $categoryRepository
@@ -194,6 +206,7 @@ class InventoryService implements InventoryServiceInterface
         WebsiteConfigRepositoryInterface $websiteConfigRepository,
         ImageService $imageService,
         FileService $fileService,
+        UserRepositoryInterface $dealerRepository,
         DealerLocationRepositoryInterface $dealerLocationRepository,
         DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository,
         CategoryRepositoryInterface $categoryRepository,
@@ -209,6 +222,7 @@ class InventoryService implements InventoryServiceInterface
         $this->billRepository = $billRepository;
         $this->quickbookApprovalRepository = $quickbookApprovalRepository;
         $this->websiteConfigRepository = $websiteConfigRepository;
+        $this->dealerRepository = $dealerRepository;
         $this->dealerLocationRepository = $dealerLocationRepository;
         $this->dealerLocationMileageFeeRepository = $dealerLocationMileageFeeRepository;
         $this->imageService = $imageService;
@@ -240,6 +254,16 @@ class InventoryService implements InventoryServiceInterface
                 $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
 
                 $addBill = $params['add_bill'] ?? false;
+
+                if (!empty($params['dealer_id'])) {
+                    /** @var User $dealer */
+                    $dealer = $this->dealerRepository->get(['dealer_id' => $params['dealer_id']]);
+
+                    // when `overlay_enabled` is not provided, it should use what dealer does have configured
+                    if ($dealer->overlay_default && $dealer->overlay_enabled && !isset($params['overlay_enabled'])) {
+                        $params['overlay_enabled'] = $dealer->overlay_enabled;
+                    }
+                }
 
                 if (!empty($params['dealer_location_id'])) {
                     $location = $this->dealerLocationRepository->get(['dealer_location_id' => $params['dealer_location_id']]);
@@ -1165,8 +1189,8 @@ class InventoryService implements InventoryServiceInterface
     public function convertMarkdown($input): string
     {
         $input = str_replace('\n', PHP_EOL, $input);
-        //$input = str_replace('\\' . PHP_EOL, PHP_EOL . PHP_EOL, $input); // to fix CDW-824 problems
-        //$input = str_replace('\\' . PHP_EOL . 'n', PHP_EOL . PHP_EOL . PHP_EOL, $input);
+        $input = str_replace('\\' . PHP_EOL, PHP_EOL . PHP_EOL, $input); // to fix CDW-824 problems
+        $input = str_replace('\\' . PHP_EOL . 'n', PHP_EOL . PHP_EOL . PHP_EOL, $input);
 
         $input = str_replace('\\\\', '', $input);
         $input = str_replace('\\,', ',', $input);
@@ -1179,6 +1203,8 @@ class InventoryService implements InventoryServiceInterface
         $input = str_replace('<br/>', '<br>', $input);
         $input = str_replace('<bR/>', '<br>', $input);
         $input = str_replace('<bR>', '<br>', $input);
+        $input = str_replace('<bR />', '<br>', $input);
+        $input = str_replace('<br />', '<br>', $input);
         $input = preg_replace('/<(?!br\s*\/?)[^<>]+>/', '', $input);
 
         // Try/Catch Errors
@@ -1246,24 +1272,57 @@ class InventoryService implements InventoryServiceInterface
 
         //$description = preg_replace('/[[:^print:]]/', ' ', $description);
 
-        preg_match('/<blockquote>(.*?)<\/blockquote>/s', $description, $match);
+        preg_match('/<p>(.*?)<\/p>/s', $description, $match);
         if (!empty($match[0])) {
-            $new_ul = strip_tags($match[0], '<blockquote><br><ul><ol><li><a><b><strong>');
+            $new_ul = strip_tags($match[0], '<blockquote><br><h1><h2><h3><h4><h5><h6><ul><ol><li><a><b><strong>');
             $description = str_replace('<br /><br />', '<br />', $description);
             $description = str_replace($match[0], $new_ul, $description);
         }
 
+        preg_match('/<blockquote>(.*?)<\/blockquote>/s', $description, $match);
+        if (!empty($match[0])) {
+            $new_ul = strip_tags($match[0], '<blockquote><br><h1><h2><h3><h4><h5><h6><ul><ol><li><a><b><strong>');
+            $description = str_replace($match[0], $new_ul, $description);
+        }
+
+        $description = preg_replace_callback('~<ul>(.*?)</ul>~s', function($matches) {
+            $matches[1] = preg_replace(self::REMOVE_EMPTY_LINE_FIRST_AND_LAST, '', $matches[1]);
+
+            preg_match_all('~<li>(.*?)</li>~s', $matches[1], $li_matches);
+
+            $finalHTML = '<ul>' ;
+            foreach ($li_matches[0] as $li_item) {
+                $finalHTML.= $li_item;
+            }
+            $finalHTML.= '</ul>';
+
+            return $finalHTML;
+        }, $description);
+
+        $description = preg_replace_callback('~<ol>(.*?)</ol>~s', function($matches) {
+            $matches[1] = preg_replace(self::REMOVE_EMPTY_LINE_FIRST_AND_LAST, '', $matches[1]);
+
+            preg_match_all('~<li>(.*?)</li>~s', $matches[1], $li_matches);
+
+            $finalHTML = '<ol>' ;
+            foreach ($li_matches[0] as $li_item) {
+                $finalHTML.= $li_item;
+            }
+            $finalHTML.= '</ol>';
+
+            return $finalHTML;
+        }, $description);
 
         preg_match('/<ul.*>(.*?)<\/ul>/s', $description, $match);
         if (!empty($match[0])) {
-            $new_ul = strip_tags($match[0], '<ul><li><a><b><strong>');
+            $new_ul = strip_tags($match[0], '<ul><br><li><h1><h2><h3><h4><h5><h6><a><b><strong>');
             $description = str_replace($match[0], $new_ul, $description);
         }
 
         // Only accepts necessary tags
         preg_match('/<ol.*>(.*?)<\/ol>/s', $description, $match);
         if (!empty($match[0])) {
-            $new_ol = strip_tags($match[0], '<ol><li><a><b><strong>');
+            $new_ol = strip_tags($match[0], '<ol><br><li><h1><h2><h3><h4><h5><h6><a><b><strong>');
             $description = str_replace($match[0], $new_ol, $description);
         }
 
@@ -1275,6 +1334,10 @@ class InventoryService implements InventoryServiceInterface
     /**
      * Reindex the inventory by dealer ids, then it will invalidate cache by dealer ids
      *
+     * Real processing order:
+     *      1. ElasticSearch indexation by dealer location id
+     *      2. Redis Cache invalidation by dealer id
+     *
      * @param  int[]  $dealerIds
      * @return void
      */
@@ -1284,7 +1347,29 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
+     * Generate images overlays by dealer id, then reindex the inventory by dealer ids, finally it will invalidate cache by dealer ids
+     *
+     * Method name say nothing about real process order, it is only to be consistent with legacy naming convention
+     *
+     * Real processing order:
+     *      1. Image overlays generation by dealer id
+     *      2. ElasticSearch indexation by dealer location id
+     *      3. Redis Cache invalidation by dealer id
+     *
+     * @param  int[]  $dealerIds
+     * @return void
+     */
+    public function invalidateCacheReindexAndGenerateImageOverlaysByDealerIds(array $dealerIds): void
+    {
+        $this->dispatch(new GenerateOverlayAndReIndexInventoriesByDealersJob($dealerIds));
+    }
+
+    /**
      * Reindex the inventory by dealer location id, then it will invalidate cache by dealer id
+     *
+     * Real processing order:
+     *      1. ElasticSearch indexation by dealer location id
+     *      2. Redis Cache invalidation by dealer id
      *
      * @param  DealerLocation  $dealerLocation
      * @return void

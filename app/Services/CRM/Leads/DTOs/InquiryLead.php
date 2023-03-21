@@ -400,16 +400,33 @@ class InquiryLead
      * @return string
      */
     public function getInquiryUrl(): string {
+        if (!empty($this->url) && str_starts_with($this->url, 'http')) {
+            return $this->url;
+        }
+
+        if (!empty($this->referral) && str_starts_with($this->referral, 'http')) {
+            return $this->referral;
+        }
+
         // Only Append If Domain Exists
         if($this->websiteDomain) {
+            // Make sure it has only one '/' on the right side of the URL
+            $websiteDomain = rtrim($this->websiteDomain, "/") . '/';
+
             // Return URL With Website Domain
             if(!empty($this->url)) {
-                return $this->websiteDomain . $this->url;
+                // Make sure there is no '/' on the left
+                $url = ltrim($this->url, "/");
+
+                return $websiteDomain . $url;
             }
 
             // Return Referral URL Instead
             if(!empty($this->referral)) {
-                return $this->websiteDomain . $this->referral;
+                // Make sure there is no '/' on the left
+                $referral = ltrim($this->referral, "/");
+
+                return $websiteDomain . $referral;
             }
         }
 

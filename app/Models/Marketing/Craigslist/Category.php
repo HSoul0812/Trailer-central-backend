@@ -4,7 +4,6 @@ namespace App\Models\Marketing\Craigslist;
 
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Category

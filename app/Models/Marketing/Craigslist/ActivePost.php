@@ -135,22 +135,22 @@ class ActivePost extends Model
      */
     public function getDealerIdAttribute(): int {
         // Find By Profile ID
-        if($this->profile) {
+        if(!empty($this->profile->dealer_id)) {
             return $this->profile->dealer_id;
         }
 
         // Find By Queue ID
-        if($this->queue) {
+        if(!empty($this->queue->dealer_id)) {
             return $this->queue->dealer_id;
         }
 
         // Find By Parent Queue ID
-        if($this->parentQueue) {
+        if(!empty($this->parentQueue->dealer_id)) {
             return $this->parentQueue->dealer_id;
         }
 
         // Find By Session ID
-        if($this->session) {
+        if(!empty($this->session->dealer_id)) {
             return $this->session->session_dealer_id;
         }
 

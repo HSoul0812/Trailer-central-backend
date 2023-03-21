@@ -341,6 +341,14 @@ return [
             'driver' => 'sentry',
             'level' => env('SENTRY_LOG_LEVEL', 'error')
         ],
+
+        'dealer-export' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/dealer-export.log'),
+            'level' => env('LOG_LEVEL', 'error'),
+            'days' => 3,
+            'permission' => 0664,
+        ],
     ],
 
 ];

@@ -3,6 +3,8 @@
 namespace App\Repositories\User;
 
 use App\Exceptions\User\TooLongPasswordException;
+use App\Exceptions\User\WrongCurrentPasswordException;
+use App\Services\Common\EncrypterServiceInterface;
 use App\Models\User\DealerUser;
 use App\Models\User\DealerPasswordReset;
 use App\Exceptions\NotImplementedException;
@@ -13,6 +15,19 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInterface {
+
+    /**
+     * @var EncrypterServiceInterface
+     */
+    private $encrypterService;
+
+    /**
+     * @param  EncrypterServiceInterface  $encrypterService
+     */
+    public function __construct(EncrypterServiceInterface $encrypterService)
+    {
+        $this->encrypterService = $encrypterService;
+    }
 
     public function create($params) {
         throw new NotImplementedException;
@@ -80,10 +95,13 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
 
     /**
      * {@inheritDoc}
+     * @throws WrongCurrentPasswordException when current password is wrong
      * @throws TooLongPasswordException when the password is greater than eighth characters
      */
-    public function updateDealerPassword(User $dealer, string $password) : void
+    public function updateDealerPassword(User $dealer, string $password, string $current_password) : void
     {
+        $this->passwordMatch($dealer->password, $current_password, $dealer->salt);
+
         if (empty($dealer->salt)) {
             $salt = uniqid();
             DB::statement("UPDATE dealer SET salt = '{$salt}' WHERE dealer_id = {$dealer->dealer_id}");
@@ -94,10 +112,26 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
 
     /**
      * {@inheritDoc}
+     * @throws WrongCurrentPasswordException when current password is wrong
      * @throws TooLongPasswordException when the password is greater than eighth characters
      */
-    public function updateDealerUserPassword(DealerUser $user, string $password) : void
+    public function updateDealerUserPassword(DealerUser $user, string $password, string $current_password) : void
     {
+        $this->passwordMatch($user->password, $current_password, $user->salt);
+
         DB::statement("UPDATE dealer_users SET password = ENCRYPT('{$password}', salt) WHERE dealer_user_id = {$user->dealer_user_id}");
+    }
+
+    /**
+     * @param string $expectedPassword
+     * @param string $password
+     * @return void
+     * @throws WrongCurrentPasswordException when the current password is wrong
+     */
+    private function passwordMatch(string $expectedPassword, string $password, string $salt)
+    {
+        if($expectedPassword !== $this->encrypterService->encryptBySalt($password, $salt)) {
+            throw new WrongCurrentPasswordException();
+        }
     }
 }

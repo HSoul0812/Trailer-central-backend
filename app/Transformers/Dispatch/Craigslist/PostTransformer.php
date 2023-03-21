@@ -6,11 +6,11 @@ use App\Services\Dispatch\Craigslist\DTOs\ClappPost;
 use League\Fractal\TransformerAbstract;
 
 /**
- * Class FormTransformer
+ * Class PostTransformer
  * 
  * @package App\Transformers\Dispatch\Craigslist
  */
-class FormTransformer extends TransformerAbstract
+class PostTransformer extends TransformerAbstract
 {
     /**
      * @param ClappPost $clapp

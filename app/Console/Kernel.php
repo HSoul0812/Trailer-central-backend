@@ -188,13 +188,20 @@ class Kernel extends ConsoleKernel
            ->runInBackground();
 
         /**
-         * @todo Calo say we could schedule this to be removed in next scheduled release (Feb 20th)
+         * @todo Calo say we could schedule this to be removed in next scheduled release (Early May of 2023)
          *
          * Temporary scheduled command to mitigate the integration issue,
          * we need to make time so they will be able to move everything inventory related to the API side
          */
-        $schedule->command('command:inventory:reindex')
-            ->dailyAt('1:00')
+        // this has to be disabled momentarily because it is being dispatched three times, so we need to investigate why
+        // this is happening
+        //        $schedule->command('inventory:recreate-index')
+        //            ->dailyAt('1:00')
+        //            ->onOneServer()
+        //            ->runInBackground();
+
+        $schedule->command('horizon:clean-completed-jobs')
+            ->everyThirtyMinutes()
             ->onOneServer()
             ->runInBackground();
 

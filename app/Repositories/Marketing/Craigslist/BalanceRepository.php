@@ -111,6 +111,18 @@ class BalanceRepository implements BalanceRepositoryInterface {
         return $balance;
     }
 
+
+    /**
+     * Find Balance
+     * 
+     * @param array $params
+     * @return null|Balance
+     */
+    public function find(array $params): ?Balance {
+        // Find Balance By Dealer ID
+        return Balance::find($params['dealer_id']);
+    }
+
     /**
      * Create OR Update Balance
      * 
@@ -119,7 +131,7 @@ class BalanceRepository implements BalanceRepositoryInterface {
      */
     public function createOrUpdate(array $params): Balance {
         // Get Balance
-        $balance = $this->get($params);
+        $balance = $this->find($params);
 
         // Balance Exists? Update!
         if(!empty($balance->dealer_id)) {

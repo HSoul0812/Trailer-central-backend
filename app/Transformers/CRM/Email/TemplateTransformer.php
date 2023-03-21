@@ -7,12 +7,12 @@ use App\Models\CRM\Email\Template;
 
 class TemplateTransformer extends TransformerAbstract
 {
-    public function transform(Template $template)
+    public function transform(Template $template): array
     {
-	 return [
+        return [
              'id' => (int)$template->id,
              'user_id' => (int)$template->user_id,
-             'name' => $template->custom_template_name,
+             'name' => $template->name ?? $template->custom_template_name,
              'key' => $template->template_key,
              'created_at' => (string)$template->date,
          ];

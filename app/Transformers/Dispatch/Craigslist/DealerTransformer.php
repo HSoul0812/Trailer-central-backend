@@ -3,7 +3,7 @@
 namespace App\Transformers\Dispatch\Craigslist;
 
 use App\Transformers\Dispatch\TunnelTransformer;
-use App\Transformers\Dispatch\Craigslist\FormTransformer;
+use App\Transformers\Dispatch\Craigslist\PostTransformer;
 //use App\Transformers\Dispatch\Craigslist\UpdateTransformer;
 use App\Transformers\Marketing\VirtualCardTransformer;
 use App\Transformers\Marketing\Craigslist\AccountTransformer;
@@ -33,7 +33,7 @@ class DealerTransformer extends TransformerAbstract
      * @param ProfileTransformer $profileTransformer
      * @param TunnelTransformer $tunnelTransformer
      * @param VirtualCardTransformer $cardTransformer
-     * @param FormTransformer $formTransformer
+     * @param PostTransformer $postTransformer
      * @param UpdateTransformer $updateTransformer
      */
     public function __construct(
@@ -41,14 +41,14 @@ class DealerTransformer extends TransformerAbstract
         ProfileTransformer $profileTransformer,
         TunnelTransformer $tunnelTransformer,
         VirtualCardTransformer $cardTransformer,
-        FormTransformer $formTransformer/*,
+        PostTransformer $postTransformer/*,
         UpdateTransformer $updateTransformer*/
     ) {
         $this->accountTransformer = $accountTransformer;
         $this->profileTransformer = $profileTransformer;
         $this->tunnelTransformer = $tunnelTransformer;
         $this->cardTransformer = $cardTransformer;
-        $this->formTransformer = $formTransformer;
+        $this->postTransformer = $postTransformer;
         //$this->updateTransformer = $updateTransformer;
     }
 
@@ -96,7 +96,7 @@ class DealerTransformer extends TransformerAbstract
 
     public function includeInventories(DealerCraigslist $dealer)
     {
-        return $this->collection($dealer->inventories, $this->formTransformer);
+        return $this->collection($dealer->inventories, $this->postTransformer);
     }
 
     /*public function includeUpdates(DealerCraigslist $dealer)

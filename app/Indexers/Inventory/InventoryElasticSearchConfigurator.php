@@ -227,6 +227,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         ],
         'image'                => ['type' => 'keyword'],
         'images'               => ['type' => 'keyword'],
+        'originalImages'       => ['type' => 'keyword'],
         'imagesSecondary'      => ['type' => 'keyword'],
         'numberOfImages'       => ['type' => 'integer'],
         'widthInches'          => ['type' => 'float'],
@@ -247,7 +248,11 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
 
     public function name(): string
     {
-        return $this->aliasName() . '_' . now()->format('Y_m_d_h_i_s');
+        return $this->aliasName().
+            '_'.
+            now()->format('Y_m_d_H_i_s').
+            '_'
+            .str_replace('-', '_', getHostName());
     }
 
     public function aliasName(): string
@@ -295,6 +300,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
                 ]
             ]
         ])->index([
+            'mapping.ignore_malformed' => true,
             'number_of_shards' => config('elastic.scout_driver.settings.inventory.number_of_shards'),
             'number_of_replicas' => config('elastic.scout_driver.settings.inventory.number_of_replicas'),
             'refresh_interval' => config('elastic.scout_driver.settings.inventory.refresh_interval')
