@@ -13,6 +13,7 @@ use App\Models\User\NewDealerUser;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Services\CRM\User\SettingsServiceInterface;
+use App\Repositories\CRM\Leads\LeadRepository;
 
 class SettingsControllerTest extends TestCase {
 
@@ -97,6 +98,59 @@ class SettingsControllerTest extends TestCase {
                 ]
             ]
         ];
+    }
+
+    /**
+     * @group CRM
+     */
+    public function testUpdateTimezone()
+    {
+        $userId = $this->dealer->newDealerUser->user_id;
+        $settingsParams['timezone'] = 'invalid_timezone_string';
+
+        $this->withHeaders(['access-token' => $this->token])
+            ->postJson(self::apiEndpoint, $settingsParams)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('timezone');
+
+        // random timezone
+        $settingsParams['timezone'] = timezone_identifiers_list()[$this->faker->randomDigit()]; 
+
+        $this->withHeaders(['access-token' => $this->token])
+            ->postJson(self::apiEndpoint, $settingsParams)
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('new_crm_user', [
+            'user_id' => $userId,
+            'timezone' => $settingsParams['timezone']
+        ]);
+    }
+
+    /**
+     * @group CRM
+     */
+    public function testUpdateSort()
+    {
+        $userId = $this->dealer->newDealerUser->user_id;
+        $settingsParams['default/filters/sort'] = 9999;
+
+        $this->withHeaders(['access-token' => $this->token])
+            ->postJson(self::apiEndpoint, $settingsParams)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('default/filters/sort');
+
+        // random sort
+        $settingsParams['default/filters/sort'] = $this->faker->numberBetween(0, count(LeadRepository::SORT_ORDERS_CRM) - 1); 
+
+        $this->withHeaders(['access-token' => $this->token])
+            ->postJson(self::apiEndpoint, $settingsParams)
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('crm_settings', [
+            'user_id' => $userId,
+            'key' => 'default/filters/sort',
+            'value' => $settingsParams['default/filters/sort']
+        ]);
     }
 
     /**
