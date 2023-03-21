@@ -305,7 +305,7 @@ class ValidateService implements ValidateServiceInterface
         }
 
         // Get One Entry From Collection
-        $client = $warnings->first();
+        $client = $warnings[0];
 
         // Get Last Activity
         $latest = $this->sessions->getAll([
