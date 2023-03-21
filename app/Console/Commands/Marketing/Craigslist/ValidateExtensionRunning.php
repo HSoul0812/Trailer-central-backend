@@ -3,6 +3,7 @@
 namespace App\Console\Commands\Marketing\Craigslist;
 
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
+use App\Services\Marketing\Craigslist\DTOs\Behaviour;
 use App\Services\Marketing\Craigslist\ValidateServiceInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
@@ -104,5 +105,6 @@ class ValidateExtensionRunning extends Command
 
         // Count Scheduled Posts and Send Back to Server
         $this->service->counts();
+        $this->service->counts(Behaviour::SLOT_ID_EDIT);
     }
 }
