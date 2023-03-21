@@ -343,9 +343,9 @@ class ValidateService implements ValidateServiceInterface
             'dealer_id' => $client->dealerId,
             'slot_id'   => $client->slotId,
             'uuid'      => $client->uuid,
-            'email'     => $client->email(),
+            'email'     => $client->email,
             'label'     => Client::CLIENT_DUSK,
-            'isEdit'    => $client->isEdit(),
+            'isEdit'    => $client->isEdit,
             'level'     => $level,
             'elapsed'   => $elapsed
         ]);
