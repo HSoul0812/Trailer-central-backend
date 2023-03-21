@@ -92,7 +92,9 @@ class ScheduleTransformer extends TransformerAbstract
         } elseif ($queue->queueDeleting->count() > 0) {
             $className = 'deleting';
             $color = 'darkred';
-        } elseif ($queue->queueEdits->count() > 0) {
+        } elseif ($queue->queueEdits->count() > 0 &&
+                  $queue->queueEdits->first()->session->status != 'error' &&
+                  $queue->queueEdits->first()->session->status != 'done') {
             $className = 'edit';
             $color = 'darkolivegreen';
         } elseif ($queue->status === 'error' || $queue->status === 'canceled' ||
