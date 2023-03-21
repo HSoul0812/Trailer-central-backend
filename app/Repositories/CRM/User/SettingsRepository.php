@@ -25,12 +25,32 @@ class SettingsRepository implements SettingsRepositoryInterface
     }
 
     /**
-     * @param array $params
-     * @return Settings
+     * Create or Update crm_setting
+     * 
+     * @param array $params e.g ['user_id' => USERID, 'default/filters/sort' => SORT]
+     * @return <Collection>Settings
      */
-    public function update($params): Settings
+    public function update($params)
     {
-        throw new NotImplementedException;
+        $settings = collect();
+
+        foreach ($params as $key => $value) {
+
+            if ($key === 'user_id') continue;
+
+            $setting = Settings::updateOrCreate(
+                [
+                    'user_id' => $params['user_id'],
+                    'key' => $key
+                ], 
+                [
+                    'value' => $value
+                ]);
+
+            $settings->push($setting);
+        }
+
+        return $settings;
     }
 
     /**
