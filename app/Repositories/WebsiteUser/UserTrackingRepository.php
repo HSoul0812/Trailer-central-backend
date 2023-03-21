@@ -4,6 +4,8 @@ namespace App\Repositories\WebsiteUser;
 
 use App\Domains\UserTracking\Actions\GetPageNameFromUrlAction;
 use App\Models\UserTracking;
+use Log;
+use Throwable;
 
 class UserTrackingRepository implements UserTrackingRepositoryInterface
 {
@@ -11,6 +13,9 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
     {
     }
 
+    /**
+     * @throws Throwable
+     */
     public function create(array $params): UserTracking
     {
         if (!array_key_exists('website_user_id', $params)) {
@@ -23,7 +28,13 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
 
         $params['page_name'] = $this->getPageName($params['url']);
 
-        return UserTracking::create($params);
+        try {
+            return UserTracking::create($params);
+        } catch (Throwable $exception) {
+            Log::error(__METHOD__ . ': Failed to create a user tracking record - ' . $exception->getMessage());
+
+            throw $exception;
+        }
     }
 
     private function getWebsiteUserIdFromAuth(): ?int

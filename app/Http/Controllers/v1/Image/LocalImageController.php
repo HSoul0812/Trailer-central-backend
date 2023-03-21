@@ -1,21 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\v1\WebsiteUser;
+namespace App\Http\Controllers\v1\Image;
 
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
+use App\Http\Requests\Image\UploadLocalImageRequest;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
-use App\Http\Requests\WebsiteUser\TrackUserRequest;
-use App\Repositories\WebsiteUser\UserTrackingRepositoryInterface;
-use Throwable;
+use App\Services\Integrations\TrailerCentral\Api\Image\ImageServiceInterface;
 
-class TrackController extends AbstractRestfulController
+class LocalImageController extends AbstractRestfulController
 {
-    public function __construct(
-        private UserTrackingRepositoryInterface $userTrackingRepository
-    )
+    public function __construct(private ImageServiceInterface $imageService)
     {
         parent::__construct();
     }
@@ -29,13 +26,13 @@ class TrackController extends AbstractRestfulController
     {
         $request->validate();
 
-        try {
-            return $this->response->created(
-                content: $this->userTrackingRepository->create($request->all()),
-            );
-        } catch (Throwable $e) {
-            $this->response->errorBadRequest($e->getMessage());
-        }
+        $imageUrl = $this->imageService->uploadLocalImage($request->input('file'));
+
+        return $this->response->array([
+            'data' => [
+                'url' => $imageUrl,
+            ],
+        ]);
     }
 
     public function show(int $id)
@@ -56,7 +53,7 @@ class TrackController extends AbstractRestfulController
     protected function constructRequestBindings(): void
     {
         app()->bind(CreateRequestInterface::class, function () {
-            return inject_request_data(TrackUserRequest::class);
+            return inject_request_data(UploadLocalImageRequest::class);
         });
     }
 }

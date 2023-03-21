@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console;
 
+use App\Console\Commands\Images\DeleteOldLocalImagesCommand;
 use App\Console\Commands\Report\ReportInventoryViewAndImpressionCommand;
 use App\Console\Commands\UserTracking\PopulateMissingWebsiteUserIdCommand;
 use Illuminate\Console\Scheduling\Schedule;
@@ -63,6 +64,14 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->onOneServer()
             ->runInBackground();
+
+        $schedule
+            ->command(DeleteOldLocalImagesCommand::class)
+            ->daily()
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/commands/delete-old-local-images.log'));
     }
 
     /**

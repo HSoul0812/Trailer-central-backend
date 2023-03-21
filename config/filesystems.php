@@ -38,6 +38,13 @@ return [
         'inventory-view-and-impression-reports' => [
             'driver' => 'local',
             'root' => storage_path('app/reports/inventory/view-and-impression'),
+		],
+
+        'local_tmp' => [
+            'driver' => 'local',
+            'root' => public_path('upload/tmp'),
+            'url' => env('APP_URL') . '/upload/tmp',
+            'visibility' => 'public',
         ],
 
         'public' => [

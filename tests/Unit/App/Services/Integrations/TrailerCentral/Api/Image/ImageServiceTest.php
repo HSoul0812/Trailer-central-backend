@@ -2,9 +2,8 @@
 
 namespace Tests\Unit\App\Services\Integrations\TrailerCentral\Api\Image;
 
+use App\Domains\Images\Actions\DeleteOldLocalImagesAction;
 use App\Repositories\Integrations\TrailerCentral\AuthTokenRepository;
-use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
-use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Api\Image\ImageService;
 use App\Services\Integrations\TrailerCentral\Api\Image\ImageServiceInterface;
 use GuzzleHttp\Client;
@@ -13,6 +12,8 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\Storage;
+use Mockery;
+use Mockery\MockInterface;
 use Tests\Common\TestCase;
 
 class ImageServiceTest extends TestCase
@@ -26,7 +27,8 @@ class ImageServiceTest extends TestCase
         $this->service = $this->getConcreteService();
     }
 
-    public function testUploadImage() {
+    public function testUploadImage()
+    {
         $this->markTestSkipped("This test is skipped because it requires TC");
 
         $response = $this->service->uploadImage(1001, Storage::path('koala.png'));
@@ -39,14 +41,35 @@ class ImageServiceTest extends TestCase
         ], $response);
     }
 
+    public function testItCanDeleteOldLocalImages()
+    {
+        $olderThanDays = 20;
+
+        $this->instance(
+            abstract: DeleteOldLocalImagesAction::class,
+            instance: Mockery::mock(DeleteOldLocalImagesAction::class, function (MockInterface $mock) use ($olderThanDays) {
+                $mock->shouldReceive('execute')->with($olderThanDays)->once()->andReturns();
+            })
+        );
+
+        $service = $this->getConcreteService();
+
+        $service->deleteOldLocalImages($olderThanDays);
+    }
+
     private function getConcreteService(): ImageServiceInterface
     {
         $httpClient = $this->mockHttpClient();
+
         $authRepo = new AuthTokenRepository();
-        return new ImageService($httpClient, $authRepo);
+
+        $deleteOldLocalImagesAction = resolve(DeleteOldLocalImagesAction::class);
+
+        return new ImageService($httpClient, $authRepo, $deleteOldLocalImagesAction);
     }
 
-    private function mockHttpClient(): Client {
+    private function mockHttpClient(): Client
+    {
         $mockData = '{
           "data": {
             "url": "https:\/\/api-v1.zhao.dev.trailercentral.com\/storage\/tmp\/media\/eQNHLd\/GGoOHI\/7wQz0Sxumbsb.png"
