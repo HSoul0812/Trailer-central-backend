@@ -35,7 +35,9 @@ class IsAfterDate implements Rule
     {
         if ($this->startDate) {
             try {
-                return Carbon::parse($value)->gte(Carbon::parse($this->startDate));
+                $current = Carbon::parse($value);
+                $startDate = Carbon::parse($this->startDate);
+                return $current->isSameDay($startDate) || $current->isAfter($startDate);
             } catch (Exception $exception) {
                 return false;
             }
