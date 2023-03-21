@@ -4,6 +4,7 @@ namespace App\Services\Marketing\Craigslist;
 
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\SessionRepositoryInterface;
 use App\Services\Marketing\Craigslist\DTOs\Behaviour;
 use App\Services\Marketing\Craigslist\DTOs\Client;
 use App\Services\Marketing\Craigslist\DTOs\ClientMessage;
@@ -44,6 +45,11 @@ class ValidateService implements ValidateServiceInterface
     protected $scheduler;
 
     /**
+     * @var SessionRepositoryInterface
+     */
+    protected $sessions;
+
+    /**
      * Construct Facebook Marketplace Service
      * 
      * @param ClientRepositoryInterface $repo
@@ -51,10 +57,12 @@ class ValidateService implements ValidateServiceInterface
      */
     public function __construct(
         ClientRepositoryInterface $repo,
-        SchedulerRepositoryInterface $scheduler
+        SchedulerRepositoryInterface $scheduler,
+        SessionRepositoryInterface $sessions
     ) {
         $this->repo = $repo;
         $this->scheduler = $scheduler;
+        $this->sessions = $sessions;
 
         // Create Marketplace Logger
         $this->log = Log::channel('cl-client');
