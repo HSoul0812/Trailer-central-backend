@@ -575,7 +575,10 @@ class Inventory extends Model
             $this->attributesIndexedById = new Collection();
 
             foreach ($this->attributeValues as $attribute) {
-                $this->attributesIndexedById->put($attribute->attribute_id, $attribute->value);
+                $this->attributesIndexedById->put($attribute->attribute_id, [
+                    'attribute' => $attribute->attribute,
+                    'current_value' => $attribute->value
+                ]);
             }
         }
 
@@ -831,7 +834,21 @@ class Inventory extends Model
      */
     public function getAttributeById(int $id, $default = null)
     {
-        $value = $this->getAttributesIndexedByIdAttribute()->get($id);
+        $attributeInfo = $this->getAttributesIndexedByIdAttribute()->get($id);
+        $value = $attributeInfo['current_value'];
+        $attribute = $attributeInfo['attribute'];
+
+        if($attribute->isSelect()){
+            $validValues = $attribute->getValuesArray();
+            $value = strtolower($value);
+            if(!isset($validValues[$value])){
+                return null;
+            }
+
+            if(is_numeric($value)) {
+                return (int) $value;
+            }
+        }
 
         if (is_null($value) || (is_string($value) && $value !== '0' && empty($value))) { // we need the attributes with value 0 to be displayed
             return $default;
