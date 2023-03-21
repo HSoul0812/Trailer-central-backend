@@ -97,7 +97,7 @@ class SessionRepository implements SessionRepositoryInterface {
      */
     public function getAll($params) {
         $query = Session::leftJoin(Queue::getTableName(), Session::getTableName().'.session_id', '=', Queue::getTableName().'.session_id')
-                           ->leftJoin(Profile::getTableName(), Queue::getTableName().'.id', '=', Queue::getTableName().'.profile_id');
+                           ->leftJoin(Profile::getTableName(), Profile::getTableName().'.id', '=', Queue::getTableName().'.profile_id');
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 5;
