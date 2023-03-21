@@ -82,9 +82,11 @@ class ValidateExtensionRunning extends Command
             // Handle Validation
             if($client instanceof Behaviour) {
                 $validation->push($this->service->expired($client));
-            } else {
-                $validation->push($this->service->validate($client));
+                continue;
             }
+
+            // Add Client Validation
+            $validation->push($this->service->validate($client));
         }
 
         // Check Client Status
