@@ -115,10 +115,16 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'numSleeps'            => ['type' => 'integer'],
         'numSlideouts'         => ['type' => 'integer'],
         'numStalls'            => ['type' => 'keyword'],
-        'conversion'           => ['type' => 'keyword'],
+        'conversion'           => [
+            'type' => 'keyword',
+            'normalizer' => 'case_normal'
+        ],
         'customConversion'     => ['type' => 'keyword'],
         'shortwallFt'          => ['type' => 'float'],
-        'color'                => ['type' => 'keyword'],
+        'color'                => [
+            'type' => 'keyword',
+            'normalizer' => 'case_normal'
+        ],
         'pullType'             => [
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
@@ -126,10 +132,19 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
                 'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
-        'noseType'             => ['type' => 'keyword'],
-        'roofType'             => ['type' => 'keyword'],
+        'noseType'             => [
+            'type' => 'keyword',
+            'normalizer' => 'case_normal'
+        ],
+        'roofType'             => [
+            'type' => 'keyword',
+            'normalizer' => 'case_normal'
+        ],
         'loadType'             => ['type' => 'keyword'],
-        'fuelType'             => ['type' => 'keyword'],
+        'fuelType'             => [
+            'type' => 'keyword',
+            'normalizer' => 'case_normal'
+        ],
         'frameMaterial'        => [
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
@@ -149,11 +164,26 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'weeklyPrice'          => ['type' => 'float'],
         'dailyPrice'           => ['type' => 'float'],
         'floorplan'            => ['type' => 'keyword'],
-        'cabType'              => ['type' => 'keyword'],
-        'engineSize'           => ['type' => 'keyword'],
-        'transmission'         => ['type' => 'keyword'],
-        'driveTrail'           => ['type' => 'keyword'],
-        'propulsion'           => ['type' => 'keyword'],
+        'cabType'              => [
+            'type' => 'keyword',
+            'normalizer' => 'case_normal'
+        ],
+        'engineSize'           => [
+            'type' => 'keyword',
+            'normalizer' => 'case_normal'
+        ],
+        'transmission'         => [
+            'type' => 'keyword',
+            'normalizer' => 'case_normal'
+        ],
+        'driveTrail'           => [
+            'type' => 'keyword',
+            'normalizer' => 'case_normal'
+        ],
+        'propulsion'           => [
+            'type' => 'keyword',
+            'normalizer' => 'case_normal'
+        ],
         'draft'                => ['type' => 'float'],
         'transom'              => ['type' => 'float'],
         'deadRise'             => ['type' => 'text'],
