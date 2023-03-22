@@ -31,23 +31,11 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
 
     /**
      * @param $params
-     * @return WebsiteImage
+     * @throws NotImplementedException
      */
-    public function create($params): WebsiteImage
+    public function create($params)
     {
-        if (!isset($params['is_active'])) {
-            $params['is_active'] = 1;
-        }
-
-        if (isset($params['starts_from'])) {
-            $params['is_active'] = intval(Carbon::parse($params['starts_from'])->isPast());
-        }
-
-        if (isset($params['expires_at'])) {
-            $params['is_active'] = intval(Carbon::parse($params['expires_at'])->isFuture());
-        }
-
-        return WebsiteImage::create($params);
+        throw new NotImplementedException;
     }
 
     /**
@@ -58,7 +46,7 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
      * @throws ModelNotFoundException if website_image is not found
      * @throws InvalidArgumentException if id is not set
      */
-    public function update($params): WebsiteImage
+    public function update($params)
     {
         if (!isset($params['id'])) {
             throw new InvalidArgumentException("Website Image ID is required");
@@ -70,10 +58,6 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
 
         if (isset($params['expires_at'])) {
             $params['is_active'] = intval(Carbon::parse($params['expires_at'])->isFuture());
-        }
-
-        if (isset($params['starts_from']) && Carbon::parse($params['starts_from'])->isFuture()) {
-            $params['is_active'] = 0;
         }
 
         $image = WebsiteImage::findOrFail($params['id']);
@@ -97,18 +81,7 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
      */
     public function delete($params)
     {
-        if (!isset($params['id'])) {
-            throw new InvalidArgumentException("Website Image ID is required");
-        }
-
-        if (!isset($params['website_id'])) {
-            throw new InvalidArgumentException("Website ID is required");
-        }
-
-        WebsiteImage::where([
-            'identifier' => $params['id'],
-            'website_id' => $params['website_id']
-        ])->delete();
+        throw new NotImplementedException;
     }
 
     /**
