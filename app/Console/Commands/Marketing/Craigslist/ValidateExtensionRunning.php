@@ -68,7 +68,7 @@ class ValidateExtensionRunning extends Command
 
         // Check if Message Sent Recently
         $interval = (int) config('marketing.cl.settings.slack.interval');
-        if(!$this->repo->sentIn($this->signature, $interval)) {
+        if($this->repo->sentIn($this->signature, $interval)) {
             $log->error('The commmand: ' . $this->signature . ' has already ' .
                         'been run within ' . $interval . ' Minutes and ' .
                         'should not be run again right now...');
