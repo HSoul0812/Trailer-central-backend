@@ -72,6 +72,10 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
             $params['is_active'] = intval(Carbon::parse($params['expires_at'])->isFuture());
         }
 
+        if (isset($params['starts_from']) && Carbon::parse($params['starts_from'])->isFuture()) {
+            $params['is_active'] = 0;
+        }
+
         $image = WebsiteImage::findOrFail($params['id']);
         $image->fill($params)->save();
 

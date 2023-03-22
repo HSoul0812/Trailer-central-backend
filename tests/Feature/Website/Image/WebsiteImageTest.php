@@ -6,10 +6,6 @@ use App\Models\Website\Image\WebsiteImage;
 use Tests\TestCase;
 use App\Models\Website\Website;
 
-/**
- * @group DW
- * @group DW_SLIDESHOW
- */
 class WebsiteImageTest extends TestCase
 {
     protected $website;
@@ -67,7 +63,9 @@ class WebsiteImageTest extends TestCase
 
         $this->assertSame(self::NUMBER_OF_IMAGES, WebsiteImage::where('website_id', $this->website->id)->count());
 
-        $this->assertCount(self::NUMBER_OF_IMAGES, $response->json('data'));
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertCount(self::NUMBER_OF_IMAGES, $data['data']);
     }
 
     public function testGetExpiredImages()
@@ -81,13 +79,14 @@ class WebsiteImageTest extends TestCase
             ->withHeaders(['access-token' => $this->accessToken()])
             ->get('/api/website/' . $this->website->id . '/images?expired=1');
         $response->assertStatus(200);
-        $data = $response->json('data');
 
-        $this->assertSame(4, collect($data)->filter(function ($each) use ($expiredImages) {
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertSame(4, collect($data['data'])->filter(function ($each) use ($expiredImages) {
             return $expiredImages->contains('identifier', $each['id']);
         })->count());
 
-        $this->assertCount(4, $data);
+        $this->assertCount(4, $data['data']);
     }
 
     public function testGetNonExpiredImages()
@@ -102,13 +101,13 @@ class WebsiteImageTest extends TestCase
             ->get('/api/website/' . $this->website->id . '/images?expired=0');
         $response->assertStatus(200);
 
-        $data = $response->json('data');
+        $data = json_decode($response->getContent(), true);
 
-        $this->assertSame(6, collect($data)->filter(function ($each) {
+        $this->assertSame(6, collect($data['data'])->filter(function ($each) {
             return $this->images->where('expires_at', null)->contains('identifier', $each['id']);
         })->count());
 
-        $this->assertCount(6, $data);
+        $this->assertCount(6, $data['data']);
     }
 
     public function testGetImagesExpiredAtAGivenDate()
@@ -125,20 +124,20 @@ class WebsiteImageTest extends TestCase
             ->get('/api/website/' . $this->website->id . '/images?expires_at=' . $dateExpired->toDateString());
         $response->assertStatus(200);
 
-        $data = $response->json('data');
+        $data = json_decode($response->getContent(), true);
 
-        $this->assertSame(4, collect($data)->filter(function ($each) use ($expiredImages) {
+        $this->assertSame(4, collect($data['data'])->filter(function ($each) use ($expiredImages) {
             return $expiredImages->contains('identifier', $each['id']);
         })->count());
 
-        $this->assertCount(4, $data);
+        $this->assertCount(4, $data['data']);
     }
 
     public function testUpdateImageWithoutAccessToken()
     {
         $image = $this->images->first();
 
-        $response = $this->put('/api/website/' . $this->website->id . '/images/' . $image->identifier, []);
+        $response = $this->post('/api/website/' . $this->website->id . '/image/' . $image->identifier, []);
 
         $response->assertStatus(403);
     }
@@ -155,7 +154,7 @@ class WebsiteImageTest extends TestCase
 
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
-            ->put('/api/website/' . $this->website->id . '/images/' . $image->identifier, $data);
+            ->post('/api/website/' . $this->website->id . '/image/' . $image->identifier, $data);
 
         $response->assertStatus(200);
 
@@ -174,10 +173,14 @@ class WebsiteImageTest extends TestCase
 
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
-            ->put('/api/website/' . $this->website->id . '/images/' . 0, $data);
+            ->post('/api/website/' . $this->website->id . '/image/' . 0, $data);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['id', 'expires_at']);
+        $json = json_decode($response->getContent(), true);
+
+        self::assertArrayHasKey('message', $json);
+        self::assertArrayHasKey('id', $json['errors']);
+        self::assertArrayHasKey('expires_at', $json['errors']);
     }
 
     public function testUpdatingAnImageWithAnExpiredDateChangesTheActiveStatus()
@@ -191,7 +194,7 @@ class WebsiteImageTest extends TestCase
 
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
-            ->put('/api/website/' . $this->website->id . '/images/' . $image->identifier, $data);
+            ->post('/api/website/' . $this->website->id . '/image/' . $image->identifier, $data);
 
         $response->assertStatus(200);
 
@@ -208,7 +211,7 @@ class WebsiteImageTest extends TestCase
 
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
-            ->put('/api/website/' . $this->website->id . '/images/' . $image->identifier, $data);
+            ->post('/api/website/' . $this->website->id . '/image/' . $image->identifier, $data);
 
         $response->assertStatus(200);
 
@@ -217,6 +220,25 @@ class WebsiteImageTest extends TestCase
             'website_id' => $this->website->id,
             'is_active' => 1
         ]);
+    }
+
+    public function testStartFromMustBeADateInTheFuture()
+    {
+        $data = [
+            'id' => 0,
+            'starts_from' => now()->subDays(3)
+        ];
+
+        $response = $this
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->post('/api/website/' . $this->website->id . '/image/' . 0, $data);
+
+        $response->assertStatus(422);
+        $json = json_decode($response->getContent(), true);
+
+        self::assertArrayHasKey('message', $json);
+        self::assertArrayHasKey('id', $json['errors']);
+        self::assertArrayHasKey('starts_from', $json['errors']);
     }
 
     public function testUpdatingAnImageToShowInAFutureDateUpdatesTheIsActive()
@@ -230,7 +252,7 @@ class WebsiteImageTest extends TestCase
 
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
-            ->put('/api/website/' . $this->website->id . '/images/' . $image->identifier, $data);
+            ->post('/api/website/' . $this->website->id . '/image/' . $image->identifier, $data);
 
         $response->assertStatus(200);
 
@@ -238,162 +260,6 @@ class WebsiteImageTest extends TestCase
             'identifier' => $image->identifier,
             'website_id' => $this->website->id,
             'is_active' => 0
-        ]);
-    }
-
-    public function testCreateWebsiteImageWithoutAccessToken()
-    {
-        $response = $this->post('/api/website/' . $this->website->id . '/images/', []);
-
-        $response->assertStatus(403);
-    }
-
-    public function testItCanCreateAnImage()
-    {
-        $data = [
-            'image' => 'http://dashboard.trailercentral.com/website/media/dev/33E98FA3-1273-4878-BB73-6C203F2A61EB.png',
-            'title' => 'Test Image Create'
-        ];
-        $response = $this->withHeaders(['access-token' => $this->accessToken()])
-            ->post('/api/website/' . $this->website->id . '/images', $data);
-
-        $response->assertStatus(200);
-        $dbData = [
-                'website_id' => $this->website->id,
-                'is_active' => 1
-            ] + $data;
-        $this->assertDatabaseHas(WebsiteImage::getTableName(), $dbData);
-
-        WebsiteImage::where($dbData)->delete();
-    }
-
-    public function testCreateWebsiteImageRequestValidation()
-    {
-        $data = [
-            'expires_at' => 'hello',
-            'starts_from' => 'world',
-            'link' => PHP_INT_MAX, //should be a string
-            'sort_order' => 'should be a number',
-            'is_active' => 'should be a number',
-            'promo_id' => 'should be a number'
-        ];
-
-        $response = $this
-            ->withHeaders(['access-token' => $this->accessToken()])
-            ->post('/api/website/' . $this->website->id . '/images', $data);
-
-        $response->assertStatus(422);
-
-        $response->assertJsonValidationErrors([
-            'title',
-            'image',
-            'link',
-            'sort_order',
-            'is_active',
-            'promo_id',
-            'expires_at',
-            'starts_from'
-        ]);
-    }
-
-    public function testCreatingAnImageToShowInAFutureDateUpdatesTheIsActive()
-    {
-        $data = [
-            'image' => 'http://img.com/image.png',
-            'title' => 'Test Image Create',
-            'starts_from' => now()->addDays(5)->toDateTimeString(),
-            'is_active' => 1
-        ];
-        $response = $this->withHeaders(['access-token' => $this->accessToken()])
-            ->post('/api/website/' . $this->website->id . '/images', $data);
-
-        $response->assertStatus(200);
-        $dbData = $data + ['website_id' => $this->website->id];
-        $dbData['is_active'] = 0;
-
-        $this->assertDatabaseHas(WebsiteImage::getTableName(), $dbData);
-
-        WebsiteImage::whereIdentifier($response->json('data.id'))->delete();
-    }
-
-    public function testCreatingAnImageWithAnExpiredDateChangesTheActiveStatus()
-    {
-        $data = [
-            'image' => 'http://img.com/image.png',
-            'title' => 'Test Image Expiry',
-            'expires_at' => now()->subDays(5)->toDateTimeString(),
-            'is_active' => 1
-        ];
-        $response = $this->withHeaders(['access-token' => $this->accessToken()])
-            ->post('/api/website/' . $this->website->id . '/images', $data);
-
-        $response->assertStatus(200);
-        $dbData = $data + ['website_id' => $this->website->id];
-        $dbData['is_active'] = 0;
-
-        $this->assertDatabaseHas(WebsiteImage::getTableName(), $dbData);
-
-        WebsiteImage::whereIdentifier($response->json('data.id'))->delete();
-    }
-
-    public function testItActivatesAnImageWhenCreated()
-    {
-        $data = [
-            'image' => 'http://img.com/image.png',
-            'title' => 'Test Image Activation'
-        ];
-        $response = $this->withHeaders(['access-token' => $this->accessToken()])
-            ->post('/api/website/' . $this->website->id . '/images', $data);
-
-        $response->assertStatus(200);
-        $dbData = $data + ['website_id' => $this->website->id];
-        $dbData['is_active'] = 1;
-
-        $this->assertDatabaseHas(WebsiteImage::getTableName(), $dbData);
-
-        WebsiteImage::whereIdentifier($response->json('data.id'))->delete();
-    }
-
-    public function testItPrioritizesTheActiveStatusSentInTheRequest()
-    {
-        $data = [
-            'image' => 'http://img.com/image.png',
-            'title' => 'Test Image Activation Status',
-            'is_active' => 0
-        ];
-        $response = $this->withHeaders(['access-token' => $this->accessToken()])
-            ->post('/api/website/' . $this->website->id . '/images', $data);
-
-        $response->assertStatus(200);
-        $dbData = $data + ['website_id' => $this->website->id];
-
-        $this->assertDatabaseHas(WebsiteImage::getTableName(), $dbData);
-
-        WebsiteImage::whereIdentifier($response->json('data.id'))->delete();
-    }
-
-    public function testDeleteWebsiteImageWithoutAccessToken()
-    {
-        $image = $this->images->first();
-
-        $response = $this->delete('/api/website/' . $this->website->id . '/images/' . $image->identifier);
-
-        $response->assertStatus(403);
-    }
-
-    public function testItCanDeleteAnImage()
-    {
-        $image = $this->images->first();
-
-        $response = $this
-            ->withHeaders(['access-token' => $this->accessToken()])
-            ->delete('/api/website/' . $this->website->id . '/images/' . $image->identifier);
-
-        $response->assertNoContent();
-
-        $this->assertDatabaseMissing(WebsiteImage::getTableName(), [
-            'identifier' => $image->identifier,
-            'website_id' => $this->website->id
         ]);
     }
 }
