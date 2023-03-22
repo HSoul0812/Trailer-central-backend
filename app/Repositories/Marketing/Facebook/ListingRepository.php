@@ -170,8 +170,8 @@ class ListingRepository implements ListingRepositoryInterface {
             })
 
             ->where(function ($query) use ($inventoryTableName, $minDescriptionLength) {
-                $query->whereRaw("LENGTH({$inventoryTableName}.description) >= " . $minDescriptionLength)
-                    ->orWhereRaw("LENGTH({$inventoryTableName}.description_html) >= " . (2 * $minDescriptionLength));
+                $query->whereRaw("LENGTH(IFNULL({$inventoryTableName}.description, '')) >= " . $minDescriptionLength)
+                    ->orWhereRaw("LENGTH(IFNULL({$inventoryTableName}.description_html, '')) >= " . (2 * $minDescriptionLength));
             })
             ->has('orderedImages');
 
@@ -179,7 +179,6 @@ class ListingRepository implements ListingRepositoryInterface {
         $query = $query->leftJoin(Listings::getTableName(), function ($join) use ($integration) {
             $join->on(Listings::getTableName() . '.inventory_id', '=', Inventory::getTableName() . '.inventory_id');
             $join->on(Listings::getTableName() . '.username', '=', DB::raw("'" . $integration->fb_username . "'"));
-            $join->on(Listings::getTableName() . '.page_id', '=', DB::raw($integration->page_id ?? '0'));
         })->where(function (Builder $query) use ($listingsTableName) {
             $query->whereNull("{$listingsTableName}.facebook_id")
                 ->orWhereIn("{$listingsTableName}.status", [Listings::STATUS_DELETED, Listings::STATUS_EXPIRED]);
