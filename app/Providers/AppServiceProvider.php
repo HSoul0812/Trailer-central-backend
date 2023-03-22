@@ -111,8 +111,6 @@ use App\Services\Dms\Pos\RegisterServiceInterface;
 use App\Services\File\FileService;
 use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
-use App\Services\Inventory\InventoryBulkUpdateManufacturerService;
-use App\Services\Inventory\InventoryBulkUpdateManufacturerServiceInterface;
 use App\Services\Showroom\ShowroomService;
 use App\Services\Showroom\ShowroomServiceInterface;
 use App\Services\Subscription\StripeService;
