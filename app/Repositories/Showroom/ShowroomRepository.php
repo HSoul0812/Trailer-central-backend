@@ -102,6 +102,10 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
             $query = $query->where('model', '=', $params['model']);
         }
 
+        if (isset($params['year'])) {
+            $query = $query->where('year', '=', $params['year']);
+        }
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
