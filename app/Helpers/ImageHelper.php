@@ -27,6 +27,7 @@ class ImageHelper
         bool $proportional = true,
         ?string $output = 'file'
     ) {
+        return true;
         if($height <= 0 && $width <= 0) {
             return false;
         }
