@@ -433,6 +433,8 @@ class ImageHelper
      * @param string $logoPath
      * @param array $config
      * @return string local path of new image
+     *
+     * @throws MissingOverlayLogoParametersException when logo overlay is enabled and its configurations were not provided
      */
     public function addLogoOverlay(string $imagePath, string $logoPath, array $config)
     {
