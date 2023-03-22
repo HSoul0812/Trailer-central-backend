@@ -726,7 +726,7 @@ $api->version('v1', function ($route) {
         $route->group([
             'prefix' => 'leads/{leadId}/documents',
             'middleware' => 'leads.document.validate'
-        
+
         ], function ($route) {
 
             $route->get('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
@@ -804,7 +804,6 @@ $api->version('v1', function ($route) {
         $route->get('website/{websiteId}/images', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@index')->where('websiteId', '[0-9]+');
         $route->post('website/{websiteId}/images', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@create')->where('websiteId', '[0-9]+');
         $route->put('website/{websiteId}/images/{imageId}', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@update')->where(['websiteId' => '[0-9]+', 'imageId' => '[0-9]+']);
-        $route->delete('website/{websiteId}/images/{imageId}', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@delete')->where(['websiteId' => '[0-9]+', 'imageId' => '[0-9]+']);
 
         /*
         |--------------------------------------------------------------------------

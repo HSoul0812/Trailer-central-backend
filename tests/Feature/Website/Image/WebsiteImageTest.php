@@ -141,7 +141,7 @@ class WebsiteImageTest extends TestCase
     {
         $image = $this->images->first();
 
-        $response = $this->post('/api/website/' . $this->website->id . '/image/' . $image->identifier, []);
+        $response = $this->put('/api/website/' . $this->website->id . '/images/' . $image->identifier, []);
 
         $response->assertStatus(403);
     }
@@ -158,7 +158,7 @@ class WebsiteImageTest extends TestCase
 
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
-            ->post('/api/website/' . $this->website->id . '/image/' . $image->identifier, $data);
+            ->put('/api/website/' . $this->website->id . '/images/' . $image->identifier, $data);
 
         $response->assertStatus(200);
 
@@ -177,7 +177,7 @@ class WebsiteImageTest extends TestCase
 
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
-            ->post('/api/website/' . $this->website->id . '/image/' . 0, $data);
+            ->put('/api/website/' . $this->website->id . '/images/' . 0, $data);
 
         $response->assertStatus(422);
         $json = json_decode($response->getContent(), true);
@@ -198,7 +198,7 @@ class WebsiteImageTest extends TestCase
 
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
-            ->post('/api/website/' . $this->website->id . '/image/' . $image->identifier, $data);
+            ->put('/api/website/' . $this->website->id . '/images/' . $image->identifier, $data);
 
         $response->assertStatus(200);
 
@@ -215,7 +215,7 @@ class WebsiteImageTest extends TestCase
 
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
-            ->post('/api/website/' . $this->website->id . '/image/' . $image->identifier, $data);
+            ->put('/api/website/' . $this->website->id . '/images/' . $image->identifier, $data);
 
         $response->assertStatus(200);
 
@@ -237,7 +237,7 @@ class WebsiteImageTest extends TestCase
 
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
-            ->post('/api/website/' . $this->website->id . '/image/' . $image->identifier, $data);
+            ->put('/api/website/' . $this->website->id . '/images/' . $image->identifier, $data);
 
         $response->assertStatus(200);
 

@@ -2,10 +2,7 @@
 
 namespace App\Http\Controllers\v1\Website\Image;
 
-use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
-use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Requests\Website\Image\CreateWebsiteImageRequest;
-use App\Http\Requests\Website\Image\DeleteWebsiteImageRequest;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 use App\Http\Controllers\RestfulControllerV2;
@@ -13,6 +10,9 @@ use App\Http\Requests\Website\Image\GetWebsiteImageRequest;
 use App\Http\Requests\Website\Image\UpdateWebsiteImageRequest;
 use App\Repositories\Website\Image\WebsiteImageRepositoryInterface;
 use App\Transformers\Website\Image\WebsiteImageTransformer;
+use Dingo\Api\Exception\ResourceException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class WebsiteImagesController extends RestfulControllerV2
 {
@@ -32,11 +32,8 @@ class WebsiteImagesController extends RestfulControllerV2
     }
 
     /**
-     * @param int $websiteId
-     * @param Request $request
      * @return Response|void
-     * @throws NoObjectIdValueSetException
-     * @throws NoObjectTypeSetException
+     * @throws ResourceException when there was a failed validation
      */
     public function index(int $websiteId, Request $request)
     {
@@ -51,13 +48,11 @@ class WebsiteImagesController extends RestfulControllerV2
     }
 
     /**
-     * @param int $websiteId
-     * @param int $imageId
-     * @param Request $request
      * @return Response|void
      *
-     * @throws NoObjectIdValueSetException
-     * @throws NoObjectTypeSetException
+     * @throws ModelNotFoundException
+     * @throws ResourceException when there was a failed validation
+     * @throws HttpException when the provided resource id does not belongs to dealer who has made the request
      */
     public function update(int $websiteId, int $imageId, Request $request)
     {
@@ -71,38 +66,12 @@ class WebsiteImagesController extends RestfulControllerV2
         $this->response->errorBadRequest();
     }
 
-    /**
-     * @param int $websiteId
-     * @param Request $request
-     * @return Response|void
-     * @throws NoObjectIdValueSetException
-     * @throws NoObjectTypeSetException
-     */
     public function create(int $websiteId, Request $request)
     {
         $request = new CreateWebsiteImageRequest(['website_id' => $websiteId] + $request->all());
         if ($request->validate()) {
             $image = $this->websiteImage->create($request->all());
             return $this->response->item($image, $this->transformer);
-        }
-
-        $this->response->errorBadRequest();
-    }
-
-    /**
-     * @param int $websiteId
-     * @param int $imageId
-     * @param Request $request
-     * @return Response|void
-     * @throws NoObjectIdValueSetException
-     * @throws NoObjectTypeSetException
-     */
-    public function delete(int $websiteId, int $imageId, Request $request)
-    {
-        $request = new DeleteWebsiteImageRequest(['id' => $imageId, 'website_id' => $websiteId] + $request->all());
-        if ($request->validate()) {
-            $this->websiteImage->delete($request->all());
-            return $this->deletedResponse();
         }
 
         $this->response->errorBadRequest();
