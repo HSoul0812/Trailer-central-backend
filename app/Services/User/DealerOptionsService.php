@@ -214,11 +214,11 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             $integrationDealer = IntegrationDealer::where([
                 'dealer_id' => $dealerId,
                 'integration_id' => $integrationId
-            ])->firstOr(function () use ($dealerId, $integrationId) {
+            ])->firstOr(function () use ($dealerId, $integrationId, $active) {
                 return IntegrationDealer::create([
                     'dealer_id' => $dealerId,
                     'integration_id' => $integrationId,
-                    'active' => 0,
+                    'active' => $active,
                     'msg_body' => '',
                     'msg_title' => '',
                     'msg_date' => '0000-00-00'

@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Website\Blog\Post;
 use App\Models\User\User;
 
+use Illuminate\Support\Facades\Log;
+use Spatie\SslCertificate\SslCertificate;
+
 /**
  * Class Website
  * @package App\Models\Website
@@ -32,12 +35,16 @@ use App\Models\User\User;
  * @property bool $is_live
  * @property string $parts_email
  * @property bool $force_elastic
+ * @property string $ssl_certificate
  */
 class Website extends Model
 {
     use TableAware;
 
     const TRAILERTRADER_ID = 284;
+
+    const WEBSITE_TYPE_CUSTOM = 'custom';
+    const WEBSITE_TYPE_WEBSITE = 'website';
     const WEBSITE_TYPE_CLASSIFIED = 'classified';
 
     protected $table = 'website';
@@ -55,6 +62,22 @@ class Website extends Model
      * @var string
      */
     const UPDATED_AT = 'date_updated';
+
+    public function getSslCertificateAttribute()
+    {
+        $ip = gethostbyname($this->domain);
+        $certificate = false;
+
+        if (filter_var($ip, FILTER_VALIDATE_IP) !== false) {
+            try {
+                $certificate = SslCertificate::createForHostName($this->domain);
+            } catch (\Exception $e) {
+                Log::error($e->getMessage());
+            }
+        }
+
+        return $certificate;
+    }
 
     /**
      * Get the website type config.

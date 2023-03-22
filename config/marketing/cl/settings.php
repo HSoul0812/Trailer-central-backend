@@ -45,6 +45,10 @@ return [
             'low' => env('CLAPP_WARNING_CLIENTS_LOW', '1'),
             'edit' => env('CLAPP_WARNING_CLIENTS_EDIT_LOW', '0')
         ],
+        'counts' => [
+            'warning' => env('CLAPP_WARNING_COUNTS_HIGH', '500'),
+            'critical' => env('CLAPP_WARNING_COUNTS_CRITICAL', '1000')
+        ],
         'overrides' => [
             'elapse' => [
                 'warning' => env('CLAPP_WARNING_OVERRIDE_ELAPSE_WARNING'),
@@ -55,6 +59,10 @@ return [
                 'low' => env('CLAPP_WARNING_OVERRIDE_CLIENTS_LOW'),
                 'edit' => env('CLAPP_WARNING_OVERRIDE_CLIENTS_EDIT_LOW')
             ],
+            'counts' => [
+                'warning' => env('CLAPP_WARNING_OVERRIDE_COUNTS_HIGH'),
+                'critical' => env('CLAPP_WARNING_OVERRIDE_COUNTS_CRITICAL')
+            ]
         ]
     ],
 
@@ -76,10 +84,5 @@ return [
         'showOnWebsite' => env('CLAPP_OVERRIDE_HIDDEN', '1147,8467,7206,7099,6181,5542,5540,5541,7439,5521,6461,7638,10232'),
         'statusAll' => env('CLAPP_OVERRIDE_STATUS_ALL', '5936,5840'),
         'statusOnOrder' => env('CLAPP_OVERRIDE_STATUS_ON_ORDER', '5251'),
-    ],
-
-    // Scheduler settings
-    'scheduler' => [
-        'allDay' => env('CLAPP_SCHEDULER_ALL_DAY', false)
     ]
 ];

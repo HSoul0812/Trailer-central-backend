@@ -3,6 +3,8 @@
 namespace App\Transformers\Marketing\Craigslist;
 
 use App\Models\Marketing\Craigslist\Queue;
+use App\Models\Inventory\Inventory;
+use App\Traits\CompactHelper;
 use League\Fractal\TransformerAbstract;
 
 /**
@@ -22,14 +24,22 @@ class ScheduleTransformer extends TransformerAbstract
         $itemStyling = $this->itemStyling($queue);
 
         return [
-            "queue_id" => "queue_{$queue->queue_id}",
-            "title" => "Inv #" . $queue->inventory->inventory_id,
-            "inventory_id" => $queue->inventory->inventory_id,
+            "id" => "queue_{$queue->queue_id}",
+            "queue_id" => $queue->queue_id,
             "session_id" => $queue->session_id,
-            "archived" => boolval($queue->inventory->is_archived),
+            "inventory" => CompactHelper::shorten($queue->inventory_id),
+            "inventory_id" => $queue->inventory_id,
+            "archived" => boolval($queue->is_archived),
+            "title" => $queue->title,
+            "stock" => $queue->stock,
+            "price" => $queue->price,
+            "manufacturer" => $queue->make,
+            "category" => $queue->category_label,
+            "image" => $queue->primary_image,
             "allDay" => boolval($startAndEndTimes['allDay']),
             "start" => $startAndEndTimes['start'],
             "end" => $startAndEndTimes['end'],
+            "error" => ($queue->status === 'error') ? $queue->text_status : '',
             "text_status" => $queue->text_status,
             "durationEditable" => false,
             "className" => $itemStyling['className'],
@@ -45,7 +55,6 @@ class ScheduleTransformer extends TransformerAbstract
             $timing = explode(" ", $queue->session_started);
         }
 
-        $allDayConfig = config('marketing.cl.settings.scheduler.allDay');
         $queueDate = date('Y-m-d', $queue->time);
         $queueTime = date('H:i:s', $queue->time);
 
@@ -56,11 +65,7 @@ class ScheduleTransformer extends TransformerAbstract
             $queueTime = $timing[1];
         }
 
-        $startDate = $queueDate;
-
-        if (!$allDayConfig) {
-            $startDate .= 'T' . $queueTime . '+00:00';
-        }
+        $startDate = $queueDate . 'T' . $queueTime . '+00:00';
 
         // Set End Time
         $endTime = strtotime($queueDate . ' ' . $queueTime) + (60 * 30);
@@ -69,7 +74,7 @@ class ScheduleTransformer extends TransformerAbstract
         $endDate .= '+00:00';
 
         return [
-            'allDay' => $allDayConfig,
+            'allDay' => false,
             'start' => $startDate,
             'end' => $endDate
         ];
@@ -81,19 +86,25 @@ class ScheduleTransformer extends TransformerAbstract
         $editable = false;
         $color = '';
 
-        if (!empty($queue->q_status)) {
+        if ($queue->queueDeleted->count() > 0) {
+            $className = 'deleted';
+            $color = 'black';
+        } elseif ($queue->queueDeleting->count() > 0) {
+            $className = 'deleting';
+            $color = 'darkred';
+        } elseif ($queue->queueEdits->count() > 0 &&
+                  $queue->queueEdits->first()->session->status != 'error' &&
+                  $queue->queueEdits->first()->session->status != 'done') {
             $className = 'edit';
             $color = 'darkolivegreen';
-        } elseif (!empty($queue->d_status)) {
-            if ($queue->d_status === 'done') {
-                $className = 'deleted';
-                $color = 'black';
-            }
-        } elseif ($queue->status === 'error' || $queue->status === 'canceled') {
-            if ($queue->state === 'missing-data' || $queue->s_state === 'missing-data') {
+        } elseif ($queue->status === 'error' || $queue->status === 'canceled' ||
+                  $queue->session->status === 'error') {
+            if ($queue->state === 'missing-data' ||
+                $queue->session->state === 'missing-data' ||
+                strpos('invalid-', $queue->session->state) !== FALSE) {
                 $className = 'data';
                 $color = 'orangered';
-            } elseif ($queue->s_state === 'manual-stop' || $queue->staus === 'canceled') {
+            } elseif ($queue->session->state === 'manual-stop' || $queue->staus === 'canceled') {
                 $className = 'stopped';
                 $color = 'gray';
             } else {
@@ -104,10 +115,15 @@ class ScheduleTransformer extends TransformerAbstract
             $className = 'billing';
             $color = 'purple';
         } elseif ($queue->status === 'done') {
-            $className = 'completed';
-            $color = 'green';
+            if(!empty($queue->parameters->autoPost)) {
+                $className = 'autopost';
+                $color = 'blue';
+            } else {
+                $className = 'completed';
+                $color = 'green';
+            }
         } else {
-            if ($queue->i_status == '2') {
+            if ($queue->inventory->status === Inventory::STATUS_SOLD) {
                 $className = 'sold';
                 $color = 'brown';
             } else {
