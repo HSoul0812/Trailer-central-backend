@@ -3,9 +3,11 @@
 namespace Tests\Unit\App\Middleware;
 
 use App\Http\Middleware\HumanOnly;
+use App\Mail\FailedToFetchBotIpEmail;
 use Http;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Mail;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Common\TestCase;
 
@@ -25,6 +27,7 @@ class HumanOnlyTest extends TestCase
     public function testItAllowsRequestWithAllowedUserAgent()
     {
         $request = new Request();
+
         $request->headers->set('User-Agent', 'trailertrader-testing');
 
         (new HumanOnly())->handle($request, function () {
@@ -70,6 +73,63 @@ class HumanOnlyTest extends TestCase
         (new HumanOnly())->handle($request, function () {
             $this->assertTrue(true);
         });
+    }
+
+    public function testItSendFailedToFetchBotIpEmailForBotsChecking(): void
+    {
+        $request = new Request();
+
+        $request->server->add(['REMOTE_ADDR' => '127.0.0.1']);
+
+        $httpFakeResponses = Http::sequence()
+            ->push('dummy_body', Response::HTTP_INTERNAL_SERVER_ERROR);
+
+        Http::fake([
+            'developers.google.com/*' => $httpFakeResponses,
+            'www.bing.com/*' => $httpFakeResponses,
+        ]);
+
+        Mail::fake();
+
+        /** @var JsonResponse $response */
+        $response = (new HumanOnly())->handle($request, function () {
+        });
+
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertEquals([], data_get($response->getOriginalContent(), 'data'));
+
+        Mail::assertQueued(FailedToFetchBotIpEmail::class);
+        Mail::assertQueued(FailedToFetchBotIpEmail::class);
+    }
+
+    public function testItDoesNotSendFailedToFetchBotIpEmailIfSendMailConfigIsFalse()
+    {
+        config([
+            'trailertrader.middlewares.human_only.emails.failed_bot_ips_fetch.send_mail' => false,
+        ]);
+
+        $request = new Request();
+
+        $request->server->add(['REMOTE_ADDR' => '127.0.0.1']);
+
+        $httpFakeResponses = Http::sequence()
+            ->push('dummy_body', Response::HTTP_INTERNAL_SERVER_ERROR);
+
+        Http::fake([
+            'developers.google.com/*' => $httpFakeResponses,
+            'www.bing.com/*' => $httpFakeResponses,
+        ]);
+
+        Mail::fake();
+
+        /** @var JsonResponse $response */
+        $response = (new HumanOnly())->handle($request, function () {
+        });
+
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertEquals([], data_get($response->getOriginalContent(), 'data'));
+
+        Mail::assertNothingQueued();
     }
 
     public function testItBlocksRequestFromCrawlers()
