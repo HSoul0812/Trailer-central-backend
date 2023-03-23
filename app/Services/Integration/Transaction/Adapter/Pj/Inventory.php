@@ -60,7 +60,7 @@ class Inventory extends PjAdapter
             'vin' => $data['vin'],
             'year' => $data['year'],
             'condition' => 'new',
-            'length' => $data['length'],
+            'length' => !empty($data['length']) ? $data['length'] : 0,
             'gvwr' => $data['gvwr'],
             'axle_capacity' => $data['axle_capacity'],
             'status' => $this->convert('status', $data['status'])
@@ -119,6 +119,8 @@ class Inventory extends PjAdapter
 
             $inventoryParams['new_images'][] = ['url' => $image];
         }
+
+        $inventoryParams = $this->showroomService->mapInventoryToFactory($inventoryParams);
 
         $inventory = $this->inventoryService->create($inventoryParams);
 

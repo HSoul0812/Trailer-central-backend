@@ -12,6 +12,7 @@ use App\Repositories\Inventory\StatusRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\Integration\Transaction\Reference;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Services\Showroom\ShowroomServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -76,6 +77,11 @@ abstract class Adapter
     protected $statusRepository;
 
     /**
+     * @var ShowroomServiceInterface
+     */
+    protected $showroomService;
+
+    /**
      * @var Reference
      */
     protected $reference;
@@ -88,7 +94,8 @@ abstract class Adapter
         InventoryRepositoryInterface $inventoryRepository,
         Reference $reference,
         DealerIncomingMappingRepositoryInterface $dealerIncomingMappingRepository,
-        StatusRepositoryInterface $statusRepository
+        StatusRepositoryInterface $statusRepository,
+        ShowroomServiceInterface $showroomService
     ) {
         $this->apiEntityReferenceRepository = $apiEntityReferenceRepository;
         $this->attributeRepository = $attributeRepository;
@@ -98,6 +105,7 @@ abstract class Adapter
         $this->reference = $reference;
         $this->dealerIncomingMappingRepository = $dealerIncomingMappingRepository;
         $this->statusRepository = $statusRepository;
+        $this->showroomService = $showroomService;
     }
 
     /**
