@@ -39,6 +39,7 @@ class CollectorTransformer extends TransformerAbstract
             'import_prices' => $collector->import_prices,
             'import_description' => $collector->import_description,
             'images_delimiter' => $collector->images_delimiter,
+            'primary_image_field' => $collector->primary_image_field,
             'overridable_fields' => $collector->overridable_fields,
             'skip_categories' => $collector->skip_categories,
             'skip_locations' => $collector->skip_locations,
