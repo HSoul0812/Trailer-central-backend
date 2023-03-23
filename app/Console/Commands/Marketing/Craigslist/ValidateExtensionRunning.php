@@ -66,6 +66,16 @@ class ValidateExtensionRunning extends Command
         // Log Client
         $log = Log::channel('cl-client');
 
+        // Check if Message Sent Recently
+        $interval = (int) config('marketing.cl.settings.slack.interval');
+        if($this->repo->sentIn($this->signature, $interval)) {
+            $log->error('The commmand: ' . $this->signature . ' has already ' .
+                        'been run within ' . $interval . ' Minutes and ' .
+                        'should not be run again right now...');
+            return false;
+        }
+        $this->repo->markSent($this->signature);
+
         // CL Warning Enabled
         $isEnabled = config('marketing.cl.settings.warning.enabled', '0');
         if(!(int) $isEnabled) {
@@ -82,9 +92,11 @@ class ValidateExtensionRunning extends Command
             // Handle Validation
             if($client instanceof Behaviour) {
                 $validation->push($this->service->expired($client));
-            } else {
-                $validation->push($this->service->validate($client));
+                continue;
             }
+
+            // Add Client Validation
+            $validation->push($this->service->validate($client));
         }
 
         // Check Client Status
