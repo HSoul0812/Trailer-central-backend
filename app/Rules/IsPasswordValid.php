@@ -3,69 +3,127 @@
 namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Support\Str;
 
+/**
+ * Class IsPasswordValid
+ *
+ * @package App\Rules;
+ */
 class IsPasswordValid implements Rule
 {
     /**
-     * Determine if the Uppercase Validation Rule passes.
+     * Minimum password length
+     *
+     * @var int
+     */
+    const MIN_LENGTH = 8;
+
+    /**
+     * Mixed case pattern
+     *
+     * @var string
+     */
+    const MIXED_CASE_PATTERN = '/(\p{Ll}+.*\p{Lu})|(\p{Lu}+.*\p{Ll})/u';
+
+    /**
+     * Letter case pattern
+     *
+     * @var string
+     */
+    const LETTER_CASE_PATTERN = '/\pL/u';
+
+    /**
+     * Symbol case pattern
+     *
+     * @var string
+     */
+    const SYMBOL_CASE_PATTERN = '/\p{Z}|\p{S}|\p{P}/u';
+
+    /**
+     * Number case pattern
+     *
+     * @var string
+     */
+    const NUMBER_CASE_PATTERN = '/\pN/u';
+
+    /**
+     * Determine if the mixed case validation rule passes
      *
      * @var boolean
      */
-    public $uppercasePasses = true;
+    public $mixedCase = true;
 
     /**
-     * Determine if the Lowercase Validation Rule passes.
+     * Determine if the letters validation rule passes
      *
      * @var boolean
      */
-    public $lowercasePasses = true;
+    public $letters = true;
 
     /**
-     * Determine if the Numeric Validation Rule passes.
+     * Determine if the numeric validation rule passes
      *
      * @var boolean
      */
-    public $numericPasses = true;
+    public $numbers = true;
 
     /**
-     * Determine if the Special Character Validation Rule passes.
+     * Determine if the special character validation rule passes
      *
      * @var boolean
      */
-    public $specialCharacterPasses = true;
+    public $symbols = true;
 
     /**
-     * Determine if the validation rule passes.
+     * Determine if the validation rule passes
      *
-     * @param  string  $attribute
-     * @param  mixed  $value
+     * @param string $attribute
+     * @param mixed $value
+     *
      * @return bool
      */
     public function passes($attribute, $value)
     {
-        $this->uppercasePasses = preg_match('/[^A-Z]/', $value);
-        $this->lowercasePasses = preg_match('/[^a-z]/', $value);
-        $this->numericPasses = preg_match('/[^0-9]/', $value);
-        $this->specialCharacterPasses = preg_match('/[^@$!%*#?&_]/', $value);
+        $this->mixedCase = preg_match(self::MIXED_CASE_PATTERN, $value);
+        $this->letters = preg_match(self::LETTER_CASE_PATTERN, $value);
+        $this->symbols = preg_match(self::SYMBOL_CASE_PATTERN, $value);
+        $this->numbers = preg_match(self::NUMBER_CASE_PATTERN, $value);
 
-        return ($this->uppercasePasses && $this->lowercasePasses && $this->numericPasses && $this->specialCharacterPasses);
+        return Str::length($value) >= self::MIN_LENGTH
+            && $this->mixedCase
+            && $this->letters
+            && $this->numbers
+            && $this->symbols;
     }
 
     /**
-     * Get the validation error message.
+     * Get the validation error message
      *
      * @return string
      */
-    public function message()
+    public function message(): string
     {
-        if (!$this->uppercasePasses) {
-            return 'The :attribute must contain at least one uppercase character.';
-        } else if (!$this->lowercasePasses) {
-            return 'The :attribute must contain at least one lowercase character.';
-        } else if (!$this->numericPasses) {
-            return 'The :attribute must contain at least one number.';
-        } else if (!$this->specialCharacterPasses) {
-            return 'The :attribute must contain at least one special character.';
+        $message = 'The :attribute ' . self::lengthMessage();
+
+        if (!$this->mixedCase) {
+            $message .= ' and contain at least one uppercase and lowercase character.';
+        } elseif (!$this->numbers) {
+            $message .= ' and contain at least one number.';
+        } elseif (!$this->letters) {
+            $message .= ' and contain at least one letter.';
+        } elseif (!$this->symbols) {
+            $message .= ' and contain at least one special character.';
         }
+
+        return $message;
+    }
+
+    /**
+     * @return string
+     */
+    private static function lengthMessage(): string
+    {
+        return 'must be at least ' . self::MIN_LENGTH . ' characters';
     }
 }

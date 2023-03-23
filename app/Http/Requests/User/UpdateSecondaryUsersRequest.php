@@ -41,8 +41,6 @@ class UpdateSecondaryUsersRequest extends Request
             ],
             'users.*.password' => [
                 'nullable',
-                'string',
-                'min:8',
                 new IsPasswordValid(),
             ],
             'users.*.user_permissions' => [

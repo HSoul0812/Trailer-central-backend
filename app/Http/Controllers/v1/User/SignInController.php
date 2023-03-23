@@ -19,8 +19,6 @@ use App\Transformers\User\UserTransformer;
 use App\Http\Requests\User\CheckAdminPasswordRequest;
 use App\Http\Requests\User\UpdatePasswordRequest;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
-use App\Rules\IsPasswordValid;
-
 use App\Models\User\User;
 use Grosv\LaravelPasswordlessLogin\LoginUrl;
 use Grosv\LaravelPasswordlessLogin\PasswordlessLoginService;
@@ -128,7 +126,7 @@ class SignInController extends RestfulController
     {
         $request = new UpdatePasswordRequest($request->all());
 
-        if ($request->validate(['password' => [new IsPasswordValid()]])) {
+        if ($request->validate()) {
             $user = $this->extractUserFromRequest($request);
 
             try {
