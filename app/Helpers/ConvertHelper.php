@@ -37,7 +37,7 @@ class ConvertHelper
      * @param string $type
      * @return string for feet and inches display
      */
-    public function fromFeetAndInches(string $input, string $displayMode, string $type): string
+    public function fromFeetAndInches(string $input, string $displayMode, string $type): ?string
     {
         $feet = null;
         $inches = null;

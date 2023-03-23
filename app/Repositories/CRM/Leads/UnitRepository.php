@@ -53,7 +53,7 @@ class UnitRepository extends RepositoryAbstract implements UnitRepositoryInterfa
      */
     public function getAll($params): Collection
     {
-        $query = InventoryLead::query();
+        $query = InventoryLead::query()->has('inventory');
 
         if (isset($params['website_lead_id'])) {
             $query->where('website_lead_id', $params['website_lead_id']);
