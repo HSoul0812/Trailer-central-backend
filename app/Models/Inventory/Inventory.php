@@ -192,6 +192,9 @@ class Inventory extends Model
     /** @var null|string */
     public static $searchableAs = null;
 
+    /** @var bool to determines when the image overlay generation jobs should be dispatched */
+    private static $isOverlayGenerationEnabled = true;
+
     const TABLE_NAME = 'inventory';
 
     const STATUS_QUOTE = 6;

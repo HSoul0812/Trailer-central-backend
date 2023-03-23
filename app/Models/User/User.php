@@ -7,7 +7,6 @@ use App\Models\Parts\Part;
 use Laravel\Cashier\Billable;
 use App\Traits\CompactHelper;
 use App\Models\CRM\Leads\Lead;
-use App\Models\User\AuthToken;
 use App\Models\Website\Website;
 use App\Models\CRM\Leads\LeadType;
 use App\Services\User\UserService;
@@ -19,7 +18,6 @@ use App\Models\CRM\Dms\Printer\Settings;
 use App\Traits\Models\HasPermissionsStub;
 use App\Models\CRM\Dms\Quote\QuoteSetting;
 use App\Models\Website\Config\WebsiteConfig;
-use App\Models\Integration\IntegrationDealer;
 use App\Models\Marketing\Facebook\Marketplace;
 use Illuminate\Contracts\Auth\Authenticatable;
 use App\Models\Integration\Collector\Collector;
@@ -54,6 +52,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property int $auto_import_hide
  * @property int $overlay_enabled 0 -> disabled, 1 -> only primary image, 2 -> all images
  * @property bool $overlay_default
+ * @property \DateTimeInterface $overlay_updated_at
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */
@@ -327,7 +326,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
         'is_dms_active',
         'is_scheduler_active',
         'is_quote_manager_active',
-        'google_feed_active'
+        'google_feed_active',
+        'overlay_updated_at'
     ];
 
     /**
@@ -339,7 +339,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
         'is_scheduler_active' => 'boolean',
         'clsf_active' => 'boolean',
         'is_quote_manager_active' => 'boolean',
-        'google_feed_active' => 'boolean'
+        'google_feed_active' => 'boolean',
+        'overlay_updated_at' => 'date'
     ];
 
     /**
