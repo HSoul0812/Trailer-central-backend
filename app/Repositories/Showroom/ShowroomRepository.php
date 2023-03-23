@@ -85,7 +85,13 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
         }
 
         if (isset($params['search_term'])) {
-            $query = $query->where('model', 'LIKE', '%' . $params['search_term'] . '%');
+
+            $query = $query->where(function ($q) use ($params) {
+                $q->where('model', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere('manufacturer', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere('series', 'LIKE', '%' . $params['search_term'] . '%')
+                ;
+            });
         }
 
         if (isset($params['manufacturer'])) {
@@ -94,6 +100,10 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
 
         if (isset($params['model'])) {
             $query = $query->where('model', '=', $params['model']);
+        }
+
+        if (isset($params['year'])) {
+            $query = $query->where('year', '=', $params['year']);
         }
 
         if (!isset($params['per_page'])) {
