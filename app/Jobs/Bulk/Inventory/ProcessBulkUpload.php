@@ -41,11 +41,11 @@ class ProcessBulkUpload extends Job {
 
             $importerService->setBulkUpload($bulk);
 
-            Inventory::withoutCacheInvalidationAndSearchSyncing(static function () use ($importerService): void {
+            Inventory::withoutImageOverlayGenerationSearchSyncingAndCacheInvalidation(static function () use ($importerService): void {
                 $importerService->run();
             });
 
-            $inventoryService->invalidateCacheAndReindexByDealerIds([$bulk->dealer_id]);
+            $inventoryService->invalidateCacheReindexAndGenerateImageOverlaysByDealerIds([$bulk->dealer_id]);
 
             Log::info(sprintf('Inventory bulk upload %d was processed', $bulk->id));
         } catch (\Exception $ex) {
