@@ -14,6 +14,16 @@ return [
     'middlewares' => [
         'human_only' => [
             'allow_ips' => env('TT_MIDDLEWARES_HUMAN_ONLY_ALLOW_IPS', ''),
+
+            'emails' => [
+                'failed_bot_ips_fetch' => [
+                    'send_mail' => env('TT_MIDDLEWARES_HUMAN_ONLY_EMAILS_FAILED_BOT_IPS_FETCH_SEND_MAIL', false),
+                    'mail_to' => [
+                        'pond@trailercentral.com',
+                        'francois@trailercentral.com',
+                    ],
+                ],
+            ],
         ],
     ],
 

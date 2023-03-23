@@ -2,19 +2,17 @@
 
 namespace App\Http\Middleware;
 
-use Cache;
+use App\Domains\Crawlers\Strategies\GetBotIpRangesFromJsonStrategy;
 use Closure;
-use Http;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Jaybizzle\LaravelCrawlerDetect\Facades\LaravelCrawlerDetect;
 use Symfony\Component\HttpFoundation\IpUtils;
 
 /**
  * With this middleware, we want to allow only the requests that has correct criteria to go through, in this order:
  * 1. IP address is in the config('trailertrader.middlewares.human_only.allow_ips') list OR
- * 2. User agent is in the $allowUserAgents list OR
- * 3. User agent is GoogleBot (we check by IP) OR
+ * 2. User agent is GoogleBot or BingBot (we check by IP) OR
+ * 3. User agent is in the $allowUserAgents list OR
  * 4. User agent is not a web crawler (check using the LaravelCrawlerDetect class)
  *
  * If the incoming request failed all these checks, then the code will return empty array, so the bad bots can't tell
@@ -22,20 +20,18 @@ use Symfony\Component\HttpFoundation\IpUtils;
  */
 class HumanOnly
 {
-    /**
-     * The cache key for the GoogleBot ip ranges
-     */
-    const GOOGLE_BOT_IPS_CACHE_KEY = 'google-bot-ips';
-
-    /**
-     * The amount of time before the cache will be invalidated
-     */
-    const GOOGLE_BOT_IPS_CACHE_SECONDS = 86_400;
-
-    /**
-     * The URL that store the googlebot ip ranges
-     */
-    const GOOGLE_BOT_IP_JSON_URL = 'https://developers.google.com/static/search/apis/ipranges/googlebot.json';
+    const BOT_IPS_FETCHER_CONFIGS = [
+        'google' => [
+            'provider_name' => 'Google',
+            'url' => 'https://developers.google.com/static/search/apis/ipranges/googlebot.json',
+            'strategy' => GetBotIpRangesFromJsonStrategy::class,
+        ],
+        'bing' => [
+            'provider_name' => 'Bing',
+            'url' => 'https://www.bing.com/toolbox/bingbot.json',
+            'strategy' => GetBotIpRangesFromJsonStrategy::class,
+        ]
+    ];
 
     /**
      * List of user agent that we want to allow the request to go through
@@ -110,47 +106,7 @@ class HumanOnly
             return true;
         }
 
-        // Always allow access from Google Bot
-        return $this->isGoogleBotIp($ip);
-    }
-
-    private function isGoogleBotIp(string $ip): bool
-    {
-        $ipRange = $this
-            ->getGoogleBotIpRanges()
-            ->first(fn(string $ipRange) => IpUtils::checkIp($ip, $ipRange));
-
-        return $ipRange !== null;
-    }
-
-    private function getGoogleBotIpRanges(): Collection
-    {
-        // The keys that we accept from the IP range file
-        $acceptKeys = ['ipv6Prefix', 'ipv4Prefix'];
-
-        // We'll get the bot IP list from the file that Google has provided
-        // for now I set the cache time to 1 day, so we can keep getting any new
-        // IP range that Google might introduce later
-        // @see https://developers.google.com/search/docs/crawling-indexing/verifying-googlebot
-        return Cache::remember(
-            key: self::GOOGLE_BOT_IPS_CACHE_KEY,
-            ttl: self::GOOGLE_BOT_IPS_CACHE_SECONDS,
-            callback: function () use ($acceptKeys) {
-                return Http::get(self::GOOGLE_BOT_IP_JSON_URL)
-                    ->collect('prefixes')
-                    ->map(function (array $response) use ($acceptKeys) {
-                        foreach ($acceptKeys as $acceptKey) {
-                            if (array_key_exists($acceptKey, $response)) {
-                                return $response[$acceptKey];
-                            }
-                        }
-
-                        return null;
-                    })
-                    ->filter()
-                    ->values();
-            }
-        );
+        return $this->isIpOfTheAllowedBots($ip);
     }
 
     private function ipIsInTheAllowList(string $ip): bool
@@ -168,6 +124,29 @@ class HumanOnly
 
             if ($ip === $allowIp) {
                 return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function isIpOfTheAllowedBots(string $ip): bool
+    {
+        foreach (self::BOT_IPS_FETCHER_CONFIGS as $config) {
+            switch ($config['strategy']) {
+                case GetBotIpRangesFromJsonStrategy::class:
+                    $concreteStrategy = new GetBotIpRangesFromJsonStrategy($config['provider_name'], $config['url']);
+
+                    $ipRange = $concreteStrategy
+                        ->getIpRanges()
+                        ->first(fn(string $ipRange) => IpUtils::checkIp($ip, $ipRange));
+
+                    // Return true immediately if the ip range is matched with the allowed bot of this provider
+                    if ($ipRange !== null) {
+                        return true;
+                    }
+
+                    break;
             }
         }
 
