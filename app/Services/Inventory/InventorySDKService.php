@@ -164,7 +164,7 @@ class InventorySDKService implements InventorySDKServiceInterface
             $this->request->add('location_country', strtoupper($params['country']));
         } elseif ($location->lat() !== self::DEFAULT_LAT_ON_DW && $location->lon() !== self::DEFAULT_LON_ON_DW) {
             $distance = $params['distance'] ? (float)$params['distance'] : self::DEFAULT_DISTANCE;
-            $location = new GeolocationRange($location->lat(), $location->lon(), $distance);
+            $location = new GeolocationRange($location->lat(), $location->lon(), $distance, GeolocationRange::UNITS_MILES, true);
         }
 
         $this->request->withGeolocation($location);
@@ -202,17 +202,16 @@ class InventorySDKService implements InventorySDKServiceInterface
      */
     protected function addCommonFilters(array $params)
     {
-        $attributes = [];
-        if (!empty($params['sale'])) {
-            $attributes[self::SALE_SCRIPT_ATTRIBUTE] = true;
+        $attributes = [
+            self::SALE_SCRIPT_ATTRIBUTE => boolval($params['sale'] ?? 0),
+            self::PRICE_SCRIPT_ATTRIBUTE => []
+        ];
 
-            $attributes[self::PRICE_SCRIPT_ATTRIBUTE] = [];
-            if (!empty($params['price_min']) && $params['price_min'] > 0 && !empty($params['price_max'])) {
-                $attributes[self::PRICE_SCRIPT_ATTRIBUTE] = [$params['price_min'], $params['price_max']];
-            }
-
-            $this->mainFilterGroup->add(new Filter('sale_price_script', new Collection($attributes)));
+        if ((!empty($params['price_min']) && $params['price_min'] > 0) || (!empty($params['price_max']) && $params['price_max'] > 0)) {
+            $attributes[self::PRICE_SCRIPT_ATTRIBUTE] = [$params['price_min'] ?? null, $params['price_max'] ?? null];
         }
+
+        $this->mainFilterGroup->add(new Filter('sale_price_script', new Collection($attributes)));
 
         $this->mainFilterGroup->add(new Filter('classifieds_site', new Collection([true])));
         $this->mainFilterGroup->add(new Filter(
