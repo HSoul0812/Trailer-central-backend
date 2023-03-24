@@ -19,11 +19,35 @@ class SessionRepository implements SessionRepositoryInterface {
      */
     private $sortOrders = [
         'scheduled' => [
-            'field' => 'clapp_session.clapp_scheduled',
+            'field' => 'clapp_session.session_scheduled',
             'direction' => 'DESC'
         ],
         '-scheduled' => [
-            'field' => 'clapp_session.clapp_scheduled',
+            'field' => 'clapp_session.session_scheduled',
+            'direction' => 'ASC'
+        ],
+        'updated' => [
+            'field' => 'clapp_session.session_last_activity',
+            'direction' => 'DESC'
+        ],
+        '-updated' => [
+            'field' => 'clapp_session.session_last_activity',
+            'direction' => 'ASC'
+        ],
+        'web_activity' => [
+            'field' => 'clapp_session.webui_last_activity',
+            'direction' => 'DESC'
+        ],
+        '-web_activity' => [
+            'field' => 'clapp_session.webui_last_activity',
+            'direction' => 'ASC'
+        ],
+        'dispatch_activity' => [
+            'field' => 'clapp_session.dispatch_last_activity',
+            'direction' => 'DESC'
+        ],
+        '-dispatch_activity' => [
+            'field' => 'clapp_session.dispatch_last_activity',
             'direction' => 'ASC'
         ]
     ];
@@ -72,8 +96,9 @@ class SessionRepository implements SessionRepositoryInterface {
      * @return Collection<Session>
      */
     public function getAll($params) {
-        $query = Session::leftJoin(Queue::getTableName(), Session::getTableName().'.session_id', '=', Queue::getTableName().'.session_id')
-                           ->leftJoin(Profile::getTableName(), Queue::getTableName().'.id', '=', Queue::getTableName().'.profile_id');
+        $query = Session::select(Session::getTableName() . '.*')
+                        ->leftJoin(Queue::getTableName(), Session::getTableName().'.session_id', '=', Queue::getTableName().'.session_id')
+                        ->leftJoin(Profile::getTableName(), Profile::getTableName().'.id', '=', Queue::getTableName().'.profile_id');
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 5;
@@ -89,6 +114,10 @@ class SessionRepository implements SessionRepositoryInterface {
 
         if (isset($params['slot_id'])) {
             $query = $query->where(Session::getTableName() . '.session_slot_id', $params['slot_id']);
+        }
+
+        if (isset($params['client_id'])) {
+            $query = $query->where(Session::getTableName() . '.session_client', $params['client_id']);
         }
 
         if (isset($params['id'])) {

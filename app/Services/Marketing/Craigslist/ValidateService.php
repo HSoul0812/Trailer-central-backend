@@ -4,10 +4,12 @@ namespace App\Services\Marketing\Craigslist;
 
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\SessionRepositoryInterface;
 use App\Services\Marketing\Craigslist\DTOs\Behaviour;
 use App\Services\Marketing\Craigslist\DTOs\Client;
 use App\Services\Marketing\Craigslist\DTOs\ClientMessage;
 use App\Services\Marketing\Craigslist\DTOs\ClientValidate;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -44,6 +46,11 @@ class ValidateService implements ValidateServiceInterface
     protected $scheduler;
 
     /**
+     * @var SessionRepositoryInterface
+     */
+    protected $sessions;
+
+    /**
      * Construct Facebook Marketplace Service
      * 
      * @param ClientRepositoryInterface $repo
@@ -51,10 +58,12 @@ class ValidateService implements ValidateServiceInterface
      */
     public function __construct(
         ClientRepositoryInterface $repo,
-        SchedulerRepositoryInterface $scheduler
+        SchedulerRepositoryInterface $scheduler,
+        SessionRepositoryInterface $sessions
     ) {
         $this->repo = $repo;
         $this->scheduler = $scheduler;
+        $this->sessions = $sessions;
 
         // Create Marketplace Logger
         $this->log = Log::channel('cl-client');
@@ -253,17 +262,24 @@ class ValidateService implements ValidateServiceInterface
             $valid = $active[$email] ?? [];
             $client = $warning[0];
             $config = $this->getConfig($client->dealerId);
-            $message = '';
+
+            // Validate From DB?
+            $found = $this->validateFromDb($valid, $warning);
+            if(!empty($found) && $found->level === 'info') {
+                $valid[] = $found;
+            } else {
+                $warning[] = $found;
+            }
 
             // Check Number of Clients
             if(count($valid) < 1) {
                 $message = ClientMessage::varied(collect($warning));
             } elseif($client->isEdit) {
                 if(count($valid) <= (int) $config['clients.edit']) {
-                    $message = ClientMessage::warning(collect($valid));
+                    $message = ClientMessage::warning(collect($warning));
                 }
             } elseif(count($valid) <= (int) $config['clients.low']) {
-                $message = ClientMessage::warning(collect($valid));
+                $message = ClientMessage::warning(collect($warning));
             }
 
             // Message Exists?
@@ -282,6 +298,57 @@ class ValidateService implements ValidateServiceInterface
 
         // Return Messages
         return $messages;
+    }
+
+    /**
+     * Validate Warnings From DB
+     * 
+     * @param array<ClientValidate> $active
+     * @param array<ClientValidate> $warnings
+     * @return null|ClientValidate
+     */
+    private function validateFromDb(array $active, array $warnings): ?ClientValidate {
+        // Active Clients Already Exist? Don't Bother Checking DB
+        if(count($active) > 0) {
+            return null;
+        }
+
+        // Get One Entry From Collection
+        $client = $warnings[0];
+
+        // Get Last Activity
+        $latest = $this->sessions->getAll([
+            'uuid' => $client->uuid,
+            'sort' => '-dispatch_activity'
+        ])->first();
+
+        // Get Elapsed
+        $config = $this->getConfig();
+        $elapsed = time() - Carbon::parse($latest->dispatch_last_activity)->timestamp;
+
+        // Check Warning Level
+        $level = 'info';
+        if($elapsed > (int) $config['elapse.warning']) {
+            $level = 'warning';
+        }
+        if($elapsed > (int) $config['elapse.error']) {
+            $level = 'error';
+        }
+        if($elapsed > (int) $config['elapse.critical']) {
+            $level = 'critical';
+        }
+
+        // Get New Client Validate
+        return new ClientValidate([
+            'dealer_id' => $client->dealerId,
+            'slot_id'   => $client->slotId,
+            'uuid'      => $client->uuid,
+            'email'     => $client->email,
+            'label'     => Client::CLIENT_DUSK,
+            'isEdit'    => $client->isEdit,
+            'level'     => $level,
+            'elapsed'   => $elapsed
+        ]);
     }
 
 
