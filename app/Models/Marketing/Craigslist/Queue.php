@@ -31,6 +31,28 @@ class Queue extends Model
     const RENTAL_SUFFIX = ' [Rental]';
 
 
+    /**
+     * Command Add
+     * 
+     * @const string
+     */
+    const COMMAND_ADD = 'postAdd';
+
+    /**
+     * Command Edit
+     * 
+     * @const string
+     */
+    const COMMAND_EDIT = 'postEdit';
+
+    /**
+     * Command Delete
+     * 
+     * @const string
+     */
+    const COMMAND_DELETE = 'postDelete';
+
+
     // Define Table Name Constant
     const TABLE_NAME = 'clapp_queue';
 
@@ -122,6 +144,51 @@ class Queue extends Model
     }
 
     /**
+     * Get Updates for Queue
+     * 
+     * @return HasMany
+     */
+    public function updates(): HasMany
+    {
+        return $this->hasMany(Queue::class, 'parent_id', 'queue_id');
+    }
+
+    /**
+     * Get Edit Updates for Queue
+     * 
+     * @return HasMany
+     */
+    public function queueEdits(): HasMany
+    {
+        return $this->updates()->where('command', self::COMMAND_EDIT)
+                    ->where('status', '<>', 'done')
+                    ->where('status', '<>', 'error');
+    }
+
+    /**
+     * Get Unfinished Deletes for Queue
+     * 
+     * @return HasMany
+     */
+    public function queueDeleting(): HasMany
+    {
+        return $this->updates()->where('command', self::COMMAND_DELETE)
+                    ->where('status', '<>', 'done')
+                    ->where('status', '<>', 'error');
+    }
+
+    /**
+     * Get Finished Deletes for Queue
+     * 
+     * @return HasMany
+     */
+    public function queueDeleted(): HasMany
+    {
+        return $this->updates()->where('command', self::COMMAND_DELETE)
+                    ->where('status', '=', 'done');
+    }
+
+    /**
      * Get Inventory Clapp Overrides
      * 
      * @return HasMany
@@ -169,7 +236,6 @@ class Queue extends Model
         return $map;
     }
 
-
     /**
      * Get Type From Parameters or Profile
      * 
@@ -195,6 +261,21 @@ class Queue extends Model
     }
 
     /**
+     * Get Category Label From Inventory or Part
+     * 
+     * @return string
+     */
+    public function getCategoryLabelAttribute(): string {
+        // Get Category Label From Parts
+        if($this->type === 'parts' && !empty($this->part->category->name)) {
+            return $this->part->category->name;
+        }
+
+        // Get Inventory Category
+        return $this->inventory->category_label ?? '';
+    }
+
+    /**
      * Get Title From Inventory Or Parts
      * 
      * @return string
@@ -203,14 +284,22 @@ class Queue extends Model
         // Get Parts Title
         $truncate = (int) config('marketing.cl.settings.truncate.title', 70);
         if($this->type === 'parts') {
-            $title = $this->part->title;
+            // Return Title From Part
+            if(!empty($this->part) && !empty($this->part->title)) {
+                $title = $this->part->title;
+            } else {
+                $title = $this->parameters->title ?? 'Part #' . $this->inventory_id;
+            }
         } else {
             // Get Override Title
             if(!empty($this->override_map['title'])) {
                 $title = $this->override_map['title'];
-            } else {
-                // Return Inventory Title
+            } elseif(!empty($this->inventory) && !empty($this->inventory->title)) {
+                // Return Title From Inventory
                 $title = $this->inventory->title;
+            } else {
+                // Get Current Title
+                $title = $this->parameters->title ?? 'Inventory #' . $this->inventory_id;
             }
 
             // Get Rental
@@ -231,33 +320,36 @@ class Queue extends Model
      */
     public function getStockAttribute(): string {
         // Get Parts SKU
-        if($this->type === 'parts') {
+        if($this->type === 'parts' && !empty($this->part->sku)) {
             return $this->part->sku;
+        } elseif(!empty($this->inventory->stock)) {
+            // Return Inventory Stock
+            return $this->inventory->stock;
         }
 
-        // Return Inventory Stock
-        return $this->inventory->stock;
+        // Get Parameters Value Instead?
+        return $this->parameters->stock ?? '';
     }
 
     /**
      * Get Price From Inventory Or Parts
      * 
-     * @return string
+     * @return int
      */
-    public function getPriceAttribute(): string {
+    public function getPriceAttribute(): int {
         // Get Parts Price
-        if($this->type === 'parts') {
-            return $this->part->price;
-        }
-
-        // Check for Sales Price
-        if(!empty($this->inventory->sales_price) && $this->inventory->sales_price !== '0.00') {
+        if($this->type === 'parts' && !empty($this->part->dealer_id)) {
+            return floatval($this->part->price);
+        } elseif(!empty($this->inventory->sales_price) && $this->inventory->sales_price !== '0.00') {
             // Return Sales Price Instead
-            return $this->inventory->sales_price;
+            return floatval($this->inventory->sales_price);
+        } elseif(!empty($this->inventory->dealer_id)) {
+            // Check Inventory Price (Even If its 0)
+            return floatval($this->inventory->price);
         }
 
-        // Return Inventory Price
-        return $this->inventory->price;
+        // Return Parameter Price
+        return $this->parameters->price ? floatval($this->parameters->price) : 0;
     }
 
 
@@ -464,7 +556,6 @@ class Queue extends Model
         return $size;
     }
 
-
     /**
      * Get Images From Inventory Or Parts
      * 
@@ -499,56 +590,24 @@ class Queue extends Model
         return $images;
     }
 
-
-    /**
-     * Get Current Title
-     * 
-     * @return string
-     */
-    public function getCurrentTitleAttribute(): string {
-        // Return Title From Inventory
-        if(!empty($this->inventory) && !empty($this->inventory->title)) {
-            return $this->inventory->title;
-        }
-        return $this->parameters->title ?? '';
-    }
-
-    /**
-     * Get Current Stock
-     * 
-     * @return string
-     */
-    public function getCurrentStockAttribute(): string {
-        // Return Stock From Inventory
-        if(!empty($this->inventory) && !empty($this->inventory->stock)) {
-            return $this->inventory->stock;
-        }
-        return $this->parameters->stock ?? '';
-    }
-
-    /**
-     * Get Current Price
-     * 
-     * @return float
-     */
-    public function getCurrentPriceAttribute(): float {
-        // Return Price From Inventory
-        if(!empty($this->inventory) && !empty($this->inventory->price)) {
-            return $this->inventory->price;
-        }
-        return $this->parameters->price ? floatval($this->parameters->price) : 0;
-    }
-
     /**
      * Get Current Primary Image
      * 
      * @return string
      */
-    public function getCurrentImageAttribute(): string {
-        // Return Primary Image Inventory
-        if(!empty($this->inventory) && !empty($this->inventory->primary_image)) {
-            return $this->inventory->primary_image->image->filename;
+    public function getPrimaryImageAttribute(): string {
+        // Return Primary Image for Parts
+        if($this->type === 'parts' && !empty($this->part->images)) {
+            return $this->part->images[0];
+        } elseif(!empty($this->inventory) && !empty($this->inventory->primary_image)) {
+            // Return Primary Image for Inventory
+            return config('app.cdn_url') . $this->inventory->primary_image->image->filename;
+        } elseif(!empty($this->images[0])) {
+            // Return First Image If Available
+            return config('app.cdn_url') . $this->images[0];
         }
-        return $this->parameters->images[0] ?? '';
+
+        // Return First Image in Parameters If Available
+        return !empty($this->parameters->images[0]) ? config('app.cdn_url') . $this->parameters->images[0] : '';
     }
 }

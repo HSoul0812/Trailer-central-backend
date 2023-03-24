@@ -171,8 +171,8 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_code' => $integration->tfa_code,
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
-            'missing' => !$integration->is_up_to_date ? $this->getInventory($integration, 'missing', $params) : null,
-            'sold' => !$integration->is_up_to_date ? $this->getInventory($integration, 'sold', $params) : null,
+            'missing' => $this->getInventory($integration, 'missing', $params),
+            'sold' => $this->getInventory($integration, 'sold', $params),
             'posts_per_day' => $integration->posts_per_day ?? intval(config('marketing.fb.settings.limit.listings', 3))
 
         ]);
@@ -227,10 +227,11 @@ class MarketplaceService implements MarketplaceServiceInterface
             $maxListings = $integration->posts_per_day ?? config('marketing.fb.settings.limit.listings', 3);
 
             if ($nrOfListingsToday === $maxListings || $nrInventoryItemsRemaining === 0) {
-                // Update Imported At
-                $marketplace = $this->marketplace->update([
+                // If we posted enough inventories on facebook stop until next day after 8:00 am
+                $tomorrowMorning = Carbon::now()->setTimezone('UTC')->addDay()->setTime(8, 0, 0)->format('Y-m-d H:i:s');
+                $this->marketplace->update([
                     'id' => $params['marketplace_id'],
-                    'imported_at' => Carbon::now()->setTimezone('UTC')->toDateTimeString()
+                    'retry_after_ts' => $tomorrowMorning
                 ]);
             }
 

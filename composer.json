@@ -52,6 +52,7 @@
         "league/html-to-markdown": "^5.1",
         "league/oauth2-client": "^2.6",
         "maatwebsite/laravel-nova-excel": "1.2.*",
+        "maxbanton/cwh": "^2.0",
         "microsoft/microsoft-graph": "^1.34",
         "phenx/php-svg-lib": "0.3.3",
         "php-ews/php-ews": "~1.0",

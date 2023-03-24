@@ -163,6 +163,7 @@ return [
                     'crm-users',
                     'manufacturers',
                     //'hot-potato'
+                    'dealer-exports',
                 ],
                 'balance' => 'auto',
                 'processes' => 1,
@@ -176,7 +177,6 @@ return [
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 3600,
             ],
             'supervisor-3' => [
@@ -185,7 +185,6 @@ return [
                 'balance' => 'auto',
                 'processes' => 5,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 3600,
             ]
         ],
@@ -210,6 +209,7 @@ return [
                     'crm-users',
                     'manufacturers',
                     //'hot-potato'
+                    'dealer-exports',
                 ],
                 'balance' => 'auto',
                 'processes' => 1,
@@ -223,7 +223,6 @@ return [
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 900,
             ],
             'supervisor-3' => [
@@ -232,7 +231,6 @@ return [
                 'balance' => 'auto',
                 'processes' => 5,
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 3600,
             ]
         ],
@@ -264,7 +262,6 @@ return [
                 'maxProcesses' => 14,
                 'balance' => 'auto',
                 'tries' => 3,
-                'delay' => 3,
                 'timeout' => 900,
             ],
             'supervisor-3' => [
@@ -285,7 +282,7 @@ return [
             ],
             'supervisor-5' => [
                 'connection' => 'redis',
-                'queue' => ['reports', 'emailbuilder'],
+                'queue' => ['reports', 'emailbuilder', 'dealer-exports'],
                 'balance' => 'auto',
                 'minProcesses' => 1,
                 'maxProcesses' => 3,
@@ -334,15 +331,23 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout', 'inventory-cache'],
+                'queue' => ['inventory-cache'],
                 'balance' => 'auto',
-                'minProcesses' => 45,
-                'maxProcesses' => 60,
+                'minProcesses' => 3,
+                'maxProcesses' => 15,
                 'tries' => 3,
-                'delay' => 3,
-                'timeout' => 900,
+                'timeout' => 900
             ],
             'supervisor-3' => [
+                'connection' => 'redis',
+                'queue' => ['scout'],
+                'balance' => 'auto',
+                'minProcesses' => 5,
+                'maxProcesses' => 45,
+                'tries' => 3,
+                'timeout' => 900,
+            ],
+            'supervisor-4' => [
                 'connection' => 'redis',
                 'queue' => ['fb-catalog'],
                 'balance' => 'auto',
@@ -350,7 +355,7 @@ return [
                 'tries' => 3,
                 'timeout' => 360,
             ],
-            'supervisor-4' => [
+            'supervisor-5' => [
                 'connection' => 'redis',
                 'queue' => ['cvr-send-file'],
                 'balance' => false,
@@ -358,16 +363,16 @@ return [
                 'tries' => 3,
                 'timeout' => 600,
             ],
-            'supervisor-5' => [
+            'supervisor-6' => [
                 'connection' => 'redis',
-                'queue' => ['reports', 'emailbuilder'],
+                'queue' => ['reports', 'emailbuilder', 'dealer-exports'],
                 'balance' => 'auto',
                 'minProcesses' => 3,
                 'maxProcesses' => 30,
                 'tries' => 3,
                 'timeout' => 3600,
             ],
-            'supervisor-6' => [
+            'supervisor-7' => [
                 'connection' => 'redis',
                 'queue' => ['parts', 'parts-export-new'],
                 'balance' => 'auto',
@@ -376,7 +381,7 @@ return [
                 'tries' => 3,
                 'timeout' => 7200,
             ],
-             'supervisor-7' => [
+             'supervisor-8' => [
                 'connection' => 'redis',
                 'queue' => ['scrapereplies'],
                 'balance' => 'auto',
@@ -384,6 +389,15 @@ return [
                 'maxProcesses' => 100,
                 'tries' => 1,
                 'timeout' => 600,
+            ],
+            'supervisor-9' => [
+                'connection' => 'redis',
+                'queue' => ['overlay-images'],
+                'balance' => 'auto',
+                'minProcesses' => 3,
+                'maxProcesses' => 30,
+                'tries' => 3,
+                'timeout' => 14400
             ],
         ],
     ],

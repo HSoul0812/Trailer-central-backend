@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $import_prices
  * @property bool $import_description
  * @property string $images_delimiter
+ * @property string $primary_image_field
  * @property string $overridable_fields
  * @property string $path_to_fields_to_description
  * @property string $fields_to_description
@@ -182,6 +183,7 @@ class Collector extends Model implements Filterable
         'import_prices',
         'import_description',
         'images_delimiter',
+        'primary_image_field',
         'overridable_fields',
         'path_to_fields_to_description',
         'fields_to_description',

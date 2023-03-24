@@ -31,11 +31,17 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @return WebsiteImage
      */
-    public function create($params)
+    public function create($params): WebsiteImage
     {
-        throw new NotImplementedException;
+        if (!isset($params['is_active'])) {
+            $params['is_active'] = 1;
+        }
+
+        $params = $this->updateSlideshowActiveStatus($params);
+
+        return WebsiteImage::create($params);
     }
 
     /**
@@ -46,19 +52,13 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
      * @throws ModelNotFoundException if website_image is not found
      * @throws InvalidArgumentException if id is not set
      */
-    public function update($params)
+    public function update($params): WebsiteImage
     {
         if (!isset($params['id'])) {
             throw new InvalidArgumentException("Website Image ID is required");
         }
 
-        if (isset($params['starts_from'])) {
-            $params['is_active'] = intval(Carbon::parse($params['starts_from'])->isPast());
-        }
-
-        if (isset($params['expires_at'])) {
-            $params['is_active'] = intval(Carbon::parse($params['expires_at'])->isFuture());
-        }
+        $params = $this->updateSlideshowActiveStatus($params);
 
         $image = WebsiteImage::findOrFail($params['id']);
         $image->fill($params)->save();
@@ -81,7 +81,18 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
      */
     public function delete($params)
     {
-        throw new NotImplementedException;
+        if (!isset($params['id'])) {
+            throw new InvalidArgumentException("Website Image ID is required");
+        }
+
+        if (!isset($params['website_id'])) {
+            throw new InvalidArgumentException("Website ID is required");
+        }
+
+        WebsiteImage::where([
+            'identifier' => $params['id'],
+            'website_id' => $params['website_id']
+        ])->delete();
     }
 
     /**
@@ -112,5 +123,28 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
         }
 
         return $query->paginate($params['per_page'])->appends($params);
+    }
+
+    /**
+     * @param array $params
+     * @return array
+     */
+    private function updateSlideshowActiveStatus(array $params): array
+    {
+        if (isset($params['starts_from']) && isset($params['expires_at'])) {
+            $startsFrom = Carbon::parse($params['starts_from']);
+            $expiresAt = Carbon::parse($params['expires_at']);
+            $params['is_active'] = intval(
+                ($startsFrom->isPast() || $startsFrom->isToday()) &&
+                ($expiresAt->isToday() || $expiresAt->isFuture())
+            );
+        } else if (isset($params['starts_from']) && !isset($params['expires_at'])) {
+            $startsFrom = Carbon::parse($params['starts_from']);
+            $params['is_active'] = intval($startsFrom->isPast() || $startsFrom->isToday());
+        } else if (!isset($params['starts_from']) && isset($params['expires_at'])) {
+            $expiresAt = Carbon::parse($params['expires_at']);
+            $params['is_active'] = intval(($expiresAt->isToday() || $expiresAt->isFuture()));
+        }
+        return $params;
     }
 }

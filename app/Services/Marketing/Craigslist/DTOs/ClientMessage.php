@@ -20,7 +20,18 @@ class ClientMessage
     /**
      * @const array<string>
      */
-    const MESSAGE_VARS = ['active', 'email', 'elapsed', 'scale'];
+    const MESSAGE_VARS = ['active', 'email', 'elapsed', 'scale', 'past', 'remaining'];
+
+
+    /**
+     * @const string
+     */
+    const COUNTS_PREFIX = 'counts';
+
+    /**
+     * @const string
+     */
+    const COUNTS_EMAIL = self::COUNTS_PREFIX . ':slotId@trailercentral.com';
 
 
     /**
@@ -58,7 +69,28 @@ class ClientMessage
     const WARNING_CRITICAL = 'CRITICAL!: Its has been over :elapsed :scale since any :email Craigslist ' .
             'clients have checked in! This must be fixed IMMEDIATELY!';
 
-    
+
+    /**
+     * @const string
+     */
+    const COUNTS_INFO = 'There are currently :past scheduled posts on :email ready to post now, ' .
+            'with :remaining posts on :email anticipated by the end of the current day.';
+
+    /**
+     * @const string
+     */
+    const COUNTS_WARNING = 'WARNING: There are currently :past past due scheduler posts on :email! ' .
+                        'This must be reviewed and fixed as soon as possible!' .
+            'For the rest of the day there are currently :remaining posts on :email remaining.';
+
+    /**
+     * @const string
+     */
+    const COUNTS_CRITICAL = 'CRITICAL!: There are currently :past past due scheduler posts on :email. ' .
+                         'This must be fixed IMMEDIATELY! ' .
+            'For the rest of the day there are currently :remaining posts on :email remaining.';
+
+
     /**
      * @const array<string>
      */
@@ -67,7 +99,10 @@ class ClientMessage
         'clients' => self::WARNING_LOW_CLIENTS,
         'warning' => self::WARNING_ELAPSED,
         'error' => self::WARNING_ALERT,
-        'critical' => self::WARNING_CRITICAL
+        'critical' => self::WARNING_CRITICAL,
+        'countsInfo' => self::COUNTS_INFO,
+        'countsWarning' => self::COUNTS_WARNING,
+        'countsCritical' => self::COUNTS_CRITICAL
     ];
 
 
@@ -170,6 +205,39 @@ class ClientMessage
             'dealer_id' => $client->dealerId,
             'email'     => $client->email,
             'level'     => $client->level,
+            'message'   => $message
+        ]);
+    }
+
+    /**
+     * Get Post Counts Message
+     * 
+     * @param string $level
+     * @param int $duePast
+     * @param int $dueToday
+     * @param int $slotId
+     * @param string $email
+     * @return ClientMessage
+     */
+    static public function counts(string $level, int $duePast, int $dueToday, int $slotId, string $email): ClientMessage {
+        // Throw Error if Invalid
+        $key = self::COUNTS_PREFIX . ucfirst($level);
+        if(!isset(self::WARNING_LEVELS[$key])) {
+            $key = self::COUNTS_PREFIX . 'Warning';
+        }
+
+        // Discover Client Level
+        $message = self::message($key, [
+            'past'      => $duePast,
+            'remaining' => $dueToday,
+            'email'     => $email
+        ]);
+
+        // Return ClientMessage
+        return new self([
+            'dealer_id' => 0,
+            'email'     => str_replace(':slotId', $slotId, self::COUNTS_EMAIL),
+            'level'     => $level,
             'message'   => $message
         ]);
     }

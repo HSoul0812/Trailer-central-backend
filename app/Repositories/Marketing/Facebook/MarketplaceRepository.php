@@ -195,30 +195,19 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
 
     public function getAllIntegrations($params): Collection
     {
-        $query = Marketplace::select(Marketplace::getTableName() . '.*', User::getTableName() . '.name AS dealer_name', DealerFBMOverview::getTableName() . '.last_attempt_ts')
-            ->leftJoin(Listings::getTableName(), Listings::getTableName() . '.marketplace_id', '=', Marketplace::getTableName() . '.id')
-            ->leftJoin(User::getTableName(), Marketplace::getTableName() . '.dealer_id', '=', User::getTableName() . '.dealer_id')
-            ->leftJoin(DealerFBMOverview::getTableName(), DealerFBMOverview::getTableName() . '.id', '=', Marketplace::getTableName() . '.id')
-            ->leftJoin(Error::getTableName(), function ($join) {
-                $join->on(Error::getTableName() . '.marketplace_id', '=',
-                    Marketplace::getTableName() . '.id')
-                    ->where(Error::getTableName() . '.dismissed', 0)
-                    ->whereNull(Error::getTableName() . '.inventory_id');
-            })
-            ->where(function (Builder $query) {
-                return $query->whereNull(Error::getTableName() . '.id')
-                    ->orWhere(Error::getTableName() . '.expires_at', '<', DB::raw('NOW()'));
-            });
+        $query = Marketplace::where('retry_after_ts', '<', DB::raw('NOW()'))->orWhereNull('retry_after_ts');
 
         if (!isset($params['per_page'])) {
-            $params['per_page'] = 1000;
+            $params['per_page'] = 100;
         }
 
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
+        } else {
+            $query->orderBy('last_attempt_ts', 'ASC');
         }
 
-        return $query->groupBy(Marketplace::getTableName() . '.id')->limit($params['per_page'])->get();
+        return $query->limit($params['per_page'])->get();
     }
 
     /**

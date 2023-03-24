@@ -288,6 +288,9 @@ class Collector extends Resource
                 Text::make('Images Delimiter', 'images_delimiter')->rules('max:128')->hideFromIndex()->help(
                     'Separator between links to images in the file (by default - ",")'
                 ),
+                Text::make('Primary Image Field')->hideFromIndex()->help(
+                    'Pass this field when you have a column on source telling which one is the primary image'
+                ),
                 Boolean::make('Use Secondary Image', 'use_secondary_image')->hideFromIndex()->help(
                     'Images in the file are marked as secondary'
                 ),

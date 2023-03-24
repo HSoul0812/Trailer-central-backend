@@ -34,7 +34,7 @@ class ActivePostTransformer extends TransformerAbstract
             'title' => $post->current_title,
             'stock' => $post->current_stock,
             'price' => $post->current_price,
-            'image' => $post->current_image ? config('app.cdn_url') . $post->current_image : '',
+            'image' => $post->current_image,
             'area' => $post->area,
             'subarea' => $post->subarea,
             'category' => $post->category,

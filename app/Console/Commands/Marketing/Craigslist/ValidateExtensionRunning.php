@@ -3,6 +3,7 @@
 namespace App\Console\Commands\Marketing\Craigslist;
 
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
+use App\Services\Marketing\Craigslist\DTOs\Behaviour;
 use App\Services\Marketing\Craigslist\ValidateServiceInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
@@ -65,6 +66,16 @@ class ValidateExtensionRunning extends Command
         // Log Client
         $log = Log::channel('cl-client');
 
+        // Check if Message Sent Recently
+        $interval = (int) config('marketing.cl.settings.slack.interval');
+        if($this->repo->sentIn($this->signature, $interval)) {
+            $log->error('The commmand: ' . $this->signature . ' has already ' .
+                        'been run within ' . $interval . ' Minutes and ' .
+                        'should not be run again right now...');
+            return false;
+        }
+        $this->repo->markSent($this->signature);
+
         // CL Warning Enabled
         $isEnabled = config('marketing.cl.settings.warning.enabled', '0');
         if(!(int) $isEnabled) {
@@ -81,9 +92,11 @@ class ValidateExtensionRunning extends Command
             // Handle Validation
             if($client instanceof Behaviour) {
                 $validation->push($this->service->expired($client));
-            } else {
-                $validation->push($this->service->validate($client));
+                continue;
             }
+
+            // Add Client Validation
+            $validation->push($this->service->validate($client));
         }
 
         // Check Client Status
@@ -101,5 +114,9 @@ class ValidateExtensionRunning extends Command
         } else {
             $log->info('No Slack Messages To Send for CL Clients');
         }
+
+        // Count Scheduled Posts and Send Back to Server
+        $this->service->counts();
+        $this->service->counts(Behaviour::SLOT_ID_EDIT);
     }
 }
