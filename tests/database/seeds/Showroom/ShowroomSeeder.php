@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\database\seeds\Showroom;
 
-use App\Models\Parts\Part;
-use App\Models\Parts\CacheStoreTime;
-use App\Models\Parts\Vendor;
 use App\Models\Showroom\Showroom;
-use App\Models\User\User;
+use App\Models\Showroom\ShowroomFeature;
+use App\Models\Showroom\ShowroomFile;
+use App\Models\Showroom\ShowroomGenericMap;
+use App\Models\Showroom\ShowroomImage;
 use App\Traits\WithGetter;
-use Faker\Factory as Faker;
 use Tests\database\seeds\Seeder;
 
 /**
- * @property-read User $dealer
+ * @property-read Showroom $showroom
+ * @property-read ShowroomGenericMap $showroomGenericMaps
  */
 class ShowroomSeeder extends Seeder
 {
@@ -26,13 +26,56 @@ class ShowroomSeeder extends Seeder
     private $showroom;
 
     /**
+     * @var ShowroomFeature[]
+     */
+    private $showroomFeatures = [];
+
+    /**
+     * @var int
+     */
+    private $showroomFeaturesCount;
+
+    /**
+     * @var ShowroomFile[]
+     */
+    private $showroomFiles = [];
+
+    /**
+     * @var int
+     */
+    private $showroomFilesCount;
+
+    /**
+     * @var ShowroomGenericMap[]
+     */
+    private $showroomGenericMaps = [];
+
+    /**
+     * @var int
+     */
+    private $showroomGenericMapsCount;
+
+    /**
+     * @var ShowroomImage[]
+     */
+    private $showroomImages = [];
+
+    /**
+     * @var int
+     */
+    private $showroomImagesCount;
+
+    /**
      * @var array
      */
     private $params;
 
-    public function __construct()
+    public function __construct($params = [])
     {
-        //
+        $this->showroomFeaturesCount = $params['showroomFeaturesCount'] ?? 0;
+        $this->showroomFilesCount = $params['showroomFilesCount'] ?? 0;
+        $this->showroomGenericMapsCount = $params['showroomGenericMapsCount'] ?? 0;
+        $this->showroomImagesCount = $params['showroomImagesCount'] ?? 0;
     }
 
     public function seed(): void
@@ -49,14 +92,37 @@ class ShowroomSeeder extends Seeder
             "lq_price" => 0.00,
             "is_visible" => 1,
             "NEED_REVIEW" => 1,
-
         ]);
+
+        ShowroomFeature::where('showroom_id', '=', $this->showroom->getKey())->delete();
+        ShowroomFile::where('showroom_id', '=', $this->showroom->getKey())->delete();
+        ShowroomGenericMap::where('showroom_id', '=', $this->showroom->getKey())->delete();
+        ShowroomImage::where('showroom_id', '=', $this->showroom->getKey())->delete();
+
+        for ($i = 0; $i < $this->showroomFeaturesCount; $i++) {
+            $this->showroomFeatures[] = factory(ShowroomFeature::class)->create(['showroom_id' => $this->showroom->getKey()]);
+        }
+
+        for ($i = 0; $i < $this->showroomFilesCount; $i++) {
+            $this->showroomFiles[] = factory(ShowroomFile::class)->create(['showroom_id' => $this->showroom->getKey()]);
+        }
+
+        for ($i = 0; $i < $this->showroomGenericMapsCount; $i++) {
+            $this->showroomGenericMaps[] = factory(ShowroomGenericMap::class)->create(['showroom_id' => $this->showroom->getKey()]);
+        }
+
+        for ($i = 0; $i < $this->showroomImagesCount; $i++) {
+            $this->showroomImages[] = factory(ShowroomImage::class)->create(['showroom_id' => $this->showroom->getKey()]);
+        }
     }
 
     public function cleanUp(): void
     {
-        // Database clean up
-        Showroom::where('manufacturer', 'Testing Showroom')->delete();
+        ShowroomImage::where('showroom_id', '=', $this->showroom->getKey())->delete();
+        ShowroomFeature::where('showroom_id', '=', $this->showroom->getKey())->delete();
+        ShowroomFile::where('showroom_id', '=', $this->showroom->getKey())->delete();
+        ShowroomGenericMap::where('showroom_id', '=', $this->showroom->getKey())->delete();
+        Showroom::where('id', '=', $this->showroom->getKey())->delete();
     }
 
     public function getShowroomId(): int
