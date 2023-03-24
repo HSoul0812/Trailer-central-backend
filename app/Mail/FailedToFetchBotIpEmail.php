@@ -26,7 +26,7 @@ class FailedToFetchBotIpEmail extends Mailable
     public function build(): static
     {
         return $this
-            ->to(config('trailertrader.middlewares.human_only.emails.failed_bot_ips_fetch.mail_to'))
+            ->to(config('crawlers.report.cache_crawlers_ip_addresses.mail_to'))
             ->subject("Failed to fetch $this->providerName bots IP addresses!")
             ->markdown('emails.failed-to-fetch-bots-ip');
     }

@@ -2,9 +2,11 @@
 
 namespace App\Http\Middleware;
 
-use App\Domains\Crawlers\Strategies\GetBotIpRangesFromJsonStrategy;
+use App\Domains\Crawlers\Strategies\CrawlerCheckStrategy;
+use Cache;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Jaybizzle\LaravelCrawlerDetect\Facades\LaravelCrawlerDetect;
 use Symfony\Component\HttpFoundation\IpUtils;
 
@@ -20,19 +22,6 @@ use Symfony\Component\HttpFoundation\IpUtils;
  */
 class HumanOnly
 {
-    const BOT_IPS_FETCHER_CONFIGS = [
-        'google' => [
-            'provider_name' => 'Google',
-            'url' => 'https://developers.google.com/static/search/apis/ipranges/googlebot.json',
-            'strategy' => GetBotIpRangesFromJsonStrategy::class,
-        ],
-        'bing' => [
-            'provider_name' => 'Bing',
-            'url' => 'https://www.bing.com/toolbox/bingbot.json',
-            'strategy' => GetBotIpRangesFromJsonStrategy::class,
-        ]
-    ];
-
     /**
      * List of user agent that we want to allow the request to go through
      *
@@ -91,6 +80,19 @@ class HumanOnly
             }
         }
 
+        // Loop from the crawler config, take only the one that has strategy as user agent check
+        foreach (config('crawlers.providers') as $config) {
+            if ($config['strategy'] !== CrawlerCheckStrategy::USER_AGENT_CHECK) {
+                continue;
+            }
+
+            foreach ($config['user_agents'] as $allowUserAgent) {
+                if (str_contains($userAgent, $allowUserAgent)) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -132,21 +134,18 @@ class HumanOnly
 
     private function isIpOfTheAllowedBots(string $ip): bool
     {
-        foreach (self::BOT_IPS_FETCHER_CONFIGS as $config) {
-            switch ($config['strategy']) {
-                case GetBotIpRangesFromJsonStrategy::class:
-                    $concreteStrategy = new GetBotIpRangesFromJsonStrategy($config['provider_name'], $config['url']);
+        foreach (config('crawlers.providers') as $config) {
+            if ($config['strategy'] !== CrawlerCheckStrategy::IP_CHECK) {
+                continue;
+            }
 
-                    $ipRange = $concreteStrategy
-                        ->getIpRanges()
-                        ->first(fn(string $ipRange) => IpUtils::checkIp($ip, $ipRange));
+            /** @var Collection $ipRanges */
+            $ipRanges = Cache::get($config['ips_cache_key'], collect([]));
 
-                    // Return true immediately if the ip range is matched with the allowed bot of this provider
-                    if ($ipRange !== null) {
-                        return true;
-                    }
+            $ipRange = $ipRanges->first(fn(string $ipRange) => IpUtils::checkIp($ip, $ipRange));
 
-                    break;
+            if ($ipRange !== null) {
+                return true;
             }
         }
 
