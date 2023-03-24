@@ -3,17 +3,23 @@
 namespace Tests\Unit\App\Middleware;
 
 use App\Http\Middleware\HumanOnly;
-use App\Mail\FailedToFetchBotIpEmail;
-use Http;
+use Cache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Mail;
+use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Common\TestCase;
 
 class HumanOnlyTest extends TestCase
 {
-    public function testItBlocksRequestWithoutUserAgent()
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Cache::clear();
+    }
+
+    public function testItBlocksRequestWithoutUserAgent(): void
     {
         $request = new Request();
 
@@ -24,128 +30,91 @@ class HumanOnlyTest extends TestCase
         $this->assertMiddlewareReturnsEmpty($response);
     }
 
-    public function testItAllowsRequestWithAllowedUserAgent()
+    public function testItAllowsRequestWithAllowedUserAgent(): void
     {
         $request = new Request();
 
         $request->headers->set('User-Agent', 'trailertrader-testing');
 
-        (new HumanOnly())->handle($request, function () {
-            $this->assertTrue(true);
-        });
+        $response = (new HumanOnly())->handle($request, fn() => true);
+
+        $this->assertTrue($response);
     }
 
-    public function testItAllowsRequestWithAllowedIpAddress()
+    public function testItAllowsRequestWithAllowedCrawlerUserAgent(): void
     {
-        // @see https://developers.google.com/static/search/apis/ipranges/googlebot.json
-        $googleBotIpAddress = '66.249.79.1';
+        $request = new Request();
 
-        $fakeAllowedIpAddress = '123.4.5.6';
+        $request->headers->set('User-Agent', config('crawlers.providers.yahoo.user_agents')[0]);
+
+        $response = (new HumanOnly())->handle($request, fn() => true);
+
+        $this->assertTrue($response);
+    }
+
+    public function testItAllowsRequestWithAllowedIpAddressFromConfig(): void
+    {
+        $allowedIpAddress = '123.4.5.6';
 
         $request = new Request();
-        config(['trailertrader.middlewares.human_only.allow_ips' => $fakeAllowedIpAddress]);
-        $request->server->add(['REMOTE_ADDR' => $fakeAllowedIpAddress]);
-
-        $fakeGoogleBotResponseArray = [
-            'prefixes' => [[
-                'ipv4Prefix' => '66.249.79.0/27',
-            ]],
-        ];
-
-        $httpFakeResponses = Http::sequence()
-            ->push($fakeGoogleBotResponseArray)
-            ->push($fakeGoogleBotResponseArray);
-
-        Http::fake([
-            'developers.google.com/*' => $httpFakeResponses,
-        ]);
+        config(['trailertrader.middlewares.human_only.allow_ips' => $allowedIpAddress]);
+        $request->server->add(['REMOTE_ADDR' => $allowedIpAddress]);
 
         // This test is to make sure that the allowed ip in the config works
-        (new HumanOnly())->handle($request, function () {
-            $this->assertTrue(true);
-        });
+        $response = (new HumanOnly())->handle($request, fn() => true);
 
-        // This is to make sure that the allowed GoogleBot IP addresses works
-        $request->headers->set('User-Agent', 'trailertrader-testing');
+        $this->assertTrue($response);
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function testItDoesNotAllowRequestWithNotAllowedCrawlerIpAddresses()
+    {
+        $cacheKey = config('crawlers.providers.google.ips_cache_key');
+
+        Cache::set($cacheKey, collect([
+            '66.249.79.0/27',
+        ]), 20);
+
+        $googleBotIpAddress = '50.249.71.1';
+
+        $request = new Request();
+        $request->headers->set('User-Agent', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/W.X.Y.Z Safari/537.36');
         config(['trailertrader.middlewares.human_only.allow_ips' => '']);
         $request->server->add(['REMOTE_ADDR' => $googleBotIpAddress]);
 
-        (new HumanOnly())->handle($request, function () {
-            $this->assertTrue(true);
-        });
-    }
-
-    public function testItSendFailedToFetchBotIpEmailForBotsChecking(): void
-    {
-        $request = new Request();
-
-        $request->server->add(['REMOTE_ADDR' => '127.0.0.1']);
-
-        $httpFakeResponses = Http::sequence()
-            ->push('dummy_body', Response::HTTP_INTERNAL_SERVER_ERROR);
-
-        Http::fake([
-            'developers.google.com/*' => $httpFakeResponses,
-            'www.bing.com/*' => $httpFakeResponses,
-        ]);
-
-        Mail::fake();
-
-        /** @var JsonResponse $response */
         $response = (new HumanOnly())->handle($request, function () {
         });
 
-        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-        $this->assertEquals([], data_get($response->getOriginalContent(), 'data'));
-
-        Mail::assertQueued(FailedToFetchBotIpEmail::class);
-        Mail::assertQueued(FailedToFetchBotIpEmail::class);
+        $this->assertMiddlewareReturnsEmpty($response);
     }
 
-    public function testItDoesNotSendFailedToFetchBotIpEmailIfSendMailConfigIsFalse()
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function testItAllowsRequestWithAllowedCrawlerIpAddresses(): void
     {
-        config([
-            'trailertrader.middlewares.human_only.emails.failed_bot_ips_fetch.send_mail' => false,
-        ]);
+        $cacheKey = config('crawlers.providers.google.ips_cache_key');
+
+        Cache::set($cacheKey, collect([
+            '66.249.79.0/27',
+        ]), 20);
+
+        $googleBotIpAddress = '66.249.79.1';
 
         $request = new Request();
+        $request->headers->set('User-Agent', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/W.X.Y.Z Safari/537.36');
+        config(['trailertrader.middlewares.human_only.allow_ips' => '']);
+        $request->server->add(['REMOTE_ADDR' => $googleBotIpAddress]);
 
-        $request->server->add(['REMOTE_ADDR' => '127.0.0.1']);
+        $response = (new HumanOnly())->handle($request, fn() => true);
 
-        $httpFakeResponses = Http::sequence()
-            ->push('dummy_body', Response::HTTP_INTERNAL_SERVER_ERROR);
-
-        Http::fake([
-            'developers.google.com/*' => $httpFakeResponses,
-            'www.bing.com/*' => $httpFakeResponses,
-        ]);
-
-        Mail::fake();
-
-        /** @var JsonResponse $response */
-        $response = (new HumanOnly())->handle($request, function () {
-        });
-
-        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-        $this->assertEquals([], data_get($response->getOriginalContent(), 'data'));
-
-        Mail::assertNothingQueued();
+        $this->assertTrue($response);
     }
 
-    public function testItBlocksRequestFromCrawlers()
+    public function testItBlocksRequestFromCrawlers(): void
     {
-        $fakeGoogleBotResponseArray = [
-            'prefixes' => [[
-                'ipv4Prefix' => '66.249.79.0/27',
-            ]],
-        ];
-
-        $httpFakeResponses = Http::sequence()->push($fakeGoogleBotResponseArray);
-
-        Http::fake([
-            'developers.google.com/*' => $httpFakeResponses,
-        ]);
-
         $request = new Request();
         $request->headers->set('User-Agent', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/W.X.Y.Z Safari/537.36');
 
