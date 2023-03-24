@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * Class Integration
  * @package App\Models\Integration
  *
- * * @property bool $isHidden
+ * @property bool $isHidden
  *
  * @property int $integration_id
  * @property string $name
@@ -32,9 +32,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Integration extends Model
 {
+    /**
+     * @var int
+     */
     public const STATUS_ACTIVE = 1;
 
-    // Define Table Name Constant
+    /**
+     * Define Table Name Constant
+     * @var string
+     */
     const TABLE_NAME = 'integration';
 
     /**
@@ -112,11 +118,30 @@ class Integration extends Model
         }
     }
 
+    /**
+     * @return mixed
+     */
+    public static function activeHiddenIntegrations() {
+        return Integration::where('active', true)
+            ->join('hidden_integrations', function ($join) {
+                $join->on('integration.integration_id', 'hidden_integrations.integration_id')
+                    ->where('hidden_integrations.is_hidden', true);
+            })
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * @return array|string
+     */
     public function getUnserializeFiltersAttribute()
     {
         return !empty($this->filters) ? (@unserialize($this->filters) ? json_encode(unserialize($this->filters)) : []) : [];
     }
 
+    /**
+     * @return array|string
+     */
     public function getUnserializeSettingsAttribute()
     {
         return !empty($this->settings) ? (@unserialize($this->settings) ? json_encode(unserialize($this->settings)) : []) : [];

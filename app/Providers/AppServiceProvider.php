@@ -45,6 +45,8 @@ use App\Repositories\Dms\Quickbooks\ItemNewRepository;
 use App\Repositories\Dms\Quickbooks\ItemNewRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\DealerRepository;
+use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Showroom\ShowroomBulkUpdateRepository;
@@ -111,6 +113,8 @@ use App\Services\Dms\Pos\RegisterServiceInterface;
 use App\Services\File\FileService;
 use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
+use App\Services\Inventory\InventoryBulkUpdateManufacturerService;
+use App\Services\Inventory\InventoryBulkUpdateManufacturerServiceInterface;
 use App\Services\Showroom\ShowroomService;
 use App\Services\Showroom\ShowroomServiceInterface;
 use App\Services\Subscription\StripeService;
@@ -335,12 +339,15 @@ class AppServiceProvider extends ServiceProvider
                 return new FileService(app()->make(Client::class), app()->make(SanitizeHelper::class));
             });
 
+        $this->app->bind(DealerRepositoryInterface::class, DealerRepository::class);
+
         $this->app->bind(TimeClockRepositoryInterface::class, TimeClockRepository::class);
         $this->app->bind(EmployeeRepositoryInterface::class, EmployeeRepository::class);
         $this->app->bind(TimeClockServiceInterface::class, TimeClockService::class);
         $this->app->bind(WebsiteConfigServiceInterface::class, WebsiteConfigService::class);
 
         $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
+        $this->app->bind(InventoryBulkUpdateManufacturerServiceInterface::class, InventoryBulkUpdateManufacturerService::class);
 
         $this->app->bind(ErrorRepositoryInterface::class, ErrorRepository::class);
 
