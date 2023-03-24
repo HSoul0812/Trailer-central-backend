@@ -22,6 +22,12 @@ class Client
 
 
     /**
+     * @const string Default Dusk Laravel
+     */
+    const CLIENT_DUSK = 'Laravel Dusk CL Client';
+
+
+    /**
      * @var int
      */
     private $dealerId;

@@ -515,7 +515,8 @@ class CraigslistService implements CraigslistServiceInterface
             'session_id' => $queue->session_id,
             'status' => $err->status,
             'state' => $err->state,
-            'text_status' => $err->textStatus
+            'text_status' => $err->textStatus,
+            'dispatch_last_activity' => Carbon::now()->toDateTimeString()
         ]);
 
         // Update Queue
