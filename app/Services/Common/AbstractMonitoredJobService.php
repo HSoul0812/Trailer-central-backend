@@ -9,9 +9,14 @@ use App\Models\Common\MonitoredJob;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Bus\Dispatcher;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterface
 {
+    protected const SECONDS_TO_WAIT_FOR_JOB_DISPATCHING = 1;
+
+    protected const RETRY_JOB_DISPATCHING = 2;
+
     /**
      * @var MonitoredJobRepositoryInterface
      */
@@ -25,6 +30,7 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
     /**
      * @param MonitoredJob $job
      * @throws HasNotQueueableJobException when there is not defined a queueable job
+     * @throws ModelNotFoundException when the job does not exists
      */
     public function dispatch($job): void
     {
@@ -34,7 +40,9 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
         // dispatch job to queue
         $jobId = app(Dispatcher::class)->dispatch($queueableJob->onQueue($job->queue));
 
-        $this->repository->update($job->token, ['queue_job_id' => $jobId]);
+        retry(self::RETRY_JOB_DISPATCHING, function () use ($job, $jobId): void {
+            $this->repository->update($job->token, ['queue_job_id' => $jobId]);
+        }, self::SECONDS_TO_WAIT_FOR_JOB_DISPATCHING);
     }
 
     /**
