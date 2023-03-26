@@ -196,6 +196,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('inventory:recreate-index')
             ->dailyAt('1:00')
             ->onOneServer()
+            ->withoutOverlapping()
             ->runInBackground();
 
         $schedule->command('horizon:clean-completed-jobs')
