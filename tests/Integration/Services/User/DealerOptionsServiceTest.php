@@ -5,14 +5,26 @@ use App\Services\User\DealerOptionsServiceInterface;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\database\seeds\Website\WebsiteSeeder;
 
+/**
+ * Test for App\Services\User\DealerOptionsService
+ *
+ * class DealerOptionsServiceTest
+ * @package Tests\Integration\Services\User
+ *
+ * @coversDefaultClass \App\Services\User\DealerOptionsService
+ */
 class DealerOptionsServiceTest extends \Tests\TestCase
 {
     use DatabaseTransactions;
+
     /**
      * @var WebsiteSeeder
      */
     private $seeder;
 
+    /**
+     * @return void
+     */
     public function setUp(): void
     {
         parent::setUp();
@@ -20,6 +32,9 @@ class DealerOptionsServiceTest extends \Tests\TestCase
         $this->seeder->seed();
     }
 
+    /**
+     * @return void
+     */
     public function tearDown(): void
     {
         $this->seeder->cleanUp();
@@ -27,39 +42,54 @@ class DealerOptionsServiceTest extends \Tests\TestCase
     }
 
     /**
+     * @covers ::manageDealerSubscription
+     *
+     * @dataProvider validDataProviderForManageCrm
+     *
      * @group DMS
      * @group DMS_DEALER
      *
      * @return void
+     * @throws \Exception
      */
-    public function testActivateUserAccounts() {
+    public function testManageUserAccounts($subscription, $active) {
         $service = $this->getConcreteService();
-        $service->activateUserAccounts($this->seeder->dealer->getKey());
+        $service->manageDealerSubscription(
+            $this->seeder->dealer->getKey(),
+            (object) [
+                'subscription' => $subscription,
+                'active' => $active
+            ]
+        );
         $this->assertDatabaseHas('website_config', [
             'website_id' => $this->seeder->website->getKey(),
             'key' => 'general/user_accounts',
-            'value' => 1
+            'value' => $active
         ]);
     }
 
     /**
-     * @group DMS
-     * @group DMS_DEALER
-     *
-     * @return void
+     * @return DealerOptionsServiceInterface
      */
-    public function testDeactivateUserAccounts() {
-        $service = $this->getConcreteService();
-        $service->deactivateUserAccounts($this->seeder->dealer->getKey());
-        $this->assertDatabaseHas('website_config', [
-            'website_id' => $this->seeder->website->getKey(),
-            'key' => 'general/user_accounts',
-            'value' => 0
-        ]);
-    }
-
     protected function getConcreteService(): DealerOptionsServiceInterface
     {
         return $this->app->make(DealerOptionsServiceInterface::class);
+    }
+
+    /**
+     * @return array[]
+     */
+    public function validDataProviderForManageCrm(): array
+    {
+        return [
+            'Activate UserAccounts' => [
+                'subscription' => 'user_accounts',
+                'active' => 1
+            ],
+            'Deactivate UserAccounts' => [
+                'subscription' => 'user_accounts',
+                'active' => 0
+            ]
+        ];
     }
 }

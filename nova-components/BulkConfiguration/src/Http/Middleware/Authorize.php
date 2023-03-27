@@ -2,6 +2,9 @@
 
 namespace Showroom\BulkConfiguration\Http\Middleware;
 
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Laravel\Nova\Nova;
 use Showroom\BulkConfiguration\BulkConfiguration;
 
@@ -10,11 +13,11 @@ class Authorize
     /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @param  Closure  $next
+     * @return mixed
      */
-    public function handle($request, $next)
+    public function handle(Request $request, Closure $next)
     {
         $tool = collect(Nova::registeredTools())->first([$this, 'matchesTool']);
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\Showroom;
 
+use App\Http\Requests\Showroom\ShowroomBulkUpdateYearRequest;
 use Exception;
 use Dingo\Api\Http\Request;
 
@@ -9,7 +10,6 @@ use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Showroom\ShowroomGetRequest;
 use App\Transformers\Inventory\ManufacturerTransformer;
 use App\Repositories\Showroom\ShowroomBulkUpdateRepository;
-use App\Http\Requests\Showroom\ShowroomBulkUpdateYearRequest;
 use App\Http\Requests\Showroom\ShowroomBulkUpdateVisibilityRequest;
 
 /**
@@ -18,7 +18,6 @@ use App\Http\Requests\Showroom\ShowroomBulkUpdateVisibilityRequest;
  */
 class ShowroomBulkUpdateController extends RestfulController
 {
-
     /**
      * @var ShowroomBulkUpdateRepository
      */
@@ -32,8 +31,7 @@ class ShowroomBulkUpdateController extends RestfulController
      */
     public function __construct(
         ShowroomBulkUpdateRepository $bulkUpdateRepository
-    )
-    {
+    ) {
         $this->bulkUpdateRepository = $bulkUpdateRepository;
     }
 
@@ -42,15 +40,17 @@ class ShowroomBulkUpdateController extends RestfulController
      *
      * @param Request $request
      * @return mixed
+     * @throws Exception
      */
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $request = new ShowroomGetRequest($request->all());
 
-        if ( $request->validate() ) {
-            return $this->response->collection($this->bulkUpdateRepository->getAll($request->all()), new ManufacturerTransformer());
+        if (!$request->validate()) {
+            return $this->response->errorBadRequest();
         }
 
-        return $this->response->errorBadRequest();
+        return $this->response->collection($this->bulkUpdateRepository->getAll($request->all()), new ManufacturerTransformer());
     }
 
     /**
@@ -58,28 +58,22 @@ class ShowroomBulkUpdateController extends RestfulController
      *
      * @param Request $request
      * @return mixed
+     * @throws Exception
      */
-    public function bulkUpdateYear(Request $request) {
+    public function bulkUpdateYear(Request $request)
+    {
         $request = new ShowroomBulkUpdateYearRequest($request->all());
 
-        if ( $request->validate() ) {
-            try {
-                $this->bulkUpdateRepository->bulkUpdateYear($request->all());
-
-                return $this->response->array([
-                    'status' => 'success',
-                    'message' => 'Updating Showrooms'
-                ]);
-            } catch (Exception $e) {
-                return $this->response->array([
-                    'status' => 'error',
-                    'message' => $e->getMessage()
-                ]);
-            }
-
+        if (!$request->validate()) {
+            return $this->response->errorBadRequest();
         }
 
-        return $this->response->errorBadRequest();
+        $this->bulkUpdateRepository->bulkUpdateYear($request->all());
+
+        return $this->response->array([
+            'status' => 'success',
+            'message' => 'Updating Showrooms'
+        ]);
     }
 
     /**
@@ -87,27 +81,21 @@ class ShowroomBulkUpdateController extends RestfulController
      *
      * @param Request $request
      * @return mixed
+     * @throws Exception
      */
-    public function bulkUpdateVisibility(Request $request) {
+    public function bulkUpdateVisibility(Request $request)
+    {
         $request = new ShowroomBulkUpdateVisibilityRequest($request->all());
 
-        if ( $request->validate() ) {
-            try {
-                $this->bulkUpdateRepository->bulkUpdateVisibility($request->all());
-
-                return $this->response->array([
-                    'status' => 'success',
-                    'message' => 'Updating Showrooms'
-                ]);
-            } catch (Exception $e) {
-                return $this->response->array([
-                    'status' => 'error',
-                    'message' => $e->getMessage()
-                ]);
-            }
-
+        if (!$request->validate()) {
+            return $this->response->errorBadRequest();
         }
 
-        return $this->response->errorBadRequest();
+        $this->bulkUpdateRepository->bulkUpdateVisibility($request->all());
+
+        return $this->response->array([
+            'status' => 'success',
+            'message' => 'Updating Showrooms'
+        ]);
     }
 }
