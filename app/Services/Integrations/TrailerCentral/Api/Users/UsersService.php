@@ -7,6 +7,8 @@ use App\DTOs\User\TcApiResponseUserLocation;
 use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\Exception\GuzzleException;
+use Log;
+use Str;
 
 class UsersService implements UsersServiceInterface
 {
@@ -71,6 +73,13 @@ class UsersService implements UsersServiceInterface
             $accessToken = $authToken->access_token;
         }
 
+        if (!array_key_exists('name', $location) || empty($location['name'])) {
+            $location['name'] = collect([
+                data_get($location, 'contact'),
+                uniqid(),
+            ])->filter()->values()->implode(' - ');
+        }
+
         $responseContent = $this->handleHttpRequest(
             'PUT',
             $this->userLocationUrl,
@@ -81,6 +90,7 @@ class UsersService implements UsersServiceInterface
                 ]
             ]
         );
+
         return TcApiResponseUserLocation::fromData($responseContent['data']);
     }
 
@@ -110,8 +120,8 @@ class UsersService implements UsersServiceInterface
 
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
-            \Log::info('Exception was thrown while calling TrailerCentral API.');
-            \Log::info($e->getCode() . ': ' . $e->getMessage());
+            Log::info('Exception was thrown while calling TrailerCentral API.');
+            Log::info($e->getCode() . ': ' . $e->getMessage());
 
             throw $e;
         }
