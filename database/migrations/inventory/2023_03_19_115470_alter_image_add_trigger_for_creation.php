@@ -8,7 +8,7 @@ class AlterImageAddTriggerForCreation extends Migration
     {
         // we were forced to use a trigger because there are at least 2 places out of control for API new codebase
         $imageAfterCreation = <<<SQL
-                CREATE TRIGGER AfterInsertImage
+                CREATE TRIGGER BeforeInsertImage
                 BEFORE INSERT
                 ON image FOR EACH ROW
                 BEGIN
@@ -21,6 +21,6 @@ SQL;
 
     public function down(): void
     {
-        DB::unprepared('DROP TRIGGER IF EXISTS AfterInsertImage');
+        DB::unprepared('DROP TRIGGER IF EXISTS BeforeInsertImage');
     }
 }
