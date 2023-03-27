@@ -16,7 +16,7 @@ class ValidSortOrderCrm implements Rule
      */
     public function passes($attribute, $value)
     {
-        return (int) $value < count(LeadRepository::SORT_ORDERS_CRM);
+        return in_array($value, array_keys(LeadRepository::SORT_ORDERS_CRM));
     }
 
     /**

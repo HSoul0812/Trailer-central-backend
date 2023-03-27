@@ -155,6 +155,57 @@ class SettingsControllerTest extends TestCase {
 
     /**
      * @group CRM
+     */
+    public function testUpdatePrice()
+    {
+        $userId = $this->dealer->newDealerUser->user_id;
+        $settingsParams['price_per_mile'] = 'non_numeric_value';
+
+        $this->withHeaders(['access-token' => $this->token])
+            ->postJson(self::apiEndpoint, $settingsParams)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('price_per_mile');
+
+
+        $settingsParams['price_per_mile'] = '999.99'; 
+
+        $this->withHeaders(['access-token' => $this->token])
+            ->postJson(self::apiEndpoint, $settingsParams)
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('new_crm_user', [
+            'user_id' => $userId,
+            'price_per_mile' => $settingsParams['price_per_mile']
+        ]);
+    }
+
+    /**
+     * @group CRM
+     */
+    public function testUpdateAtleastOne()
+    {
+        $this->withHeaders(['access-token' => $this->token])
+            ->postJson(self::apiEndpoint, [])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('price_per_mile')
+            ->assertJsonValidationErrors('email_signature')
+            ->assertJsonValidationErrors('timezone')
+            ->assertJsonValidationErrors('enable_hot_potato')
+            ->assertJsonValidationErrors('disable_daily_digest')
+            ->assertJsonValidationErrors('enable_assign_notification')
+            ->assertJsonValidationErrors('enable_due_notification')
+            ->assertJsonValidationErrors('enable_past_notification')
+            ->assertJsonValidationErrors('default/filters/sort')
+            ->assertJsonValidationErrors('round-robin/hot-potato/delay')
+            ->assertJsonValidationErrors('round-robin/hot-potato/duration')
+            ->assertJsonValidationErrors('round-robin/hot-potato/end-hour')
+            ->assertJsonValidationErrors('round-robin/hot-potato/skip-weekends')
+            ->assertJsonValidationErrors('round-robin/hot-potato/start-hour')
+            ->assertJsonValidationErrors('round-robin/hot-potato/use-submission-date');
+    }
+
+    /**
+     * @group CRM
      * @dataProvider settingsParamDataProvider
      * @param array of dataProvider
      */
