@@ -19,7 +19,16 @@ class FloorplanPaymentsExportAction extends BaseExportAction implements EntityAc
     {
         return DB::table('inventory')
             ->select([
-                'inventory.*',
+                'inventory.inventory_id',
+                'inventory.fp_committed',
+                'inventory.status',
+                'inventory.title',
+                'inventory.vin',
+                'inventory.manufacturer',
+                'inventory.cost_of_unit',
+                'inventory.fp_balance',
+                'inventory.fp_interest_paid',
+                'inventory.fp_vendor',
                 DB::raw('vendors.name as fp_vendor_name'),
                 DB::raw('fp_payments.id as fp_payment_id'),
                 DB::raw('fp_payments.type as fp_type'),
