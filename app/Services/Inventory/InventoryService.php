@@ -273,6 +273,7 @@ class InventoryService implements InventoryServiceInterface
         $esSearchUrl = $this->esSearchUrl();
         $queryBuilder = new ESInventoryQueryBuilder();
         $this->addTypeAggregationQuery($queryBuilder, $params);
+        $this->addAvailabilityConditionQuery($queryBuilder, $params);
         $query = $queryBuilder->build();
 
         $this->logEsQuery(
@@ -298,6 +299,8 @@ class InventoryService implements InventoryServiceInterface
         $esSearchUrl = $this->esSearchUrl();
         $queryBuilder = new ESInventoryQueryBuilder();
         $this->addCategoryAggregationQuery($queryBuilder, $params);
+        $this->addAvailabilityConditionQuery($queryBuilder, $params);
+
         $query = $queryBuilder->build();
 
         $this->logEsQuery(
@@ -694,6 +697,15 @@ class InventoryService implements InventoryServiceInterface
             );
 
             \Log::channel('elasticsearch')->debug($logMessage);
+        }
+    }
+
+    private function addAvailabilityConditionQuery(ESInventoryQueryBuilder $queryBuilder, $params)
+    {
+        $availability = trim(data_get($params, 'availability', ''));
+
+        if (!empty($availability)) {
+            $queryBuilder->addTermInValuesQuery(self::TERM_SEARCH_KEY_MAP['availability'], $availability);
         }
     }
 }
