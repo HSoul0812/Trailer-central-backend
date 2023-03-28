@@ -706,6 +706,8 @@ class InventoryService implements InventoryServiceInterface
 
         if (!empty($availability)) {
             $queryBuilder->addTermInValuesQuery(self::TERM_SEARCH_KEY_MAP['availability'], $availability);
+        } else {
+            $queryBuilder->addTermInValuesQuery(self::TERM_SEARCH_KEY_MAP['availability'], self::INVENTORY_AVAILABLE);
         }
     }
 }
