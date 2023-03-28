@@ -236,6 +236,10 @@ class Collector extends Model implements Filterable
 
     public function getOverridableFieldsListAttribute(): string
     {
+        if (!is_array($this->overridable_fields)) {
+            $this->overridable_fields = json_decode($this->overridable_fields, true);
+        }
+
         $overridable_fields = array_keys(array_filter($this->overridable_fields, function ($v) {
             return $v;
         }));
