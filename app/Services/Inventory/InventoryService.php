@@ -98,8 +98,17 @@ class InventoryService implements InventoryServiceInterface
         $esSearchUrl = $this->esSearchUrl();
 
         $queryBuilder = $this->buildSearchQuery($params);
+        $body = $queryBuilder->build();
+
+        $this->logEsQuery(
+            method: __METHOD__,
+            line: __LINE__,
+            esSearchUrl: $esSearchUrl,
+            jsonBody: json_encode($body),
+        );
+
         $res = $this->httpClient->post($esSearchUrl, [
-            'json' => $queryBuilder->build()
+            'json' => $body,
         ]);
 
         if ($res->getStatusCode() == self::HTTP_SUCCESS) {
@@ -289,6 +298,13 @@ class InventoryService implements InventoryServiceInterface
         $this->addTypeAggregationQuery($queryBuilder, $params);
         $query = $queryBuilder->build();
 
+        $this->logEsQuery(
+            method: __METHOD__,
+            line: __LINE__,
+            esSearchUrl: $esSearchUrl,
+            jsonBody: json_encode($query),
+        );
+
         return Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use ($esSearchUrl, $query) {
             $res = $this->httpClient->post($esSearchUrl, [
                 'json' => $query
@@ -307,6 +323,13 @@ class InventoryService implements InventoryServiceInterface
         $queryBuilder = new ESInventoryQueryBuilder();
         $this->addCategoryAggregationQuery($queryBuilder, $params);
         $query = $queryBuilder->build();
+
+        $this->logEsQuery(
+            method: __METHOD__,
+            line: __LINE__,
+            esSearchUrl: $esSearchUrl,
+            jsonBody: json_encode($query),
+        );
 
         return Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use ($esSearchUrl, $query) {
             $res = $this->httpClient->post($esSearchUrl, [
@@ -695,6 +718,23 @@ class InventoryService implements InventoryServiceInterface
             Log::info($e->getCode() . ': ' . $e->getMessage());
 
             throw new HttpException(422, $e->getMessage());
+        }
+    }
+
+    private function logEsQuery(string $method, int $line, string $esSearchUrl, string $jsonBody): void
+    {
+        $logEnabled = request()->header(config('logging.enablers.elasticsearch.header'));
+
+        if (filter_var($logEnabled, FILTER_VALIDATE_BOOLEAN)) {
+            $logMessage = sprintf(
+                "%s:%d => URL: %s, Body: %s",
+                $method,
+                $line,
+                $esSearchUrl,
+                $jsonBody,
+            );
+
+            \Log::channel('elasticsearch')->debug($logMessage);
         }
     }
 }
