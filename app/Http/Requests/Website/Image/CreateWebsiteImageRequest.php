@@ -16,7 +16,7 @@ class CreateWebsiteImageRequest extends Request
         return [
             'dealer_id' => ['integer', 'min:1', 'required', 'exists:dealer,dealer_id'],
             'website_id' => ['integer', 'min:1', 'required', 'exists:website,id,dealer_id,' . $this->dealer_id],
-            'title' => ['required', 'string'],
+            'title' => ['nullable', 'string'],
             'image' => ['required', 'url', 'string'],
             'description' => ['nullable', 'string'],
             'link' => ['nullable', 'string'],
