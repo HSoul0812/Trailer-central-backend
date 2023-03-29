@@ -91,6 +91,14 @@ class InventoryObserver
                 $this->cacheKey->deleteSingle($inventory->inventory_id, $inventory->dealer_id)
             ]);
         }
+
+        // Add record to deleted_inventory table
+        DB::table('deleted_inventory')->insert(
+            [
+                'vin'       => $inventory->vin,
+                'dealer_id' => $inventory->dealer_id
+            ]
+        );
     }
 
     /**
