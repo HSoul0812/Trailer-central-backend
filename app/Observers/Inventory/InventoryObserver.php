@@ -3,6 +3,7 @@
 namespace App\Observers\Inventory;
 
 use App\Models\Inventory\Inventory;
+use App\Repositories\Inventory\DeletedInventoryRepositoryInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
@@ -20,13 +21,24 @@ class InventoryObserver
     private $responseCache;
 
     /**
+     * @var DeletedInventoryRepositoryInterface
+     */
+    private $deletedInventoryRepo;
+
+    /**
      * @param ResponseCacheKeyInterface $cacheKey
      * @param InventoryResponseCacheInterface $responseCache
+     * @param DeletedInventoryRepositoryInterface $deletedInventoryRepo
      */
-    public function __construct(ResponseCacheKeyInterface $cacheKey, InventoryResponseCacheInterface $responseCache)
+    public function __construct(
+        ResponseCacheKeyInterface $cacheKey,
+        InventoryResponseCacheInterface $responseCache,
+        DeletedInventoryRepositoryInterface $deletedInventoryRepo
+    )
     {
         $this->cacheKey = $cacheKey;
         $this->responseCache = $responseCache;
+        $this->deletedInventoryRepo = $deletedInventoryRepo;
     }
 
     public static function enableCacheInvalidation(): void
@@ -93,12 +105,10 @@ class InventoryObserver
         }
 
         // Add record to deleted_inventory table
-        DB::table('deleted_inventory')->insert(
-            [
-                'vin'       => $inventory->vin,
-                'dealer_id' => $inventory->dealer_id
-            ]
-        );
+        $this->deletedInventoryRepo->create([
+            'vin' => $inventory->vin,
+            'dealer_id' => $inventory->dealer_id
+        ]);
     }
 
     /**
