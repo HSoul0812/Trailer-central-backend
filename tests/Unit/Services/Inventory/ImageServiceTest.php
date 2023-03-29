@@ -20,6 +20,7 @@ use App\Models\Inventory\Image;
 use Illuminate\Support\Collection;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use Mockery\LegacyMockInterface;
+
 /**
  * Test for App\Services\Inventory\ImageService
  *
@@ -109,6 +110,7 @@ class ImageServiceTest extends TestCase
         Storage::disk('s3')->put('image_1', '');
         Storage::disk('s3')->put('image_with_overlay_1', '');
 
+        /** @var Image|LegacyMockInterface $image1 */
         $image1 = $this->getEloquentMock(Image::class);
         $image1->image_id = 1;
         $image1->filename = 'image_1';
@@ -118,7 +120,7 @@ class ImageServiceTest extends TestCase
             ->once()
             ->with([
                 'filename' => 'image_with_overlay_1',
-                'filename_noverlay' => 'image_1',
+                'filename_with_overlay' => 'image_with_overlay_1',
                 'hash' => 'test_hash',
                 'id' => 1
             ]);
@@ -126,6 +128,14 @@ class ImageServiceTest extends TestCase
         $this->imageService->expects($this->once())
             ->method('getFileHash')
             ->willReturn('test_hash');
+
+        $this->inventoryRepositoryMock->shouldReceive('markImageAsOverlayGenerated')
+            ->once()
+            ->with($image1->image_id);
+
+        $this->imageRepositoryMock->shouldReceive('scheduleObjectToBeDroppedByURL')
+            ->once()
+            ->with($image1->filename);
 
         $this->imageService->saveOverlay($image1, 'image_with_overlay_1');
 
@@ -196,7 +206,7 @@ class ImageServiceTest extends TestCase
 
         $this->imageRepositoryMock->shouldNotReceive('update');
 
-        $this->imageService->resetOverlay($image1);
+        $this->imageService->tryToRestoreOriginalImage($image1);
 
         Storage::disk('s3')->assertExists([
             'image_1'
@@ -230,7 +240,7 @@ class ImageServiceTest extends TestCase
             ->method('getFileHash')
             ->willReturn('test_hash');
 
-        $this->imageService->resetOverlay($image1);
+        $this->imageService->tryToRestoreOriginalImage($image1);
 
         Storage::disk('s3')->assertExists([
             'image_1'
