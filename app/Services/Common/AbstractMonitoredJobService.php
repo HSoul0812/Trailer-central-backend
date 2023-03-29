@@ -13,10 +13,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterface
 {
-    protected const SECONDS_TO_WAIT_FOR_JOB_DISPATCHING = 1;
-
-    protected const RETRY_JOB_DISPATCHING = 2;
-
     /**
      * @var MonitoredJobRepositoryInterface
      */
@@ -38,11 +34,7 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
         $queueableJob = $this->createQueueableJob($job);
 
         // dispatch job to queue
-        $jobId = app(Dispatcher::class)->dispatch($queueableJob->onQueue($job->queue));
-
-        retry(self::RETRY_JOB_DISPATCHING, function () use ($job, $jobId): void {
-            $this->repository->update($job->token, ['queue_job_id' => $jobId]);
-        }, self::SECONDS_TO_WAIT_FOR_JOB_DISPATCHING);
+        app(Dispatcher::class)->dispatch($queueableJob->onQueue($job->queue));
     }
 
     /**
@@ -54,9 +46,7 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
         $queueableJob = $this->createQueueableJob($job);
 
         // dispatch job to queue
-        $jobId = app(Dispatcher::class)->dispatchNow($queueableJob->onQueue($job->queue));
-
-        $this->repository->update($job->token, ['queue_job_id' => $jobId]);
+        app(Dispatcher::class)->dispatchNow($queueableJob->onQueue($job->queue));
     }
 
     /**
