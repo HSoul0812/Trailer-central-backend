@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateDeletedInventory extends Migration
 {
+    private const TABLE_NAME = 'deleted_inventory';
+    private const VIN_COLUMN = 'vin';
+    private const DEALER_ID = 'dealer_id';
+
     /**
      * Run the migrations.
      *
@@ -13,9 +17,14 @@ class CreateDeletedInventory extends Migration
      */
     public function up()
     {
-        Schema::create('deleted_inventory', function (Blueprint $table) {
-            $table->string('vin');
-            $table->integer('dealer_id');
+        Schema::create(self::TABLE_NAME, function (Blueprint $table) {
+            if (!$this->checkColumn(self::VIN_COLUMN)) {
+                $table->string(self::VIN_COLUMN);
+            }
+
+            if (!$this->checkColumn(self::DEALER_ID)) {
+                $table->integer(self::DEALER_ID);
+            }
 
             $table->timestamps();
         });
@@ -28,6 +37,16 @@ class CreateDeletedInventory extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('deleted_inventory');
+        Schema::dropIfExists(self::TABLE_NAME);
+    }
+
+    /**
+     * Validate column existence on migrate
+     * @param string $column
+     * @return bool
+     */
+    private function checkColumn(string $column): bool
+    {
+        return Schema::hasColumn(self::TABLE_NAME, $column);
     }
 }
