@@ -240,6 +240,11 @@ return [
          * Sentry stuff
          */
         Sentry\Laravel\ServiceProvider::class,
+
+        /*
+         * TrailerCentral stuff
+         */
+        App\Providers\ApiServiceProvider::class,
     ],
 
     /*
