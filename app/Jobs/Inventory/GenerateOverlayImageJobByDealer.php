@@ -10,18 +10,15 @@ use App\Services\Inventory\InventoryServiceInterface;
 
 class GenerateOverlayImageJobByDealer extends Job
 {
-    /**
-     * The number of times the job may be attempted.
-     *
-     * @var int
-     */
+    private const WAIT_TIME_IN_SECONDS = 2;
+
+    /** @var int The number of times the job may be attempted. */
     public $tries = 5;
 
-    /**
-     * @var int
-     */
+    /** @var int */
     public $dealerId;
 
+    /** @var string */
     public $queue = 'overlay-images';
 
     public function __construct(int $dealerId)
@@ -41,9 +38,9 @@ class GenerateOverlayImageJobByDealer extends Job
         if ($inventories->count() > 0) {
             Job::batch(static function (BatchedJob $job) use ($inventories) {
                 foreach ($inventories as $inventory) {
-                    dispatch(new GenerateOverlayImageJob($inventory->inventory_id,false))->onQueue('overlay-images');
+                    dispatch(new GenerateOverlayImageJob($inventory->inventory_id,false));
                 }
-            },__CLASS__, 2);
+            },__CLASS__, self::WAIT_TIME_IN_SECONDS);
 
             // we can not inject `InventoryServiceInterface` into constructor to avoid cyclic dependency
             $service->invalidateCacheAndReindexByDealerIds([$this->dealerId]);

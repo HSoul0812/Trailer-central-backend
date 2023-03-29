@@ -57,9 +57,7 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
 
                 Job::batch(static function (BatchedJob $job) use ($inventories) {
                     foreach ($inventories as $inventory) {
-                        dispatch(
-                            new GenerateOverlayImageJob($inventory->inventory_id, false)
-                        )->onQueue('overlay-images');
+                        dispatch(new GenerateOverlayImageJob($inventory->inventory_id, false));
                     }
                 }, __CLASS__, 2, array_merge($this->context, ['process' => 'image-overlay-generation']));
             }
