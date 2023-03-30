@@ -144,4 +144,14 @@ interface InventoryServiceInterface
      * @return void
      */
     public function tryToIndexAndInvalidateInventory(Inventory $inventory): void;
+
+    /**
+     * Will try to generate image overlay only when it is enabled in the application
+     */
+    public function tryToGenerateImageOverlays(Inventory $inventory): void;
+
+    /**
+     * Applies overlays to inventory images
+     */
+    public function generateOverlays(int $inventoryId): void;
 }

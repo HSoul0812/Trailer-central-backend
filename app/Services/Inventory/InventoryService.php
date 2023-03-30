@@ -6,6 +6,8 @@ use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\File\FileUploadException;
 use App\Exceptions\File\ImageUploadException;
 use App\Exceptions\Inventory\InventoryException;
+use App\Helpers\Inventory\InventoryHelper;
+use App\Jobs\Files\DeleteS3FilesJob;
 use App\Jobs\Inventory\GenerateOverlayAndReIndexInventoriesByDealersJob;
 use App\Jobs\Inventory\ReIndexInventoriesByDealerLocationJob;
 use App\Jobs\Inventory\ReIndexInventoriesByDealersJob;
@@ -37,6 +39,7 @@ use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Resource\Collection as FractalResourceCollection;
 use League\Fractal\Manager as FractalManager;
@@ -245,7 +248,7 @@ class InventoryService implements InventoryServiceInterface
     public function create(array $params): Inventory
     {
         try {
-            $inventory = Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($params) {
+            $inventory = Inventory::withoutImageOverlayGenerationSearchSyncingAndCacheInvalidation(function () use ($params) {
                 $this->inventoryRepository->beginTransaction();
 
                 $newImages = $params['new_images'] ?? [];
@@ -285,8 +288,11 @@ class InventoryService implements InventoryServiceInterface
                 }
 
                 if (!empty($clappsDefaultImage)) {
-                    $clappImage = $this->imageService->upload($clappsDefaultImage, $params['title'],
-                        $params['dealer_id']);
+                    $clappImage = $this->imageService->upload(
+                        $clappsDefaultImage,
+                        $params['title'],
+                        $params['dealer_id']
+                    );
                     $params['clapps']['default-image'] = $clappImage['path'];
                 }
 
@@ -309,17 +315,12 @@ class InventoryService implements InventoryServiceInterface
 
                 $this->inventoryRepository->commitTransaction();
 
-                // Generate Overlay Inventory Images if necessary
-                if (!empty($newImages)) {
-                    $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
-                }
+                $this->tryToGenerateImageOverlays($inventory);
 
                 Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
 
                 return $inventory;
             });
-
-            $this->tryToIndexAndInvalidateInventory($inventory);
         } catch (\Exception $e) {
             Log::error('Item create error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
@@ -339,11 +340,10 @@ class InventoryService implements InventoryServiceInterface
     public function update(array $params): Inventory
     {
         try {
-            $inventory = Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($params) {
+            $inventory = Inventory::withoutImageOverlayGenerationSearchSyncingAndCacheInvalidation(function () use ($params) {
                 $this->inventoryRepository->beginTransaction();
 
                 $newImages = $params['new_images'] ?? [];
-                $existingImages = $params['existing_images'] ?? [];
                 $newFiles = $params['new_files'] ?? [];
                 $hiddenFiles = $params['hidden_files'] ?? [];
                 $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
@@ -375,7 +375,11 @@ class InventoryService implements InventoryServiceInterface
                 }
 
                 if (!empty($clappsDefaultImage)) {
-                    $clappImage = $this->imageService->upload($clappsDefaultImage, $params['title'], $params['dealer_id']);
+                    $clappImage = $this->imageService->upload(
+                        $clappsDefaultImage,
+                        $params['title'],
+                        $params['dealer_id']
+                    );
                     $params['clapps']['default-image'] = $clappImage['path'];
                 }
 
@@ -396,7 +400,6 @@ class InventoryService implements InventoryServiceInterface
                 }
 
                 $inventory = $this->inventoryRepository->update($params, $options);
-                $changes = $inventory->getChanges();
 
                 if (!$inventory instanceof Inventory) {
                     Log::error('Item hasn\'t been updated.', ['params' => $params]);
@@ -418,20 +421,12 @@ class InventoryService implements InventoryServiceInterface
 
                 $this->inventoryRepository->commitTransaction();
 
-                // Generate Overlay Inventory Images if necessary
-                if (!empty($newImages) || !empty($existingImages) ||
-                    (!empty($changes) && isset($changes['overlay_enabled']))) {
-                    Log::channel('inventory-overlays')
-                       ->info('Queue regenerating overlays just for Inventory ID #' . $inventory->inventory_id);
-                    $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
-                }
+                $this->tryToGenerateImageOverlays($inventory);
 
                 Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
 
                 return $inventory;
             });
-
-            $this->tryToIndexAndInvalidateInventory($inventory);
         } catch (\Exception $e) {
             Log::error('Item update error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
@@ -695,24 +690,47 @@ class InventoryService implements InventoryServiceInterface
         }
 
         foreach ($withoutOverlay as &$image) {
-            $fileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id'], null, $overlayEnabledParams);
+            $fileDto = $this->imageService->upload(
+                $image['url'],
+                $params['title'],
+                $params['dealer_id'],
+                null,
+                $overlayEnabledParams
+            );
+
             if (empty($fileDto)) {
                 continue;
             }
 
             $image['filename'] = $fileDto->getPath();
-            $image['filename_noverlay'] = '';
+            $image['filename_noverlay'] = null;
+            $image['filename_without_overlay'] = $fileDto->getPath();
             $image['hash'] = $fileDto->getHash();
         }
 
         foreach ($withOverlay as &$image) {
-            $noOverlayFileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id'], null, $overlayEnabledParams);
-            $overlayFileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id'], null, $overlayEnabledParams);
+            $noOverlayFileDto = $this->imageService->upload(
+                $image['url'],
+                $params['title'],
+                $params['dealer_id'],
+                null,
+                $overlayEnabledParams
+            );
+            $overlayFileDto = $this->imageService->upload(
+                $image['url'],
+                $params['title'],
+                $params['dealer_id'],
+                null,
+                $overlayEnabledParams
+            );
+
             if (empty($noOverlayFileDto) || empty($overlayFileDto)) {
                 continue;
             }
 
             $image['filename'] = $overlayFileDto->getPath();
+            $image['filename_with_overlay'] = $overlayFileDto->getPath();
+            $image['filename_without_overlay'] = $noOverlayFileDto->getPath();
             $image['filename_noverlay'] = $noOverlayFileDto->getPath();
             $image['hash'] = $overlayFileDto->getHash();
         }
@@ -721,76 +739,70 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
-     * Apply Overlays to Inventory Images
-     *
-     * @param int $inventoryId
-     * @return bool
+     * Applies overlays to inventory images, or reset image to the original image when needed
      */
-    public function generateOverlays(int $inventoryId)
+    public function generateOverlays(int $inventoryId): void
     {
         $inventoryImages = $this->inventoryRepository->getInventoryImages($inventoryId);
 
-        if ($inventoryImages->count() === 0) return false;
-
-        $overlayParams = $this->inventoryRepository->getOverlayParams($inventoryId);
-
-        Log::channel('inventory-overlays')->info('Adding Overlays on Inventory Images', $overlayParams);
-
-        $overlayEnabled = $overlayParams['overlay_enabled'];
-
-        $hasChanges = false;
-
-        foreach ($inventoryImages as $inventoryImage) {
-
-            $imageObj = $inventoryImage->image;
-
-            // Add Overlays if enabled
-            if ($overlayEnabled == Inventory::OVERLAY_ENABLED_ALL
-                || (
-                    $overlayEnabled == Inventory::OVERLAY_ENABLED_PRIMARY
-                    && ($inventoryImage->position == 1 || $inventoryImage->is_default == 1)
-                    )
-                ) {
-
-                // apply overlays
-                $originalFilename = !empty($imageObj->filename_noverlay) ? $imageObj->filename_noverlay : $imageObj->filename;
-                $localNewImagePath = $this->imageService->addOverlays($this->getS3BaseUrl() . $originalFilename, $overlayParams);
-
-                if (!empty($localNewImagePath)) {
-                    // upload overlay image
-                    $filenameParts = explode('.', $localNewImagePath);
-
-                    $randomFilename = md5($localNewImagePath);
-
-                    if (count($filenameParts) > 1) {
-                        $randomFilename .= '.'.$filenameParts[1];
-                    }
-
-                    $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $overlayParams['dealer_id']);
-                    unlink($localNewImagePath);
-
-                    // update image to database
-                    $this->imageTableService->saveOverlay($imageObj, $newFilename);
-
-                    // @todo implement a mechanism to detect any image processing failure and reset the image to previous state
-                    $hasChanges = true;
-                } else {
-
-                    Log::channel('inventory-overlays')
-                        ->error('Failed Adding Overlays, Invalid OverlayParams',
-                            array_merge($overlayParams, ['image_id' => $imageObj->image_id]));
-                }
-
-            // otherwise Reset Overlay
-            } else {
-
-                $this->imageTableService->resetOverlay($imageObj);
-
-                $hasChanges = true;
-            }
+        if ($inventoryImages->count() === 0) {
+            return;
         }
 
-        return $hasChanges;
+        $dealerOverlayConfig = $this->inventoryRepository->getOverlayParams($inventoryId);
+
+        Log::channel('inventory-overlays')->info('Adding Overlays on Inventory Images', $dealerOverlayConfig);
+
+        $imageIndex = 0;
+
+        $inventoryImages
+            ->sortBy(InventoryHelper::singleton()->imageSorter())
+            ->each(function (InventoryImage $inventoryImage) use ($dealerOverlayConfig, &$imageIndex) {
+                if ($inventoryImage->shouldRestoreOriginalImage($dealerOverlayConfig['overlay_enabled'], $imageIndex)) {
+                    $this->imageTableService->tryToRestoreOriginalImage($inventoryImage->image);
+
+                    $imageIndex++;
+
+                    return true;
+                }
+
+                if ($dealerOverlayConfig['overlay_updated_at'] <= $inventoryImage->overlay_updated_at) {
+                    $this->imageTableService->tryToRestoreImageOverlay($inventoryImage->image);
+
+                    $imageIndex++;
+
+                    return true;
+                }
+
+                // overlay only should be generated when it is a new image or when the dealer has changed
+                // its global overlay configuration
+                try {
+                    DB::beginTransaction();
+
+                    $overlayFilename = $this->imageService->addOverlayAndSaveToStorage(
+                        $inventoryImage->image->originalFilename(),
+                        $dealerOverlayConfig
+                    );
+
+                    $this->imageTableService->saveOverlay($inventoryImage->image, $overlayFilename);
+
+                    DB::commit();
+                } catch (\Exception $exception) {
+                    DB::rollBack();
+
+                    if (isset($overlayFilename)) {
+                        $this->dispatch((new DeleteS3FilesJob([$overlayFilename]))->onQueue('files'));
+                    }
+
+                    Log::channel('inventory-overlays')
+                        ->error(
+                            'Failed Adding Overlays, Invalid OverlayParams: '.$exception->getMessage(),
+                            array_merge($dealerOverlayConfig, ['image_id' => $inventoryImage->image->image_id])
+                        );
+                }
+
+                $imageIndex++;
+            });
     }
 
     /**
@@ -1400,6 +1412,24 @@ class InventoryService implements InventoryServiceInterface
             }
 
             $this->responseCache->forget($keyPatterns);
+        }
+    }
+
+    /**
+     * Will try to generate image overlay only when it is enabled in the application
+     */
+    public function tryToGenerateImageOverlays(Inventory $inventory): void
+    {
+        if (Inventory::isOverlayGenerationEnabled()) {
+
+            Log::channel('inventory-overlays')
+                ->info('Queue regenerating overlays just for Inventory ID #'.$inventory->inventory_id);
+
+            // 1 second delay assuming there might be a race condition when transaction commit is taking longer
+            // to process when adding/updating new inventory
+            $job = (new GenerateOverlayImageJob($inventory->inventory_id))->delay(2);
+
+            $this->dispatch($job);
         }
     }
 }
