@@ -1581,7 +1581,7 @@ class InventoryServiceTest extends TestCase
                 ->once()->with($image, $s3Filename);
         }
 
-        $this->imageTableServiceMock->shouldNotReceive('resetOverlay');
+        $this->imageTableServiceMock->shouldNotReceive('tryToRestoreOriginalImage');
 
         $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
@@ -1668,7 +1668,7 @@ class InventoryServiceTest extends TestCase
 
                 // Mock resetOverlay
                 $this->imageTableServiceMock
-                    ->shouldReceive('resetOverlay')
+                    ->shouldReceive('tryToRestoreOriginalImage')
                     ->once()->withArgs([$image]);
 
                 $this->imageTableServiceMock
@@ -1742,7 +1742,7 @@ class InventoryServiceTest extends TestCase
 
         $this->imageTableServiceMock->shouldNotReceive('saveOverlay');
         $this->imageServiceMock->shouldNotReceive('uploadToS3');
-        $this->imageTableServiceMock->shouldNotReceive('resetOverlay');
+        $this->imageTableServiceMock->shouldNotReceive('tryToRestoreOriginalImage');
 
         $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
@@ -1779,7 +1779,7 @@ class InventoryServiceTest extends TestCase
         $this->imageServiceMock->shouldNotReceive('uploadToS3');
         $this->imageServiceMock->shouldNotReceive('addOverlays');
         $this->imageTableServiceMock->shouldNotReceive('saveOverlay');
-        $this->imageTableServiceMock->shouldNotReceive('resetOverlay');
+        $this->imageTableServiceMock->shouldNotReceive('tryToRestoreOriginalImage');
 
         $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
@@ -1839,7 +1839,7 @@ class InventoryServiceTest extends TestCase
         foreach ($inventoryImages as $inventoryImage) {
             $image = $inventoryImage->image;
 
-            $this->imageTableServiceMock->shouldReceive('resetOverlay')
+            $this->imageTableServiceMock->shouldReceive('tryToRestoreOriginalImage')
                 ->once()->with($image);
         }
 
