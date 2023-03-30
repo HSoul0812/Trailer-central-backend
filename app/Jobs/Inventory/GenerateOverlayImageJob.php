@@ -12,6 +12,12 @@ use Illuminate\Queue\SerializesModels;
 use App\Jobs\Job;
 use Exception;
 
+/**
+ * @todo this job should be renamed to `InventoryBackGroundWorkFlowJob` when safe, it is is handling 3 processes
+ *       a) Generate overlay
+ *       b) ElasticSearch indexation
+ *       c) Inventory cache invalidation
+ */
 class GenerateOverlayImageJob extends Job
 {
     use Dispatchable, SerializesModels, WithTags;

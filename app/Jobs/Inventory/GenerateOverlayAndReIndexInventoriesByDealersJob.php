@@ -11,6 +11,12 @@ use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 
+/**
+ * @todo this job should be renamed to `InventoryBackGroundWorkFlowByDealerJob` when safe, it is is handling 3 processes
+ *       a) Generate overlay
+ *       b) ElasticSearch indexation
+ *       c) Inventory cache invalidation
+ */
 class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
 {
     /** @var int time in seconds */

@@ -30,12 +30,14 @@ abstract class TestCase extends BaseTestCase
         $this->setCacheInvalidationFeatureFlag(false);
         Inventory::enableCacheInvalidation();
         Inventory::enableSearchSyncing();
+        Inventory::enableOverlayGeneration();
     }
 
     protected function tearDown(): void
     {
         Inventory::enableCacheInvalidation();
         Inventory::enableSearchSyncing();
+        Inventory::enableOverlayGeneration();
 
         parent::tearDown();
     }

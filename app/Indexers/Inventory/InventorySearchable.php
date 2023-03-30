@@ -178,6 +178,7 @@ trait InventorySearchable
     {
         self::disableSearchSyncing();
         InventoryObserver::disableCacheInvalidation();
+        self::disableOverlayGeneration();
     }
 
     public static function disableCacheInvalidationAndSearchSyncing(): void
