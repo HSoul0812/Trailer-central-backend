@@ -156,18 +156,33 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public const DONT_USE_AUTO_MSRP = 0;
 
     /**
-     * @var string
+     * @var int
      */
     public const OVERLAY_ENABLED_NONE = 0;
 
+    /**
+     * @var int
+     */
     public const OVERLAY_ENABLED_PRIMARY = 1;
 
+    /**
+     * @var int
+     */
     public const OVERLAY_ENABLED_ALL = 2;
 
+    /**
+     * @var int
+     */
     public const OVERLAY_DISABLED_BY_DEFAULT = 0;
 
+    /**
+     * @var int
+     */
     public const OVERLAY_ENABLED_BY_DEFAULT = 1;
 
+    /**
+     * @var int[]
+     */
     const OVERLAY_CODES = [
         self::OVERLAY_ENABLED_PRIMARY,
         self::OVERLAY_ENABLED_ALL,
