@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use App\Models\Inventory\InventoryImage;
+use App\Models\User\User as Dealer;
 
 class AlterInventoryImageOverlayGeneratedAt extends Migration
 {
@@ -24,10 +25,15 @@ class AlterInventoryImageOverlayGeneratedAt extends Migration
             );
         });
 
-        InventoryImage::query()
-            ->join('inventory','inventory.inventory_id','=','inventory_image.inventory_id')
-            ->whereNotNull('inventory.overlay_enabled')
-            ->update(['overlay_updated_at' => now()]);
+        $dealers = DB::table('dealer')->select('dealer_id')->get();
+
+        $dealers->each(static function (Dealer $dealer): void {
+            InventoryImage::query()
+                ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
+                ->where('inventory.dealer_id', $dealer->dealer_id)
+                ->whereNotNull('inventory.overlay_enabled')
+                ->update(['overlay_updated_at' => now()]);
+        });
     }
 
     /**
