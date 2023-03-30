@@ -21,19 +21,17 @@ class CloudWatchPusher
                 break;
             }
 
-            // Create your custom handler
-            $cwHandler = new CloudWatchLoggerHandler();
+            // Create your custom handlers here
+            if (config('integrations.cloudwatch.enabled')) {
+                $cwHandler = new CloudWatchLoggerHandler();
 
-            Log::channel('single')->info('We pushim');
-
-            // Push it to monolog
-            $logger->pushHandler(
-                $cwHandler->getHandler(
-                    $this->getStreamFileNameFromPath($url)
-                )
-            );
-
-            Log::channel('single')->info('We pushe to ' . $this->getStreamFileNameFromPath($url));
+                // Push it to monolog
+                $logger->pushHandler(
+                    $cwHandler->getHandler(
+                        $this->getStreamFileNameFromPath($url)
+                    )
+                );
+            }
         }
     }
 
