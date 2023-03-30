@@ -94,11 +94,11 @@ class InventoryImage extends Model
     /**
      * This requieres the images are sorted by `InventoryHelper::imageSorter`
      */
-    public function shouldGenerateOverlay(?int $typeOfOverlay, int $index): bool
+    public function shouldRestoreOriginalImage(?int $typeOfOverlay, int $index): bool
     {
-        return $typeOfOverlay == Inventory::OVERLAY_ENABLED_ALL || (
+        return !($typeOfOverlay == Inventory::OVERLAY_ENABLED_ALL || (
                 $typeOfOverlay == Inventory::OVERLAY_ENABLED_PRIMARY &&
                 ($this->position == 1 || $this->is_default == 1 || ($this->position === null && $index === 0))
-            );
+            ));
     }
 }
