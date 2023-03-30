@@ -5765,6 +5765,62 @@
             "time": "2022-12-02T22:17:43+00:00"
         },
         {
+            "name": "maxbanton/cwh",
+            "version": "v2.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/maxbanton/cwh.git",
+                "reference": "7ad7477e5808763c65691a0db807da5d3c6aa834"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/maxbanton/cwh/zipball/7ad7477e5808763c65691a0db807da5d3c6aa834",
+                "reference": "7ad7477e5808763c65691a0db807da5d3c6aa834",
+                "shasum": ""
+            },
+            "require": {
+                "aws/aws-sdk-php": "^3.18",
+                "monolog/monolog": "^2.0",
+                "php": "^7.2 || ^8"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.5 || ^9.4",
+                "squizlabs/php_codesniffer": "^3.5"
+            },
+            "suggest": {
+                "maxbanton/dd": "Minimalistic dump-and-die function for easy debugging"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Maxbanton\\Cwh\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Max Leonov",
+                    "email": "hi@maxleonov.pw",
+                    "homepage": "https://maxleonov.pw"
+                }
+            ],
+            "description": "AWS CloudWatch Handler for Monolog library",
+            "homepage": "https://github.com/maxbanton/cwh",
+            "keywords": [
+                "aws",
+                "cloudwatch",
+                "monolog"
+            ],
+            "support": {
+                "issues": "https://github.com/maxbanton/cwh/issues",
+                "source": "https://github.com/maxbanton/cwh"
+            },
+            "time": "2022-11-09T13:18:16+00:00"
+        },
+        {
             "name": "microsoft/microsoft-graph",
             "version": "1.86.0",
             "source": {

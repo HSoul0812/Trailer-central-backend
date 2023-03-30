@@ -7,6 +7,7 @@ namespace Tests\Unit\Services\Export\Parts\BulkCsvDownloadJobService;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Services\Export\Parts\BulkCsvDownloadJobService;
 use App\Services\Export\Parts\FilesystemCsvExporter;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
@@ -56,6 +57,11 @@ class RunTest extends TestCase
             ->shouldReceive('queryAllByDealerId')
             ->once()
             ->with($job->dealer_id);
+        // And I expect that parts repository getBins method is called with no arguments
+        $dependencies->partsRepository
+            ->shouldReceive('getBins')
+            ->once()
+            ->andReturn(Collection::make([]));
         // And I expect that bulk repository updateProgress method is called with certain arguments
         $dependencies->bulkDownloadRepository
             ->shouldReceive('updateProgress')
@@ -124,6 +130,11 @@ class RunTest extends TestCase
             ->shouldReceive('queryAllByDealerId')
             ->once()
             ->with($job->dealer_id);
+        // And I expect that parts repository getBins method is called with no arguments
+        $dependencies->partsRepository
+            ->shouldReceive('getBins')
+            ->once()
+            ->andReturn(Collection::make([]));
         // And I expect that bulk repository updateProgress method is called with certain arguments
         $dependencies->bulkDownloadRepository
             ->shouldReceive('updateProgress')

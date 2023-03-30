@@ -23,8 +23,9 @@ class ElasticSearchClient extends Client implements ElasticSearchClientInterface
 
         if ($response->getStatusCode() === self::HTTP_SUCCESS) {
             $json = json_decode($response->getBody()->getContents(), false);
+            $total = is_object($json->hits->total) ? $json->hits->total->value: $json->hits->total;
 
-            return new ElasticSearchQueryResult($query->toArray(), (array)$json->aggregations, $json->hits->total->value, $json->hits->hits);
+            return new ElasticSearchQueryResult($query->toArray(), (array)$json->aggregations, $total , $json->hits->hits);
         }
 
         if ($response->getStatusCode() === self::HTTP_BAD_REQUEST) {
