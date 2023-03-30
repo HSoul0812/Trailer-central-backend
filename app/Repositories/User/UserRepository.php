@@ -193,6 +193,7 @@ class UserRepository implements UserRepositoryInterface {
      */
     public function updateOverlaySettings(int $dealerId, array $params): array
     {
+        /** @var User $dealer */
         $dealer = User::findOrFail($dealerId);
 
         $overlaySettingFields = [
@@ -226,7 +227,14 @@ class UserRepository implements UserRepositoryInterface {
 
         $dealer->save();
 
-        return $dealer->getChanges();
+        $changes = $dealer->getChanges();
+
+        if (!empty($changes)) {
+            $dealer->overlay_updated_at = now();
+            $dealer->save();
+        }
+
+        return $changes;
     }
 
     /**
