@@ -2,12 +2,17 @@
 
 namespace App\Logging;
 
-use Illuminate\Support\Facades\Log;
-use Monolog\Logger;
-use Monolog\Processor\IntrospectionProcessor;
-
+/**
+ * class CloudWatchPusher
+ *
+ * @package App\Logging
+ */
 class CloudWatchPusher
 {
+    /**
+     * @param $logger
+     * @return void
+     */
     public function __invoke($logger)
     {
         foreach ($logger->getHandlers() as $handler) {
@@ -32,7 +37,11 @@ class CloudWatchPusher
         }
     }
 
-    private function getStreamFileNameFromPath(string $path)
+    /**
+     * @param string $path
+     * @return string
+     */
+    private function getStreamFileNameFromPath(string $path): string
     {
         $explodedUrl = explode('storage/logs', $path);
         return $explodedUrl[1];
