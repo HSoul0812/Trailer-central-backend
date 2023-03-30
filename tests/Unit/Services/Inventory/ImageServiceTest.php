@@ -12,22 +12,15 @@ use App\Jobs\Inventory\GenerateOverlayImageJob;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User\User;
-use App\Models\Inventory\Inventory;
 use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Inventory\ImageService;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Models\Inventory\Image;
-use Illuminate\Support\Collection;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use Mockery\LegacyMockInterface;
 
 /**
- * Test for App\Services\Inventory\ImageService
- *
- * Class ImageServiceTest
- * @package Tests\Unit\Services\Inventory
- *
  * @group DW
  * @group DW_ELASTICSEARCH
  * @group DW_INVENTORY
@@ -38,6 +31,7 @@ class ImageServiceTest extends TestCase
 {
     use WithFaker;
 
+    /** @var int  */
     const DEALER_ID = 1;
 
     /**
@@ -237,8 +231,13 @@ class ImageServiceTest extends TestCase
     }
 
     /**
+     * Test that SUT will update dealer overlay configuration but it will not massively update
+     * inventory overlay configuration because `overlay_enabled` was not changed, finally it should
+     * have dispatched a `GenerateOverlayImageJobByDealer` to process all inventory overlay changes
+     *
      * @group Marketing
      * @group Marketing_Overlays
+     * @covers ::updateOverlaySettings
      */
     public function testUpdateOverlaySettings()
     {
@@ -247,27 +246,19 @@ class ImageServiceTest extends TestCase
             'overlay_logo' => 'logo.png'
         ];
 
+        /** @var User|LegacyMockInterface $userMock */
         $userMock = $this->getEloquentMock(User::class);
         $userMock->dealer_id = self::DEALER_ID;
 
-        $inventories = new Collection();
-        for ($i = 0; $i < 5; $i++)
-        {
-            $inventoryId = $i + 1;
-            $inventory = $this->getEloquentMock(Inventory::class);
-            $inventory->inventory_id = $inventoryId;
-            $inventories->push($inventory);
-        }
+        $this->inventoryRepositoryMock->allows('massUpdate')->never();
 
-        $this->inventoryRepositoryMock->shouldNotReceive('massUpdate');
+        $this->userRepositoryMock->expects('updateOverlaySettings')
+            ->with(self::DEALER_ID, $overlayParams)
+            ->andReturns($overlayParams);
 
-        $this->userRepositoryMock->shouldReceive('updateOverlaySettings')
-            ->once()->with(self::DEALER_ID, $overlayParams)
-            ->andReturn($overlayParams);
-
-        $this->userRepositoryMock->shouldReceive('get')
-            ->once()->with(['dealer_id' => self::DEALER_ID])
-            ->andReturn($userMock);
+        $this->userRepositoryMock->expects('get')
+            ->with(['dealer_id' => self::DEALER_ID])
+            ->andReturns($userMock);
 
         $this->imageService->updateOverlaySettings($overlayParams);
 
@@ -276,10 +267,15 @@ class ImageServiceTest extends TestCase
     }
 
     /**
+     * Test that SUT will update dealer overlay configuration, also it will massively update
+     * inventory overlay configuration because `overlay_enabled` was changed, finally it should
+     * have dispatched a `GenerateOverlayImageJobByDealer` to process all inventory overlay changes
+     *
      * @group Marketing
      * @group Marketing_Overlays
+     * @covers ::updateOverlaySettings
      */
-    public function testUpdateOverlaySettingsWithOverlayenabledChanged()
+    public function testUpdateOverlaySettingsWithOverlayEnabledChanged()
     {
         $overlayParams = [
             'dealer_id' => self::DEALER_ID,
@@ -287,32 +283,23 @@ class ImageServiceTest extends TestCase
             'overlay_enabled' => 2
         ];
 
+        /** @var User|LegacyMockInterface $userMock */
         $userMock = $this->getEloquentMock(User::class);
         $userMock->dealer_id = self::DEALER_ID;
 
-        $inventories = new Collection();
-        for ($i = 0; $i < 5; $i++)
-        {
-            $inventoryId = $i + 1;
-            $inventory = $this->getEloquentMock(Inventory::class);
-            $inventory->inventory_id = $inventoryId;
-            $inventories->push($inventory);
-        }
-
-        $this->inventoryRepositoryMock->shouldReceive('massUpdate')
+        $this->inventoryRepositoryMock->expects('massUpdate')
             ->with([
                 'dealer_id' => $overlayParams['dealer_id'],
                 'overlay_enabled' => $overlayParams['overlay_enabled']
-            ])
-            ->once();
+            ]);
 
-        $this->userRepositoryMock->shouldReceive('updateOverlaySettings')
-            ->once()->with(self::DEALER_ID, $overlayParams)
-            ->andReturn($overlayParams);
+        $this->userRepositoryMock->expects('updateOverlaySettings')
+            ->with(self::DEALER_ID, $overlayParams)
+            ->andReturns($overlayParams);
 
-        $this->userRepositoryMock->shouldReceive('get')
-            ->once()->with(['dealer_id' => self::DEALER_ID])
-            ->andReturn($userMock);
+        $this->userRepositoryMock->expects('get')
+            ->with(['dealer_id' => self::DEALER_ID])
+            ->andReturns($userMock);
 
         $this->imageService->updateOverlaySettings($overlayParams);
 
@@ -321,27 +308,33 @@ class ImageServiceTest extends TestCase
     }
 
     /**
+     * Test that SUT will try to update dealer overlay configuration, then, it should not perform any other action
+     * due there was not changes
+     *
      * @group Marketing
      * @group Marketing_Overlays
+     * @covers ::updateOverlaySettings
      */
     public function testUpdateOverlaySettingsWithoutChanges()
     {
+        $performedChanges = []; // there was not changes
+
         $overlayParams = [
             'dealer_id' => self::DEALER_ID,
             'overlay_logo' => 'logo.png'
         ];
 
-        $this->inventoryRepositoryMock->shouldNotReceive('getAll');
+        $this->inventoryRepositoryMock->allows('getAll')->never();
 
-        $this->inventoryRepositoryMock->shouldNotReceive('massUpdate');
+        $this->inventoryRepositoryMock->allows('massUpdate')->never();
 
-        $this->userRepositoryMock->shouldReceive('updateOverlaySettings')
-            ->once()->with(self::DEALER_ID, $overlayParams)
-            ->andReturn([]);
+        $this->userRepositoryMock->expects('updateOverlaySettings')
+            ->with(self::DEALER_ID, $overlayParams)
+            ->andReturns($performedChanges);
 
-        $this->userRepositoryMock->shouldReceive('get')
-            ->once()->with(['dealer_id' => self::DEALER_ID])
-            ->andReturn($this->getEloquentMock(User::class));
+        $this->userRepositoryMock->expects('get')
+            ->with(['dealer_id' => self::DEALER_ID])
+            ->andReturns($this->getEloquentMock(User::class));
 
         $this->imageService->updateOverlaySettings($overlayParams);
 
