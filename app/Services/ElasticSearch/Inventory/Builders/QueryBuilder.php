@@ -495,7 +495,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 'type' => 'number',
                 'script' => [
                     'lang' => 'painless',
-                    'source' => 'double price;
+                    'source' => 'double price = 0;
                     if(doc[\'websitePrice\'].size() > 0){ price = doc[\'websitePrice\'].value; }
                     if(doc[\'salesPrice\'].size() > 0 && 0 < doc[\'salesPrice\'].value && doc[\'salesPrice\'].value < price) { price = doc[\'salesPrice\'].value; }
                     return price;
