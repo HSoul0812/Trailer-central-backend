@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +13,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/endpoint', function (Request $request) {
-//     //
-// });
+/**
+ * Manufacturers
+ */
+$api = app('Dingo\Api\Routing\Router');
+$api->version('v1', function ($route) {
+    $route->get('manufacturers', 'App\Http\Controllers\v1\Showroom\ShowroomBulkUpdateController@index');
+    $route->post('manufacturers/bulk_year', 'App\Http\Controllers\v1\Showroom\ShowroomBulkUpdateController@bulkUpdateYear');
+    $route->post('manufacturers/bulk_visibility', 'App\Http\Controllers\v1\Showroom\ShowroomBulkUpdateController@bulkUpdateVisibility');
+    $route->post('inventories/bulk_manufacturer', 'App\Http\Controllers\v1\Inventory\InventoryBulkUpdateController@bulkUpdateManufacturer');
+});

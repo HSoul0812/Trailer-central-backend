@@ -2,165 +2,102 @@
 
 namespace App\Services\User;
 
-use App\Models\User\NewDealerUser;
-use App\Models\User\User;
+use Exception;
 
 /**
  * Interface DealerOptionsServiceInterface
+ *
  * @package App\Services\User
  */
 interface DealerOptionsServiceInterface
 {
     /**
+     * Activate/Deactivate Dealer subscriptions
      * @param int $dealerId
+     * @param object $fields
+     * @return bool
+     * @throws Exception
+     */
+    public function manageDealerSubscription(int $dealerId, object $fields): bool;
+
+    /**
+     * Activate/Deactivate Dealer hidden integrations
+     * @param int $dealerId
+     * @param int $integrationId
+     * @param bool $active
      * @return bool
      */
-    public function activateCrm(int $dealerId): bool;
+    public function manageHiddenIntegration(int $dealerId, int $integrationId, bool $active): bool;
+
+    /**
+     * Activate/Deactivate Dealer CDK
+     * @param int $dealerId
+     * @param bool $active
+     * @return bool
+     * @throws Exception
+     */
+    public function manageCdk(int $dealerId, bool $active): bool;
+
+    /**
+     * Activate/Deactivate Dealer CRM
+     * @param int $dealerId
+     * @param bool $active
+     * @return bool
+     * @throws Exception
+     */
+    public function manageCrm(int $dealerId, bool $active): bool;
+
+    /**
+     * Activate/Deactivate Dealer E-Commerce
+     * @param int $dealerId
+     * @param bool $active
+     * @return bool
+     * @throws Exception
+     */
+    public function manageEcommerce(int $dealerId, bool $active): bool;
+
+    /**
+     * Activate/Deactivate Dealer Marketing
+     * @param int $dealerId
+     * @param bool $active
+     * @return bool
+     * @throws Exception
+     */
+    public function manageMarketing(int $dealerId, bool $active): bool;
+
+    /**
+     * Activate/Deactivate Dealer Mobile site
+     * @param int $dealerId
+     * @param bool $active
+     * @return bool
+     * @throws Exception
+     */
+    public function manageMobile(int $dealerId, bool $active): bool;
+
+    /**
+     * Activate/Deactivate Dealer Parts
+     * @param int $dealerId
+     * @param bool $active
+     * @return bool
+     * @throws Exception
+     */
+    public function manageParts(int $dealerId, bool $active): bool;
+
+    /**
+     * Activate/Deactivate Dealer user accounts
+     * @param int $dealerId
+     * @param bool $active
+     * @return bool
+     * @throws Exception
+     */
+    public function manageUserAccounts(int $dealerId, bool $active): bool;
 
     /**
      * @param int $dealerId
      * @return bool
-     */
-    public function deactivateCrm(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @param string $sourceId
-     * @return bool
-     */
-    public function activateCdk(int $dealerId, string $sourceId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function deactivateCdk(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
+     * @throws Exception
      */
     public function deactivateDealer(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function activateDealerClassifieds(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function deactivateDealerClassifieds(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function activateDms(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function deactivateDms(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function activateECommerce(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function deactivateECommerce(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function activateMarketing(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function deactivateMarketing(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function activateMobile(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function deactivateMobile(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function activateScheduler(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function deactivateScheduler(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function activateELeads(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function deactivateELeads(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function activateParts(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function deactivateParts(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function activateQuoteManager(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function deactivateQuoteManager(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function activateUserAccounts(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function deactivateUserAccounts(int $dealerId): bool;
 
     /**
      * @param int $dealerId
@@ -172,18 +109,7 @@ interface DealerOptionsServiceInterface
      * @param int $dealerId
      * @param string $status
      * @return bool
+     * @throws Exception
      */
     public function changeStatus(int $dealerId, string $status): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function activateGoogleFeed(int $dealerId): bool;
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function deactivateGoogleFeed(int $dealerId): bool;
 }
