@@ -10,16 +10,18 @@ use Illuminate\Support\Facades\Log;
 
 use App\Jobs\Job;
 
-class ProcessBulkUpload extends Job {
-
+class ProcessBulkUpload extends Job
+{
+    /** @var int  */
     public $timeout = 0;
+
+    /** @var int  */
     public $tries = 2;
 
+    /** @var int  */
     protected $bulkId;
 
-    /**
-     * @var CsvImportServiceInterface
-     */
+    /** @var CsvImportServiceInterface */
     protected $csvImportService;
 
     /**
@@ -32,7 +34,10 @@ class ProcessBulkUpload extends Job {
         $this->bulkId = $bulkId;
     }
 
-    public function handle(CsvImportServiceInterface $importerService, InventoryServiceInterface $inventoryService): void
+    public function handle(
+        CsvImportServiceInterface $importerService,
+        InventoryServiceInterface $inventoryService
+    ): void
     {
         Log::info('Starting inventory bulk upload');
 
