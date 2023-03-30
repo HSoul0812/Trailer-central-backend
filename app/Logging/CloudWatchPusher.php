@@ -42,6 +42,6 @@ class CloudWatchPusher
     private function getStreamFileNameFromPath(string $path): string
     {
         $explodedUrl = explode('storage/logs', $path);
-        return $explodedUrl[1];
+        return gethostname() . $explodedUrl[1];
     }
 }
