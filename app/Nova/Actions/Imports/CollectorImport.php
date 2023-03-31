@@ -94,8 +94,9 @@ class CollectorImport implements ToModel, WithStartRow
             'override_prices' => $row[70] ?? 0,
             'override_attributes' => $row[71] ?? 0,
             'override_descriptions' => $row[72] ?? 0,
-            'created_at' => $row[73],
-            'updated_at' => $row[74],
+            'third_party_provider' => $row[73],
+            'created_at' => $row[74],
+            'updated_at' => $row[75],
         ]);
     }
 

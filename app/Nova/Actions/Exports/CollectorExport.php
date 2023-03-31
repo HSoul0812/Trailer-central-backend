@@ -101,6 +101,7 @@ class CollectorExport extends DownloadExcel implements WithHeadings, WithMapping
             'Override Prices',
             'Override Attributes',
             'Override Descriptions',
+            'Third Party Provider',
             'Created At',
             'Updated At',
         ];
@@ -187,6 +188,7 @@ class CollectorExport extends DownloadExcel implements WithHeadings, WithMapping
             $mapping->override_prices,
             $mapping->override_attributes,
             $mapping->override_descriptions,
+            $mapping->third_party_provider,
             $mapping->created_at,
             $mapping->updated_at,
         ];
