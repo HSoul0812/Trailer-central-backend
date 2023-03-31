@@ -49,11 +49,22 @@ class ManageDealer extends Action
      *
      * @param ActionFields $fields
      * @param Collection $models
+     * @return void
      */
-    public function handle(ActionFields $fields, Collection $models): void
+    public function handle(ActionFields $fields, Collection $models)
     {
         /** @var User $model */
         foreach ($models as $model) {
+            $message = "Dealer $model->dealer_id is already ";
+
+            if (!$model->deleted && $fields->active) {
+                return Action::danger($message . ' activated.');
+            }
+
+            if ($model->deleted && !$fields->active) {
+                return Action::danger($message . ' deactivated.');
+            }
+
             $result = $this->dealerOptionsService->manageDealerOperations($model->dealer_id, $fields->active);
 
             if (!$result) {
