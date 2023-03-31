@@ -1,0 +1,85 @@
+<?php
+
+namespace App\Nova\Actions\Dealer;
+
+use App\Models\User\User;
+use App\Services\User\DealerOptionsServiceInterface;
+use Illuminate\Bus\Queueable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Collection;
+use InvalidArgumentException;
+use Laravel\Nova\Actions\Action;
+use Laravel\Nova\Fields\ActionFields;
+use Laravel\Nova\Fields\Select;
+
+/**
+ * Class ManageDealer
+ * @package App\Nova\Actions\Dealer
+ */
+class ManageDealer extends Action
+{
+    use InteractsWithQueue;
+    use Queueable;
+
+    /**
+     * @var bool
+     */
+    public $showOnTableRow = true;
+
+    /**
+     * @var string
+     */
+    public $confirmText = 'Are you sure you want to perform this action?.';
+
+    /**
+     * @var DealerOptionsServiceInterface
+     */
+    private $dealerOptionsService;
+
+    /**
+     * @param DealerOptionsServiceInterface $dealerOptionsService
+     */
+    public function __construct(DealerOptionsServiceInterface $dealerOptionsService)
+    {
+        $this->dealerOptionsService = $dealerOptionsService;
+    }
+
+    /**
+     * Perform the action on the given models.
+     *
+     * @param ActionFields $fields
+     * @param Collection $models
+     */
+    public function handle(ActionFields $fields, Collection $models): void
+    {
+        /** @var User $model */
+        foreach ($models as $model) {
+            $result = $this->dealerOptionsService->manageDealerOperations($model->dealer_id, $fields->active);
+
+            if (!$result) {
+                throw new InvalidArgumentException('Error trying managing Dealer', 500);
+            }
+        }
+    }
+
+    /**
+     * Get the fields available on the action.
+     *
+     * @return array
+     */
+    public function fields(): array
+    {
+        return [
+            Select::make('State', 'active')
+                ->options([
+                    1 => 'Activate',
+                    0 => 'Deactivate'
+                ])
+                ->rules('required')
+                ->help('<ul>
+                            <li>Activating dealer will unarchive his inventory based on previous deactivation date.</li>
+                            <li>Deactivating dealer will archive his inventory.</li>
+                        </ul>'),
+        ];
+    }
+}

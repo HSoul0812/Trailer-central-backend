@@ -95,9 +95,11 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
 
     /**
      * @param int $dealerId
+     * @param bool $active
+     * @param $datetime
      * @return mixed
      */
-    public function deactivateDealer(int $dealerId): User;
+    public function manageDealerOperations(int $dealerId, bool $active, $datetime): User;
 
     /**
      * @param int $dealerId

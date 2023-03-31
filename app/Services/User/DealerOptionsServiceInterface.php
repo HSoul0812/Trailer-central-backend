@@ -38,9 +38,10 @@ interface DealerOptionsServiceInterface
 
     /**
      * @param int $dealerId
+     * @param bool $active
      * @return bool
      */
-    public function deactivateDealer(int $dealerId): bool;
+    public function manageDealerOperations(int $dealerId, bool $active): bool;
 
     /**
      * @param int $dealerId

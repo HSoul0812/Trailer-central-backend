@@ -19,6 +19,7 @@ use App\Repositories\Repository;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\Website\EntityRepositoryInterface as WebsiteEntityRepositoryInterface;
 use App\Repositories\Website\WebsiteRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
@@ -136,24 +137,31 @@ class DealerOptionsService implements DealerOptionsServiceInterface
 
     /**
      * @param int $dealerId
+     * @param bool $active
      * @return bool
      */
-    public function deactivateDealer(int $dealerId): bool {
+    public function manageDealerOperations(int $dealerId, bool $active): bool
+    {
         try {
+            // Transaction added in case of any exception occurs we don't mess any data
+            DB::beginTransaction();
+            $deletedAt = User::find($dealerId)->deleted_at;
+            $datetime = Carbon::now()->format('Y-m-d H:i:s');
 
             $inventoryParams = [
-                'active' => self::INACTIVE,
-                'is_archived' => self::ARCHIVED_ON,
-                'archived_at' => Carbon::now()->format('Y-m-d H:i:s')
+                'active' => $active,
+                'is_archived' => $active ? 0 : self::ARCHIVED_ON,
+                'archived_at' => $active ? null : $datetime
             ];
 
-            $this->userRepository->deactivateDealer($dealerId);
-            $this->inventoryRepository->archiveInventory($dealerId, $inventoryParams);
+            $this->userRepository->manageDealerOperations($dealerId, $active, $datetime);
+            $this->inventoryRepository->manageDealerInventory($dealerId, $inventoryParams, $deletedAt);
 
+            DB::commit();
             return true;
         } catch (\Exception $e) {
-            Log::error("Dealer deactivation error. dealer_id - {$dealerId}", $e->getTrace());
-
+            Log::error("Dealer managing error. dealer_id - {$dealerId}", $e->getTrace());
+            DB::rollback();
             return false;
         }
     }

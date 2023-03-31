@@ -5,10 +5,10 @@ namespace App\Nova\Resources\Dealer;
 use App\Nova\Actions\ActivateUserAccounts;
 use App\Nova\Actions\DeactivateUserAccounts;
 use App\Nova\Actions\Dealer\ChangeStatus;
-use App\Nova\Actions\Dealer\DeactivateDealer;
 use App\Nova\Actions\Dealer\DeactivateECommerce;
 use App\Nova\Actions\Dealer\HiddenIntegrations\ActivateELeads;
 use App\Nova\Actions\Dealer\HiddenIntegrations\DeactivateELeads;
+use App\Nova\Actions\Dealer\ManageDealer;
 use App\Nova\Actions\Dealer\Subscriptions\CDK\ActivateCdk;
 use App\Nova\Actions\Dealer\Subscriptions\CDK\DeactivateCdk;
 use App\Nova\Actions\Dealer\Subscriptions\CRM\ActivateCrm;
@@ -278,7 +278,7 @@ class Dealer extends Resource
             app()->make(DeactivateScheduler::class)->exceptOnTableRow(),
             app()->make(ActivateUserAccounts::class)->exceptOnTableRow(),
             app()->make(DeactivateUserAccounts::class)->exceptOnTableRow(),
-            app()->make(DeactivateDealer::class)->exceptOnTableRow(),
+            app()->make(ManageDealer::class)->exceptOnTableRow(),
 
             // Table Row can see
             app()->make(ActivateCdk::class)->onlyOnTableRow()->canSee(function ($request) {
@@ -463,12 +463,12 @@ class Dealer extends Resource
 
                 return $this->resource instanceof Model && $this->resource->isUserAccountsActive;
             }),
-            app()->make(DeactivateDealer::class)->onlyOnTableRow()->canSee(function ($request) {
+            app()->make(ManageDealer::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
-                return $this->resource instanceof Model && !$this->resource->deleted;
+                return $this->resource instanceof Model;
             }),
 
             app()->make(ChangeStatus::class),
