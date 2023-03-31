@@ -2,31 +2,32 @@
 
 namespace Tests\Unit\Services\File;
 
-use App\Exceptions\File\FileUploadException;
-use App\Exceptions\File\ImageUploadException;
-use App\Helpers\ImageHelper;
-use App\Helpers\SanitizeHelper;
-use App\Services\File\DTOs\FileDto;
-use App\Services\File\ImageService;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Http\UploadedFile;
+use App\Exceptions\File\FileUploadException;
+use App\Exceptions\File\ImageUploadException;
+use App\Services\File\DTOs\FileDto;
+use App\Services\File\ImageService;
 use Illuminate\Support\Facades\Storage;
-use Mockery;
-use Mockery\LegacyMockInterface;
-use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use Tests\TestCase;
-use App\Models\User\User;
 use App\Models\Inventory\Inventory;
+use Illuminate\Http\UploadedFile;
+use Mockery\LegacyMockInterface;
+use App\Helpers\ImageHelper;
+use GuzzleHttp\Client;
+use App\Models\User\User;
+use Tests\TestCase;
+use Mockery;
 use Imagick;
 
 /**
- * Test for App\Services\File\ImageService
+ * This test suite requieres the binary `convert`which is provided by the package imagemagick
+ * to install run command: `sudo apt-get install imagemagick`
  *
- * Class ImageServiceTest
- * @package Tests\Unit\File
+ * @group DW
+ * @group DW_INVENTORY
+ * @group DW_ELASTICSEARCH
  *
  * @coversDefaultClass \App\Services\File\ImageService
  */
@@ -44,11 +45,6 @@ class ImageServiceTest extends TestCase
      * @var LegacyMockInterface|Client
      */
     private $httpClient;
-
-    /**
-     * @var LegacyMockInterface|SanitizeHelper
-     */
-    private $sanitizeHelper;
 
     /**
      * @var LegacyMockInterface|ImageHelper
@@ -76,9 +72,6 @@ class ImageServiceTest extends TestCase
 
         $this->httpClient = Mockery::mock(Client::class);
         $this->app->instance(Client::class, $this->httpClient);
-
-        $this->sanitizeHelper = Mockery::mock(SanitizeHelper::class);
-        $this->app->instance(SanitizeHelper::class, $this->sanitizeHelper);
 
         $this->imageHelper = Mockery::mock(ImageHelper::class)->makePartial();
         $this->app->instance(ImageHelper::class, $this->imageHelper);
@@ -136,10 +129,6 @@ class ImageServiceTest extends TestCase
             ->with()
             ->andReturn($this->image);
 
-        $this->sanitizeHelper
-            ->shouldReceive('cleanFilename')
-            ->passthru();
-
         $this->imageHelper
             ->shouldReceive('resize')
             ->passthru();
@@ -167,73 +156,10 @@ class ImageServiceTest extends TestCase
      * @throws BindingResolutionException
      * @throws FileUploadException
      * @throws ImageUploadException
-     */
-    public function testUploadWithOverlay(string $url, string $title, int $dealerId)
-    {
-        $params = [
-            'overlayText' => 'some_text'
-        ];
-
-        $this->httpClient
-            ->shouldReceive('get')
-            ->once()
-            ->with(self::TEST_URL, ['http_errors' => false])
-            ->andReturn($this->httpResponse);
-
-        $this->httpResponse
-            ->shouldReceive('getBody')
-            ->once()
-            ->with()
-            ->andReturn($this->httpStream);
-
-        $this->httpStream
-            ->shouldReceive('getContents')
-            ->once()
-            ->with()
-            ->andReturn($this->image);
-
-        $this->sanitizeHelper
-            ->shouldReceive('cleanFilename')
-            ->passthru();
-
-        $this->imageHelper
-            ->shouldReceive('resize')
-            ->passthru();
-
-        $this->imageHelper
-            ->shouldReceive('addOverlay')
-            ->with(\Mockery::type('string'), 'some_text')
-            ->once();
-
-        $imageService = app()->make(ImageService::class);
-        $result = $imageService->upload($url, $title, $dealerId, null, $params);
-
-        $this->assertInstanceOf(FileDto::class, $result);
-        $this->assertNotNull($result->getPath());
-        $this->assertNotNull($result->getHash());
-
-        Storage::disk('s3')->assertExists($result->getPath());
-    }
-
-    /**
-     * @covers ::upload
-     * @dataProvider uploadDataProvider
-     *
-     * @group DMS
-     * @group DMS_FILES
-     *
-     * @param string $url
-     * @param string $title
-     * @param int $dealerId
-     * @throws BindingResolutionException
-     * @throws FileUploadException
-     * @throws ImageUploadException
      * @throws FileNotFoundException
      */
-    public function testUploadWithWrongExtension(string $url, string $title, int $dealerId)
+    public function testUploadWithWrongExtensionWillHaveDefaultExtension(string $url, string $title, int $dealerId)
     {
-        $this->expectException(ImageUploadException::class);
-
         $image = Storage::disk('test_resources')->get('test_image.bmp');
 
         $this->httpClient
@@ -255,7 +181,10 @@ class ImageServiceTest extends TestCase
             ->andReturn($image);
 
         $imageService = app()->make(ImageService::class);
-        $imageService->upload($url, $title, $dealerId);
+
+        $file = $imageService->upload($url, $title, $dealerId);
+
+        $this->assertStringContainsString(sprintf('.%s', ImageService::DEFAULT_EXTENSION), $file->getPath());
     }
 
     /**
@@ -316,6 +245,53 @@ class ImageServiceTest extends TestCase
     {
         $params = [
             'skipNotExisting' => true
+        ];
+
+        $this->httpClient
+            ->shouldReceive('get')
+            ->once()
+            ->with(self::TEST_URL, ['http_errors' => false])
+            ->andReturn($this->httpResponse);
+
+        $this->httpResponse
+            ->shouldReceive('getBody')
+            ->once()
+            ->with()
+            ->andReturn($this->httpStream);
+
+        $this->httpStream
+            ->shouldReceive('getContents')
+            ->once()
+            ->with()
+            ->andReturn(null);
+
+        $imageService = app()->make(ImageService::class);
+        $result = $imageService->upload($url, $title, $dealerId, null, $params);
+
+        $this->assertNull($result);
+    }
+
+    /**
+     * @covers ::upload
+     * @dataProvider uploadDataProvider
+     *
+     * @group DMS
+     * @group DMS_FILES
+     *
+     * @param string $url
+     * @param string $title
+     * @param int $dealerId
+     * @throws BindingResolutionException
+     * @throws FileUploadException
+     * @throws ImageUploadException
+     */
+    public function testUploadWillThrowExceptionWhenEmptyContent(string $url, string $title, int $dealerId)
+    {
+        $this->expectException(FileUploadException::class);
+        $this->expectExceptionMessage("Can't get file contents. Url - {$url}, dealer_id - {$dealerId}, id - ");
+
+        $params = [
+            'skipNotExisting' => false
         ];
 
         $this->httpClient
@@ -432,20 +408,20 @@ class ImageServiceTest extends TestCase
                     'dealer_id' => self::TEST_DEALER_ID,
                     'inventory_id' => self::TEST_INVENTORY_ID,
                     'overlay_logo' => '',
-                    'overlay_logo_position' => User::OVERLAY_LOGO_POSITION_LOWER_RIGHT, 
-                    'overlay_logo_width' => '20%', 
-                    'overlay_logo_height' => '20%', 
-                    'overlay_upper' => User::OVERLAY_UPPER_DEALER_NAME, 
-                    'overlay_upper_bg' => '#000000', 
-                    'overlay_upper_alpha' => 0, 
-                    'overlay_upper_text' => '#ffffff', 
-                    'overlay_upper_size' => 40, 
+                    'overlay_logo_position' => User::OVERLAY_LOGO_POSITION_LOWER_RIGHT,
+                    'overlay_logo_width' => '20%',
+                    'overlay_logo_height' => '20%',
+                    'overlay_upper' => User::OVERLAY_UPPER_DEALER_NAME,
+                    'overlay_upper_bg' => '#000000',
+                    'overlay_upper_alpha' => 0,
+                    'overlay_upper_text' => '#ffffff',
+                    'overlay_upper_size' => 40,
                     'overlay_upper_margin' => 40,
-                    'overlay_lower' => User::OVERLAY_UPPER_DEALER_PHONE, 
-                    'overlay_lower_bg' => '#000000', 
-                    'overlay_lower_alpha' => 0, 
-                    'overlay_lower_text' => '#ffffff', 
-                    'overlay_lower_size' => 40, 
+                    'overlay_lower' => User::OVERLAY_UPPER_DEALER_PHONE,
+                    'overlay_lower_bg' => '#000000',
+                    'overlay_lower_alpha' => 0,
+                    'overlay_lower_text' => '#ffffff',
+                    'overlay_lower_size' => 40,
                     'overlay_lower_margin' => 40,
                     'overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL,
                     'dealer_overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL,
@@ -496,25 +472,24 @@ class ImageServiceTest extends TestCase
 
         $newImage = $imageService->addOverlays($imagePath, $overlayParams);
 
-        Storage::disk('tmp')->assertExists([
-            'tmp_addLogoOverlay'
-        ]);
-
         Storage::disk('tmp')->assertMissing([
             'tmp_addUpperTextOverlay',
             'tmp_localLogoPath',
             'tmp_resizedLogo',
             'tmp_localImagePath',
+            'tmp_addLogoOverlay'
         ]);
 
         $this->assertEquals(mime_content_type($newImage), 'image/png');
 
         // to compare the image manually by human
-        // Storage::disk('test_resources')->put('testAddUpperTextLowerLogoOverlays.png', 
-        //     file_get_contents($newImage));
+        // $imageContent = file_get_contents($newImage);
+        // Storage::disk('test_resources')->put('testAddUpperTextLowerLogoOverlays_current_test.png', $imageContent);
 
-        $this->assertImages($newImage,
-            Storage::disk('test_resources')->path('testAddUpperTextLowerLogoOverlays.png'));
+        $this->assertImages(
+            $newImage,
+            Storage::disk('test_resources')->path('testAddUpperTextLowerLogoOverlays.png')
+        );
     }
 
     /**
@@ -528,7 +503,7 @@ class ImageServiceTest extends TestCase
         $overlayParams['overlay_logo_position'] = User::OVERLAY_LOGO_POSITION_UPPER_RIGHT;
 
         $imagePath = Storage::disk('test_resources')->path('inventory_image.png');
-            
+
         $this->imageHelper->shouldReceive('addLogoOverlay')
             ->withArgs([
                 Storage::disk('tmp')->path('tmp_addLowerTextOverlay'),
@@ -559,25 +534,23 @@ class ImageServiceTest extends TestCase
 
         $newImage = $imageService->addOverlays($imagePath, $overlayParams);
 
-        Storage::disk('tmp')->assertExists([
-            'tmp_addLogoOverlay'
-        ]);
-
         Storage::disk('tmp')->assertMissing([
             'tmp_addLowerTextOverlay',
             'tmp_localLogoPath',
             'tmp_resizedLogo',
             'tmp_localImagePath',
+            'tmp_addLogoOverlay'
         ]);
 
         $this->assertEquals(mime_content_type($newImage), 'image/png');
 
-        // to compare the image manually by human
-        // Storage::disk('test_resources')->put('testAddLowerTextUpperLogoOverlays.png', 
-        //     file_get_contents($newImage));
+        // $imageContent = file_get_contents($newImage);
+        // Storage::disk('test_resources')->put('testAddLowerTextUpperLogoOverlays_current_test.png', $imageContent);
 
-        $this->assertImages($newImage,
-            Storage::disk('test_resources')->path('testAddLowerTextUpperLogoOverlays.png'));
+        $this->assertImages(
+            $newImage,
+            Storage::disk('test_resources')->path('testAddLowerTextUpperLogoOverlays.png')
+        );
     }
 
     /**
@@ -591,7 +564,7 @@ class ImageServiceTest extends TestCase
         $overlayParams['overlay_logo_position'] = User::OVERLAY_LOGO_POSITION_NONE;
 
         $imagePath = Storage::disk('test_resources')->path('inventory_image.png');
-            
+
         $this->imageHelper->shouldReceive('addUpperTextOverlay')
             ->withArgs([$imagePath, self::TEST_DEALER_NAME, $overlayParams])
             ->passthru();
@@ -608,29 +581,28 @@ class ImageServiceTest extends TestCase
             ->shouldReceive('getRandomString')
             ->andReturn(
                 'tmp_addUpperTextOverlay',
-                'tmp_addLowerTextOverlay',
+                'tmp_addLowerTextOverlay'
             );
 
         $imageService = app()->make(ImageService::class);
 
         $newImage = $imageService->addOverlays($imagePath, $overlayParams);
 
-        Storage::disk('tmp')->assertExists([
-            'tmp_addLowerTextOverlay'
-        ]);
-
         Storage::disk('tmp')->assertMissing([
             'tmp_addUpperTextOverlay',
+            'tmp_addLowerTextOverlay'
         ]);
 
         $this->assertEquals(mime_content_type($newImage), 'image/png');
 
         // to compare the image manually by human
-        // Storage::disk('test_resources')->put('testAddLowerTextUpperTextOverlays.png', 
-        //     file_get_contents($newImage));
+        // $imageContent = file_get_contents($newImage);
+        // Storage::disk('test_resources')->put('testAddLowerTextUpperTextOverlays_current_test.png', $imageContent);
 
-        $this->assertImages($newImage,
-            Storage::disk('test_resources')->path('testAddLowerTextUpperTextOverlays.png'));
+        $this->assertImages(
+            $newImage,
+            Storage::disk('test_resources')->path('testAddLowerTextUpperTextOverlays.png')
+        );
     }
 
     /**
@@ -664,34 +636,31 @@ class ImageServiceTest extends TestCase
                 'tmp_localLogoPath',
                 'tmp_resizedLogo',
                 'tmp_localImagePath',
-                'tmp_addLogoOverlay',
+                'tmp_addLogoOverlay'
             );
 
         $imageService = app()->make(ImageService::class);
 
         $newImage = $imageService->addOverlays($imagePath, $overlayParams);
 
-        Storage::disk('tmp')->assertExists([
-            'tmp_addLogoOverlay'
-        ]);
-
         Storage::disk('tmp')->assertMissing([
             'tmp_localLogoPath',
             'tmp_resizedLogo',
             'tmp_localImagePath',
+            'tmp_addLogoOverlay'
         ]);
 
         $this->assertEquals(mime_content_type($newImage), 'image/png');
 
         // to compare the image manually by human
-        // Storage::disk('test_resources')->put('testAddLogoOnlyOverlay.png', 
-        //     file_get_contents($newImage));
+        // $imageContent = file_get_contents($newImage);
+        // Storage::disk('test_resources')->put('testAddLogoOnlyOverlay_current_test.png', $imageContent);
 
-        $this->assertImages($newImage,
-            Storage::disk('test_resources')->path('testAddLogoOnlyOverlay.png'));
+        $this->assertImages(
+            $newImage,
+            Storage::disk('test_resources')->path('testAddLogoOnlyOverlay.png')
+        );
     }
-
-
 
     /**
      * @dataProvider overlayParamDataProvider
@@ -711,7 +680,7 @@ class ImageServiceTest extends TestCase
 
         $imageService = app()->make(ImageService::class);
 
-        $newImage = $imageService->addOverlays($imagePath, $overlayParams);
+        $imageService->addOverlays($imagePath, $overlayParams);
     }
 
     /**
@@ -724,7 +693,7 @@ class ImageServiceTest extends TestCase
         $overlayParams['overlay_logo'] = 'https://s3.amazonaws.com/distillery-trailercentral/media/Indiana Trailer Sales & More - Transparent.png';
         $overlayParams['overlay_upper'] = User::OVERLAY_UPPER_NONE;
 
-        $imagePath = 'https://s3.amazonaws.com/distillery-trailercentral/media/Indiana Trailer Sales & More - Transparent.png';
+        $imagePath = 'https://s3.amazonaws.com/distillery-trailercentral/media/102_X_40_TRIPLE_GOOSENECK_CARHAULER_0jTiQS - Copy.png';
 
         $this->imageHelper->shouldReceive('addLogoOverlay')
             ->withArgs([
@@ -745,24 +714,30 @@ class ImageServiceTest extends TestCase
                 'tmp_localLogoPath',
                 'tmp_resizedLogo',
                 'tmp_localImagePath',
-                'tmp_addLogoOverlay',
+                'tmp_addLogoOverlay'
             );
 
         $imageService = app()->make(ImageService::class);
 
         $newImage = $imageService->addOverlays($imagePath, $overlayParams);
 
-        Storage::disk('tmp')->assertExists([
-            'tmp_addLogoOverlay'
-        ]);
-
         Storage::disk('tmp')->assertMissing([
             'tmp_localLogoPath',
             'tmp_resizedLogo',
             'tmp_localImagePath',
+            'tmp_addLogoOverlay'
         ]);
 
+        // to compare the image manually by human
+        // $imageContent = file_get_contents($newImage);
+        // Storage::disk('test_resources')->put('testAddOverlayWithUrl_current_test.png', $imageContent);
+
         $this->assertEquals(mime_content_type($newImage), 'image/png');
+
+        $this->assertImages(
+            $newImage,
+            Storage::disk('test_resources')->path('testAddOverlayWithUrl.png')
+        );
     }
 
     /**
@@ -770,7 +745,7 @@ class ImageServiceTest extends TestCase
      * @group Marketing
      * @group Marketing_Overlays
      */
-    public function testAddOverlayWithNonvalidTextSettings($overlayParams)
+    public function testAddOverlayWithNonValidTextSettings($overlayParams)
     {
         $overlayParams['overlay_upper'] = 'foo';
         $overlayParams['overlay_lower'] = '';

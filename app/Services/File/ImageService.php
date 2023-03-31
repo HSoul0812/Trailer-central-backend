@@ -31,20 +31,20 @@ class ImageService extends AbstractFileService
      */
     private $imageHelper;
 
-    private const DEFAULT_EXTENSION = 'jpg';
+    public const DEFAULT_EXTENSION = 'jpg';
 
-    private const EXTENSION_MAPPING = [
-        "image/gif" => "gif",
-        "image/jpeg" => "jpg",
-        "image/jpg" => "jpg",
-        "image/png" => "png",
-        "image/x-png" => "png",
-        "image/x-MS-bmp" => "bmp",
-        "image/x-ms-bmp" => "bmp",
-        "image/x-portable-bitmap" => "pbm",
-        "image/x-photo-cd" => "pcd",
-        "image/x-pict" => "pic",
-        "image/tiff" => "tiff"
+    public const EXTENSION_MAPPING = [
+        'image/gif' => 'gif',
+        'image/jpeg' => 'jpg',
+        'image/jpg' => 'jpg',
+        'image/png' => 'png',
+        'image/x-png' => 'png',
+        'image/x-MS-bmp' => 'bmp',
+        'image/x-ms-bmp' => 'bmp',
+        'image/x-portable-bitmap' => 'pbm',
+        'image/x-photo-cd' => 'pcd',
+        'image/x-pict' => 'pic',
+        'image/tiff' => 'tiff'
     ];
 
     public function __construct(Client $httpClient, SanitizeHelper $sanitizeHelper, ImageHelper $imageHelper)
@@ -74,7 +74,6 @@ class ImageService extends AbstractFileService
     ): ?FileDto
     {
         $skipNotExisting = $params['skipNotExisting'] ?? false;
-        $overlayText = $params['overlayText'] ?? null;
 
         $localFilename = $this->uploadLocalByUrl($url, $dealerId, $identifier, $skipNotExisting);
 
@@ -92,22 +91,29 @@ class ImageService extends AbstractFileService
             $extension = self::DEFAULT_EXTENSION;
         }
 
-        $inventoryFilenameTitle = $title.'_'.CompactHelper::getRandomString().
-            ($overlayText ? ('_overlay_'.time()) : '').$extension;
+        $filenameParts = [
+            $title,
+            CompactHelper::getRandomString(),
+            $extension
+        ];
+
+        // a name like `test_image_title_2Y3gR6argueTroll.jpg`
+        $inventoryFilenameTitle = sprintf('%s_%s.%s', ...$filenameParts);
+
         $s3Filename = $this->sanitizeHelper->cleanFilename($inventoryFilenameTitle);
 
-        $this->imageHelper->resize($localFilename, 800, 800, true);
+        if ($localFilename) {
+            $this->imageHelper->resize($localFilename, 800, 800, true);
 
-        if ($overlayText) {
-            $this->imageHelper->addOverlay($localFilename, $overlayText);
+            $s3Path = $this->uploadToS3($localFilename, $s3Filename, $dealerId, $identifier, $params);
+
+            $hash = sha1_file($localFilename);
+            unlink($localFilename);
+
+            return new FileDto($s3Path, $hash);
         }
 
-        $s3Path = $this->uploadToS3($localFilename, $s3Filename, $dealerId, $identifier, $params);
-
-        $hash = sha1_file($localFilename);
-        unlink($localFilename);
-
-        return new FileDto($s3Path, $hash);
+        return null;
     }
 
     /**
@@ -121,13 +127,13 @@ class ImageService extends AbstractFileService
     public function uploadLocal(array $data): FileDto
     {
         if (!isset($data['file']) || !$data['file'] instanceof UploadedFile) {
-            throw new ImageUploadException("file has been missed");
+            throw new ImageUploadException('file has been missed');
         }
 
         $file = $data['file'];
 
         if (!in_array($file->getMimeType(), array_keys(self::EXTENSION_MAPPING))) {
-            throw new ImageUploadException("Not expected mime type");
+            throw new ImageUploadException('Not expected mime type');
         }
 
         $content = $file->get();
