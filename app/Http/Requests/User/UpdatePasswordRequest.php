@@ -14,7 +14,7 @@ class UpdatePasswordRequest extends Request
     protected $rules = [
         'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
         'dealer_user_id' => 'integer|min:1|exists:dealer_users,dealer_user_id',
-        'password' => ['required', 'min:6', 'max:8'],
+        'password' => ['required', 'min:8', 'max:8', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/'],
         'current_password' => ['required'],
     ];
 
