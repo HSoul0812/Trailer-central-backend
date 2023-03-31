@@ -22,7 +22,7 @@ use Mockery;
 use Imagick;
 
 /**
- * This test suite requieres the binary `convert`which is provided by the package imagemagick
+ * This test suite requieres the binary `convert` which is provided by the package imagemagick
  * to install run command: `sudo apt-get install imagemagick`
  *
  * @group DW

@@ -321,8 +321,13 @@ class InventoryServiceTest extends TestCase
         Log::shouldReceive('info')
             ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
 
-        $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
-        $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteByDealer')
+            ->with($inventory->dealer_id)
+            ->andReturn($expectedCacheKey);
+        $this->inventoryResponseCacheMock
+            ->shouldReceive('forget')
+            ->with([$expectedCacheKey]);
 
         $this->assertImageOverlayLogHasNewEntry($inventory);
 
@@ -437,8 +442,13 @@ class InventoryServiceTest extends TestCase
             ->shouldReceive('deleteByTbPrimaryId')
             ->never();
 
-        $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
-        $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteByDealer')
+            ->with($inventory->dealer_id)
+            ->andReturn($expectedCacheKey);
+        $this->inventoryResponseCacheMock
+            ->shouldReceive('forget')
+            ->with([$expectedCacheKey]);
 
         Log::shouldReceive('info')
             ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
@@ -557,8 +567,13 @@ class InventoryServiceTest extends TestCase
         Log::shouldReceive('info')
             ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
 
-        $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
-        $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteByDealer')
+            ->with($inventory->dealer_id)
+            ->andReturn($expectedCacheKey);
+        $this->inventoryResponseCacheMock
+            ->shouldReceive('forget')
+            ->with([$expectedCacheKey]);
 
         $this->assertImageOverlayLogHasNewEntry($inventory);
 
@@ -659,8 +674,13 @@ class InventoryServiceTest extends TestCase
         Log::shouldReceive('info')
             ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
 
-        $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
-        $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteByDealer')
+            ->with($inventory->dealer_id)
+            ->andReturn($expectedCacheKey);
+        $this->inventoryResponseCacheMock
+            ->shouldReceive('forget')
+            ->with([$expectedCacheKey]);
 
         $this->assertImageOverlayLogHasNewEntry($inventory);
 
@@ -763,8 +783,13 @@ class InventoryServiceTest extends TestCase
         Log::shouldReceive('info')
             ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
 
-        $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
-        $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteByDealer')
+            ->with($inventory->dealer_id)
+            ->andReturn($expectedCacheKey);
+        $this->inventoryResponseCacheMock
+            ->shouldReceive('forget')
+            ->with([$expectedCacheKey]);
 
         $this->assertImageOverlayLogHasNewEntry($inventory);
 
@@ -881,8 +906,13 @@ class InventoryServiceTest extends TestCase
         Log::shouldReceive('info')
             ->with('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
 
-        $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
-        $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteByDealer')
+            ->with($inventory->dealer_id)
+            ->andReturn($expectedCacheKey);
+        $this->inventoryResponseCacheMock
+            ->shouldReceive('forget')
+            ->with([$expectedCacheKey]);
 
         $this->assertImageOverlayLogHasNewEntry($inventory);
 
@@ -1965,8 +1995,13 @@ class InventoryServiceTest extends TestCase
 
         Log::shouldReceive('error')->never();
 
-        $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
-        $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteByDealer')
+            ->with($inventory->dealer_id)
+            ->andReturn($expectedCacheKey);
+        $this->inventoryResponseCacheMock
+            ->shouldReceive('forget')
+            ->with([$expectedCacheKey]);
 
         $this->assertImageOverlayLogHasNewEntry($inventory);
 
@@ -2040,8 +2075,13 @@ class InventoryServiceTest extends TestCase
             ->shouldReceive('uploadImages')
             ->once();
 
-        $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedCacheKey);
-        $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedCacheKey]);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteByDealer')
+            ->with($inventory->dealer_id)
+            ->andReturn($expectedCacheKey);
+        $this->inventoryResponseCacheMock
+            ->shouldReceive('forget')
+            ->with([$expectedCacheKey]);
 
         $this->assertImageOverlayLogHasNewEntry($inventory);
 
@@ -2094,9 +2134,17 @@ class InventoryServiceTest extends TestCase
             ->shouldReceive('rollbackTransaction')
             ->never();
 
-        $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedSearchCacheKey);
-        $this->responseCacheKeyMock->shouldReceive('deleteSingle')->with($inventory->inventory_id, $inventory->dealer_id)->andReturn($expectedSingleCacheKey);
-        $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedSearchCacheKey, $expectedSingleCacheKey]);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteByDealer')
+            ->with($inventory->dealer_id)
+            ->andReturn($expectedSearchCacheKey);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteSingle')
+            ->with($inventory->inventory_id, $inventory->dealer_id)
+            ->andReturn($expectedSingleCacheKey);
+        $this->inventoryResponseCacheMock
+            ->shouldReceive('forget')
+            ->with([$expectedSearchCacheKey, $expectedSingleCacheKey]);
 
         /** @var InventoryService $service */
         $service = $this->app->make(InventoryService::class);
@@ -2160,9 +2208,17 @@ class InventoryServiceTest extends TestCase
             ->shouldReceive('uploadImages')
             ->once();
 
-        $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedSearchCacheKey);
-        $this->responseCacheKeyMock->shouldReceive('deleteSingle')->with($inventory->inventory_id, $inventory->dealer_id)->andReturn($expectedSingleCacheKey);
-        $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedSearchCacheKey, $expectedSingleCacheKey]);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteByDealer')
+            ->with($inventory->dealer_id)
+            ->andReturn($expectedSearchCacheKey);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteSingle')
+            ->with($inventory->inventory_id, $inventory->dealer_id)
+            ->andReturn($expectedSingleCacheKey);
+        $this->inventoryResponseCacheMock
+            ->shouldReceive('forget')
+            ->with([$expectedSearchCacheKey, $expectedSingleCacheKey]);
 
         $result = $inventoryServiceMock->update($params);
 
@@ -2218,9 +2274,17 @@ class InventoryServiceTest extends TestCase
             ->shouldReceive('rollbackTransaction')
             ->never();
 
-        $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedSearchCacheKey);
-        $this->responseCacheKeyMock->shouldReceive('deleteSingle')->with($inventory->inventory_id, $inventory->dealer_id)->andReturn($expectedSingleCacheKey);
-        $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedSearchCacheKey, $expectedSingleCacheKey]);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteByDealer')
+            ->with($inventory->dealer_id)
+            ->andReturn($expectedSearchCacheKey);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteSingle')
+            ->with($inventory->inventory_id, $inventory->dealer_id)
+            ->andReturn($expectedSingleCacheKey);
+        $this->inventoryResponseCacheMock
+            ->shouldReceive('forget')
+            ->with([$expectedSearchCacheKey, $expectedSingleCacheKey]);
 
         /** @var InventoryService $service */
         $service = $this->app->make(InventoryService::class);
@@ -2285,9 +2349,17 @@ class InventoryServiceTest extends TestCase
             ->shouldReceive('uploadImages')
             ->once();
 
-        $this->responseCacheKeyMock->shouldReceive('deleteByDealer')->with($inventory->dealer_id)->andReturn($expectedSearchCacheKey);
-        $this->responseCacheKeyMock->shouldReceive('deleteSingle')->with($inventory->inventory_id, $inventory->dealer_id)->andReturn($expectedSingleCacheKey);
-        $this->inventoryResponseCacheMock->shouldReceive('forget')->with([$expectedSearchCacheKey, $expectedSingleCacheKey]);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteByDealer')
+            ->with($inventory->dealer_id)
+            ->andReturn($expectedSearchCacheKey);
+        $this->responseCacheKeyMock
+            ->shouldReceive('deleteSingle')
+            ->with($inventory->inventory_id, $inventory->dealer_id)
+            ->andReturn($expectedSingleCacheKey);
+        $this->inventoryResponseCacheMock
+            ->shouldReceive('forget')
+            ->with([$expectedSearchCacheKey, $expectedSingleCacheKey]);
 
         $result = $inventoryServiceMock->update($params);
 
