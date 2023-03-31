@@ -1170,25 +1170,17 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function manageDealerInventory(int $dealerId, array $inventoryParams, $deletedAt): int
     {
-        $dealerInventories = Inventory::where('dealer_id', $dealerId);
-
-        if (!$inventoryParams['active']) {
-            $dealerInventories = $dealerInventories->where([
-                    ['active', 1],
-                    ['archived_at', null]
-            ]);
-        } else {
-            if (is_null($deletedAt)) {
-                throw new \Exception('Deleted at is required when activating dealer inventories.');
-            }
-
-            $dealerInventories = $dealerInventories->where([
-                ['active', 0],
-                ['archived_at', $deletedAt]
-            ]);
+        if ($inventoryParams['active'] && is_null($deletedAt)) {
+            throw new \Exception('Deleted at is required when activating dealer inventories.');
         }
 
-        return $dealerInventories->update($inventoryParams);
+        $dealerInventories = Inventory::where('dealer_id', $dealerId);
+        $archivedAt = $inventoryParams['active'] ? $deletedAt : null;
+
+        return $dealerInventories->where([
+            ['active', !$inventoryParams['active']],
+            ['archived_at', $archivedAt]
+        ])->update($inventoryParams);
     }
 
     /**
