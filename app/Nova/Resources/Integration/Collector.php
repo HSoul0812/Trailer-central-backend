@@ -222,7 +222,12 @@ class Collector extends Resource
             new Panel('BDV', [
                 Boolean::make('Activate BDV', 'is_bdv_enabled')->hideFromIndex()->help(
                     'Whether or not to use BDV for this feed (images will be overwritten by whatever bdv sends)'
-                )
+                ),
+                NovaDependencyContainer::make([
+                    Boolean::make('Check for matching with existing bdv images', 'check_images_for_bdv_matching')->hideFromIndex()->help(
+                        'Check if an image should be updated for the inventory item if such an image already exists in bdv. It is relevant for large volumes of data'
+                    ),
+                ])->dependsOn('is_bdv_enabled', true),
             ]),
 
             new Panel('Spincar', [
@@ -241,22 +246,29 @@ class Collector extends Resource
                 Boolean::make('Use Factory Mapping', 'use_factory_mapping')->hideFromIndex()->help(
                     'Whether or not to use the data from FV to populate these units'
                 ),
-                Boolean::make('Enable MFG and Brand Mapping', 'is_mfg_brand_mapping_enabled')->hideFromIndex()->help(
-                    'If enabled will map unit MFG to MFG and unit Brand to Brand.'
-                ),
+                NovaDependencyContainer::make([
+                    Boolean::make('Enable MFG and Brand Mapping', 'is_mfg_brand_mapping_enabled')->hideFromIndex()->help(
+                        'If enabled will map unit MFG to MFG and unit Brand to Brand.'
+                    ),
+                    Boolean::make('Use brands', 'use_brands_for_factory_mapping')->hideFromIndex()->help(
+                        'Only if brands field exists'
+                    ),
+                    Boolean::make('Don\'t save unmapped items', 'not_save_unmapped_on_factory_units')
+                        ->withMeta(['value' => $this->not_save_unmapped_on_factory_units ?? true])->hideFromIndex()->help(
+                        "If a unit is not found in the factory vantage, do not save it"
+                    ),
+                ])->dependsOn('use_factory_mapping', true),
             ]),
 
             new Panel('Actions With Items', [
                 Boolean::make('Create Items')->withMeta(['value' => $this->create_items ?? true])->hideFromIndex(),
                 Boolean::make('Update Items')->withMeta(['value' => $this->update_items ?? true])->hideFromIndex(),
                 Boolean::make('Archive Items')->withMeta(['value' => $this->archive_items ?? true])->hideFromIndex(),
-                NovaDependencyContainer::make([
-                    Boolean::make('Don\'t archive manually added items', 'not_archive_manually_items')->hideFromIndex()->help(
-                        'If checked, added to the dashboard items won\'t be archived if they are absent in the source file'
-                    ),
-                ])->dependsOn('archive_items', true),
                 Boolean::make('Unarchive Sold Items', 'unarchive_sold_items')->hideFromIndex()->help(
                     'If item exists, but is archived, it will be unarchived upon selecting this option'
+                ),
+                Boolean::make('Mark Sold Manually Added Items', 'mark_sold_manually_added_items')->hideFromIndex()->help(
+                    'Mark as sold the items that were added from other sources (for example from the dashboard)'
                 ),
                 Boolean::make('Use Partial Update', 'use_partial_update')->hideFromIndex()->help(
                     'Relevant for collectors, that spend a lot of time on running processes. This feature is able to set how often the full run will be. The partial run will be at another time (without images update)'
@@ -305,6 +317,9 @@ class Collector extends Resource
             new Panel('Title And Description', [
                 Text::make('Title Format', 'title_format')->rules('max:128')->hideFromIndex()->help(
                     'Title generation. A list of fields should be separated by commas (by default - "year,manufacturer,model,category")'
+                ),
+                Text::make('Conditional Title Format', 'conditional_title_format')->rules('max:254')->hideFromIndex()->help(
+                    'If all field values are not empty, this title format will be used. Otherwise, the default template will be used'
                 ),
                 Boolean::make('Import Description', 'import_description')->hideFromIndex(),
                 Text::make('Path To Fields (additional description)', 'path_to_fields_to_description')->rules('max:254')->hideFromIndex()->help(
