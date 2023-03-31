@@ -19,7 +19,7 @@ class AddThirdPartyProviderToCollector extends Migration
         Schema::table($this->table, function (Blueprint $table) {
             if (!Schema::hasColumn($this->table, $this->column)) {
                 Schema::table($this->table, function (Blueprint $table) {
-                    $table->text($this->column)->nullable();
+                    $table->string($this->column)->nullable();
                 });
             }
         });
