@@ -73,12 +73,12 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
     /**
      * {@inheritDoc}
      */
-    public function completePasswordReset(string $code, string $password) : bool
+    public function completePasswordReset(string $code, string $password, string $current_password): bool
     {
         $dealerPasswordReset = $this->getByCode($code);
         $dealer = $dealerPasswordReset->dealer;
 
-        $this->updateDealerPassword($dealer, $password);
+        $this->updateDealerPassword($dealer, $password, $current_password);
 
         $dealerPasswordReset->status = DealerPasswordReset::STATUS_PASSWORD_RESET_COMPLETED;
 
@@ -98,7 +98,7 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
      * @throws WrongCurrentPasswordException when current password is wrong
      * @throws TooLongPasswordException when the password is greater than eighth characters
      */
-    public function updateDealerPassword(User $dealer, string $password, string $current_password) : void
+    public function updateDealerPassword(User $dealer, string $password, string $current_password): void
     {
         $this->passwordMatch($dealer->password, $current_password, $dealer->salt);
         $this->guardPasswordLength($password);
@@ -150,6 +150,7 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
     /**
      * @param string $expectedPassword
      * @param string $password
+     * @param string $salt
      * @return void
      * @throws WrongCurrentPasswordException when the current password is wrong
      */

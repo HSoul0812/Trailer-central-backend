@@ -108,7 +108,7 @@ class SignInController extends RestfulController
         $request = new FinishPasswordResetRequest($request->all());
         if ($request->validate()) {
             try {
-                $this->passwordResetService->finishReset($request->code, $request->password);
+                $this->passwordResetService->finishReset($request->code, $request->password, $request->current_password);
             } catch (TooLongPasswordException $ex) {
                 // the request validation is preventing this, but just in case anyone remove that rule
                 // we're going to handle it here
