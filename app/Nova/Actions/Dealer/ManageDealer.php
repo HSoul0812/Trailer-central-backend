@@ -22,6 +22,13 @@ class ManageDealer extends Action
     use Queueable;
 
     /**
+     * The displayable name of the action.
+     *
+     * @var string
+     */
+    public $name = 'Manage Dealer Active State';
+
+    /**
      * @var bool
      */
     public $showOnTableRow = true;
