@@ -178,9 +178,10 @@ class ListingRepository implements ListingRepositoryInterface {
         // Join with Listings
         $query = $query->leftJoin(Listings::getTableName(), function ($join) use ($integration) {
             $join->on(Listings::getTableName() . '.inventory_id', '=', Inventory::getTableName() . '.inventory_id');
-            $join->on(Listings::getTableName() . '.username', '=', DB::raw("'" . $integration->fb_username . "'"));
-        })->where(function (Builder $query) use ($listingsTableName) {
+            $join->orOn(DB::raw("CONCAT(fbapp_listings.year, fbapp_listings.make, fbapp_listings.model)"), '=', DB::raw("CONCAT(inventory.year, inventory.manufacturer, inventory.model)"));
+        })->where(function (Builder $query) use ($listingsTableName, $integration) {
             $query->whereNull("{$listingsTableName}.facebook_id")
+                ->orWhere(Listings::getTableName() . '.username', '<>', DB::raw("'" . $integration->fb_username . "'"))
                 ->orWhereIn("{$listingsTableName}.status", [Listings::STATUS_DELETED, Listings::STATUS_EXPIRED]);
         });
 
