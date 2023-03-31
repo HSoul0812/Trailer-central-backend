@@ -1221,21 +1221,50 @@ class InventoryRepository implements InventoryRepositoryInterface
      *     overlay_text_phone: string,
      *     country: string,
      *     overlay_text_location: string,
-     *     overlay_updated_at: string
+     *     overlay_updated_at: string,
+     *     dealer_overlay_updated_at: string
      *     }
      */
     public function getOverlayParams(int $inventoryId): array
     {
-        $query = Inventory::select(User::getTableName() .'.dealer_id', 'inventory_id', 'overlay_logo', 'overlay_logo_position', 'overlay_logo_width', 'overlay_logo_height',
-            'overlay_upper', 'overlay_upper_bg', 'overlay_upper_alpha', 'overlay_upper_text', 'overlay_upper_size', 'overlay_upper_margin',
-            'overlay_lower', 'overlay_lower_bg', 'overlay_lower_alpha', 'overlay_lower_text', 'overlay_lower_size', 'overlay_lower_margin',
-            'overlay_default', Inventory::getTableName() .'.overlay_enabled', User::getTableName() .'.overlay_enabled AS dealer_overlay_enabled',
-            User::getTableName() .'.name AS overlay_text_dealer', DealerLocation::getTableName() .'.phone AS overlay_text_phone',
-            DealerLocation::getTableName() .'.country', User::getTableName() .'.overlay_updated_at',
-            \DB::raw("CONCAT(".DealerLocation::getTableName() .".city, ', ',".DealerLocation::getTableName() .".region) AS overlay_text_location"))
-        ->leftJoin(User::getTableName(), Inventory::getTableName() .'.dealer_id', '=', User::getTableName() .'.dealer_id')
-        ->leftJoin(DealerLocation::getTableName(), Inventory::getTableName() .'.dealer_location_id', '=', DealerLocation::getTableName() .'.dealer_location_id')
-        ->where(Inventory::getTableName() .'.inventory_id', $inventoryId);
+        $userTableName = User::getTableName();
+        $dealerLocationTable = DealerLocation::getTableName();
+        $inventoryTable = Inventory::getTableName();
+
+        $columns = [
+            $userTableName.'.dealer_id',
+            'inventory_id',
+            'overlay_logo',
+            'overlay_logo_position',
+            'overlay_logo_width',
+            'overlay_logo_height',
+            'overlay_upper',
+            'overlay_upper_bg',
+            'overlay_upper_alpha',
+            'overlay_upper_text',
+            'overlay_upper_size',
+            'overlay_upper_margin',
+            'overlay_lower',
+            'overlay_lower_bg',
+            'overlay_lower_alpha',
+            'overlay_lower_text',
+            'overlay_lower_size',
+            'overlay_lower_margin',
+            'overlay_default',
+            $inventoryTable.'.overlay_enabled',
+            $userTableName.'.overlay_enabled AS dealer_overlay_enabled',
+            $userTableName.'.name AS overlay_text_dealer',
+            $dealerLocationTable.'.phone AS overlay_text_phone',
+            $dealerLocationTable.'.country',
+            $inventoryTable.'.overlay_updated_at',
+            $userTableName.'.overlay_updated_at AS dealer_overlay_updated_at',
+            DB::raw(sprintf("CONCAT(%s.city,', ',%s.region) AS overlay_text_location", $dealerLocationTable, $dealerLocationTable))
+        ];
+
+        $query = Inventory::select($columns)
+                        ->leftJoin($userTableName, $inventoryTable .'.dealer_id', '=', $userTableName .'.dealer_id')
+                        ->leftJoin($dealerLocationTable, $inventoryTable .'.dealer_location_id', '=', $dealerLocationTable .'.dealer_location_id')
+                        ->where($inventoryTable .'.inventory_id', $inventoryId);
 
         $overlayParams = $query->first()->toArray();
 

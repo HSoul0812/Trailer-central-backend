@@ -47,6 +47,7 @@ use App\Repositories\Dms\Customer\InventoryRepository as DmsCustomerInventoryRep
 use App\Services\Export\Inventory\PdfExporter;
 use App\Traits\S3\S3Helper;
 use App\Jobs\Inventory\GenerateOverlayImageJob;
+use Twilio\Rest\Api\V2010\Account\Usage\Record\ReadThisMonthOptions;
 
 /**
  * Class InventoryService
@@ -749,39 +750,55 @@ class InventoryService implements InventoryServiceInterface
             return;
         }
 
-        $dealerOverlayConfig = $this->inventoryRepository->getOverlayParams($inventoryId);
+        $inventoryOverlayConfig = $this->inventoryRepository->getOverlayParams($inventoryId);
 
-        Log::channel('inventory-overlays')->info('Adding Overlays on Inventory Images', $dealerOverlayConfig);
+        Log::channel('inventory-overlays')->info('Adding Overlays on Inventory Images', $inventoryOverlayConfig);
 
         $imageIndex = 0;
 
         $inventoryImages
             ->sortBy(InventoryHelper::singleton()->imageSorter())
-            ->each(function (InventoryImage $inventoryImage) use ($dealerOverlayConfig, &$imageIndex) {
-                if ($inventoryImage->shouldRestoreOriginalImage($dealerOverlayConfig['overlay_enabled'], $imageIndex)) {
-                    $this->imageTableService->tryToRestoreOriginalImage($inventoryImage->image);
+            ->each(function (InventoryImage $inventoryImage) use ($inventoryOverlayConfig, &$imageIndex) {
+                $isOverlayDisabledOrImageShouldNotOverlay = $this->isOverlayDisabledOrImageShouldNotOverlay(
+                    $inventoryImage,
+                    $imageIndex,
+                    $inventoryOverlayConfig['overlay_enabled']
+                );
 
+                if ($inventoryImage->hasBeenAlreadyOverlay()) {
+                    if ($isOverlayDisabledOrImageShouldNotOverlay) {
+                        $this->imageTableService->tryToRestoreOriginalImage($inventoryImage->image);
+
+                        $imageIndex++;
+
+                        return true;
+                    }
+
+                    if ($this->shouldRestoreImageOverlay($inventoryImage, $inventoryOverlayConfig['overlay_updated_at'])) {
+                        $this->imageTableService->tryToRestoreImageOverlay($inventoryImage->image);
+
+                        $imageIndex++;
+
+                        return true;
+                    }
+                }
+
+                if ($isOverlayDisabledOrImageShouldNotOverlay) {
+                    // do nothing
                     $imageIndex++;
 
                     return true;
                 }
 
-                if ($dealerOverlayConfig['overlay_updated_at'] <= $inventoryImage->overlay_updated_at) {
-                    $this->imageTableService->tryToRestoreImageOverlay($inventoryImage->image);
-
-                    $imageIndex++;
-
-                    return true;
-                }
-
+                $overlayFilename = null;
                 // overlay only should be generated when it is a new image or when the dealer has changed
                 // its global overlay configuration
                 try {
                     DB::beginTransaction();
 
                     $overlayFilename = $this->imageService->addOverlayAndSaveToStorage(
-                        $inventoryImage->image->originalFilename(),
-                        $dealerOverlayConfig
+                        $inventoryImage->image->filename_without_overlay,
+                        $inventoryOverlayConfig
                     );
 
                     $this->imageTableService->saveOverlay($inventoryImage->image, $overlayFilename);
@@ -790,19 +807,48 @@ class InventoryService implements InventoryServiceInterface
                 } catch (\Exception $exception) {
                     DB::rollBack();
 
-                    if (isset($overlayFilename)) {
+                    if ($overlayFilename !== null) {
                         $this->dispatch((new DeleteS3FilesJob([$overlayFilename]))->onQueue('files'));
                     }
 
                     Log::channel('inventory-overlays')
                         ->error(
                             'Failed Adding Overlays, Invalid OverlayParams: '.$exception->getMessage(),
-                            array_merge($dealerOverlayConfig, ['image_id' => $inventoryImage->image->image_id])
+                            array_merge($inventoryOverlayConfig, ['image_id' => $inventoryImage->image->image_id])
                         );
                 }
 
                 $imageIndex++;
             });
+    }
+
+    /**
+     * This requieres the images are sorted by `InventoryHelper::imageSorter`
+     */
+    private function isOverlayDisabledOrImageShouldNotOverlay(
+        InventoryImage $inventoryImage,
+        int $index,
+        ?int $typeOfOverlay
+    ): bool
+    {
+        if ($typeOfOverlay === Inventory::OVERLAY_ENABLED_NONE || $typeOfOverlay === null) {
+            return true;
+        }
+
+        if ($typeOfOverlay == Inventory::OVERLAY_ENABLED_PRIMARY) {
+            return !(
+                $inventoryImage->position == 1 ||
+                $inventoryImage->is_default == 1 ||
+                ($inventoryImage->position === null && $index === 0)
+            );
+        }
+
+        return false;
+    }
+
+    private function shouldRestoreImageOverlay(InventoryImage $inventoryImage, ?string $overlayUpdatedAt): bool
+    {
+        return $overlayUpdatedAt <= $inventoryImage->overlay_updated_at;
     }
 
     /**

@@ -53,9 +53,4 @@ class Image extends Model
     {
         return $this->hasMany(InventoryImage::class, 'image_id', 'image_id');
     }
-
-    public function originalFilename(): string
-    {
-        return $this->filename_without_overlay;
-    }
 }

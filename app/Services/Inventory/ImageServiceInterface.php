@@ -45,7 +45,8 @@ interface ImageServiceInterface
      *     overlay_text_phone: string,
      *     country: string,
      *     overlay_text_location: string,
-     *     overlay_updated_at: string
+     *     overlay_updated_at: string,
+     *     dealer_overlay_updated_at: string
      *     }  $params
      * @return User
      */

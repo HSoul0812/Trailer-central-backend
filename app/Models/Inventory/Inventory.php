@@ -249,6 +249,7 @@ class Inventory extends Model
         self::CONDITION_RE_MFG => 'Re-manufactured',
     ];
 
+    const OVERLAY_ENABLED_NONE = User::OVERLAY_ENABLED_NONE;
     const OVERLAY_ENABLED_PRIMARY = User::OVERLAY_ENABLED_PRIMARY;
     const OVERLAY_ENABLED_ALL = User::OVERLAY_ENABLED_ALL;
 

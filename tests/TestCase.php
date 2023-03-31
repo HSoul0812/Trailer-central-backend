@@ -139,6 +139,10 @@ abstract class TestCase extends BaseTestCase
         $mock->shouldReceive('getRelationValue')->passthru();
         $mock->shouldReceive('relationLoaded')->passthru();
         $mock->shouldReceive('fromFloat')->passthru();
+        $mock->shouldReceive('getConnection')->passthru();
+        $mock->shouldReceive('getConnectionName')->passthru();
+        $mock->shouldReceive('resolveConnection')->passthru();
+
         $mock->wasRecentlyCreated = true;
 
         return $mock;

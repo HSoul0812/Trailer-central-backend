@@ -125,7 +125,8 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
      *     overlay_text_phone: string,
      *     country: string,
      *     overlay_text_location: string,
-     *     overlay_updated_at: string
+     *     overlay_updated_at: string,
+     *     dealer_overlay_updated_at: string
      *     }
      */
     public function getOverlayParams(int $inventoryId): array;
