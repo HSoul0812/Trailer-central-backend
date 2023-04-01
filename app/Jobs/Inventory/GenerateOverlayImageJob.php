@@ -46,7 +46,7 @@ class GenerateOverlayImageJob extends Job
 
         try {
             Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($service): void {
-                $service->generateOverlays($this->inventoryId);
+                $service->generateOverlaysByInventoryId($this->inventoryId);
             });
 
             $log->info(

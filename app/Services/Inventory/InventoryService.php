@@ -698,7 +698,7 @@ class InventoryService implements InventoryServiceInterface
     /**
      * Applies overlays to inventory images, or reset image to the original image when needed
      */
-    public function generateOverlays(int $inventoryId): void
+    public function generateOverlaysByInventoryId(int $inventoryId): void
     {
         $inventoryImages = $this->inventoryRepository->getInventoryImages($inventoryId);
 
@@ -746,33 +746,7 @@ class InventoryService implements InventoryServiceInterface
                     return true;
                 }
 
-                $overlayFilename = null;
-                // overlay only should be generated when it is a new image or when the dealer has changed
-                // its global overlay configuration
-                try {
-                    DB::beginTransaction();
-
-                    $overlayFilename = $this->imageService->addOverlayAndSaveToStorage(
-                        $inventoryImage->image->filename_without_overlay,
-                        $inventoryOverlayConfig
-                    );
-
-                    $this->imageTableService->saveOverlay($inventoryImage->image, $overlayFilename);
-
-                    DB::commit();
-                } catch (\Exception $exception) {
-                    DB::rollBack();
-
-                    if ($overlayFilename !== null) {
-                        $this->dispatch((new DeleteS3FilesJob([$overlayFilename]))->onQueue('files'));
-                    }
-
-                    Log::channel('inventory-overlays')
-                        ->error(
-                            'Failed Adding Overlays, Invalid OverlayParams: '.$exception->getMessage(),
-                            array_merge($inventoryOverlayConfig, ['image_id' => $inventoryImage->image->image_id])
-                        );
-                }
+                $this->applyOverlayToImage($inventoryImage, $inventoryOverlayConfig);
 
                 $imageIndex++;
             });
@@ -805,6 +779,42 @@ class InventoryService implements InventoryServiceInterface
     private function shouldRestoreImageOverlay(InventoryImage $inventoryImage, ?string $overlayUpdatedAt): bool
     {
         return $overlayUpdatedAt <= $inventoryImage->overlay_updated_at;
+    }
+
+    /**
+     * @param  InventoryImage  $inventoryImage
+     * @param  array  $inventoryOverlayConfig
+     * @return void
+     */
+    private function applyOverlayToImage(InventoryImage $inventoryImage, array $inventoryOverlayConfig): void
+    {
+        $overlayFilename = null;
+        // overlay only should be generated when it is a new image or when the dealer has changed
+        // its global overlay configuration
+        try {
+            DB::beginTransaction();
+
+            $overlayFilename = $this->imageService->addOverlayAndSaveToStorage(
+                $inventoryImage->image->filename_without_overlay,
+                $inventoryOverlayConfig
+            );
+
+            $this->imageTableService->saveOverlay($inventoryImage->image, $overlayFilename);
+
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+
+            if ($overlayFilename !== null) {
+                $this->dispatch(new DeleteS3FilesJob([$overlayFilename]));
+            }
+
+            Log::channel('inventory-overlays')
+                ->error(
+                    'Failed Adding Overlays, Invalid OverlayParams: '.$exception->getMessage(),
+                    array_merge($inventoryOverlayConfig, ['image_id' => $inventoryImage->image->image_id])
+                );
+        }
     }
 
     /**

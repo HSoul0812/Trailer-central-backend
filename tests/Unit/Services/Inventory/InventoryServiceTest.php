@@ -36,10 +36,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Mockery;
 use Mockery\LegacyMockInterface;
 use PHPUnit\Framework\MockObject\MockObject;
-use Tests\TestCase;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Contracts\LoggerServiceInterface;
@@ -47,18 +45,15 @@ use App\Jobs\Inventory\GenerateOverlayImageJob as InventoryBackgroundWorkFlowJob
 use Illuminate\Support\Facades\Queue;
 use App\Models\Inventory\InventoryImage;
 use Illuminate\Support\Facades\Storage;
-use App\Models\User\User;
 use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Inventory\ImageService as ImageTableService;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
+use App\Models\User\User;
+use Tests\TestCase;
+use Mockery;
 
 /**
- * Test for App\Services\Inventory\InventoryService
- *
- * Class InventoryServiceTest
- * @package Tests\Unit\Services\Inventory
- *
  * @group DW
  * @group DW_INVENTORY
  * @group DW_ELASTICSEARCH
@@ -821,6 +816,7 @@ class InventoryServiceTest extends TestCase
         $inventory->fp_vendor = 1;
         $inventory->shouldReceive('searchable');
 
+        /** @var User|LegacyMockInterface $dealer */
         $dealer = $this->getDealerModelMock($inventory->dealer_id);
 
         $expectedCacheKey = sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $inventory->dealer_id);
@@ -1045,24 +1041,28 @@ class InventoryServiceTest extends TestCase
         $imageModels = new Collection();
         $fileModels = new Collection();
 
+        /** @var Image|LegacyMockInterface $imageModel1 */
         $imageModel1 = $this->getEloquentMock(Image::class);
         $imageModel1->image_id = 1;
         $imageModel1->filename = 'test_' . 1;
         $imageModel1->inventory_images_count = 2;
         $imageModels->push($imageModel1);
 
+        /** @var Image|LegacyMockInterface $imageModel2 */
         $imageModel2 = $this->getEloquentMock(Image::class);
         $imageModel2->image_id = 2;
         $imageModel2->filename = 'test_' . 2;
         $imageModel2->inventory_images_count = 1;
         $imageModels->push($imageModel2);
 
+        /** @var File|LegacyMockInterface $fileModel1 */
         $fileModel1 = $this->getEloquentMock(File::class);
         $fileModel1->id = 1;
         $fileModel1->path = 'test_' . 1;
         $fileModel1->inventory_files_count = 1;
         $fileModels->push($fileModel1);
 
+        /** @var File|LegacyMockInterface $fileModel2 */
         $fileModel2 = $this->getEloquentMock(File::class);
         $fileModel2->id = 2;
         $fileModel2->path = 'test_' . 2;
@@ -1380,12 +1380,15 @@ class InventoryServiceTest extends TestCase
      *
      * @return void
      */
-    public function testDeliveryPrice() {
+    public function testDeliveryPrice()
+    {
+        /** @var Inventory|LegacyMockInterface $inventory */
         $inventory = $this->getEloquentMock(Inventory::class);
         $inventory->id = 1;
         $inventory->latitude = 10;
         $inventory->longitude = 10;
 
+        /** @var DealerLocation|LegacyMockInterface $dealerLocation */
         $dealerLocation = $this->getEloquentMock(DealerLocation::class);
         $dealerLocation->latitude = 11;
         $dealerLocation->longitude = 11;
@@ -1397,9 +1400,11 @@ class InventoryServiceTest extends TestCase
 
         $inventory->dealerLocation = $dealerLocation;
 
+        /** @var DealerLocationMileageFee|LegacyMockInterface $mileageFee */
         $mileageFee = $this->getEloquentMock(DealerLocationMileageFee::class);
         $mileageFee->fee_per_mile = 1;
 
+        /** @var InventoryCategory|LegacyMockInterface $inventoryCategory */
         $inventoryCategory = $this->getEloquentMock(InventoryCategory::class);
         $inventoryCategory->id = 1;
         $inventoryCategory
@@ -1419,8 +1424,10 @@ class InventoryServiceTest extends TestCase
             ->shouldReceive('get')
             ->once()
             ->andReturn($mileageFee);
+
         $inventoryService = app()->make(InventoryServiceInterface::class);
         $price = $inventoryService->deliveryPrice($inventory->id);
+
         $this->assertGreaterThan(96, $price);
         $this->assertLessThan(97, $price);
     }
@@ -1470,7 +1477,7 @@ class InventoryServiceTest extends TestCase
      * @dataProvider overlayParamDataProvider
      * @group Marketing
      * @group Marketing_Overlays
-     * @covers ::generateOverlays
+     * @covers ::generateOverlaysByInventoryId
      */
     public function testWillSkipAllBecauseOverlayDisabled($overlayParams)
     {
@@ -1490,7 +1497,7 @@ class InventoryServiceTest extends TestCase
      * @dataProvider overlayParamDataProvider
      * @group Marketing
      * @group Marketing_Overlays
-     * @covers ::generateOverlays
+     * @covers ::generateOverlaysByInventoryId
      */
     public function testWillSkipAllBecauseOverlayNull($overlayParams)
     {
@@ -1560,7 +1567,7 @@ class InventoryServiceTest extends TestCase
 
         $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
+        $inventoryServiceMock->generateOverlaysByInventoryId(self::TEST_INVENTORY_ID);
     }
     /**
      * Test that SUT will go through the happy path until the end by restoring all original images
@@ -1569,7 +1576,7 @@ class InventoryServiceTest extends TestCase
      * @dataProvider overlayParamDataProvider
      * @group Marketing
      * @group Marketing_Overlays
-     * @covers ::generateOverlays
+     * @covers ::generateOverlaysByInventoryId
      */
     public function testRestoreAllOriginalImages($overlayParams)
     {
@@ -1639,7 +1646,7 @@ class InventoryServiceTest extends TestCase
 
         $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
+        $inventoryServiceMock->generateOverlaysByInventoryId(self::TEST_INVENTORY_ID);
     }
 
     /**
@@ -1649,7 +1656,7 @@ class InventoryServiceTest extends TestCase
      * @dataProvider overlayParamDataProvider
      * @group Marketing
      * @group Marketing_Overlays
-     * @covers ::generateOverlays
+     * @covers ::generateOverlaysByInventoryId
      */
     public function testGenerateAllImageOverlays($overlayParams)
     {
@@ -1735,7 +1742,7 @@ class InventoryServiceTest extends TestCase
 
         $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
+        $inventoryServiceMock->generateOverlaysByInventoryId(self::TEST_INVENTORY_ID);
     }
 
     /**
@@ -1745,7 +1752,7 @@ class InventoryServiceTest extends TestCase
      * @dataProvider overlayParamDataProvider
      * @group Marketing
      * @group Marketing_Overlays
-     * @covers ::generateOverlays
+     * @covers ::generateOverlaysByInventoryId
      */
     public function testRestoreAllOverlays($overlayParams)
     {
@@ -1815,7 +1822,7 @@ class InventoryServiceTest extends TestCase
 
         $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
+        $inventoryServiceMock->generateOverlaysByInventoryId(self::TEST_INVENTORY_ID);
     }
 
     /**
@@ -1824,7 +1831,7 @@ class InventoryServiceTest extends TestCase
      * @dataProvider overlayParamDataProvider
      * @group Marketing
      * @group Marketing_Overlays
-     * @covers ::generateOverlays
+     * @covers ::generateOverlaysByInventoryId
      */
     public function testGenerateOverlaysWillDoNothing($overlayParams)
     {
@@ -1847,7 +1854,7 @@ class InventoryServiceTest extends TestCase
 
         $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
-        $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
+        $inventoryServiceMock->generateOverlaysByInventoryId(self::TEST_INVENTORY_ID);
     }
 
     /**

@@ -153,5 +153,5 @@ interface InventoryServiceInterface
     /**
      * Applies overlays to inventory images
      */
-    public function generateOverlays(int $inventoryId): void;
+    public function generateOverlaysByInventoryId(int $inventoryId): void;
 }

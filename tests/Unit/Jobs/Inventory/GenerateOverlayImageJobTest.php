@@ -65,7 +65,7 @@ class GenerateOverlayImageJobTest extends TestCase
         $shouldIndexAndInvalidateCache = false;
 
         $this->inventoryServiceMock
-            ->allows('generateOverlays')
+            ->allows('generateOverlaysByInventoryId')
             ->with($inventoryId)
             ->andThrow(Exception::class);
 
@@ -103,7 +103,7 @@ class GenerateOverlayImageJobTest extends TestCase
         $inventoryMock->dealer_id = $dealerId;
 
         $this->inventoryServiceMock
-            ->allows('generateOverlays')
+            ->allows('generateOverlaysByInventoryId')
             ->with($inventoryId)
             ->andThrow(Exception::class);
 
