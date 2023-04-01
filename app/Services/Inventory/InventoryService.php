@@ -656,8 +656,8 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
-     * @param array $params
-     * @param string $imagesKey
+     * @param  array  $params
+     * @param  string  $imagesKey
      * @return array
      *
      * @throws \App\Exceptions\File\FileUploadException
@@ -667,36 +667,18 @@ class InventoryService implements InventoryServiceInterface
     {
         $images = $params[$imagesKey];
 
-        $isOverlayEnabled = isset($params['overlay_enabled']) && in_array($params['overlay_enabled'], Inventory::OVERLAY_CODES);
-        $overlayEnabledParams = [
+        $otherParams = [
             'skipNotExisting' => true,
             'visibility' => config('filesystems.disks.s3.visibility')
         ];
 
-        $withOverlay = [];
-        $withoutOverlay = [];
-
-        if ($isOverlayEnabled && $params['overlay_enabled'] == Inventory::OVERLAY_ENABLED_ALL) {
-            $withOverlay = $images;
-        } elseif ($isOverlayEnabled && $params['overlay_enabled'] == Inventory::OVERLAY_ENABLED_PRIMARY) {
-            $withOverlay = array_filter($images, function ($image) {
-                return isset($image['position']) && $image['position'] == 0;
-            });
-
-            $withoutOverlay = array_filter($images, function ($image) {
-                return !isset($image['position']) || $image['position'] != 0;
-            });
-        } else {
-            $withoutOverlay = $images;
-        }
-
-        foreach ($withoutOverlay as &$image) {
+        foreach ($images as &$image) {
             $fileDto = $this->imageService->upload(
                 $image['url'],
                 $params['title'],
                 $params['dealer_id'],
                 null,
-                $overlayEnabledParams
+                $otherParams
             );
 
             if (empty($fileDto)) {
@@ -705,38 +687,12 @@ class InventoryService implements InventoryServiceInterface
 
             $image['filename'] = $fileDto->getPath();
             $image['filename_noverlay'] = null;
+            $image['filename_with_overlay'] = null;
             $image['filename_without_overlay'] = $fileDto->getPath();
             $image['hash'] = $fileDto->getHash();
         }
 
-        foreach ($withOverlay as &$image) {
-            $noOverlayFileDto = $this->imageService->upload(
-                $image['url'],
-                $params['title'],
-                $params['dealer_id'],
-                null,
-                $overlayEnabledParams
-            );
-            $overlayFileDto = $this->imageService->upload(
-                $image['url'],
-                $params['title'],
-                $params['dealer_id'],
-                null,
-                $overlayEnabledParams
-            );
-
-            if (empty($noOverlayFileDto) || empty($overlayFileDto)) {
-                continue;
-            }
-
-            $image['filename'] = $overlayFileDto->getPath();
-            $image['filename_with_overlay'] = $overlayFileDto->getPath();
-            $image['filename_without_overlay'] = $noOverlayFileDto->getPath();
-            $image['filename_noverlay'] = $noOverlayFileDto->getPath();
-            $image['hash'] = $overlayFileDto->getHash();
-        }
-
-        return array_merge($withOverlay, $withoutOverlay);
+        return $images;
     }
 
     /**

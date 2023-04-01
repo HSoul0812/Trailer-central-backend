@@ -395,7 +395,6 @@ class InventoryServiceTest extends TestCase
             ->andReturn($dealer);
 
         $newImage = new FileDto('path', 'hash');
-        $newImageWithOverlay = new FileDto('path_with_overlay', 'hash_with_overlay');
 
         $this->imageServiceMock
             ->shouldReceive('upload')
@@ -408,12 +407,6 @@ class InventoryServiceTest extends TestCase
             ->once()
             ->with($params['new_images'][0]['url'], $params['title'], $inventory->dealer_id, null, $overlayEnabledParams)
             ->andReturn($newImage);
-
-        $this->imageServiceMock
-            ->shouldReceive('upload')
-            ->once()
-            ->with($params['new_images'][0]['url'], $params['title'], $inventory->dealer_id, null, $overlayEnabledParams)
-            ->andReturn($newImageWithOverlay);
 
         $this->inventoryRepositoryMock
             ->shouldReceive('create')
@@ -1433,63 +1426,6 @@ class InventoryServiceTest extends TestCase
     }
 
     /**
-     * @return \array[][]
-     */
-    public function createParamsProvider(): array
-    {
-        $this->refreshApplication();
-        $this->setUpTraits();
-
-        return [[
-            [
-                'dealer_id' => $this->faker->numberBetween(1222, 3333),
-                'vin' => self::TEST_VIN,
-                'stock' => self::TEST_STOCK,
-                'model' => self::TEST_MODEL,
-                'title' => self::TEST_TITLE,
-                'b_vendorId' => 123,
-                'b_status' => 345,
-                'b_docNum' => 789,
-                'b_receivedDate' => '11.11.11',
-                'b_dueDate' => '12.12.12',
-                'b_memo' => 'b_memo',
-                'b_id' => '555',
-                'b_isFloorPlan' => true
-            ]
-        ]];
-    }
-
-    /**
-     * @return \string[][][]
-     */
-    public function deleteParamsProvider(): array
-    {
-        return [[
-            [Repository::RELATION_WITH_COUNT => 'inventoryImages'],
-            [Repository::RELATION_WITH_COUNT => 'inventoryFiles']
-        ]];
-    }
-
-    /**
-     * @return \array[][]
-     */
-    public function deleteDuplicatesParamsProvider(): array
-    {
-        return [[
-            [
-                Repository::SELECT => ['stock'],
-                Repository::CONDITION_AND_WHERE => [['dealer_id', '=', self::TEST_DEALER_ID]],
-                Repository::CONDITION_AND_HAVING_COUNT => ['inventory_id', '>', 1],
-                Repository::GROUP_BY => ['stock'],
-            ],
-            [
-                Repository::CONDITION_AND_WHERE => [['dealer_id', '=', self::TEST_DEALER_ID]],
-                Repository::CONDITION_AND_WHERE_IN => ['stock' => []],
-            ]
-        ]];
-    }
-
-    /**
      * @param Inventory $inventory
      * @param array $params
      * @return array
@@ -1525,38 +1461,6 @@ class InventoryServiceTest extends TestCase
             'is_floorplan_bill' => $billInfo['is_floor_plan'],
             'qb_sync_processed' => 0,
         ];
-    }
-
-    /**
-     * @return array[]
-     */
-    public function overlayParamDataProvider()
-    {
-        return [[[
-            'dealer_id' => self::TEST_DEALER_ID,
-            'inventory_id' => self::TEST_INVENTORY_ID,
-            'overlay_logo' => 'logo.png',
-            'overlay_logo_position' => User::OVERLAY_LOGO_POSITION_LOWER_RIGHT,
-            'overlay_logo_width' => '20%',
-            'overlay_logo_height' => '20%',
-            'overlay_upper' => User::OVERLAY_UPPER_DEALER_NAME,
-            'overlay_upper_bg' => '#000000',
-            'overlay_upper_alpha' => 0,
-            'overlay_upper_text' => '#ffffff',
-            'overlay_upper_size' => 40,
-            'overlay_upper_margin' => 40,
-            'overlay_lower' => User::OVERLAY_UPPER_DEALER_PHONE,
-            'overlay_lower_bg' => '#000000',
-            'overlay_lower_alpha' => 0,
-            'overlay_lower_text' => '#ffffff',
-            'overlay_lower_size' => 40,
-            'overlay_lower_margin' => 40,
-            'overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL,
-            'dealer_overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL,
-            'overlay_text_dealer' => 'DEALER_NAME',
-            'overlay_text_phone' => 'DEALER_PHONE_NUMBER',
-            'overlay_text_location' => 'DEALER_LOCATION',
-        ]]];
     }
 
     /**
@@ -2422,5 +2326,91 @@ class InventoryServiceTest extends TestCase
         Log::shouldReceive('channel')
             ->once()
             ->andReturn($this->logForImageOverlayMock);
+    }
+
+    /**
+     * @return \array[][]
+     */
+    public function createParamsProvider(): array
+    {
+        $this->refreshApplication();
+        $this->setUpTraits();
+
+        return [[
+            [
+                'dealer_id' => $this->faker->numberBetween(1222, 3333),
+                'vin' => self::TEST_VIN,
+                'stock' => self::TEST_STOCK,
+                'model' => self::TEST_MODEL,
+                'title' => self::TEST_TITLE,
+                'b_vendorId' => 123,
+                'b_status' => 345,
+                'b_docNum' => 789,
+                'b_receivedDate' => '11.11.11',
+                'b_dueDate' => '12.12.12',
+                'b_memo' => 'b_memo',
+                'b_id' => '555',
+                'b_isFloorPlan' => true
+            ]
+        ]];
+    }
+
+    public function overlayParamDataProvider(): array
+    {
+        return [[[
+            'dealer_id' => self::TEST_DEALER_ID,
+            'inventory_id' => self::TEST_INVENTORY_ID,
+            'overlay_logo' => 'logo.png',
+            'overlay_logo_position' => User::OVERLAY_LOGO_POSITION_LOWER_RIGHT,
+            'overlay_logo_width' => '20%',
+            'overlay_logo_height' => '20%',
+            'overlay_upper' => User::OVERLAY_UPPER_DEALER_NAME,
+            'overlay_upper_bg' => '#000000',
+            'overlay_upper_alpha' => 0,
+            'overlay_upper_text' => '#ffffff',
+            'overlay_upper_size' => 40,
+            'overlay_upper_margin' => 40,
+            'overlay_lower' => User::OVERLAY_UPPER_DEALER_PHONE,
+            'overlay_lower_bg' => '#000000',
+            'overlay_lower_alpha' => 0,
+            'overlay_lower_text' => '#ffffff',
+            'overlay_lower_size' => 40,
+            'overlay_lower_margin' => 40,
+            'overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL,
+            'dealer_overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL,
+            'overlay_text_dealer' => 'DEALER_NAME',
+            'overlay_text_phone' => 'DEALER_PHONE_NUMBER',
+            'overlay_text_location' => 'DEALER_LOCATION',
+        ]]];
+    }
+
+    /**
+     * @return \string[][][]
+     */
+    public function deleteParamsProvider(): array
+    {
+        return [[
+            [Repository::RELATION_WITH_COUNT => 'inventoryImages'],
+            [Repository::RELATION_WITH_COUNT => 'inventoryFiles']
+        ]];
+    }
+
+    /**
+     * @return \array[][]
+     */
+    public function deleteDuplicatesParamsProvider(): array
+    {
+        return [[
+            [
+                Repository::SELECT => ['stock'],
+                Repository::CONDITION_AND_WHERE => [['dealer_id', '=', self::TEST_DEALER_ID]],
+                Repository::CONDITION_AND_HAVING_COUNT => ['inventory_id', '>', 1],
+                Repository::GROUP_BY => ['stock'],
+            ],
+            [
+                Repository::CONDITION_AND_WHERE => [['dealer_id', '=', self::TEST_DEALER_ID]],
+                Repository::CONDITION_AND_WHERE_IN => ['stock' => []],
+            ]
+        ]];
     }
 }

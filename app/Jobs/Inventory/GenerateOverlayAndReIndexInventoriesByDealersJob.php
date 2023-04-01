@@ -49,10 +49,10 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
             $this->context['dealer_id'] = $dealerId;
 
             $inventories = $repository->getAll(
-                [
-                    'dealer_id' => $dealerId,
-                    'images_greater_than' => 1
-                ], false, false, [Inventory::getTableName().'.inventory_id']
+                ['dealer_id' => $dealerId, 'images_greater_than' => 1],
+                false,
+                false,
+                [Inventory::getTableName().'.inventory_id']
             );
 
             if ($inventories->count() > 0) {
