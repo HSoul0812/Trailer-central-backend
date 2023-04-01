@@ -199,11 +199,6 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->runInBackground();
 
-        $schedule->command('horizon:clean-completed-jobs')
-            ->everyThirtyMinutes()
-            ->onOneServer()
-            ->runInBackground();
-
         $schedule->command('horizon:snapshot')
             ->everyFiveMinutes()
             ->onOneServer()
