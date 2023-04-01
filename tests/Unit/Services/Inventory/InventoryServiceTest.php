@@ -1843,6 +1843,100 @@ class InventoryServiceTest extends TestCase
     }
 
     /**
+     * Test that SUT will go through the sad path, by only processing one image, then it fails, finally it
+     * will log an error entry and dispatching a job to delete the recently created S3 object.
+     * overlay_enabled = Inventory::OVERLAY_ENABLED_PRIMARY
+     *
+     * @dataProvider overlayParamDataProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     * @covers ::generateOverlaysByInventoryId
+     */
+    public function testItWillCatchExceptionLogAndScheduleTheObjectToBeDropped($overlayParams)
+    {
+        $today = now();
+
+        $someException = new \Exception('Something goes wrong');
+        $overlayParams['dealer_overlay_enabled'] = Inventory::OVERLAY_ENABLED_PRIMARY;
+        $overlayParams['overlay_enabled'] = Inventory::OVERLAY_ENABLED_PRIMARY;
+        $overlayParams['overlay_updated_at'] = $today;
+
+        /** @var InventoryImage[]|EloquentCollection $inventoryImages */
+        $inventoryImages = new EloquentCollection();
+
+        /** @var Image|LegacyMockInterface $image */
+        $image = $this->getEloquentMock(Image::class);
+        $image->image_id = 2;
+        $image->filename = 'filename_with_overlay_2';
+        $image->filename_without_overlay = 'filename_2';
+
+        /** @var InventoryImage|LegacyMockInterface $inventoryImage */
+        $inventoryImage = $this->getEloquentMock(InventoryImage::class);
+        $inventoryImage->image = $image;
+        $inventoryImage->is_default = 1;
+        $inventoryImage->position = 0;
+        $inventoryImage->overlay_updated_at = null;
+        $inventoryImage->shouldReceive('hasBeenAlreadyOverlay')->andReturn(false);
+        $inventoryImage->shouldReceive('isDefault')->andReturn(false);
+        $inventoryImages->push($inventoryImage);
+
+        $s3Filename = 's3_image_with_overlay_'.$image->image_id;
+        $tmpFilename = 'tmp_image_with_overlay_'.$image->image_id;
+
+        $this->imageServiceMock
+            ->shouldReceive('addOverlayAndSaveToStorage')
+            ->once()
+            ->with($image->filename_without_overlay, $overlayParams)
+            ->andReturn($s3Filename);
+
+        Storage::disk('tmp')->put($tmpFilename, '');
+
+        $this->imageTableServiceMock
+            ->shouldReceive('saveOverlay')
+            ->once()
+            ->with($image, $s3Filename)
+            ->andThrow($someException);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('getOverlayParams')
+            ->with(self::TEST_INVENTORY_ID)
+            ->once()
+            ->andReturn($overlayParams);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('getInventoryImages')
+            ->with(self::TEST_INVENTORY_ID)
+            ->once()
+            ->andReturn($inventoryImages);
+
+        $this->imageTableServiceMock->shouldNotReceive('tryToRestoreOriginalImage');
+        $this->imageTableServiceMock->shouldNotReceive('tryToRestoreImageOverlay');
+
+        DB::shouldReceive('beginTransaction')->once();
+        DB::shouldReceive('commit')->never();
+        DB::shouldReceive('rollBack')->once();
+
+        $this->logForImageOverlayMock
+            ->expects('info')
+            ->once();
+
+        $this->logForImageOverlayMock
+            ->expects('error')
+            ->once();
+
+        Log::shouldReceive('channel')
+            ->twice()
+            ->andReturn($this->logForImageOverlayMock);
+
+        $inventoryServiceMock = Mockery::mock(InventoryService::class,
+            $this->getInventoryServiceDependencies())->makePartial();
+
+        $inventoryServiceMock->generateOverlaysByInventoryId(self::TEST_INVENTORY_ID);
+
+        Queue::assertPushed(DeleteS3FilesJob::class, 1);
+    }
+
+    /**
      * Test that SUT will go through the happy path until the end by restoring all image overlays
      * overlay_enabled = Inventory::OVERLAY_ENABLED_ALL
      *
