@@ -355,7 +355,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
         'clsf_active' => 'boolean',
         'is_quote_manager_active' => 'boolean',
         'google_feed_active' => 'boolean',
-        'overlay_updated_at' => 'date'
+        'overlay_updated_at' => 'datetime'
     ];
 
     /**

@@ -54,7 +54,7 @@ class InventoryImage extends Model
         'overlay_updated_at'
     ];
 
-    protected $casts = ['overlay_updated_at' => 'date'];
+    protected $casts = ['overlay_updated_at' => 'datetime'];
 
     /**
      * @return BelongsTo

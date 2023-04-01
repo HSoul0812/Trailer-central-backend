@@ -2,6 +2,7 @@
 
 namespace App\Services\Inventory;
 
+use App\Constants\Date;
 use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\File\FileUploadException;
 use App\Exceptions\File\ImageUploadException;
@@ -47,7 +48,6 @@ use App\Repositories\Dms\Customer\InventoryRepository as DmsCustomerInventoryRep
 use App\Services\Export\Inventory\PdfExporter;
 use App\Traits\S3\S3Helper;
 use App\Jobs\Inventory\GenerateOverlayImageJob;
-use Twilio\Rest\Api\V2010\Account\Usage\Record\ReadThisMonthOptions;
 
 /**
  * Class InventoryService
@@ -780,7 +780,13 @@ class InventoryService implements InventoryServiceInterface
 
     private function shouldRestoreImageOverlay(InventoryImage $inventoryImage, ?string $overlayUpdatedAt): bool
     {
-        return $overlayUpdatedAt <= $inventoryImage->overlay_updated_at;
+        $imageOverlayUpdatedAt = $inventoryImage->overlay_updated_at;
+
+        if ($inventoryImage->overlay_updated_at && is_object($inventoryImage->overlay_updated_at)) {
+            $imageOverlayUpdatedAt = $inventoryImage->overlay_updated_at->format(Date::FORMAT_Y_M_D_T);
+        }
+
+        return $overlayUpdatedAt <= $imageOverlayUpdatedAt;
     }
 
     /**
