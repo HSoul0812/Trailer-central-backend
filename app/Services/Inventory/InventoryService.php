@@ -696,7 +696,8 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
-     * Applies overlays to inventory images, or reset image to the original image when needed
+     * Applies overlays to inventory images by inventory id,
+     * or reset its image to the original/overlay image when needed
      */
     public function generateOverlaysByInventoryId(int $inventoryId): void
     {
