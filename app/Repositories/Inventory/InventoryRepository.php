@@ -1221,8 +1221,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      *     overlay_text_phone: string,
      *     country: string,
      *     overlay_text_location: string,
-     *     overlay_updated_at: string,
-     *     dealer_overlay_updated_at: string
+     *     overlay_updated_at: string
      *     }
      */
     public function getOverlayParams(int $inventoryId): array
@@ -1256,8 +1255,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             $userTableName.'.name AS overlay_text_dealer',
             $dealerLocationTable.'.phone AS overlay_text_phone',
             $dealerLocationTable.'.country',
-            $inventoryTable.'.overlay_updated_at',
-            $userTableName.'.overlay_updated_at AS dealer_overlay_updated_at',
+            $userTableName.'.overlay_updated_at',
             DB::raw(sprintf("CONCAT(%s.city,', ',%s.region) AS overlay_text_location", $dealerLocationTable, $dealerLocationTable))
         ];
 

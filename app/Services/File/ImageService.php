@@ -181,8 +181,7 @@ class ImageService extends AbstractFileService
      *     overlay_text_phone: string,
      *     country: string,
      *     overlay_text_location: string,
-     *     overlay_updated_at: string,
-     *     dealer_overlay_updated_at: string
+     *     overlay_updated_at: string
      *     }  $params
      * @return string|null local path of new image, or null when new image and original image are same
      *
@@ -269,8 +268,7 @@ class ImageService extends AbstractFileService
      *     overlay_text_phone: string,
      *     country: string,
      *     overlay_text_location: string,
-     *     overlay_updated_at: string,
-     *     dealer_overlay_updated_at: string
+     *     overlay_updated_at: string
      *     }  $overlayConfig
      *
      * @return string the new filename
