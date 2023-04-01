@@ -520,6 +520,7 @@ class InventoryService implements InventoryServiceInterface
 
             $result = $this->inventoryRepository->delete($deleteInventoryParams);
 
+            // @todo this method should use `ImageRepository::scheduleObjectToBeDroppedByURL`
             if (isset($imagesFilenames) && $result) {
                 // $this->dispatch((new DeleteS3FilesJob($imagesFilenames))->onQueue('files'));
             }
@@ -1098,18 +1099,19 @@ class InventoryService implements InventoryServiceInterface
                     ->toArray();
             }
 
-            $imagesFilenames = $this->imageRepository
-                ->getAll([
-                    'inventory_id' => $inventoryId,
-                    ImageRepositoryInterface::CONDITION_AND_WHERE_IN => ['inventory_image.image_id' => $imageIds]
-                ])
-                ->pluck('filename')
-                ->toArray();
+            //            $imagesFilenames = $this->imageRepository
+            //                ->getAll([
+            //                    'inventory_id' => $inventoryId,
+            //                    ImageRepositoryInterface::CONDITION_AND_WHERE_IN => ['inventory_image.image_id' => $imageIds]
+            //                ])
+            //                ->pluck('filename')
+            //                ->toArray();
 
             $this->imageRepository->delete([
                 ImageRepositoryInterface::CONDITION_AND_WHERE_IN => ['image_id' => $imageIds]
             ]);
 
+            // @todo this method should use `ImageRepository::scheduleObjectToBeDroppedByURL`
             // $this->dispatch((new DeleteS3FilesJob($imagesFilenames))->onQueue('files'));
 
             $this->inventoryRepository->commitTransaction();

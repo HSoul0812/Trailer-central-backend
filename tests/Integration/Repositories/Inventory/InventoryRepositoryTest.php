@@ -8,9 +8,12 @@ use App\Models\Inventory\Inventory;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 use App\Repositories\Inventory\InventoryRepository;
-use Illuminate\Support\Facades\DB;
+use \Illuminate\Database\QueryException;
 
 /**
+ * @group DW
+ * @group DW_INVENTORY
+ *
  * Class InventoryRepositoryTest
  * @package Tests\Integration\Repositories\Dms
  *
@@ -73,8 +76,11 @@ class InventoryRepositoryTest extends TestCase
      * @group DMS
      * @group DMS_INVENTORY
      */
-    public function testGetFloorplannedInventoryWithoutStatus()
+    public function testWillThrowAnExceptionWhenStatusNull()
     {
+        $this->expectException(QueryException::class);
+        $this->expectExceptionMessageMatches("/1048 Column 'status' cannot be null/s");
+
         $itemHaveNoStatus = [
             'dealer_id' => $this->dealerId,
             'status' => null,

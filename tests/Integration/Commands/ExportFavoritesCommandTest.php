@@ -17,6 +17,10 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
+/**
+ * @group DW
+ * @group DW_INVENTORY
+ */
 class ExportFavoritesCommandTest extends TestCase
 {
     /**

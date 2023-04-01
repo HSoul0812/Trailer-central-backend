@@ -12,6 +12,9 @@ use Mockery\LegacyMockInterface;
 use Tests\TestCase;
 
 /**
+ * @group DW
+ * @group DW_INVENTORY
+ *
  * Class PackageServiceTest
  * @package Tests\Unit\Services\Inventory\Packages
  *
