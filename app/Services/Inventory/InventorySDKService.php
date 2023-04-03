@@ -123,7 +123,6 @@ class InventorySDKService implements InventorySDKServiceInterface
 
         $location = $this->addGeolocation($params);
         $this->addSorting($params, $location);
-        \Log::info($this->request->serialize());
         return $this->responseFromSDKResponse($this->search->execute($this->request));
     }
 
