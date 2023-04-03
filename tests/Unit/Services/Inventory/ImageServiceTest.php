@@ -5,6 +5,7 @@ namespace Tests\Unit\Services\Inventory;
 use App\Exceptions\File\MissingS3FileException;
 use App\Jobs\Inventory\GenerateOverlayImageJobByDealer;
 use App\Jobs\Inventory\ReIndexInventoriesByDealersJob;
+use App\Models\Inventory\Inventory;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use Mockery;
@@ -280,7 +281,12 @@ class ImageServiceTest extends TestCase
         $overlayParams = [
             'dealer_id' => self::DEALER_ID,
             'overlay_logo' => 'logo.png',
-            'overlay_enabled' => 2
+            'overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL
+        ];
+
+        $performedChanges = [
+            'overlay_logo' => 'logo.png',
+            'overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL
         ];
 
         /** @var User|LegacyMockInterface $userMock */
@@ -295,7 +301,7 @@ class ImageServiceTest extends TestCase
 
         $this->userRepositoryMock->expects('updateOverlaySettings')
             ->with(self::DEALER_ID, $overlayParams)
-            ->andReturns($overlayParams);
+            ->andReturns($performedChanges);
 
         $this->userRepositoryMock->expects('get')
             ->with(['dealer_id' => self::DEALER_ID])
@@ -327,6 +333,39 @@ class ImageServiceTest extends TestCase
         $this->inventoryRepositoryMock->allows('getAll')->never();
 
         $this->inventoryRepositoryMock->allows('massUpdate')->never();
+
+        $this->userRepositoryMock->expects('updateOverlaySettings')
+            ->with(self::DEALER_ID, $overlayParams)
+            ->andReturns($performedChanges);
+
+        $this->userRepositoryMock->expects('get')
+            ->with(['dealer_id' => self::DEALER_ID])
+            ->andReturns($this->getEloquentMock(User::class));
+
+        $this->imageService->updateOverlaySettings($overlayParams);
+
+        Queue::assertNotPushed(GenerateOverlayImageJob::class);
+        Queue::assertNotPushed(ReIndexInventoriesByDealersJob::class);
+    }
+
+    /**
+     * Test that SUT will try to update dealer overlay configuration, then, it should perform only inventory `massUpdate`
+     * but it will not dispatch jobs to generate overlays
+     *
+     * @group Marketing
+     * @group Marketing_Overlays
+     * @covers ::updateOverlaySettings
+     */
+    public function testUpdateOverlaySettingsOnlyChangedWasOverlayEnabled()
+    {
+        $performedChanges = ['overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL];
+        $overlayParams = array_merge(['dealer_id' => self::DEALER_ID], $performedChanges);
+
+        $this->inventoryRepositoryMock->expects('massUpdate')
+            ->with([
+                'dealer_id' => $overlayParams['dealer_id'],
+                'overlay_enabled' => $overlayParams['overlay_enabled']
+            ]);
 
         $this->userRepositoryMock->expects('updateOverlaySettings')
             ->with(self::DEALER_ID, $overlayParams)

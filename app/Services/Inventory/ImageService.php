@@ -147,7 +147,6 @@ class ImageService implements ImageServiceInterface
     {
         $changes = $this->userRepository->updateOverlaySettings($params['dealer_id'], $params);
         $dealer = $this->userRepository->get(['dealer_id' => $params['dealer_id']]);
-        $wasChanged = !empty($changes);
         $isOverlayEnabledChanged = isset($changes['overlay_enabled']);
 
         // update overlay_enabled on all inventories
@@ -161,7 +160,7 @@ class ImageService implements ImageServiceInterface
         }
 
         // Generate Overlay Inventory Images if necessary
-        if ($wasChanged) {
+        if (collect($changes)->except('overlay_enabled')->count() > 0) {
             // @todo we should implement some mechanism to avoid to dispatch many times
             //      `GenerateOverlayImageJobByDealer` successively because that job will spawn as many
             //      `GenerateOverlayImageJob` jobs as many inventory units has the dealer

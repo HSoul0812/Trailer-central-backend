@@ -228,8 +228,9 @@ class UserRepository implements UserRepositoryInterface {
         $dealer->save();
 
         $changes = $dealer->getChanges();
+        unset($changes['updated_at']);
 
-        if (!empty($changes)) {
+        if (collect($changes)->except('overlay_enabled')->count() > 0) {
             $dealer->overlay_updated_at = now();
             $dealer->save();
         }
