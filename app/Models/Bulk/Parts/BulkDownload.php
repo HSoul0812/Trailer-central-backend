@@ -56,7 +56,6 @@ class BulkDownload extends MonitoredJob
  *     description="Represents a parts bulk download file job",
  *     properties={
  *         @OA\Property(property="token", type="string", description="the primary key value for this message"),
- *         @OA\Property(property="queue_job_id", type="string", description="the queue job id belonging to this monitored job"),
  *         @OA\Property(property="queue", type="string", description="the name of the queue"),
  *         @OA\Property(property="concurrency_level", type="string", description="the allowed concurrency level"),
  *         @OA\Property(property="dealer_id", type="integer", description="the dealer id who launched it"),

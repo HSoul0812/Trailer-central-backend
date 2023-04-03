@@ -9,9 +9,17 @@ use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Select;
 use App\Models\Website\Config\WebsiteConfig;
+use App\Models\Website\Website as DealerWebsite;
+
+use Laravel\Nova\Panel;
+use Laravel\Nova\Fields\DateTime;
+use Spatie\SslCertificate\SslCertificate;
 
 use App\Nova\Resource;
 use Laravel\Nova\Http\Requests\NovaRequest;
+
+use App\Nova\Actions\Dealer\Subscriptions\Google\IssueCertificateSSL;
+use App\Nova\Actions\Dealer\Subscriptions\Google\EnableProxiedDomainsSsl;
 
 class Website extends Resource
 {
@@ -56,6 +64,8 @@ class Website extends Resource
      */
     public function fields(Request $request)
     {
+        $certificate = $this->ssl_certificate;
+
         $model = $this->model();
         if (!empty($model)) {
             $configs = $model->websiteConfigs()->get();
@@ -71,20 +81,46 @@ class Website extends Resource
 
             Text::make('App ID', 'identifier')->exceptOnForms(),
 
-            Text::make('Domain')
-                ->sortable(),
+            new Panel('Domain', [
+                Boolean::make('Certified', function () use ($certificate) {
+                    return $certificate ? $certificate->isValid() : null;
+                }),
 
-            Text::make('Type')
-                ->sortable(),
+                Text::make('Domain')
+                    ->sortable(),
 
-            Text::make('Template','template')->sortable(),
+                Text::make('Issuer', function () use ($certificate) {
+                    return $certificate ? $certificate->getIssuer() : null;
+                })
+                    ->hideFromIndex()
+                    ->exceptOnForms(),
+
+                DateTime::make('Valid From', function () use ($certificate) {
+                    return $certificate ? $certificate->validFromDate() : null;
+                })
+                    ->hideFromIndex()
+                    ->exceptOnForms()
+                    ->format('DD MMM, YYYY - LT'),
+
+                DateTime::make('Expiration Date', function () use ($certificate) {
+                    return $certificate ? $certificate->expirationDate() : null;
+                })
+                    ->hideFromIndex()
+                    ->exceptOnForms()
+                    ->format('DD MMM, YYYY - LT')
+            ]),
+
+            Select::make('Type', 'type')
+                ->options($this->websiteTypes())
+                ->displayUsingLabels(),
+
+            Text::make('Template')->help("This will apply as the CertificateName on SSL certificates")->hideFromIndex(),
 
             Boolean::make('Active', 'is_active')->sortable(),
 
             Boolean::make('Responsive', 'responsive')->sortable(),
 
             Select::make('Inventory Source', 'inventory_source')->withMeta(['value' => $sourceConfig->value ?? 'env' ])->options(self::INVENTORY_SOURCE_MAP),
-
 
             Textarea::make('Global Filter', 'type_config')->sortable()->help(
               "Usage:<br>
@@ -146,6 +182,15 @@ class Website extends Resource
 
             Textarea::make('Head Scripts', 'HeadScripts')->hideFromIndex(),
 
+        ];
+    }
+
+    public function websiteTypes(): array
+    {
+        return [
+            DealerWebsite::WEBSITE_TYPE_CUSTOM => 'Custom',
+            DealerWebsite::WEBSITE_TYPE_WEBSITE => 'Website',
+            DealerWebsite::WEBSITE_TYPE_CLASSIFIED => 'Classified'
         ];
     }
 
@@ -225,6 +270,11 @@ class Website extends Resource
     public function actions(Request $request)
     {
         return [
+            app()->make(IssueCertificateSsl::class)
+                ->canSee(function ($request) {
+                    return !$this->ssl_certificate;
+                }),
+            app()->make(EnableProxiedDomainsSsl::class)
         ];
     }
 }

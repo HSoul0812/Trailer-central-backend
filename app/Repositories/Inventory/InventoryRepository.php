@@ -395,6 +395,16 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
+     * @param array $where
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdate(array $where, array $params): bool
+    {
+        return Inventory::query()->where($where)->update($params);
+    }
+
+    /**
      * Update the qb_invoice_item_inventories table for sales person report updation.
      *
      * @param Inventory $item

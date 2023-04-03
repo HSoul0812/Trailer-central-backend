@@ -47,6 +47,8 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
 
     public function massUpdate(array $params): bool;
 
+    public function bulkUpdate(array $where, array $params): bool;
+
     /**
      * @return int number of touched records
      */

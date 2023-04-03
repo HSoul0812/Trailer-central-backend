@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="mb-6">
-            <heading class="mb-6">Bulk Years</heading>
+            <heading class="mb-6">Bulk Showroom Years</heading>
 
             <card class="mb-6">
                 <div class="flex border-b border-40">
@@ -84,7 +84,7 @@
         </div>
 
         <div class="mb-6">
-            <heading class="mb-6">Bulk Visibility</heading>
+            <heading class="mb-6">Bulk Showroom Visibility</heading>
 
             <card class="mb-6">
                 <div class="flex border-b border-40">
@@ -161,22 +161,91 @@
             </div>
         </div>
 
+        <div class="mb-6">
+            <heading class="mb-6">Bulk Inventory Manufacturer</heading>
+
+            <card class="mb-6">
+                <div class="flex border-b border-40">
+                    <div class="w-1/5 px-8 py-6">
+                        <label for="manufacturer-inv-change" class="inline-block text-80 pt-2 leading-tight">
+                            From Manufacturer
+                        </label>
+                    </div>
+                    <div class="py-6 px-8 w-1/2">
+                        <select id="manufacturer-inv-change"
+                                name="manufacturer-inv-change"
+                                class="w-full form-control form-input form-input-bordered"
+                                v-model="formBulkInvMfg.from_manufacturer">
+                            <option v-for="manufacturer in manufacturers">{{ manufacturer.name }}</option>
+                        </select>
+                        <!---->
+                        <!---->
+                        <div class="help-text help-text mt-2">
+                            This is the Manufacturer that is going to be changed
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex border-b border-40">
+                    <div class="w-1/5 px-8 py-6">
+                        <label for="manufacturer-inv-change" class="inline-block text-80 pt-2 leading-tight">
+                            To Manufacturer
+                        </label>
+                    </div>
+                    <div class="py-6 px-8 w-1/2">
+                        <select id="manufacturer-inv-change"
+                                name="manufacturer-inv-change"
+                                class="w-full form-control form-input form-input-bordered"
+                                v-model="formBulkInvMfg.to_manufacturer">
+                            <option v-for="manufacturer in manufacturers">{{ manufacturer.name }}</option>
+                        </select>
+                        <!---->
+                        <!---->
+                        <div class="help-text help-text mt-2">
+                            This is the Manufacturer that will be the new one per inventory
+                        </div>
+                    </div>
+                </div>
+            </card>
+
+            <div class="flex items-center">
+                <a tabindex="0" class="btn btn-link dim cursor-pointer text-80 ml-auto mr-6">
+                    Cancel
+                </a>
+
+                <button type="submit" class="btn btn-default btn-primary inline-flex items-center relative" dusk="create-button"
+                        v-on:click="postBulkInvMfgForm">
+                        <span class="">
+                          Bulk Change Inv Manufacturer
+                        </span>
+                    <!---->
+                </button>
+            </div>
+        </div>
+
         <div v-if="debug">
             <heading class="mb-6">Debug</heading>
 
             <card>
                 <div class="p-4">
                     <div class="mb-2">
-                        <span>Bulk Year</span>
+                        <span>Bulk Showroom Year</span>
                     </div>
                     <pre style="background-color: black; color: white;">{{ formBulkYear }}</pre>
                 </div>
 
                 <div class="p-4">
                     <div class="mb-2">
-                        <span>Bulk Visibility</span>
+                        <span>Bulk Showroom Visibility</span>
                     </div>
                     <pre style="background-color: black; color: white;">{{ formBulkVisibility }}</pre>
+                </div>
+
+                <div class="p-4">
+                    <div class="mb-2">
+                        <span>Bulk Inventory Manufacturer</span>
+                    </div>
+                    <pre style="background-color: black; color: white;">{{ formBulkInvMfg }}</pre>
                 </div>
             </card>
         </div>
@@ -203,6 +272,11 @@ export default {
                 visibility: false,
             },
 
+            formBulkInvMfg: {
+                from_manufacturer: '',
+                to_manufacturer: ''
+            },
+
             manufacturers: [],
             years: []
         }
@@ -212,8 +286,8 @@ export default {
     },
 
     methods: {
-        getManufacturers() {
-            axios.get('/api/manufacturers')
+        async getManufacturers() {
+            await Nova.request().get('/api/manufacturers')
                 .then((response) => {
                     this.manufacturers = response.data.data;
                 });
@@ -235,6 +309,12 @@ export default {
         },
         async postBulkVisibilityForm() {
             await axios.post('/api/manufacturers/bulk_visibility', this.formBulkVisibility)
+                .then((response) => {
+                    this.$toasted.show(response.data.message, { type: response.data.status })
+                });
+        },
+        async postBulkInvMfgForm() {
+            await axios.post('/api/inventories/bulk_manufacturer', this.formBulkInvMfg)
                 .then((response) => {
                     this.$toasted.show(response.data.message, { type: response.data.status })
                 });
