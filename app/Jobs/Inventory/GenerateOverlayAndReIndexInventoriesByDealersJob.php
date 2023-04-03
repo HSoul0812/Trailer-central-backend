@@ -11,6 +11,12 @@ use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 
+/**
+ * @todo this job should be renamed to `InventoryBackGroundWorkFlowByDealerJob` when safe, it is is handling 3 processes
+ *       a) Generate overlay
+ *       b) ElasticSearch indexation
+ *       c) Inventory cache invalidation
+ */
 class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
 {
     /** @var int time in seconds */
@@ -24,6 +30,9 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
 
     /**  @var array|null */
     private $context;
+
+    /** @var int The number of times the job may be attempted. */
+    public $tries = 1;
 
     public function __construct(array $dealerIds, ?array $context = null)
     {
@@ -42,28 +51,25 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
         foreach ($this->dealerIds as $dealerId) {
             $this->context['dealer_id'] = $dealerId;
 
-            // we need to find a way to avoid AWS rate limiting
-//            $inventories = $repository->getAll(
-//                [
-//                    'dealer_id' => $dealerId,
-//                    'images_greater_than' => 1
-//                ], false, false, [Inventory::getTableName().'.inventory_id']
-//            );
-//
-//            if ($inventories->count() > 0) {
-//                $logger->info(
-//                    'Enqueueing the job to generate inventory image overlays for dealer id',
-//                    ['dealer_id' => $dealerId]
-//                );
-//
-//                Job::batch(static function (BatchedJob $job) use ($inventories) {
-//                    foreach ($inventories as $inventory) {
-//                        dispatch(
-//                            new GenerateOverlayImageJob($inventory->inventory_id, false)
-//                        )->onQueue('overlay-images');
-//                    }
-//                }, __CLASS__, 2, array_merge($this->context, ['process' => 'image-overlay-generation']));
-//            }
+            $inventories = $repository->getAll(
+                ['dealer_id' => $dealerId, 'images_greater_than' => 1],
+                false,
+                false,
+                [Inventory::getTableName().'.inventory_id']
+            );
+
+            if ($inventories->count() > 0) {
+                $logger->info(
+                    'Enqueueing the job to generate inventory image overlays for dealer id',
+                    ['dealer_id' => $dealerId]
+                );
+
+                Job::batch(static function (BatchedJob $job) use ($inventories) {
+                    foreach ($inventories as $inventory) {
+                        dispatch(new GenerateOverlayImageJob($inventory->inventory_id, false));
+                    }
+                }, __CLASS__, 2, array_merge($this->context, ['process' => 'image-overlay-generation']));
+            }
 
             $logger->info('Enqueueing the job to reindex inventory by dealer id', ['dealer_id' => $dealerId]);
 

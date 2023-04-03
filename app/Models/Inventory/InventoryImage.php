@@ -10,14 +10,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Class InventoryImage
  * @package App\Models\Inventory
  *
- * @property int $image_id,
- * @property int $inventory_id,
- * @property bool $is_default,
- * @property int $is_secondary,
- * @property int $position,
- * @property string $showroom_image,
- * @property bool $was_manually_added,
- * @property bool $is_stock,
+ * @property int $image_id
+ * @property int $inventory_id
+ * @property bool $is_default
+ * @property int $is_secondary
+ * @property int $position
+ * @property string $showroom_image
+ * @property bool $was_manually_added
+ * @property bool $is_stock
+ * @property \DateTimeInterface $overlay_updated_at
  *
  * @property Image $image
  * @property Inventory $inventory
@@ -50,7 +51,10 @@ class InventoryImage extends Model
         'showroom_image',
         'was_manually_added',
         'is_stock',
+        'overlay_updated_at'
     ];
+
+    protected $casts = ['overlay_updated_at' => 'datetime'];
 
     /**
      * @return BelongsTo
@@ -73,5 +77,22 @@ class InventoryImage extends Model
     public function isSecondary(): bool
     {
         return (bool)$this->is_secondary;
+    }
+
+    public function originalFilenameRegardingInventoryOverlayConfig(?int $typeOfOverlay): string
+    {
+        // @todo fix the way it determines it is the primary image
+        if ($typeOfOverlay == Inventory::OVERLAY_ENABLED_ALL) {
+            return $this->image->filename_without_overlay;
+        } elseif ($typeOfOverlay == Inventory::OVERLAY_ENABLED_PRIMARY && ($this->position == 1 || $this->is_default == 1)) {
+            return $this->image->filename_without_overlay;
+        }
+
+        return $this->image->filename;
+    }
+
+    public function hasBeenAlreadyOverlay(): bool
+    {
+        return (bool) $this->overlay_updated_at;
     }
 }

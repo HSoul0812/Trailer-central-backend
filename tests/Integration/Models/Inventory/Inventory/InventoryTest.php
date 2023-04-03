@@ -8,7 +8,8 @@ use App\Models\Inventory\Inventory;
 use Tests\TestCase;
 
 /**
- * Class InventoryTest
+ * @group DW
+ * @group DW_INVENTORY
  *
  * @package Tests\Integration\Models\Inventory\Inventory
  *
