@@ -1189,13 +1189,14 @@ class InventoryRepository implements InventoryRepositoryInterface
             throw new \Exception('Deleted at is required when activating dealer inventories.');
         }
 
-        $dealerInventories = Inventory::where('dealer_id', $dealerId);
         $archivedAt = $inventoryParams['active'] ? $deletedAt : null;
 
-        return $dealerInventories->where([
+        $queryParams = [
             ['active', !$inventoryParams['active']],
             ['archived_at', $archivedAt]
-        ])->update($inventoryParams);
+        ];
+
+        return $this->massUpdate($inventoryParams, $queryParams);
     }
 
     /**
