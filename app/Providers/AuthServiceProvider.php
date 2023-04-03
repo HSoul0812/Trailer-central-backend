@@ -15,6 +15,7 @@ use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping;
 use App\Models\Feed\TransactionExecuteQueue;
+use App\Models\Feed\Uploads\FeedApiUpload;
 use App\Models\Integration\Collector\Collector;
 use App\Models\Integration\Collector\CollectorChangeReport;
 use App\Models\Integration\Collector\CollectorFields;
@@ -51,6 +52,7 @@ use App\Nova\Policies\CollectorSpecificationRulePolicy;
 use App\Nova\Policies\DealerPolicy;
 use App\Nova\Policies\FeatureFlagPolicy;
 use App\Nova\Policies\ExternalDealerMappingPolicy;
+use App\Nova\Policies\FeedApiUploadPolicy;
 use App\Nova\Policies\FeedPolicy;
 use App\Nova\Policies\FieldMapPolicy;
 use App\Nova\Policies\IntegrationPolicy;
@@ -135,7 +137,8 @@ class AuthServiceProvider extends ServiceProvider
         CollectorSpecification::class => CollectorSpecificationPolicy::class,
         CollectorSpecificationRule::class => CollectorSpecificationRulePolicy::class,
         CollectorSpecificationAction::class => CollectorSpecificationActionPolicy::class,
-        FeatureFlag::class => FeatureFlagPolicy::class
+        FeatureFlag::class => FeatureFlagPolicy::class,
+        FeedApiUpload::class => FeedApiUploadPolicy::class
     ];
 
     /**

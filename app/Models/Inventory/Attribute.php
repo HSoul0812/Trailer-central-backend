@@ -34,6 +34,13 @@ class Attribute extends Model
      */
     protected $table = 'eav_attribute';
 
+    protected $fillable = [
+        'type',
+        'code',
+        'name',
+        'values'
+    ];
+
     // ES indexed attributes
     const AXLES = 1;
     const CONSTRUCTION = 2;

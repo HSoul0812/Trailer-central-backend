@@ -118,7 +118,7 @@ class Kernel extends ConsoleKernel
         /**
          * Campaigns/Blasts
          */
-        if (config('app.env') === 'production') {
+        if ($this->isProduction()) {
             $schedule->command('text:process-campaign')
                     ->withoutOverlapping()
                     ->onOneServer()
@@ -187,16 +187,19 @@ class Kernel extends ConsoleKernel
            ->onOneServer()
            ->runInBackground();
 
-        /**
-         * @todo Calo say we could schedule this to be removed in next scheduled release (Early May of 2023)
-         *
-         * Temporary scheduled command to mitigate the integration issue,
-         * we need to make time so they will be able to move everything inventory related to the API side
-         */
-        $schedule->command('inventory:recreate-index')
-            ->dailyAt('1:00')
-            ->onOneServer()
-            ->runInBackground();
+        if ($this->isProduction()) {
+            /**
+             * @todo Calo say we could schedule this to be removed in next scheduled release (Early May of 2023)
+             *
+             * Temporary scheduled command to mitigate the integration issue,
+             * we need to make time so they will be able to move everything inventory related to the API side
+             */
+            $schedule->command('inventory:recreate-index')
+                ->dailyAt('1:00')
+                ->onOneServer()
+                ->withoutOverlapping()
+                ->runInBackground();
+        }
 
         $schedule->command('horizon:clean-completed-jobs')
             ->everyThirtyMinutes()
@@ -233,5 +236,10 @@ class Kernel extends ConsoleKernel
         $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
+    }
+
+    private function isProduction(): bool
+    {
+        return config('app.env') === 'production';
     }
 }

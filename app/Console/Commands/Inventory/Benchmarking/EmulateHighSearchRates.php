@@ -15,6 +15,13 @@ class EmulateHighSearchRates extends Command
             'bool' => [
                 'must' => [
                     [
+                        'terms' => [
+                            'dealerId' => [
+                                '6469'
+                            ]
+                        ]
+                    ],
+                    [
                         'term' => [
                             'isArchived' => false
                         ]
@@ -25,219 +32,15 @@ class EmulateHighSearchRates extends Command
                         ]
                     ],
                     [
-                        'term' => [
-                            'dealerId' => '6469'
-                        ]
-                    ],
-                    [
                         'bool' => [
-                            'must_not' => [
-                                [
-                                    'bool' => [
-                                        'should' => [
-                                            [
-                                                'match' => [
-                                                    'description.txt' => [
-                                                        'query' => 'swiss',
-                                                        'operator' => 'and'
-                                                    ]
-                                                ]
-                                            ],
-                                            [
-                                                'wildcard' => [
-                                                    'description' => [
-                                                        'value' => '*swiss*'
-                                                    ]
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ],
-                                [
-                                    'bool' => [
-                                        'should' => [
-                                            [
-                                                'match' => [
-                                                    'description.txt' => [
-                                                        'query' => 'snowdogg',
-                                                        'operator' => 'and'
-                                                    ]
-                                                ]
-                                            ],
-                                            [
-                                                'wildcard' => [
-                                                    'description' => [
-                                                        'value' => '*snowdogg*'
-                                                    ]
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ],
-                                [
-                                    'bool' => [
-                                        'should' => [
-                                            [
-                                                'match' => [
-                                                    'description.txt' => [
-                                                        'query' => 'chainsaw',
-                                                        'operator' => 'and'
-                                                    ]
-                                                ]
-                                            ],
-                                            [
-                                                'wildcard' => [
-                                                    'description' => [
-                                                        'value' => '*chainsaw*'
-                                                    ]
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ],
-                                [
-                                    'bool' => [
-                                        'should' => [
-                                            [
-                                                'match' => [
-                                                    'description.txt' => [
-                                                        'query' => 'plow',
-                                                        'operator' => 'and'
-                                                    ]
-                                                ]
-                                            ],
-                                            [
-                                                'wildcard' => [
-                                                    'description' => [
-                                                        'value' => '*plow*'
-                                                    ]
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ],
                             'should' => [
                                 [
                                     'bool' => [
-                                        'should' => [
+                                        'must' => [
                                             [
-                                                'match' => [
-                                                    'description.txt' => [
-                                                        'query' => 'zero turn',
-                                                        'operator' => 'and'
-                                                    ]
-                                                ]
-                                            ],
-                                            [
-                                                'wildcard' => [
-                                                    'description' => [
-                                                        'value' => '*zero turn*'
-                                                    ]
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ],
-                                [
-                                    'bool' => [
-                                        'should' => [
-                                            [
-                                                'match' => [
-                                                    'description.txt' => [
-                                                        'query' => 'tractor',
-                                                        'operator' => 'and'
-                                                    ]
-                                                ]
-                                            ],
-                                            [
-                                                'wildcard' => [
-                                                    'description' => [
-                                                        'value' => '*tractor*'
-                                                    ]
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ],
-                                [
-                                    'bool' => [
-                                        'should' => [
-                                            [
-                                                'match' => [
-                                                    'description.txt' => [
-                                                        'query' => 'LAWN MOWER',
-                                                        'operator' => 'and'
-                                                    ]
-                                                ]
-                                            ],
-                                            [
-                                                'wildcard' => [
-                                                    'description' => [
-                                                        'value' => '*lawn mower*'
-                                                    ]
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ],
-                                [
-                                    'bool' => [
-                                        'should' => [
-                                            [
-                                                'match' => [
-                                                    'description.txt' => [
-                                                        'query' => 'LAWN TRACTOR',
-                                                        'operator' => 'and'
-                                                    ]
-                                                ]
-                                            ],
-                                            [
-                                                'wildcard' => [
-                                                    'description' => [
-                                                        'value' => '*lawn tractor*'
-                                                    ]
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ],
-                                [
-                                    'bool' => [
-                                        'should' => [
-                                            [
-                                                'match' => [
-                                                    'description.txt' => [
-                                                        'query' => 'walk behind',
-                                                        'operator' => 'and'
-                                                    ]
-                                                ]
-                                            ],
-                                            [
-                                                'wildcard' => [
-                                                    'description' => [
-                                                        'value' => '*walk behind*'
-                                                    ]
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ],
-                                [
-                                    'bool' => [
-                                        'should' => [
-                                            [
-                                                'match' => [
-                                                    'description.txt' => [
-                                                        'query' => 'stand on',
-                                                        'operator' => 'and'
-                                                    ]
-                                                ]
-                                            ],
-                                            [
-                                                'wildcard' => [
-                                                    'description' => [
-                                                        'value' => '*stand on*'
+                                                'terms' => [
+                                                    'condition' => [
+                                                        'new'
                                                     ]
                                                 ]
                                             ]
@@ -251,8 +54,101 @@ class EmulateHighSearchRates extends Command
                         'bool' => [
                             'should' => [
                                 [
-                                    'term' => [
-                                        'condition' => 'new'
+                                    'bool' => [
+                                        'must_not' => [
+                                            [
+                                                'query_string' => [
+                                                    'fields' => [
+                                                        'description.tokens^1'
+                                                    ],
+                                                    'query' => '*swiss*'
+                                                ]
+                                            ],
+                                            [
+                                                'query_string' => [
+                                                    'fields' => [
+                                                        'description.tokens^1'
+                                                    ],
+                                                    'query' => '*snowdogg*'
+                                                ]
+                                            ],
+                                            [
+                                                'query_string' => [
+                                                    'fields' => [
+                                                        'description.tokens^1'
+                                                    ],
+                                                    'query' => '*chainsaw*'
+                                                ]
+                                            ],
+                                            [
+                                                'query_string' => [
+                                                    'fields' => [
+                                                        'description.tokens^1'
+                                                    ],
+                                                    'query' => '*plow*'
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    [
+                        'bool' => [
+                            'should' => [
+                                [
+                                    'bool' => [
+                                        'should' => [
+                                            [
+                                                'query_string' => [
+                                                    'fields' => [
+                                                        'description.tokens^1'
+                                                    ],
+                                                    'query' => '*zero AND turn*'
+                                                ]
+                                            ],
+                                            [
+                                                'query_string' => [
+                                                    'fields' => [
+                                                        'description.tokens^1'
+                                                    ],
+                                                    'query' => '*tract\o\r*'
+                                                ]
+                                            ],
+                                            [
+                                                'query_string' => [
+                                                    'fields' => [
+                                                        'description.tokens^1'
+                                                    ],
+                                                    'query' => '*lawn AND mower*'
+                                                ]
+                                            ],
+                                            [
+                                                'query_string' => [
+                                                    'fields' => [
+                                                        'description.tokens^1'
+                                                    ],
+                                                    'query' => '*lawn AND tract\o\r*'
+                                                ]
+                                            ],
+                                            [
+                                                'query_string' => [
+                                                    'fields' => [
+                                                        'description.tokens^1'
+                                                    ],
+                                                    'query' => '*walk AND behind*'
+                                                ]
+                                            ],
+                                            [
+                                                'query_string' => [
+                                                    'fields' => [
+                                                        'description.tokens^1'
+                                                    ],
+                                                    'query' => '*st\a\n\d AND on*'
+                                                ]
+                                            ]
+                                        ]
                                     ]
                                 ]
                             ]
@@ -268,23 +164,97 @@ class EmulateHighSearchRates extends Command
                 ]
             ]
         ],
+        'stored_fields' => [
+            '_source'
+        ],
+        'script_fields' => [
+            'distance' => [
+                'script' => [
+                    'source' => "if(doc['location.geo'].value != null) {
+                                return doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371;
+                             } else {
+                                return 0;
+                             }",
+                    'params' => [
+                        'lat' => 0,
+                        'lng' => 0
+                    ]
+                ]
+            ]
+        ],
+        'sort' => [
+            [
+                '_script' => [
+                    'type' => 'number',
+                    'script' => [
+                        'lang' => 'painless',
+                        'source' => "if (doc['status'].size() == 0) {return 0;} else if (doc['status'].value == '1') {  return 4;}  else if (doc['status'].value == '4') {  return 3;}  else if (doc['status'].value == '3') {  return 2;}  else if (doc['status'].value == '2') {  return 1;}  else {return 0;}"
+                    ],
+                    'order' => 'desc'
+                ]
+            ],
+            [
+                'existingPrice' => [
+                    'order' => 'desc'
+                ]
+            ],
+            [
+                'title' => [
+                    'order' => 'asc'
+                ]
+            ]
+        ],
         'aggregations' => [
+            'status' => [
+                'terms' => [
+                    'field' => 'status',
+                    'size' => 200
+                ]
+            ],
+            'dry_weight' => [
+                'stats' => [
+                    'field' => 'dryWeight'
+                ]
+            ],
+            'is_featured' => [
+                'terms' => [
+                    'field' => 'isFeatured',
+                    'size' => 200
+                ]
+            ],
+            'gvwr' => [
+                'stats' => [
+                    'field' => 'gvwr'
+                ]
+            ],
+            'fuel_type' => [
+                'terms' => [
+                    'field' => 'fuelType',
+                    'size' => 200
+                ]
+            ],
+            'sleeping_capacity' => [
+                'terms' => [
+                    'field' => 'numSleeps',
+                    'size' => 200
+                ]
+            ],
             'is_special' => [
                 'terms' => [
                     'field' => 'isSpecial',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'category' => [
                 'terms' => [
                     'field' => 'category',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'condition' => [
                 'terms' => [
                     'field' => 'condition',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'length' => [
@@ -320,48 +290,43 @@ class EmulateHighSearchRates extends Command
             'dealer_location_id' => [
                 'terms' => [
                     'field' => 'dealerLocationId',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'pull_type' => [
                 'terms' => [
                     'field' => 'pullType',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'stalls' => [
                 'terms' => [
                     'field' => 'numStalls',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'livingquarters' => [
                 'terms' => [
                     'field' => 'hasLq',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'slideouts' => [
                 'terms' => [
                     'field' => 'numSlideouts',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'configuration' => [
                 'terms' => [
                     'field' => 'loadType',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'midtack' => [
                 'terms' => [
                     'field' => 'hasMidtack',
-                    'size' => 300
-                ]
-            ],
-            'gvwr' => [
-                'stats' => [
-                    'field' => 'gvwr'
+                    'size' => 200
                 ]
             ],
             'payload_capacity' => [
@@ -369,16 +334,32 @@ class EmulateHighSearchRates extends Command
                     'field' => 'payloadCapacity'
                 ]
             ],
+            'mileage_miles' => [
+                'stats' => [
+                    'field' => 'mileageMiles'
+                ]
+            ],
+            'mileage_kilometres' => [
+                'stats' => [
+                    'field' => 'mileageKilometres'
+                ]
+            ],
+            'is_rental' => [
+                'terms' => [
+                    'field' => 'isRental',
+                    'size' => 200
+                ]
+            ],
             'manufacturer' => [
                 'terms' => [
                     'field' => 'manufacturer',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'brand' => [
                 'terms' => [
                     'field' => 'brand',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'price' => [
@@ -389,7 +370,7 @@ class EmulateHighSearchRates extends Command
             'year' => [
                 'terms' => [
                     'field' => 'year',
-                    'size' => 300,
+                    'size' => 200,
                     'order' => [
                         '_term' => 'desc'
                     ]
@@ -398,25 +379,31 @@ class EmulateHighSearchRates extends Command
             'axles' => [
                 'terms' => [
                     'field' => 'numAxles',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'construction' => [
                 'terms' => [
                     'field' => 'frameMaterial',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'color' => [
                 'terms' => [
                     'field' => 'color',
-                    'size' => 300
+                    'size' => 200
                 ]
             ],
             'ramps' => [
                 'terms' => [
                     'field' => 'hasRamps',
-                    'size' => 300
+                    'size' => 200
+                ]
+            ],
+            'floor_plans' => [
+                'terms' => [
+                    'field' => 'featureList.floorPlan',
+                    'size' => 200
                 ]
             ],
             'passengers' => [
@@ -425,80 +412,8 @@ class EmulateHighSearchRates extends Command
                 ]
             ]
         ],
-        'sort' => [
-            [
-                '_script' => [
-                    'type' => 'string',
-                    'script' => [
-                        'inline' => "doc['status'].size() != 0 && doc['status'].value == params.status ? '1': '0'",
-                        'params' => [
-                            'status' => 1
-                        ]
-                    ],
-                    'order' => 'desc'
-                ]
-            ],
-            [
-                '_script' => [
-                    'type' => 'string',
-                    'script' => [
-                        'inline' => "doc['status'].size() != 0 && doc['status'].value == params.status ? '1': '0'",
-                        'params' => [
-                            'status' => 4
-                        ]
-                    ],
-                    'order' => 'desc'
-                ]
-            ],
-            [
-                '_script' => [
-                    'type' => 'string',
-                    'script' => [
-                        'inline' => "doc['status'].size() != 0 && doc['status'].value == params.status ? '1': '0'",
-                        'params' => [
-                            'status' => 3
-                        ]
-                    ],
-                    'order' => 'desc'
-                ]
-            ],
-            [
-                '_script' => [
-                    'type' => 'string',
-                    'script' => [
-                        'inline' => "doc['status'].size() != 0 && doc['status'].value == params.status ? '1': '0'",
-                        'params' => [
-                            'status' => 2
-                        ]
-                    ],
-                    'order' => 'desc'
-                ]
-            ],
-            [
-                'existingPrice' => [
-                    'order' => 'desc'
-                ]
-            ],
-            [
-                'title' => [
-                    'order' => 'ASC'
-                ]
-            ]
-        ],
-        'stored_fields' => [
-            '_source'
-        ],
-        'script_fields' => [
-            'distance' => [
-                'script' => [
-                    'source' => "if(doc['location.geo'].value != null) { return doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371; } else { return 0; }",
-                    'params' => [
-                        'lat' => 0.0,
-                        'lng' => 0.0
-                    ]
-                ]
-            ]
-        ]
+        'from' => 0,
+        'size' => 15
     ];
 
     /**
@@ -559,7 +474,7 @@ class EmulateHighSearchRates extends Command
             $response = $data['value'];
             $content = json_decode($response->getBody(), true);
 
-            if (isset($content['took'])){
+            if (isset($content['took'])) {
                 $stats['took'][] = $content['took'];
                 $stats['avg'] += $content['took'];
             }

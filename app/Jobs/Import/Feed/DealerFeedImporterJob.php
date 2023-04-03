@@ -6,6 +6,7 @@ namespace App\Jobs\Import\Feed;
 
 use App\Jobs\Job;
 use App\Services\Import\Feed\DealerFeedUploaderService;
+use App\Services\Import\Feed\FactoryUpload;
 use Illuminate\Support\Facades\Log;
 
 class DealerFeedImporterJob extends Job
@@ -24,23 +25,16 @@ class DealerFeedImporterJob extends Job
      */
     private $code;
 
-    /**
-     * The service that will process the data
-     * @var DealerFeedUploaderService
-     */
-    private $feedUploader;
-
-    public function __construct($data, string $code, DealerFeedUploaderService $feedUploader)
+    public function __construct($data, string $code)
     {
         $this->data = $data;
         $this->code = $code;
-        $this->feedUploader = $feedUploader;
     }
 
-    public function handle()
+    public function handle(FactoryUpload $factory)
     {
         Log::info('Starting DealerFeedImporterJob', ['code' => $this->code]);
-        $this->feedUploader->run($this->data, $this->code);
+        $factory->run($this->data);
     }
 
 }
