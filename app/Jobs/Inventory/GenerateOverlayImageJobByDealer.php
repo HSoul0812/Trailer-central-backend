@@ -13,7 +13,7 @@ class GenerateOverlayImageJobByDealer extends Job
     private const WAIT_TIME_IN_SECONDS = 2;
 
     /** @var int The number of times the job may be attempted. */
-    public $tries = 5;
+    public $tries = 1;
 
     /** @var int */
     public $dealerId;
