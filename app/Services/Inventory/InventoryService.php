@@ -349,15 +349,17 @@ class InventoryService implements InventoryServiceInterface
         return $queryBuilder;
     }
 
-    private function addScriptFilter(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        $priceDef = "double price;
-                        if(doc['websitePrice'] != null){ price = doc['websitePrice'].value; }
-                        if(0 < doc['salesPrice'].value && doc['salesPrice'].value < price) { price = doc['salesPrice'].value; }";
+    private function addScriptFilter(ESInventoryQueryBuilder $queryBuilder, array $params)
+    {
+        $priceDef = "double price = 0; double websitePrice = 0; double salesPrice = 0;
+                        if(doc['websitePrice'].size > 0){ price = websitePrice = doc['websitePrice'].value; }
+                        if(doc['salesPrice'].size() > 0){ salesPrice = doc['salesPrice'].value; }
+                        if(0 < salesPrice && salesPrice < price) { price = salesPrice; }";
 
         $filter = "doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
 
-        if(!empty($params['sale'])) {
-            $filter .= " && doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value";
+        if (!empty($params['sale'])) {
+            $filter .= " && salesPrice > 0.0 && salesPrice < websitePrice";
         }
 
         if(!empty($params['price_min']) && $params['price_min'] > 0 && !empty($params['price_max'])) {
