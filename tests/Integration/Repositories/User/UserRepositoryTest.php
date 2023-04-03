@@ -16,10 +16,14 @@ class UserRepositoryTest  extends TestCase
 {
     use WithFaker;
 
-    /**
-     * @var SettingsSeeder
-     */
+    /** @var SettingsSeeder */
     private $seeder;
+
+    /** @var UserRepositoryInterface  */
+    private $repository;
+
+    /** @var User */
+    private $dealer;
 
     /**
      * Test that repository is properly bound by the application
@@ -87,33 +91,27 @@ class UserRepositoryTest  extends TestCase
      *
      * @covers ::UpdateOverlaySettings
      */
-    public function testUpdateOverlaySettingsByNotChangingOverlayUpdatedAt() {
-
-        $repository = $this->getConcreteRepository();
-
-        $paramsForDealerCreation = array_merge(
+    public function testUpdateOverlaySettingsByNotChangingOverlayUpdatedAt()
+    {
+        $this->dealer = $this->repository->create(array_merge(
             [
                 'name' => 'Test',
                 'email' => $this->faker->email,
                 'password' => 'testtest'
             ],
             InventoryRepositoryTest::OVERLAY_DEFAULT_CONFIGURATION
-        );
+        ));
 
-        $dealer = $repository->create($paramsForDealerCreation);
-
-        $performedChanges = $repository->updateOverlaySettings(
-            $dealer->dealer_id,
+        $performedChanges = $this->repository->updateOverlaySettings(
+            $this->dealer->dealer_id,
             ['overlay_enabled' => Inventory::OVERLAY_ENABLED_PRIMARY]
         );
 
         $this->assertSame(Inventory::OVERLAY_ENABLED_PRIMARY, $performedChanges['overlay_enabled']);
 
-        $dealer = $repository->getByEmail($dealer->email);
+        $this->dealer = $this->repository->getByEmail($this->dealer->email);
 
-        $this->assertNull($dealer->overlay_updated_at);
-
-        $dealer->delete();
+        $this->assertNull($this->dealer->overlay_updated_at);
     }
 
     /**
@@ -124,23 +122,19 @@ class UserRepositoryTest  extends TestCase
      *
      * @covers ::UpdateOverlaySettings
      */
-    public function testUpdateOverlaySettingsByChangingOverlayUpdatedAt() {
-
-        $repository = $this->getConcreteRepository();
-
-        $paramsForDealerCreation = array_merge(
+    public function testUpdateOverlaySettingsByChangingOverlayUpdatedAt()
+    {
+        $this->dealer = $this->repository->create(array_merge(
             [
                 'name' => 'Test',
                 'email' => $this->faker->email,
                 'password' => 'testtest'
             ],
             InventoryRepositoryTest::OVERLAY_DEFAULT_CONFIGURATION
-        );
+        ));
 
-        $dealer = $repository->create($paramsForDealerCreation);
-
-        $performedChanges = $repository->updateOverlaySettings(
-            $dealer->dealer_id,
+        $performedChanges = $this->repository->updateOverlaySettings(
+            $this->dealer->dealer_id,
             [
                 'overlay_enabled' => Inventory::OVERLAY_ENABLED_PRIMARY,
                 'overlay_logo' => 'logo2.png',
@@ -149,11 +143,9 @@ class UserRepositoryTest  extends TestCase
 
         $this->assertSame(Inventory::OVERLAY_ENABLED_PRIMARY, $performedChanges['overlay_enabled']);
 
-        $dealer = $repository->getByEmail($dealer->email);
+        $this->dealer = $this->repository->getByEmail($this->dealer->email);
 
-        $this->assertNotNull($dealer->overlay_updated_at);
-
-        $dealer->delete();
+        $this->assertNotNull($this->dealer->overlay_updated_at);
     }
 
     /**
@@ -166,5 +158,22 @@ class UserRepositoryTest  extends TestCase
     protected function getConcreteRepository(): UserRepositoryInterface
     {
         return $this->app->make(UserRepositoryInterface::class);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->repository = $this->getConcreteRepository();
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->dealer) {
+            $this->dealer->delete();
+            $this->dealer = null;
+        }
+
+        parent::tearDown();
     }
 }
