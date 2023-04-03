@@ -19,7 +19,6 @@ use App\Transformers\User\UserTransformer;
 use App\Http\Requests\User\CheckAdminPasswordRequest;
 use App\Http\Requests\User\UpdatePasswordRequest;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
-
 use App\Models\User\User;
 use Grosv\LaravelPasswordlessLogin\LoginUrl;
 use Grosv\LaravelPasswordlessLogin\PasswordlessLoginService;

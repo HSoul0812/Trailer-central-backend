@@ -3,6 +3,7 @@
 namespace App\Http\Requests\User;
 
 use App\Http\Requests\Request;
+use App\Rules\IsPasswordValid;
 
 /**
  * @property int $dealer_id
@@ -11,12 +12,21 @@ use App\Http\Requests\Request;
  */
 class UpdatePasswordRequest extends Request
 {
-    protected $rules = [
-        'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
-        'dealer_user_id' => 'integer|min:1|exists:dealer_users,dealer_user_id',
-        'password' => ['required', 'min:8', 'max:8', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/'],
-        'current_password' => ['required'],
-    ];
+    protected function getRules(): array
+    {
+        return [
+            'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
+            'dealer_user_id' => 'integer|min:1|exists:dealer_users,dealer_user_id',
+            'password' => [
+                'required',
+                'max:8',
+                new IsPasswordValid(),
+            ],
+            'current_password' => [
+                'required',
+            ],
+        ];
+    }
 
     public function messages(): array
     {

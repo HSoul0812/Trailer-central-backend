@@ -84,11 +84,12 @@ class InventoryControllerTest extends TestCase
      * @group DMS_INVENTORY
      */
     public function testHistoryInvalidParameters(
-        array $params,
-        string $expectedException,
-        string $expectedExceptionMessage,
+        array   $params,
+        string  $expectedException,
+        string  $expectedExceptionMessage,
         ?string $firstExpectedErrorMessage
-    ): void {
+    ): void
+    {
         $inventoryHistorySeeder = new InventoryHistorySeeder();
 
         // Given I have a collection of inventory transactions
@@ -1455,7 +1456,7 @@ HTML,
             'was_manually_added' => 1
         ];
 
-        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(),
+        $response = $this->json('POST', '/api/inventory/' . $seeder->inventory->getKey(),
             $inventoryParams, $this->getSeederAccessToken($seeder));
 
         $response->assertSuccessful();
@@ -1487,7 +1488,8 @@ HTML,
 
         $inventoryParams['title'] = 'test_title';
 
-        $images = factory(Image::class, 2)->create(); $index = 0;
+        $images = factory(Image::class, 2)->create();
+        $index = 0;
         $images->each(function (Image $image) use ($seeder, &$index, &$inventoryParams): void {
             factory(InventoryImage::class)->create([
                 'inventory_id' => $seeder->inventory->inventory_id,
@@ -1504,7 +1506,7 @@ HTML,
             $index++;
         });
 
-        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(), $inventoryParams, $this->getSeederAccessToken($seeder));
+        $response = $this->json('POST', '/api/inventory/' . $seeder->inventory->getKey(), $inventoryParams, $this->getSeederAccessToken($seeder));
 
         $response->assertSuccessful();
 
@@ -1535,7 +1537,7 @@ HTML,
 
         $inventoryParams['title'] = 'test_title';
 
-        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(),
+        $response = $this->json('POST', '/api/inventory/' . $seeder->inventory->getKey(),
             $inventoryParams, $this->getSeederAccessToken($seeder));
 
         $response->assertSuccessful();
@@ -1566,7 +1568,8 @@ HTML,
 
         $inventoryParams['title'] = 'test_title';
 
-        $images = factory(Image::class, 2)->create(); $index = 0;
+        $images = factory(Image::class, 2)->create();
+        $index = 0;
         $images->each(function (Image $image) use ($seeder, &$index, &$inventoryParams): void {
             factory(InventoryImage::class)->create([
                 'inventory_id' => $seeder->inventory->inventory_id,
@@ -1591,7 +1594,7 @@ HTML,
             'was_manually_added' => 1
         ];
 
-        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(), $inventoryParams, $this->getSeederAccessToken($seeder));
+        $response = $this->json('POST', '/api/inventory/' . $seeder->inventory->getKey(), $inventoryParams, $this->getSeederAccessToken($seeder));
 
         $response->assertSuccessful();
 

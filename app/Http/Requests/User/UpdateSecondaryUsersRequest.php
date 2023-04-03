@@ -7,6 +7,7 @@ use App\Models\User\DealerUser;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Rules\Shared\EmailValidation;
 use Illuminate\Validation\Rule;
+use App\Rules\IsPasswordValid;
 
 /**
  * Class UpdateSecondaryUsersRequest
@@ -40,7 +41,7 @@ class UpdateSecondaryUsersRequest extends Request
             ],
             'users.*.password' => [
                 'nullable',
-                'string',
+                new IsPasswordValid(),
             ],
             'users.*.user_permissions' => [
                 'array',
