@@ -21,7 +21,6 @@ use Illuminate\Database\Query\Builder;
  * It is useful for prevent concurrent access to resources shared by a job, or just to prevent excessive use of resources
  *
  * @property string $token the primary key value for this message, it could be provided by the creator
- * @property string $queue_job_id the queue job id belonging to this monitored job. It is unique
  * @property string $queue the name of the queue
  * @property string $concurrency_level the allowed concurrency level, it could be: by-dealer, by-job, without-restrictions
  * @property int $dealer_id the dealer id who launched it
@@ -116,7 +115,6 @@ class MonitoredJob extends Model
         'concurrency_level',
         'name',
         'result',
-        'queue_job_id',
         'status',
         'progress'
     ];

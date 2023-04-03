@@ -181,18 +181,14 @@ class MonitoredJobRepositoryTest extends AbstractMonitoredJobsTest
 
         // Also, given I have a known progress to replace another one
         $newProgress = (float)$this->faker->unique()->numberBetween(20, 80);
-        // And I have a new desired `queue_job_id` to replace another one
-        $queueableJobId = $this->faker->unique()->numberBetween(2500, 25000);
 
         // When I call the method `update` with certain parameters that I know it will update them
-        $repository->update($randomJob->token, ['progress' => $newProgress, 'queue_job_id' => $queueableJobId]);
+        $repository->update($randomJob->token, ['progress' => $newProgress]);
 
         // Then I call the method `get` with certain parameters that I know it will return a model
         $job = $repository->get(['token' => $randomJob->token]);
         // And I should see that my expected progress is the same retrieved from method `get`
         self::assertSame($newProgress, $job->progress);
-        // And I should see that the attribute `queue_job_id` was updated as expected
-        self::assertNotSame($job->queue_job_id, $queueableJobId);
     }
 
     /**

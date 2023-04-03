@@ -85,7 +85,6 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
         }
 
         if (isset($params['search_term'])) {
-
             $query = $query->where(function ($q) use ($params) {
                 $q->where('model', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhere('manufacturer', 'LIKE', '%' . $params['search_term'] . '%')
