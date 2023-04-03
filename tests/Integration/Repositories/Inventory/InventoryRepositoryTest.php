@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\Integration\Repositories\Dms;
+namespace Tests\Integration\Repositories\Inventory;
 
 use App\Models\User\DealerLocation;
 use App\Models\User\User;
@@ -24,7 +24,7 @@ class InventoryRepositoryTest extends TestCase
 {
     use DatabaseTransactions;
 
-    private const OVERLAY_DEFAULT_CONFIGURATION = [
+    public const OVERLAY_DEFAULT_CONFIGURATION = [
         'overlay_logo' => 'logo.png',
         'overlay_logo_position' => User::OVERLAY_LOGO_POSITION_LOWER_RIGHT,
         'overlay_logo_width' => '20%',

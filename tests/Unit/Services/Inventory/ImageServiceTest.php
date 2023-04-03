@@ -33,6 +33,9 @@ class ImageServiceTest extends TestCase
     use WithFaker;
 
     /** @var int  */
+    const ONCE = 1;
+
+    /** @var int  */
     const DEALER_ID = 1;
 
     /**
@@ -264,7 +267,8 @@ class ImageServiceTest extends TestCase
         $this->imageService->updateOverlaySettings($overlayParams);
 
         Queue::assertNotPushed(GenerateOverlayImageJob::class);
-        Queue::assertPushed(GenerateOverlayImageJobByDealer::class, 1);
+        Queue::assertNotPushed(ReIndexInventoriesByDealersJob::class);
+        Queue::assertPushed(GenerateOverlayImageJobByDealer::class, self::ONCE);
     }
 
     /**
@@ -310,7 +314,8 @@ class ImageServiceTest extends TestCase
         $this->imageService->updateOverlaySettings($overlayParams);
 
         Queue::assertNotPushed(GenerateOverlayImageJob::class);
-        Queue::assertPushed(GenerateOverlayImageJobByDealer::class, 1);
+        Queue::assertNotPushed(ReIndexInventoriesByDealersJob::class);
+        Queue::assertPushed(GenerateOverlayImageJobByDealer::class, self::ONCE);
     }
 
     /**
@@ -360,6 +365,9 @@ class ImageServiceTest extends TestCase
     {
         $performedChanges = ['overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL];
         $overlayParams = array_merge(['dealer_id' => self::DEALER_ID], $performedChanges);
+        /** @var User $dealer */
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = self::DEALER_ID;
 
         $this->inventoryRepositoryMock->expects('massUpdate')
             ->with([
@@ -373,11 +381,12 @@ class ImageServiceTest extends TestCase
 
         $this->userRepositoryMock->expects('get')
             ->with(['dealer_id' => self::DEALER_ID])
-            ->andReturns($this->getEloquentMock(User::class));
+            ->andReturns($dealer);
 
         $this->imageService->updateOverlaySettings($overlayParams);
 
         Queue::assertNotPushed(GenerateOverlayImageJob::class);
         Queue::assertNotPushed(ReIndexInventoriesByDealersJob::class);
+        Queue::assertPushed(GenerateOverlayImageJobByDealer::class, self::ONCE);
     }
 }

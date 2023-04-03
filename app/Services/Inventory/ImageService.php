@@ -160,7 +160,7 @@ class ImageService implements ImageServiceInterface
         }
 
         // Generate Overlay Inventory Images if necessary
-        if (collect($changes)->except('overlay_enabled')->count() > 0) {
+        if (count($changes) > 0) {
             // @todo we should implement some mechanism to avoid to dispatch many times
             //      `GenerateOverlayImageJobByDealer` successively because that job will spawn as many
             //      `GenerateOverlayImageJob` jobs as many inventory units has the dealer
