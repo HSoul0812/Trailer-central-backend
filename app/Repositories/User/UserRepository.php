@@ -248,7 +248,7 @@ class UserRepository implements UserRepositoryInterface {
     /**
      * {@inheritDoc}
      */
-    public function manageDealerOperations(int $dealerId, bool $active, $datetime = null): User
+    public function manageDealerActiveState(int $dealerId, bool $active, $datetime = null): User
     {
         if (is_null($datetime)) {
             $datetime = Carbon::now()->format('Y-m-d H:i:s');

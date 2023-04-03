@@ -9,6 +9,7 @@ use App\Models\User\NewUser;
 use App\Helpers\StringHelper;
 use App\Models\User\DealerClapp;
 use App\Models\User\NewDealerUser;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\User\DealerAdminSetting;
 use App\Repositories\GenericRepository;
@@ -234,11 +235,17 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     }
 
     /**
+     * Change dealer Active state from active/deleted
+     * Also
+     * Deactivate: Archive active units
+     * Active: Unarchive the archived units from last deactivation date
+     *
      * @param int $dealerId
      * @param bool $active
      * @return bool
+     * @throws Exception
      */
-    public function manageDealerOperations(int $dealerId, bool $active): bool
+    public function manageDealerActiveState(int $dealerId, bool $active): bool
     {
         try {
             // Transaction added in case of any exception occurs we don't mess any data
@@ -247,12 +254,13 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             $datetime = Carbon::now()->format('Y-m-d H:i:s');
 
             $inventoryParams = [
+                'dealer_id' => $dealerId,
                 'active' => $active,
                 'is_archived' => $active ? 0 : self::ARCHIVED_ON,
                 'archived_at' => $active ? null : $datetime
             ];
 
-            $this->userRepository->manageDealerOperations($dealerId, $active, $datetime);
+            $this->userRepository->manageDealerActiveState($dealerId, $active, $datetime);
             $this->inventoryRepository->manageDealerInventory($dealerId, $inventoryParams, $deletedAt);
 
             DB::commit();

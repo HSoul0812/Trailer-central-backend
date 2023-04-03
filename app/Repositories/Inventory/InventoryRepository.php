@@ -378,9 +378,10 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param array $params
+     * @param array $queryParams
      * @return bool
      */
-    public function massUpdate(array $params): bool
+    public function massUpdate(array $params, array $queryParams = []): bool
     {
         if (!isset($params['dealer_id'])) {
             throw new RepositoryInvalidArgumentException('dealer_id has been missed. Params - ' . json_encode($params));
@@ -389,7 +390,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         $dealerId = $params['dealer_id'];
         unset($params['dealer_id']);
 
-        Inventory::query()->where('dealer_id', $dealerId)->update($params);
+        $queryParams += ['dealer_id', $dealerId];
+
+        Inventory::query()->where(
+            $queryParams
+        )->update($params);
 
         return true;
     }

@@ -57,6 +57,7 @@ class ManageDealer extends Action
      * @param ActionFields $fields
      * @param Collection $models
      * @return void
+     * @throws \Exception
      */
     public function handle(ActionFields $fields, Collection $models)
     {
@@ -72,7 +73,7 @@ class ManageDealer extends Action
                 return Action::danger($message . ' deactivated.');
             }
 
-            $result = $this->dealerOptionsService->manageDealerOperations($model->dealer_id, $fields->active);
+            $result = $this->dealerOptionsService->manageDealerActiveState($model->dealer_id, $fields->active);
 
             if (!$result) {
                 throw new InvalidArgumentException('Error trying managing Dealer', 500);
