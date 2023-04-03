@@ -73,12 +73,12 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
     /**
      * {@inheritDoc}
      */
-    public function completePasswordReset(string $code, string $password) : bool
+    public function completePasswordReset(string $code, string $password, string $current_password): bool
     {
         $dealerPasswordReset = $this->getByCode($code);
         $dealer = $dealerPasswordReset->dealer;
 
-        $this->updateDealerPassword($dealer, $password);
+        $this->updateDealerPassword($dealer, $password, $current_password);
 
         $dealerPasswordReset->status = DealerPasswordReset::STATUS_PASSWORD_RESET_COMPLETED;
 
@@ -98,10 +98,9 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
      * @throws WrongCurrentPasswordException when current password is wrong
      * @throws TooLongPasswordException when the password is greater than eighth characters
      */
-    public function updateDealerPassword(User $dealer, string $password, string $current_password) : void
+    public function updateDealerPassword(User $dealer, string $password, string $current_password): void
     {
         $this->passwordMatch($dealer->password, $current_password, $dealer->salt);
-        $this->guardPasswordLength($password);
 
         if (empty($dealer->salt)) {
             $salt = uniqid();
@@ -119,37 +118,14 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
     public function updateDealerUserPassword(DealerUser $user, string $password, string $current_password) : void
     {
         $this->passwordMatch($user->password, $current_password, $user->salt);
-        $this->guardPasswordLength($password);
 
         DB::statement("UPDATE dealer_users SET password = ENCRYPT('{$password}', salt) WHERE dealer_user_id = {$user->dealer_user_id}");
     }
 
     /**
-     * @param string $password
-     * @return void
-     * @throws TooLongPasswordException when the password is greater than eighth characters
-     */
-    private function guardPasswordLength(string $password): void
-    {
-        if (strlen($password) > 8) {
-            /**
-             * Sadly this is technical debt which we need to pay, at least while we make a space to really fix it.
-             *
-             * @see https://www.php.net/manual/en/function.crypt.php
-             * @see https://dev.mysql.com/doc/refman/5.6/en/encryption-functions.html#function_encrypt
-             *
-             * MySQL ENCRYPT() and PHP encrypt() relies on the crypt() system call.
-             *
-             * It ignores all but the first eight characters of str, at least on some systems. This behavior is determined
-             * by the implementation of the underlying crypt() system call.
-             */
-            throw new TooLongPasswordException();
-        }
-    }
-
-    /**
      * @param string $expectedPassword
      * @param string $password
+     * @param string $salt
      * @return void
      * @throws WrongCurrentPasswordException when the current password is wrong
      */

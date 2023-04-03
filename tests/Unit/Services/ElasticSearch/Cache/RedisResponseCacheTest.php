@@ -52,7 +52,7 @@ class RedisResponseCacheTest extends TestCase
 
     public function test_it_invalidates_with_scan_if_a_wildcard_is_provided()
     {
-        $this->phpRedis->expects($this->exactly(2))->method('hScan');
+        $this->phpRedis->expects($this->once())->method('hScan');
         $this->phpRedis->expects($this->once())->method('unlink');
         $this->phpRedis->expects($this->once())->method('hDel');
 

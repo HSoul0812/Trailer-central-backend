@@ -10,6 +10,8 @@ use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
 use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
+use App\Repositories\Inventory\DeletedInventoryRepository;
+use App\Repositories\Inventory\DeletedInventoryRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
@@ -112,6 +114,7 @@ class InventoryServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        $this->app->bind(DeletedInventoryRepositoryInterface::class, DeletedInventoryRepository::class);
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);

@@ -97,6 +97,16 @@ class CollectorImport implements ToModel, WithStartRow
             'third_party_provider' => $row[73],
             'created_at' => $row[74],
             'updated_at' => $row[75],
+            'use_partial_update' => $row[73] ?? 0,
+            'last_full_run' => $row[74] ?? 0,
+            'days_till_full_run' => $row[75] ?? 0,
+            'not_save_unmapped_on_factory_units' => $row[76] ?? 0,
+            'conditional_title_format' => $row[77] ?? 0,
+            'use_brands_for_factory_mapping' => $row[78] ?? 0,
+            'check_images_for_bdv_matching' => $row[79] ?? 0,
+            'mark_sold_manually_added_items' => $row[80] ?? 0,
+            'created_at' => $row[81],
+            'updated_at' => $row[82],
         ]);
     }
 
