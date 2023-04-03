@@ -31,6 +31,9 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
     /**  @var array|null */
     private $context;
 
+    /** @var int The number of times the job may be attempted. */
+    public $tries = 1;
+
     public function __construct(array $dealerIds, ?array $context = null)
     {
         $this->dealerIds = $dealerIds;
