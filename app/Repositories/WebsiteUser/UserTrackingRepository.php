@@ -28,6 +28,15 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
 
         $params['page_name'] = $this->getPageName($params['url']);
 
+        $params['ip_address'] = request()->ip();
+
+        // We don't want to process this record for location if the IP
+        // address doesn't exist, or if the IP address is in the ignore
+        // location processing list
+        if (empty($params['ip_address']) || in_array($params['ip_address'], UserTracking::IGNORE_LOCATION_PROCESSING_IP_ADDRESSES)) {
+            $params['location_processed'] = true;
+        }
+
         try {
             return UserTracking::create($params);
         } catch (Throwable $exception) {
