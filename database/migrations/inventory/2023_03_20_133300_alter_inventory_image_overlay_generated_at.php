@@ -15,14 +15,16 @@ class AlterInventoryImageOverlayGeneratedAt extends Migration
     public function up(): void
     {
         Schema::table('inventory_image', function (Blueprint $table): void {
-            $table->timestamp('overlay_updated_at')
-                ->nullable()
-                ->index('inventory_image_overlay_updated_at_index');
+            if (!Schema::hasColumn('inventory_image', 'overlay_updated_at')) {
+                $table->timestamp('overlay_updated_at')
+                    ->nullable()
+                    ->index('inventory_image_overlay_updated_at_index');
 
-            $table->index(
-                ['inventory_id', 'overlay_updated_at'],
-                'inventory_image_inventory_and_overlay_updated_at_index'
-            );
+                $table->index(
+                    ['inventory_id', 'overlay_updated_at'],
+                    'inventory_image_inventory_and_overlay_updated_at_index'
+                );
+            }
         });
 
         $dealers = DB::table('dealer')->select('dealer_id')->get();
