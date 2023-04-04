@@ -1527,7 +1527,7 @@ class InventoryServiceTest extends TestCase
         $inventoryImage1->is_default = 0;
         $inventoryImage1->position = 1;
         $inventoryImage1->overlay_updated_at = null;
-        $inventoryImage1->shouldReceive('hasBeenAlreadyOverlay')->andReturn(false);
+        $inventoryImage1->shouldReceive('hasBeenOverlay')->andReturn(false);
         $inventoryImage1->shouldReceive('isDefault')->andReturn(true);
         $inventoryImages->push($inventoryImage1);
 
@@ -1544,7 +1544,7 @@ class InventoryServiceTest extends TestCase
         $inventoryImage2->is_default = 0;
         $inventoryImage2->position = 2;
         $inventoryImage2->overlay_updated_at = null;
-        $inventoryImage2->shouldReceive('hasBeenAlreadyOverlay')->andReturn(false);
+        $inventoryImage2->shouldReceive('hasBeenOverlay')->andReturn(false);
         $inventoryImage2->shouldReceive('isDefault')->andReturn(false);
         $inventoryImages->push($inventoryImage2);
 
@@ -1602,7 +1602,7 @@ class InventoryServiceTest extends TestCase
         $inventoryImage1->is_default = 0;
         $inventoryImage1->position = 1;
         $inventoryImage1->overlay_updated_at = $yesterday;
-        $inventoryImage1->shouldReceive('hasBeenAlreadyOverlay')->andReturn(true);
+        $inventoryImage1->shouldReceive('hasBeenOverlay')->andReturn(true);
         $inventoryImage1->shouldReceive('isDefault')->andReturn(true);
         $inventoryImages->push($inventoryImage1);
 
@@ -1619,7 +1619,7 @@ class InventoryServiceTest extends TestCase
         $inventoryImage2->is_default = 0;
         $inventoryImage2->position = 2;
         $inventoryImage2->overlay_updated_at = $yesterday;
-        $inventoryImage2->shouldReceive('hasBeenAlreadyOverlay')->andReturn(true);
+        $inventoryImage2->shouldReceive('hasBeenOverlay')->andReturn(true);
         $inventoryImage2->shouldReceive('isDefault')->andReturn(false);
         $inventoryImages->push($inventoryImage2);
 
@@ -1681,7 +1681,7 @@ class InventoryServiceTest extends TestCase
         $inventoryImage1->is_default = 0;
         $inventoryImage1->position = 1;
         $inventoryImage1->overlay_updated_at = null;
-        $inventoryImage1->shouldReceive('hasBeenAlreadyOverlay')->andReturn(false);
+        $inventoryImage1->shouldReceive('hasBeenOverlay')->andReturn(false);
         $inventoryImage1->shouldReceive('isDefault')->andReturn(true);
         $inventoryImages->push($inventoryImage1);
 
@@ -1698,7 +1698,7 @@ class InventoryServiceTest extends TestCase
         $inventoryImage2->is_default = 0;
         $inventoryImage2->position = 2;
         $inventoryImage2->overlay_updated_at = null;
-        $inventoryImage2->shouldReceive('hasBeenAlreadyOverlay')->andReturn(false);
+        $inventoryImage2->shouldReceive('hasBeenOverlay')->andReturn(false);
         $inventoryImage2->shouldReceive('isDefault')->andReturn(false);
         $inventoryImages->push($inventoryImage2);
 
@@ -1778,7 +1778,7 @@ class InventoryServiceTest extends TestCase
         $regularInventoryImage->is_default = 0;
         $regularInventoryImage->position = 0;
         $regularInventoryImage->overlay_updated_at = $yesterday;
-        $regularInventoryImage->shouldReceive('hasBeenAlreadyOverlay')->andReturn(false);
+        $regularInventoryImage->shouldReceive('hasBeenOverlay')->andReturn(false);
         $regularInventoryImage->shouldReceive('isDefault')->andReturn(true);
         $inventoryImages->push($regularInventoryImage);
 
@@ -1799,7 +1799,7 @@ class InventoryServiceTest extends TestCase
         $primaryInventoryImage->is_default = 1;
         $primaryInventoryImage->position = 1;
         $primaryInventoryImage->overlay_updated_at = null;
-        $primaryInventoryImage->shouldReceive('hasBeenAlreadyOverlay')->andReturn(false);
+        $primaryInventoryImage->shouldReceive('hasBeenOverlay')->andReturn(false);
         $primaryInventoryImage->shouldReceive('isDefault')->andReturn(false);
         $inventoryImages->push($primaryInventoryImage);
 
@@ -1876,7 +1876,7 @@ class InventoryServiceTest extends TestCase
         $inventoryImage->is_default = 1;
         $inventoryImage->position = 0;
         $inventoryImage->overlay_updated_at = null;
-        $inventoryImage->shouldReceive('hasBeenAlreadyOverlay')->andReturn(false);
+        $inventoryImage->shouldReceive('hasBeenOverlay')->andReturn(false);
         $inventoryImage->shouldReceive('isDefault')->andReturn(false);
         $inventoryImages->push($inventoryImage);
 
@@ -1969,7 +1969,7 @@ class InventoryServiceTest extends TestCase
         $inventoryImage1->is_default = 0;
         $inventoryImage1->position = 1;
         $inventoryImage1->overlay_updated_at = $yesterday;
-        $inventoryImage1->shouldReceive('hasBeenAlreadyOverlay')->andReturn(true);
+        $inventoryImage1->shouldReceive('hasBeenOverlay')->andReturn(true);
         $inventoryImage1->shouldReceive('isDefault')->andReturn(true);
         $inventoryImages->push($inventoryImage1);
 
@@ -1986,7 +1986,7 @@ class InventoryServiceTest extends TestCase
         $inventoryImage2->is_default = 0;
         $inventoryImage2->position = 2;
         $inventoryImage2->overlay_updated_at = $yesterday;
-        $inventoryImage2->shouldReceive('hasBeenAlreadyOverlay')->andReturn(true);
+        $inventoryImage2->shouldReceive('hasBeenOverlay')->andReturn(true);
         $inventoryImage2->shouldReceive('isDefault')->andReturn(false);
         $inventoryImages->push($inventoryImage2);
 

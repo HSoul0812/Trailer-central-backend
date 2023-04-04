@@ -7,16 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Class Image
- * @package App\Models\Inventory
- *
  * @property int $image_id
  * @property \DateTimeInterface $created_at
  * @property \DateTimeInterface $updated_at
  * @property string $filename image URL which is shown in dealer websites
  * @property string $filename_with_overlay
  * @property string $filename_without_overlay image URL shown in TrailerTrade
- * @property string $filename_noverlay @deprecated this column is deprecated
+ * @property string $filename_noverlay this column is @deprecated
  * @property string $hash
  * @property string $program
  */
