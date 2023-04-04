@@ -236,7 +236,7 @@ class Collector extends Model implements Filterable
         'override_prices',
         'override_attributes',
         'override_descriptions',
-        'third_party_provider'
+        'third_party_provider',
         'use_partial_update',
         'days_till_full_run',
         'last_full_run',
