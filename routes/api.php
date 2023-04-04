@@ -499,6 +499,9 @@ $api->version('v1', function ($route) {
         $route->post('interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail');
         $route->get('leads/{leadId}/contact-date', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@getContactDate');
 
+        /**
+         * Email Interaction
+         */
         $route->get('leads/{leadId}/interactions/draft-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@getEmailDraft');
         $route->post('leads/{leadId}/interactions/draft-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@saveEmailDraft');
         $route->post('leads/{leadId}/interactions/send-email-draft', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmailDraft');
@@ -520,15 +523,7 @@ $api->version('v1', function ($route) {
     // Stop Text!
     $route->post('leads/texts/stop', 'App\Http\Controllers\v1\CRM\Text\StopController@index');
     // Reply
-    $route->put('leads/texts/reply', 'App\Http\Controllers\v1\CRM\Text\TextController@reply')->middleware(['accesstoken.validate', 'replytext.validate']);;
-
-    /**
-     * Email Interaction
-     */
-    $route->group([], function($route) {
-
-        $route->get('leads/{leadId}/emails', 'App\Http\Controllers\v1\CRM\Text\TextController@index')->where('leadId', '[0-9]+');
-    });
+    $route->put('leads/texts/reply', 'App\Http\Controllers\v1\CRM\Text\TextController@reply')->middleware(['accesstoken.validate', 'replytext.validate']);
 
     /**
      * Facebook Webhooks
