@@ -96,6 +96,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $override_prices
  * @property int $override_attributes
  * @property int $override_descriptions
+ * @property string|null $third_party_provider
  * @property \DateTime|null $last_run
  * @property \DateTime|null $scheduled_for
  * @property bool $use_partial_update
@@ -235,6 +236,7 @@ class Collector extends Model implements Filterable
         'override_prices',
         'override_attributes',
         'override_descriptions',
+        'third_party_provider'
         'use_partial_update',
         'days_till_full_run',
         'last_full_run',
