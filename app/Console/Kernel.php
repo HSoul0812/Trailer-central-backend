@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console;
 
-use App\Console\Commands\Report\ReportInventoryViewAndImpressionCommand;
-use App\Console\Commands\UserTracking\PopulateMissingWebsiteUserIdCommand;
-use App\Console\Commands\UserTracking\PopulateUserLocationCommand;
 use App\Console\Commands\UserTracking\ProcessUserTrackingsCommand;
-use Artisan;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -44,16 +40,6 @@ class Kernel extends ConsoleKernel
 
         $schedule
             ->command(ProcessUserTrackingsCommand::class)
-            ->daily()
-            ->withoutOverlapping()
-            ->onOneServer()
-            ->runInBackground();
-
-        $schedule
-            ->command(ReportInventoryViewAndImpressionCommand::class, [
-                // Send the yesterday time to the command
-                'date' => now()->subMinutes(10)->format(ReportInventoryViewAndImpressionCommand::DATE_FORMAT),
-            ])
             ->daily()
             ->withoutOverlapping()
             ->onOneServer()
