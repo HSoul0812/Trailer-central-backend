@@ -2,15 +2,20 @@
 
 namespace App\Console\Commands\Report;
 
+use App\Domains\Commands\Traits\PrependsOutput;
+use App\Domains\Commands\Traits\PrependsTimestamp;
 use App\Domains\UserTracking\Exporters\InventoryViewAndImpressionCsvExporter;
 use App\Domains\UserTracking\Mail\ReportInventoryViewAndImpressionEmail;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Mail;
+use Swift_TransportException;
 use Throwable;
 
 class ReportInventoryViewAndImpressionCommand extends Command
 {
+    use PrependsOutput, PrependsTimestamp;
+
     const DATE_FORMAT = 'Y-m-d';
 
     /**
@@ -44,6 +49,8 @@ class ReportInventoryViewAndImpressionCommand extends Command
      */
     public function handle(): int
     {
+        $this->info(sprintf("%s command started...", $this->name));
+
         $date = $this->argument('date');
 
         try {
@@ -66,14 +73,20 @@ class ReportInventoryViewAndImpressionCommand extends Command
         $sendMail = config('trailertrader.report.inventory-view-and-impression.send_mail');
 
         if ($sendMail) {
-            $this->line("Sending email...");
-
             $mailTo = config('trailertrader.report.inventory-view-and-impression.mail_to');
 
-            Mail::to($mailTo)->send(new ReportInventoryViewAndImpressionEmail($filePath, $date));
+            try {
+                Mail::to($mailTo)->send(new ReportInventoryViewAndImpressionEmail($filePath, $date));
 
-            $this->info("Email sent!");
+                $this->info("Inventory view and impression email sent successfully!");
+            } catch (Swift_TransportException $exception) {
+                $this->error("Can't sent out email: {$exception->getMessage()}");
+
+                return 2;
+            }
         }
+
+        $this->info(sprintf("%s command finished!", $this->name));
 
         return 0;
     }

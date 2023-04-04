@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands\UserTracking;
 
+use App\Domains\Commands\Traits\PrependsOutput;
+use App\Domains\Commands\Traits\PrependsTimestamp;
 use App\Domains\UserTracking\Actions\PopulateMissingWebsiteUserIdAction;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -9,6 +11,8 @@ use Throwable;
 
 class PopulateMissingWebsiteUserIdCommand extends Command
 {
+    use PrependsOutput, PrependsTimestamp;
+
     const DATE_FORMAT = 'Y-m-d';
 
     /**
@@ -42,6 +46,8 @@ class PopulateMissingWebsiteUserIdCommand extends Command
      */
     public function handle(): int
     {
+        $this->info(sprintf("%s command started...", $this->name));
+
         try {
             $from = Carbon::createFromFormat(self::DATE_FORMAT, $this->argument('date'))->startOfDay();
         } catch (Throwable) {
@@ -62,6 +68,8 @@ class PopulateMissingWebsiteUserIdCommand extends Command
 
             return 2;
         }
+
+        $this->info(sprintf("%s command finished!", $this->name));
 
         return 0;
     }

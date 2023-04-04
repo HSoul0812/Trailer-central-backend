@@ -26,7 +26,7 @@ class PopulateUserLocationCommand extends Command
      */
     public function handle(): int
     {
-        $this->info(sprintf("%s command started...", $this->signature));
+        $this->info(sprintf("%s command started...", $this->name));
 
         $this->reader = new Reader(storage_path('app/maxmind/GeoLite2-City.mmdb'));
 
@@ -37,7 +37,7 @@ class PopulateUserLocationCommand extends Command
             ->pluck('ip_address')
             ->each(fn(string $ipAddress) => $this->populateLocationForIpAddress($ipAddress));
 
-        $this->info(sprintf("%s command finished!", $this->signature));
+        $this->info(sprintf("%s command finished!", $this->name));
 
         return 0;
     }

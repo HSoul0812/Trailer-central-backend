@@ -36,7 +36,6 @@ class PopulateMissingWebsiteUserIdCommandTest extends TestCase
             ->artisan(PopulateMissingWebsiteUserIdCommand::class, [
                 'date' => $date,
             ])
-            ->expectsOutput('dummy')
             ->assertExitCode(2);
     }
 

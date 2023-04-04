@@ -6,10 +6,7 @@ namespace App\Console;
 
 use App\Console\Commands\Crawlers\CacheCrawlerIpAddressesCommand;
 use App\Console\Commands\Images\DeleteOldLocalImagesCommand;
-use App\Console\Commands\Report\ReportInventoryViewAndImpressionCommand;
-use App\Console\Commands\UserTracking\PopulateMissingWebsiteUserIdCommand;
-use App\Console\Commands\UserTracking\PopulateUserLocationCommand;
-use Artisan;
+use App\Console\Commands\UserTracking\ProcessUserTrackingsCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -49,22 +46,12 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule
-            ->command(PopulateUserLocationCommand::class)
+            ->command(ProcessUserTrackingsCommand::class)
             ->daily()
             ->withoutOverlapping()
             ->onOneServer()
             ->runInBackground()
-            ->before(function() {
-                // TODO: Set the logger here
-            })
-            ->after(function() {
-                Artisan::call(PopulateMissingWebsiteUserIdCommand::class, [
-                    'date' => now()->subDay()->format(PopulateMissingWebsiteUserIdCommand::DATE_FORMAT),
-                ]);
-                Artisan::call(ReportInventoryViewAndImpressionCommand::class, [
-                    'date' => now()->subMinutes(10)->format(ReportInventoryViewAndImpressionCommand::DATE_FORMAT),
-                ]);
-            });
+            ->appendOutputTo(storage_path('logs/commands/user-trackings.log'));
 
         $schedule
             ->command(DeleteOldLocalImagesCommand::class)
