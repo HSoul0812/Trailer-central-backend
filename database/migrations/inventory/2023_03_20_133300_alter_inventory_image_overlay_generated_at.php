@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use App\Models\Inventory\InventoryImage;
-use App\Models\User\User as Dealer;
+use stdClass as Dealer;
 
 class AlterInventoryImageOverlayGeneratedAt extends Migration
 {
