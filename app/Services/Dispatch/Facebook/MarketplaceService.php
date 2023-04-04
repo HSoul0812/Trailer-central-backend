@@ -429,7 +429,9 @@ class MarketplaceService implements MarketplaceServiceInterface
         if($step->isError()) {
             // Dismiss Existing Errors
             $this->errors->dismissAll($step->marketplaceId, $step->inventoryId ?? 0);
-
+            // Remove duplicates in the same day, and only keep the latest
+            $this->errors->removeDailyDuplicates($step->marketplaceId, $step->inventoryId);
+            
             // Return Error
             return $this->errors->create([
                 'marketplace_id' => $step->marketplaceId,

@@ -200,7 +200,7 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
         // Get First
         $collection = new Collection();
-        foreach($errors as $error) {
+        foreach ($errors as $error) {
             $collection->push($this->update([
                 'id' => $error->id,
                 'dismissed' => 1
@@ -212,8 +212,30 @@ class ErrorRepository implements ErrorRepositoryInterface {
     }
 
     /**
+     * Remove duplicates errors for the same Integration/Inventory
+     *
+     * @param int $marketplaceId
+     * @param ?int $inventoryId
+     * @return void
+     */
+    public function removeDailyDuplicates(int $marketplaceId, ?int $inventoryId = null): void
+    {
+        $this->where('marketplace_id', $marketplaceId)
+            ->where(function ($query) use ($inventoryId) {
+                if ($inventoryId !== null) {
+                    $query->where('inventory_id', $inventoryId);
+                } else {
+                    $query->whereNull('inventory_id');
+                }
+                return $query;
+            })
+            ->whereDate('created_at', date('Y-m-d'))
+            ->delete();
+    }
+
+    /**
      * Dismiss All Active Errors on Marketplace Integration
-     * 
+     *
      * @param int $marketplaceId
      * @return Collection<Error>
      */
