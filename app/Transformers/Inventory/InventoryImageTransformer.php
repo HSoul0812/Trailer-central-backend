@@ -23,7 +23,7 @@ class InventoryImageTransformer extends MediaFileTransformer
             'image_id' => $inventoryImage->image_id,
             'is_default' => $inventoryImage->is_default,
             'is_secondary' => $inventoryImage->is_secondary,
-            'position' => $inventoryImage->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION : $position,
+            'position' => $inventoryImage->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION_EDGE_CASE : $position,
             'url' => $overlayUrl,
             'original_url' => $originalImageUrl
         ];

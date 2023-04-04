@@ -72,7 +72,7 @@ class InventoryHelper
             // when the position is null, it will sorted a last position
             $position = $image->position ?? InventoryImage::LAST_IMAGE_POSITION;
 
-            return $image->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION : $position;
+            return $image->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION_EDGE_CASE : $position;
         };
     }
 

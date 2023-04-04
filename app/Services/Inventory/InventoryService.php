@@ -716,14 +716,14 @@ class InventoryService implements InventoryServiceInterface
 
         $inventoryImages
             ->sortBy(InventoryHelper::singleton()->imageSorter())
-            ->each(function (InventoryImage $inventoryImage) use ($inventoryOverlayConfig, &$imageIndex) {
+            ->each(function (InventoryImage $inventoryImage) use (&$imageIndex, $inventoryOverlayConfig): bool {
                 $isOverlayDisabledOrImageShouldNotOverlay = $this->isOverlayDisabledOrImageShouldNotOverlay(
                     $inventoryImage,
                     $imageIndex,
                     $inventoryOverlayConfig['overlay_enabled']
                 );
 
-                if ($inventoryImage->hasBeenAlreadyOverlay()) {
+                if ($inventoryImage->hasBeenOverlay()) {
                     if ($isOverlayDisabledOrImageShouldNotOverlay) {
                         $this->imageTableService->tryToRestoreOriginalImage($inventoryImage->image);
 
@@ -751,6 +751,8 @@ class InventoryService implements InventoryServiceInterface
                 $this->applyOverlayToImage($inventoryImage, $inventoryOverlayConfig);
 
                 $imageIndex++;
+
+                return true;
             });
     }
 
@@ -1105,13 +1107,13 @@ class InventoryService implements InventoryServiceInterface
                     ->toArray();
             }
 
-            //            $imagesFilenames = $this->imageRepository
-            //                ->getAll([
-            //                    'inventory_id' => $inventoryId,
-            //                    ImageRepositoryInterface::CONDITION_AND_WHERE_IN => ['inventory_image.image_id' => $imageIds]
-            //                ])
-            //                ->pluck('filename')
-            //                ->toArray();
+            //  $imagesFilenames = $this->imageRepository
+            //       ->getAll([
+            //             'inventory_id' => $inventoryId,
+            //             ImageRepositoryInterface::CONDITION_AND_WHERE_IN => ['inventory_image.image_id' => $imageIds]
+            //        ])
+            //       ->pluck('filename')
+            //       ->toArray();
 
             $this->imageRepository->delete([
                 ImageRepositoryInterface::CONDITION_AND_WHERE_IN => ['image_id' => $imageIds]
