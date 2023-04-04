@@ -7,6 +7,7 @@ namespace App\Console;
 use App\Console\Commands\Report\ReportInventoryViewAndImpressionCommand;
 use App\Console\Commands\UserTracking\PopulateMissingWebsiteUserIdCommand;
 use App\Console\Commands\UserTracking\PopulateUserLocationCommand;
+use App\Console\Commands\UserTracking\ProcessUserTrackingsCommand;
 use Artisan;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -42,7 +43,7 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule
-            ->command(PopulateUserLocationCommand::class)
+            ->command(ProcessUserTrackingsCommand::class)
             ->daily()
             ->withoutOverlapping()
             ->onOneServer()
