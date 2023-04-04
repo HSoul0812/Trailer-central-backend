@@ -433,6 +433,8 @@ class ImageHelper
      * @param string $logoPath
      * @param array $config
      * @return string local path of new image
+     *
+     * @throws MissingOverlayLogoParametersException when logo overlay is enabled and its configurations were not provided
      */
     public function addLogoOverlay(string $imagePath, string $logoPath, array $config)
     {
@@ -452,9 +454,14 @@ class ImageHelper
         $logoHeight = preg_replace("/[^0-9.]/", "", $config['overlay_logo_height']);
 
         // Check for PX/% on Width
-        if (strpos($config['overlay_logo_width'], "%") !== FALSE) {
+        if (strpos($config['overlay_logo_width'], "%") !== false) {
             $percentageWidth = $logoWidth * 0.01;
-            $logoWidth = $percentageWidth * $imageWidth;
+
+            if (!$logoHeight) {
+                $logoWidth = $percentageWidth * $imageWidth * 0.33;
+            } else {
+                $logoWidth = $percentageWidth * $imageWidth;
+            }
         }
 
         if($logoWidth > $originalLogoWidth || empty($logoWidth)) {
@@ -462,7 +469,7 @@ class ImageHelper
         }
 
         // Check for PX/% on Height
-        if (strpos($config['overlay_logo_height'], "%") !== FALSE) {
+        if (strpos($config['overlay_logo_height'], "%") !== false) {
             $percentageHeight = $logoHeight * 0.01;
             $logoHeight = $percentageHeight * $imageHeight;
         }
@@ -478,7 +485,13 @@ class ImageHelper
 
         // Create Resized Logo while keeping ratio
         $resizedLogo = $this->createTempFile('', $logoType);
-        shell_exec('convert ' . $localLogoPath . ' -resize ' . $logoWidth . 'x' . $logoHeight . ' ' . $resizedLogo);
+
+        if (!preg_replace("/[^0-9.]/", "", $config['overlay_logo_height'])) {
+            shell_exec('convert ' . $localLogoPath . ' -resize ' . $logoWidth . 'x' . ' ' . $resizedLogo);
+        } else {
+            shell_exec('convert ' . $localLogoPath . ' -resize ' . $logoWidth . 'x' . $logoHeight . ' ' . $resizedLogo);
+        }
+
 
         // Get New Logo Dimensions
         $resizedLogoResource = $this->getImageResource($resizedLogo, $logoType);

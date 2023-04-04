@@ -702,11 +702,11 @@ $api->version('v1', function ($route) {
         $route->get('leads/first', 'App\Http\Controllers\v1\CRM\Leads\LeadController@first');
         $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show')->where('id', '[0-9]+');
         $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update')->where('id', '[0-9]+');
+        $route->delete('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@destroy')->where('id', '[0-9]+');
         $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
         $route->post('leads/find-matches', 'App\Http\Controllers\v1\CRM\Leads\LeadController@getMatches');
         $route->post('leads/{id}/merge', 'App\Http\Controllers\v1\CRM\Leads\LeadController@mergeLeads');
         $route->get('leads/output', 'App\Http\Controllers\v1\CRM\Leads\LeadController@output');
-        $route->delete('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@destroy');
 
         /*
         |--------------------------------------------------------------------------
@@ -926,11 +926,16 @@ $api->version('v1', function ($route) {
             'prefix' => 'leads/{leadId}/trades',
             'middleware' => 'leads.trade.validate'
         ], function ($route) {
-            $route->get('/', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@index');
-            $route->post('/', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@create');
-            $route->post('{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@update')->where('id', '[0-9]+');
-            $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@destroy')->where('id', '[0-9]+');
-            $route->get('{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@show')->where('id', '[0-9]+');
+            $route->get('/', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@index')
+                  ->where('leadId', '[0-9]+');
+            $route->post('/', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@create')
+                  ->where('leadId', '[0-9]+');
+            $route->post('{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@update')
+                  ->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+            $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@destroy')
+                  ->where('leadId', '[0-9]+')->where('Ld', '[0-9]+');
+            $route->get('{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@show')
+                  ->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         });
 
         $route->group([

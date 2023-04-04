@@ -19,6 +19,9 @@ use Psr\Http\Message\StreamInterface;
 use Tests\TestCase;
 
 /**
+ * @group DW
+ * @group DW_INVENTORY
+ *
  * Test for App\Services\File\FileService
  *
  * Class FileServiceTest

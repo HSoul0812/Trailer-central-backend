@@ -3,6 +3,7 @@
 namespace App\Transformers\Inventory;
 
 use App\Helpers\ConvertHelper;
+use App\Helpers\Inventory\InventoryHelper;
 use App\Models\Inventory\File;
 use App\Models\Inventory\InventoryImage;
 use App\Repositories\Website\PaymentCalculator\SettingsRepositoryInterface;
@@ -358,12 +359,7 @@ class InventoryTransformer extends TransformerAbstract
      */
     private function imageSorter(): callable
     {
-        return static function (InventoryImage $image): int {
-            // when the position is null, it will sorted a last position
-            $position = $image->position ?? InventoryImage::LAST_IMAGE_POSITION;
-
-            return $image->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION : $position;
-        };
+        return InventoryHelper::singleton()->imageSorter();
     }
 
     protected function settingsRepository(): SettingsRepositoryInterface

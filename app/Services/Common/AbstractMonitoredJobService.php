@@ -30,7 +30,6 @@ abstract class AbstractMonitoredJobService implements MonitoredJobServiceInterfa
      */
     public function dispatch($job): void
     {
-        // create a queueable job
         $queueableJob = $this->createQueueableJob($job);
 
         // dispatch job to queue

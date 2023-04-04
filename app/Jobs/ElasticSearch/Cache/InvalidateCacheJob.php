@@ -9,15 +9,14 @@ class InvalidateCacheJob extends Job
 {
     private const TAG = 'cache-invalidation';
 
+    public const DELAY_ADDITION_IN_SECONDS = 2;
+
     /** @var string[] */
     private $keyPatterns;
 
     public $tries = 1;
 
     public $queue = 'inventory-cache';
-
-    /** @var int given we have an ElasticSearch refresh interval of 60 seconds, we need to made sure this will be precessed after that period  */
-    public $delay = 62;
 
     public function tags(): array
     {
@@ -33,6 +32,10 @@ class InvalidateCacheJob extends Job
     public function __construct(array $keyPatterns)
     {
         $this->keyPatterns = $keyPatterns;
+
+        // given we have a configurable ElasticSearch refresh interval in seconds,
+        // we need to made sure this will be processed after that period
+        $this->delay = ((int) config('elastic.scout_driver.settings.inventory.refresh_interval')) + self::DELAY_ADDITION_IN_SECONDS;
     }
 
     public function handle(InventoryResponseCacheInterface $service): void

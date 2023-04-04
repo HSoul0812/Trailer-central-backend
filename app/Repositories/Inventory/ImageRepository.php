@@ -3,6 +3,7 @@
 namespace App\Repositories\Inventory;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Common\StorageObjectToDrop;
 use App\Models\Inventory\Image;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -106,5 +107,10 @@ class ImageRepository implements ImageRepositoryInterface
         }
 
         return $query->get();
+    }
+
+    public function scheduleObjectToBeDroppedByURL(string $url): void
+    {
+        StorageObjectToDrop::create(['url' => $url]);
     }
 }

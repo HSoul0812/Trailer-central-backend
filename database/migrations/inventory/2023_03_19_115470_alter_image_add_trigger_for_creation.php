@@ -7,6 +7,8 @@ class AlterImageAddTriggerForCreation extends Migration
     public function up(): void
     {
         // we were forced to use a trigger because there are at least 2 places out of control for API new codebase
+        DB::unprepared('DROP TRIGGER IF EXISTS inventory_image_before_insert;');
+
         $imageAfterCreation = <<<SQL
                 CREATE TRIGGER inventory_image_before_insert
                 BEFORE INSERT

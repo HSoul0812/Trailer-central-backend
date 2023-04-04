@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Transformers\Inventory;
 
+use App\Helpers\Inventory\InventoryHelper;
 use App\Helpers\TypesHelper;
 use App\Indexers\Transformer;
 use App\Models\Inventory\Attribute;
@@ -208,12 +209,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
 
     private function imageSorter(): callable
     {
-        return static function (InventoryImage $image): int {
-            // when the position is null, it will sorted a last position
-            $position = $image->position ?? InventoryImage::LAST_IMAGE_POSITION;
-
-            return $image->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION : $position;
-        };
+        return InventoryHelper::singleton()->imageSorter();
     }
 
     /**
@@ -228,22 +224,15 @@ class InventoryElasticSearchInputTransformer implements Transformer
     }
 
     /**
-     * @param Model $inventory
+     * @param Inventory $inventory
      * @return array
      */
     private function transformOriginalImages(Inventory $inventory): array
     {
-        return $inventory->inventoryImages->sortBy($this->imageSorter())->values()->filter(function (InventoryImage $image) {
+        return $inventory->inventoryImages->sortBy($this->imageSorter())->values()->filter(static function (InventoryImage $image):bool {
             return !$image->isSecondary();
-        })->map(function (InventoryImage $image) use ($inventory) {
-            if ($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_ALL) {
-                return $image->image->filename_noverlay ? $image->image->filename_noverlay  : $image->image->filename;
-            } elseif($inventory->overlay_enabled == Inventory::OVERLAY_ENABLED_PRIMARY && ($image->position == 1 || $image->is_default == 1))  {
-                return $image->image->filename_noverlay ? $image->image->filename_noverlay  : $image->image->filename;
-            }
-
-            return $image->image->filename;
-
+        })->map(static function (InventoryImage $image) use ($inventory): string {
+            return $image->originalFilenameRegardingInventoryOverlayConfig($inventory->overlay_enabled);
         })->values()->toArray();
     }
 

@@ -14,6 +14,10 @@ use Illuminate\Support\Collection;
 use Tests\database\seeds\Inventory\InventoryHistorySeeder;
 use Tests\TestCase;
 
+/**
+ * @group DW
+ * @group DW_INVENTORY
+ */
 class InventoryHistoryRepositoryTest extends TestCase
 {
     /**
