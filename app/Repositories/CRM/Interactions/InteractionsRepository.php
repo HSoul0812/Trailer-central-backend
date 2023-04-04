@@ -291,4 +291,15 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
 
         return $query->first() ?? [];
     }
+
+    /**
+     * get email details from EMAIL interaction by interaction_id
+     * 
+     * @param int $interactionId
+     * @return EmailHistory
+     */
+    public function getEmailInteraction(int $interactionId)
+    {
+        return $this->get(['id' => $interactionId])->emailHistory->first();
+    }
 }

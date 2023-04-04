@@ -86,6 +86,11 @@ class UserRepository implements UserRepositoryInterface {
         return $dealer->update($params);
     }
 
+    public function getEmailSignature(int $dealerId)
+    {
+        return $this->get(['dealer_id' => $dealerId])->crmUser->email_signature;
+    }
+
     /**
      * {@inheritDoc}
      */

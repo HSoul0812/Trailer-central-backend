@@ -30,4 +30,23 @@ trait WithGetter
     {
         return isset($this->{$key});
     }
+
+    /**
+     * convert current object to array
+     * 
+     * @return array
+     */
+    public function toArray()
+    {
+        $data = get_object_vars($this);
+        $newData = [];
+
+        // convert camelCase to snake_case
+        foreach ($data as $key => $value) {
+            $newKey = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $key));
+            $newData[$newKey] = $value;
+        }
+
+        return $newData;
+    }
 }
