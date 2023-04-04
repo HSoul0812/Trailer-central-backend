@@ -4,7 +4,7 @@ namespace App\Console\Commands\Inventory;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use App\Models\User as Dealer;
+use stdClass as Dealer;
 
 class FixInventoryImageOverlayUrls extends Command
 {
