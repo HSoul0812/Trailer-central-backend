@@ -428,16 +428,26 @@ namespace App\Models{
  * @property array|null $meta
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $ip_address
+ * @property bool $location_processed
+ * @property string|null $city
+ * @property string|null $state
+ * @property string|null $country
  * @property-read \App\Models\WebsiteUser\WebsiteUser|null $websiteUser
  * @method static \Database\Factories\UserTrackingFactory factory(...$parameters)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking query()
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereCountry($value)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereEvent($value)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereIpAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereLocationProcessed($value)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereMeta($value)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking wherePageName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereState($value)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereUrl($value)
  * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereVisitorId($value)

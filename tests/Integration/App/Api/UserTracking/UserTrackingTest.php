@@ -2,6 +2,7 @@
 
 namespace Tests\Integration\App\Api\UserTracking;
 
+use App\Models\UserTracking;
 use App\Models\WebsiteUser\WebsiteUser;
 use Str;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,24 +28,60 @@ class UserTrackingTest extends IntegrationTestCase
         $meta = [
             'foo' => 'bar',
         ];
+        $ipAddress = UserTracking::IGNORE_LOCATION_PROCESSING_IP_ADDRESSES[0];
 
         $response = $this
-            ->postJson(self::USER_TRACK_ENDPOINT, [
-                'visitor_id' => $visitorId,
-                'event' => $event,
-                'url' => $url,
-                'meta' => $meta,
-            ])
+            ->postJson(
+                uri: self::USER_TRACK_ENDPOINT,
+                data: [
+                    'visitor_id' => $visitorId,
+                    'event' => $event,
+                    'url' => $url,
+                    'meta' => $meta,
+                ],
+                headers: [
+                    'REMOTE_ADDR' => $ipAddress,
+                ]
+            )
             ->assertCreated()
             ->assertJsonPath('user_tracking.visitor_id', $visitorId)
             ->assertJsonPath('user_tracking.event', $event)
             ->assertJsonPath('user_tracking.url', $url)
             ->assertJsonPath('user_tracking.page_name', null)
-            ->assertJsonPath('user_tracking.meta.foo', 'bar');
+            ->assertJsonPath('user_tracking.meta.foo', 'bar')
+            ->assertJsonPath('user_tracking.ip_address', $ipAddress)
+            ->assertJsonPath('user_tracking.location_processed', true)
+            ->assertJsonPath('user_tracking.city', null)
+            ->assertJsonPath('user_tracking.state', null)
+            ->assertJsonPath('user_tracking.country', null);
 
         $this->assertNotNull($response->json('user_tracking.id'));
         $this->assertNotNull($response->json('user_tracking.created_at'));
         $this->assertNotNull($response->json('user_tracking.updated_at'));
+    }
+
+    public function testItSetLocationProcessedAsFalseWhenIpAddressIsNotIgnored()
+    {
+        $ipAddress = '194.59.12.191';
+        $userTracking = UserTracking::factory()->make();
+
+        $response = $this
+            ->postJson(
+                uri: self::USER_TRACK_ENDPOINT,
+                data: $userTracking->only([
+                    'visitor_id',
+                    'event',
+                    'url',
+                    'meta'
+                ]),
+                headers: [
+                    'REMOTE_ADDR' => $ipAddress,
+                ]
+            )
+            ->assertCreated()
+            ->assertJsonPath('user_tracking.ip_address', $ipAddress);
+
+        $response->assertDontSee('location_processed');
     }
 
     public function testItCanCreateUserTrackingWithMetaAsNull()

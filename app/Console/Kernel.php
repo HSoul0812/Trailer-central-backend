@@ -6,8 +6,7 @@ namespace App\Console;
 
 use App\Console\Commands\Crawlers\CacheCrawlerIpAddressesCommand;
 use App\Console\Commands\Images\DeleteOldLocalImagesCommand;
-use App\Console\Commands\Report\ReportInventoryViewAndImpressionCommand;
-use App\Console\Commands\UserTracking\PopulateMissingWebsiteUserIdCommand;
+use App\Console\Commands\UserTracking\ProcessUserTrackingsCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -47,24 +46,12 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule
-            ->command(PopulateMissingWebsiteUserIdCommand::class, [
-                // Send the yesterday time to the command
-                'date' => now()->subMinutes(10)->format(PopulateMissingWebsiteUserIdCommand::DATE_FORMAT),
-            ])
+            ->command(ProcessUserTrackingsCommand::class)
             ->daily()
             ->withoutOverlapping()
             ->onOneServer()
-            ->runInBackground();
-
-        $schedule
-            ->command(ReportInventoryViewAndImpressionCommand::class, [
-                // Send the yesterday time to the command
-                'date' => now()->subMinutes(10)->format(ReportInventoryViewAndImpressionCommand::DATE_FORMAT),
-            ])
-            ->daily()
-            ->withoutOverlapping()
-            ->onOneServer()
-            ->runInBackground();
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/commands/user-trackings.log'));
 
         $schedule
             ->command(DeleteOldLocalImagesCommand::class)

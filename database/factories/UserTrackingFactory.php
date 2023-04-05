@@ -23,6 +23,49 @@ class UserTrackingFactory extends Factory
             'meta' => [
                 'foo' => 'bar',
             ],
+            'ip_address' => $this->faker->ipv4(),
+            'location_processed' => $this->faker->boolean(),
+            'city' => $this->faker->city(),
+            'state' => $this->faker->stateAbbr(),
+            'country' => $this->faker->countryCode(),
         ];
+    }
+
+    public function hasUSIpAddress(): Factory
+    {
+        return $this->state(function(array $attributes) {
+           return [
+               'ip_address' => '194.59.12.191',
+           ];
+        });
+    }
+
+    public function locationUnprocessed(): Factory
+    {
+        return $this->state(function(array $attributes) {
+            return [
+                'location_processed' => false,
+            ];
+        });
+    }
+
+    public function locationProcessed(): Factory
+    {
+        return $this->state(function(array $attributes) {
+           return [
+               'location_processed' => true,
+           ];
+        });
+    }
+
+    public function noLocationData(): Factory
+    {
+        return $this->state(function(array $attributes) {
+           return [
+               'city' => null,
+               'state' => null,
+               'country' => null,
+           ];
+        });
     }
 }
