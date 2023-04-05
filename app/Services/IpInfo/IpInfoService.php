@@ -9,18 +9,26 @@ use Illuminate\Support\Facades\Storage;
 
 class IpInfoService implements IpInfoServiceInterface
 {
+    const DB_PATHS = [
+        'GeoIP2-City-North-America.mmdb',
+        'GeoLite2-City.mmdb',
+        'maxmind/GeoLite2-City.mmdb',
+    ];
+
     public function city(string $ip): City {
         return Cache::remember("ipinfo/city/$ip", 300, function () use($ip) {
-            $localDisk = Storage::disk('local');
-            $naDBPath = 'GeoIP2-City-North-America.mmdb';
-            $allDBPath = 'GeoLite2-City.mmdb';
-            $db = $naDBPath;
-            if(!$localDisk->exists($naDBPath) && $localDisk->exists($allDBPath)) {
-                $db = $allDBPath;
-            }
+            $storage = Storage::disk('local');
 
-            $reader = new Reader(Storage::disk('local')->path($db));
-            return City::fromGeoIP2City($reader->city($ip));
+            // Get the first path that exist in the storage
+            $path = collect(self::DB_PATHS)->first(
+                callback: fn(string $path) => $storage->exists($path)
+            );
+
+            $reader = new Reader($storage->path($path));
+
+            return City::fromGeoIP2City(
+                city: $reader->city($ip)
+            );
         });
     }
 
