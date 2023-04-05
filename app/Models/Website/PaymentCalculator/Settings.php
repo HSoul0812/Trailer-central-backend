@@ -2,6 +2,7 @@
 
 namespace App\Models\Website\PaymentCalculator;
 
+use App\Models\Inventory\Category;
 use App\Models\Inventory\EntityType;
 use App\Models\Traits\TableAware;
 use App\Models\Website\Website;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $website_id
  * @property int $entity_type_id
+ * @property int $inventory_category_id
  * @property string $inventory_condition
  * @property int $months
  * @property float $apr
@@ -22,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \DateTimeInterface $updated_at,
  *
  * @property EntityType $entityType
+ * @property Category $category
  * @property Website $website
  */
 class Settings extends Model
@@ -58,6 +61,7 @@ class Settings extends Model
     protected $fillable = [
         'website_id',
         'entity_type_id',
+        'inventory_category_id',
         'inventory_condition',
         'months',
         'apr',
@@ -70,6 +74,11 @@ class Settings extends Model
     public function entityType(): BelongsTo
     {
         return $this->belongsTo(EntityType::class, 'entity_type_id');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'inventory_category_id', 'inventory_category_id');
     }
 
     public function website(): BelongsTo
