@@ -14,8 +14,15 @@ class OptimizeFbme extends Migration
     {
         $conn = DB::connection()->getDoctrineConnection();
         $conn->executeStatement($this->cleanFbAPPErrors());
-        $conn->executeStatement($this->dropView());
-        $conn->executeStatement($this->createView());
+
+        $conn->executeStatement($this->dropView1());
+        $conn->executeStatement($this->dropView2());
+        $conn->executeStatement($this->dropUCFunctions());
+
+        $conn->executeStatement($this->createView1());
+        $conn->executeStatement($this->createView2());
+        $conn->executeStatement($this->createView3());
+
         $conn->executeStatement($this->addIndexFbListings());
         $conn->executeStatement($this->addIndexFbAppErrors());
         $conn->close();
@@ -28,7 +35,10 @@ class OptimizeFbme extends Migration
      */
     public function down()
     {
-        //
+        $conn = DB::connection()->getDoctrineConnection();
+        $conn->executeStatement($this->dropIndexFbListings());
+        $conn->executeStatement($this->dropIndexFbAppErrors());
+        $conn->close();
     }
 
     private function cleanFbAPPErrors(): string
@@ -36,58 +46,133 @@ class OptimizeFbme extends Migration
         return "DELETE FROM fbapp_errors WHERE created_at < DATE_SUB(NOW(), INTERVAL 1 WEEK);";
     }
 
-    private function dropView(): string
+    private function dropView1(): string
     {
-        return "DROP VIEW if EXISTS dealer_fbm_overview;";
+        return "DROP VIEW IF EXISTS dealer_fbm_overview;";
+    }
+
+    private function dropView2(): string
+    {
+        return "DROP VIEW IF EXISTS fbme_listings;";
+    }
+
+    private function dropUCFunctions(): string
+    {
+        return "DROP FUNCTION IF EXISTS UC_First;
+                DROP FUNCTION IF EXISTS UC_Delimiter;";
+    }
+
+    private function createView1(): string
+    {
+        return "
+        CREATE VIEW fbmi_listings_aggregated AS
+        SELECT
+            marketplace_id AS integration_id,
+            MAX(fbapp_listings.created_at) AS max_listed_at,
+            GROUP_CONCAT(CASE WHEN DATE(fbapp_listings.created_at) = DATE(DATE_SUB(NOW(), INTERVAL 4 HOUR)) THEN stock ELSE NULL END SEPARATOR ' | ') AS units_posted_today,
+            SUM(CASE WHEN DATE(fbapp_listings.created_at) = DATE(DATE_SUB(NOW(), INTERVAL 4 HOUR)) THEN 1 ELSE 0 END) AS count_units_posted_today,
+            GROUP_CONCAT(CASE WHEN DATE(fbapp_listings.created_at) = DATE(DATE_SUB(NOW(), INTERVAL 28 HOUR)) THEN stock ELSE NULL END SEPARATOR ' | ') AS units_posted_1dayago,
+            SUM(CASE WHEN DATE(fbapp_listings.created_at) = DATE(DATE_SUB(NOW(), INTERVAL 28 HOUR)) THEN 1 ELSE 0 END) AS count_units_posted_1dayago,
+            GROUP_CONCAT(CASE WHEN DATE(fbapp_listings.created_at) = DATE(DATE_SUB(NOW(), INTERVAL 52 HOUR)) THEN stock ELSE NULL END SEPARATOR ' | ') AS units_posted_2dayago,
+            SUM(CASE WHEN DATE(fbapp_listings.created_at) = DATE(DATE_SUB(NOW(), INTERVAL 52 HOUR)) THEN 1 ELSE 0 END) AS count_units_posted_2dayago,
+            GROUP_CONCAT(CASE WHEN DATE(fbapp_listings.created_at) = DATE(DATE_SUB(NOW(), INTERVAL 76 HOUR)) THEN stock ELSE NULL END SEPARATOR ' | ') AS units_posted_3dayago,
+            SUM(CASE WHEN DATE(fbapp_listings.created_at) = DATE(DATE_SUB(NOW(), INTERVAL 76 HOUR)) THEN 1 ELSE 0 END) AS count_units_posted_3dayago,
+            GROUP_CONCAT(CASE WHEN DATE(fbapp_listings.created_at) = DATE(DATE_SUB(NOW(), INTERVAL 100 HOUR)) THEN stock ELSE NULL END SEPARATOR ' | ') AS units_posted_4dayago,
+            SUM(CASE WHEN DATE(fbapp_listings.created_at) = DATE(DATE_SUB(NOW(), INTERVAL 100 HOUR)) THEN 1 ELSE 0 END) AS count_units_posted_4dayago,
+            GROUP_CONCAT(CASE WHEN DATE(fbapp_listings.created_at) = DATE(DATE_SUB(NOW(), INTERVAL 124 HOUR)) THEN stock ELSE NULL END SEPARATOR ' | ') AS units_posted_5dayago,
+            SUM(CASE WHEN DATE(fbapp_listings.created_at) = DATE(DATE_SUB(NOW(), INTERVAL 124 HOUR)) THEN 1 ELSE 0 END) AS count_units_posted_5dayago
+        FROM
+            fbapp_listings
+        LEFT JOIN inventory 
+            ON fbapp_listings.inventory_id=inventory.inventory_id
+        GROUP BY
+            marketplace_id;";
+    }
+
+    private function createView2(): string
+    {
+        return "
+        CREATE VIEW fbmi_errors_aggregated AS
+        SELECT
+            e1.marketplace_id AS integration_id,
+            MAX(e1.updated_at) AS latest_error_timestamp,
+            (SELECT e2.error_message FROM fbapp_errors e2 WHERE e2.marketplace_id = e1.marketplace_id AND e2.updated_at = MAX(e1.updated_at)) AS latest_error_message,
+            MAX(CASE WHEN DATE(e1.updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 4 HOUR)) THEN e1.updated_at ELSE NULL END) AS latest_error_timestamp_today,
+            MAX(CASE WHEN DATE(e1.updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 28 HOUR)) THEN e1.updated_at ELSE NULL END) AS latest_error_timestamp_1dayago,
+            MAX(CASE WHEN DATE(e1.updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 52 HOUR)) THEN e1.updated_at ELSE NULL END) AS latest_error_timestamp_2dayago,
+            MAX(CASE WHEN DATE(e1.updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 76 HOUR)) THEN e1.updated_at ELSE NULL END) AS latest_error_timestamp_3dayago,
+            MAX(CASE WHEN DATE(e1.updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 100 HOUR)) THEN e1.updated_at ELSE NULL END) AS latest_error_timestamp_4dayago,
+            MAX(CASE WHEN DATE(e1.updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 124 HOUR)) THEN e1.updated_at ELSE NULL END) AS latest_error_timestamp_5dayago,
+            
+            MAX(CASE WHEN DATE(updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 4 HOUR)) THEN error_message ELSE NULL END) AS latest_error_message_today,
+            MAX(CASE WHEN DATE(updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 28 HOUR)) THEN error_message ELSE NULL END) AS latest_error_message_1dayago,
+            MAX(CASE WHEN DATE(updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 52 HOUR)) THEN error_message ELSE NULL END) AS latest_error_message_2dayago,
+            MAX(CASE WHEN DATE(updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 76 HOUR)) THEN error_message ELSE NULL END) AS latest_error_message_3dayago,
+            MAX(CASE WHEN DATE(updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 100 HOUR)) THEN error_message ELSE NULL END) AS latest_error_message_4dayago,
+            MAX(CASE WHEN DATE(updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 124 HOUR)) THEN error_message ELSE NULL END) AS latest_error_message_5dayago
+        FROM
+            fbapp_errors e1
+        GROUP BY
+            e1.marketplace_id;";
     }
 
     private function createView(): string
     {
         return "
-        CREATE VIEW dealer_fbm_overview as
-        
+        CREATE VIEW dealer_fbm_overview AS
         SELECT
             fbm.id AS id,
             d.dealer_id AS dealer_id,
             d.name AS dealer_name,
             IFNULL(fbm.fb_username, 'n/a') AS fb_username,
-            IFNULL((SELECT name FROM dealer_location WHERE dealer_location_id = fbm.dealer_location_id), 'ALL') AS location,
-            GREATEST(
-                COALESCE((SELECT MAX(listed_at) FROM fbme_listings WHERE integration_id = fbm.id), '1000-01-01 00:00:00'),
-                COALESCE((SELECT MAX(created_at) FROM fbapp_errors WHERE marketplace_id = fbm.id), '1000-01-01 00:00:00')
-            ) AS last_attempt_ts,
-            (
-            SELECT COUNT(1) > 0
-                FROM fbme_listings
-                WHERE integration_id = fbm.id
-                AND DATE(listed_at) = (
-                SELECT GREATEST(
-                    COALESCE((SELECT DATE(MAX(listed_at)) FROM fbme_listings WHERE integration_id = fbm.id), '1000-01-01'),
-                                    COALESCE((SELECT DATE(MAX(created_at)) FROM fbapp_errors WHERE marketplace_id = fbm.id and error_type <> 'missing-inventory'), '1000-01-01')
-                                )
-                            )
-                        ) AS last_run_status,
-            COALESCE((SELECT MAX(created_at) FROM fbapp_errors WHERE marketplace_id = fbm.id), '1000-01-01 00:00:00') AS last_known_error_ts,
-            COALESCE((SELECT UC_Delimiter(REPLACE(MAX(error_type), '-', ' '), ' ', TRUE) FROM fbapp_errors WHERE marketplace_id = fbm.id), 'no error') AS last_known_error_code,
-            COALESCE((SELECT MAX(error_message) FROM fbapp_errors WHERE marketplace_id = fbm.id), 'no error') AS last_known_error_message,
-            COALESCE((SELECT MAX(listed_at) FROM fbme_listings WHERE integration_id = fbm.id), '1000-01-01 00:00:00') AS last_success_ts,
-            COALESCE((SELECT GROUP_CONCAT(SKU SEPARATOR ' | ') FROM fbme_listings WHERE integration_id = fbm.id and DATE(listed_at) = (SELECT DATE(MAX(listed_at)) FROM fbme_listings WHERE integration_id = fbm.id)), 'none') AS last_units_posted,
-            COALESCE((SELECT GROUP_CONCAT(SKU SEPARATOR ' | ') FROM fbme_listings WHERE integration_id = fbm.id and DATE(listed_at) = DATE(DATE_SUB(NOW(), INTERVAL 4 HOUR))), 'none') AS units_posted_today,
-            COALESCE((SELECT GROUP_CONCAT(SKU SEPARATOR ' | ') FROM fbme_listings WHERE integration_id = fbm.id and DATE(listed_at) = DATE(DATE_SUB(NOW(), INTERVAL 28 HOUR))), 'none') AS units_posted_1dayago,
-            COALESCE((SELECT GROUP_CONCAT(SKU SEPARATOR ' | ') FROM fbme_listings WHERE integration_id = fbm.id and DATE(listed_at) = DATE(DATE_SUB(NOW(), INTERVAL 52 HOUR))), 'none') AS units_posted_2dayago,
-            COALESCE((SELECT GROUP_CONCAT(SKU SEPARATOR ' | ') FROM fbme_listings WHERE integration_id = fbm.id and DATE(listed_at) = DATE(DATE_SUB(NOW(), INTERVAL 76 HOUR))), 'none') AS units_posted_3dayago,
-            COALESCE((SELECT GROUP_CONCAT(SKU SEPARATOR ' | ') FROM fbme_listings WHERE integration_id = fbm.id and DATE(listed_at) = DATE(DATE_SUB(NOW(), INTERVAL 100 HOUR))), 'none') AS units_posted_4dayago,
-            COALESCE((SELECT GROUP_CONCAT(SKU SEPARATOR ' | ') FROM fbme_listings WHERE integration_id = fbm.id and DATE(listed_at) = DATE(DATE_SUB(NOW(), INTERVAL 124 HOUR))), 'none') AS units_posted_5dayago,
-            COALESCE((SELECT MAX(error_message) FROM fbapp_errors WHERE marketplace_id = fbm.id and DATE(created_at) = DATE(DATE_SUB(NOW(), INTERVAL 4 HOUR))), 'no error') AS error_today,
-            COALESCE((SELECT MAX(error_message) FROM fbapp_errors WHERE marketplace_id = fbm.id and DATE(created_at) = DATE(DATE_SUB(NOW(), INTERVAL 28 HOUR))), 'no error') AS error_1dayago,
-            COALESCE((SELECT MAX(error_message) FROM fbapp_errors WHERE marketplace_id = fbm.id and DATE(created_at) = DATE(DATE_SUB(NOW(), INTERVAL 52 HOUR))), 'no error') AS error_2dayago,
-            COALESCE((SELECT MAX(error_message) FROM fbapp_errors WHERE marketplace_id = fbm.id and DATE(created_at) = DATE(DATE_SUB(NOW(), INTERVAL 76 HOUR))), 'no error') AS error_3dayago,
-            COALESCE((SELECT MAX(error_message) FROM fbapp_errors WHERE marketplace_id = fbm.id and DATE(created_at) = DATE(DATE_SUB(NOW(), INTERVAL 100 HOUR))), 'no error') AS error_4dayago,
-            COALESCE((SELECT MAX(error_message) FROM fbapp_errors WHERE marketplace_id = fbm.id and DATE(created_at) = DATE(DATE_SUB(NOW(), INTERVAL 124 HOUR))), 'no error') AS error_5dayago
-        FROM fbapp_marketplace AS fbm
-        INNER JOIN dealer AS d ON fbm.dealer_id = d.dealer_id
-        GROUP BY d.dealer_id, fbm.id
-        ORDER BY last_attempt_ts DESC;";
+            IFNULL(dl.name, 'ALL') AS location,
+            IFNULL(fbm.posts_per_day, 3) AS posts_per_day,
+            GREATEST(COALESCE(l.max_listed_at, '1000-01-01 00:00:00'), COALESCE(e.latest_error_timestamp, '1000-01-01 00:00:00')) AS last_attempt_ts,
+            
+            -- COUNT(l.listed_at) > 0 AS last_run_status,
+            
+            
+            
+            COALESCE(e.latest_error_timestamp, '1000-01-01 00:00:00') AS last_known_error_ts,
+            COALESCE(e.latest_error_type, 'no error') AS last_known_error_type,
+            COALESCE(e.latest_error_message, 'no error') AS last_known_error_message,
+            
+            COALESCE(l.max_listed_at, '1000-01-01 00:00:00') AS last_success_ts,
+            
+            l.units_posted_today AS units_posted_today,
+            l.units_posted_1dayago AS units_posted_1dayago,
+            l.units_posted_2dayago AS units_posted_2dayago,
+            l.units_posted_3dayago AS units_posted_3dayago,
+            l.units_posted_4dayago AS units_posted_4dayago,
+            l.units_posted_5dayago AS units_posted_5dayago,
+            
+            IFNULL(l.count_units_posted_today, 0) AS count_units_posted_today,
+            IFNULL(l.count_units_posted_1dayago, 0) AS count_units_posted_1dayago,
+            IFNULL(l.count_units_posted_2dayago, 0) AS count_units_posted_2dayago,
+            IFNULL(l.count_units_posted_3dayago, 0) AS count_units_posted_3dayago,
+            IFNULL(l.count_units_posted_4dayago, 0) AS count_units_posted_4dayago,
+            IFNULL(l.count_units_posted_5dayago, 0) AS count_units_posted_5dayago,
+        
+            e.latest_error_message_today AS error_today,
+            e.latest_error_message_1dayago AS error_1dayago,
+            e.latest_error_message_2dayago AS error_2dayago,
+            e.latest_error_message_3dayago AS error_3dayago,
+            e.latest_error_message_4dayago AS error_4dayago,
+            e.latest_error_message_5dayago AS error_5dayago
+        FROM
+            fbapp_marketplace AS fbm
+            INNER JOIN dealer AS d ON fbm.dealer_id = d.dealer_id
+            LEFT JOIN dealer_location AS dl ON fbm.dealer_location_id = dl.dealer_location_id
+            LEFT JOIN fbmi_listings_aggregated AS l ON fbm.id = l.integration_id
+            LEFT JOIN fbmi_errors_aggregated AS e ON fbm.id = e.integration_id
+        GROUP BY
+            d.dealer_id,
+            fbm.id,
+            d.name,
+            fb_username,
+            dl.name
+        ORDER BY
+            last_attempt_ts DESC";
     }
 
     private function addIndexFbListings()
@@ -95,12 +180,18 @@ class OptimizeFbme extends Migration
         return "ALTER TABLE fbapp_listings ADD INDEX idx_inventory_id(inventory_id), ADD INDEX idx_marketplace_id(marketplace_id), ADD INDEX idx_created_at(created_at), ADD INDEX idx_marketplace_id_created_at(marketplace_id, created_at);";
     }
 
+    private function dropIndexFbListings()
+    {
+        return "ALTER TABLE fbapp_listings DROP INDEX idx_inventory_id, DROP INDEX idx_marketplace_id, DROP INDEX idx_created_at, DROP INDEX idx_marketplace_id_created_at;";
+    }
+
     private function addIndexFbAppErrors()
     {
         return "ALTER TABLE fbapp_errors ADD INDEX idx_created_at(created_at), ADD INDEX idx_marketplace_id_created_at(marketplace_id, created_at);";
     }
 
-
-
-
+    private function dropIndexFbAppErrors()
+    {
+        return "ALTER TABLE fbapp_errors DROP INDEX idx_created_at, DROP INDEX idx_marketplace_id_created_at;";
+    }
 }
