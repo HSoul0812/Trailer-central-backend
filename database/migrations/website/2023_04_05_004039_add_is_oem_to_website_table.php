@@ -14,7 +14,8 @@ class AddIsOemToWebsiteTable extends Migration
     public function up()
     {
         Schema::table('website', function (Blueprint $table) {
-            $table->boolean('is_oem')->default(false)->after('is_active');
+            $table->boolean('is_oem')->default(false)
+                ->after('is_active')->index('is_oem');
         });
     }
 
@@ -26,6 +27,7 @@ class AddIsOemToWebsiteTable extends Migration
     public function down()
     {
         Schema::table('website', function (Blueprint $table) {
+            $table->dropIndex('is_oem');
             $table->dropColumn('is_oem');
         });
     }
