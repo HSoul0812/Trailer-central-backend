@@ -231,6 +231,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     ];
 
     private $query = [
+        'track_total_hits' => true,
         'query' => [
             'bool' => [
                 'must' => [

@@ -57,7 +57,7 @@ class CreateOrUpdateRequest extends Request
             'inventory/print_logo' => ['url', self::REGEX_IMAGE_URL],
             'inventory/global_keyword_filters' => ['string', 'in:yes,no'],
             'inventory/filters/shift-positions' => 'string',
-            'contact/email' => 'string',
+            'contact/email' => 'string|nullable',
             'inventory/filters/accordion' => ['string', 'in:1,2'],
             'inventory/hybrid-list-default' => ['string', 'in:list,grid'],
             'inventory/filters/enable_auto_scroll' => ['integer', self::YES_NO],
