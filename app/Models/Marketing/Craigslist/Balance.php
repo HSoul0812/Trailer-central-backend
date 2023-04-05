@@ -3,7 +3,9 @@
 namespace App\Models\Marketing\Craigslist;
 
 use App\Models\Traits\TableAware;
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Balance extends Model {
     use TableAware;
@@ -59,4 +61,14 @@ class Balance extends Model {
     protected $hidden = [
 
     ];
+
+    /**
+     * Get User
+     *
+     * @return BelongsTo
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
 }

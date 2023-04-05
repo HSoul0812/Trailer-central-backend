@@ -14,12 +14,13 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\BelongsTo;
 use App\Nova\Resource;
 use Laravel\Nova\Panel;
 
 class FBMarketplaceAccounts extends Resource
 {
-    public static $group = 'Facebook';
+    public static $group = 'Marketplaces';
     public static $orderBy = ['last_attempt_ts' => 'asc'];
 
     public static $tableStyle = 'tight';
@@ -44,12 +45,12 @@ class FBMarketplaceAccounts extends Resource
      * @var array
      */
     public static $search = [
-        'dealer_id', 'dealer_name', 'fb_username', 'units_posted_today'
+        'id', 'dealer_id', 'dealer_name', 'fb_username', 'units_posted_today'
     ];
 
     public static function label(): string
     {
-        return 'FB Marketplace Accounts';
+        return 'Facebook Overview';
     }
 
     /**
@@ -61,9 +62,9 @@ class FBMarketplaceAccounts extends Resource
     public function fields(Request $request): array
     {
         return [
-            new Panel('FB Integration Details', $this->panelIntegration()),
+            new Panel('Integration Details', $this->panelIntegration()),
 
-            new Panel("FBME Status", $this->panelStatus()),
+            new Panel("Status", $this->panelStatus()),
 
             new Panel("Today's status", $this->panelTodaysResults()),
 
@@ -86,7 +87,7 @@ class FBMarketplaceAccounts extends Resource
             Text::make('Dealer Name', 'dealer_name')
                 ->sortable(),
 
-            Text::make('FB Username')
+            Text::make('Facebook Username')
                 ->sortable(),
 
             Text::make('Location')
