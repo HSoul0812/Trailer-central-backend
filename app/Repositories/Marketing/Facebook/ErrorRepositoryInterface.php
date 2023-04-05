@@ -19,7 +19,7 @@ interface ErrorRepositoryInterface extends Repository {
 
     /**
      * Dismiss All Errors on Marketplace Integration
-     *
+     * 
      * @param int $marketplaceId
      * @param int $inventoryId
      * @return Collection<Error>
@@ -27,17 +27,8 @@ interface ErrorRepositoryInterface extends Repository {
     public function dismissAll(int $marketplaceId, int $inventoryId = 0): Collection;
 
     /**
-     * Remove duplicates in the same day, and only keep the latest
-     *
-     * @param int $marketplaceId
-     * @param ?int $inventoryId
-     * @return void
-     */
-    public function removeDailyDuplicates(int $marketplaceId, ?int $inventoryId = null): void;
-
-    /**
      * Dismiss All Active Errors on Marketplace Integration
-     *
+     * 
      * @param int $marketplaceId
      * @return Collection<Error>
      */
