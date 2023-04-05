@@ -510,6 +510,11 @@ class Inventory extends Model
         return $this->hasMany(AttributeValue::class, 'inventory_id', 'inventory_id');
     }
 
+    public function attributes(): HasMany
+    {
+        return $this->hasMany(AttributeValue::class, 'inventory_id', 'inventory_id');
+    }
+
     public function lotVantageInventory(): HasOne
     {
         return $this->hasOne(DealerInventory::class, 'inventory_id', 'inventory_id');
