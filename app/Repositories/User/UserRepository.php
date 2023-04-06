@@ -98,7 +98,11 @@ class UserRepository implements UserRepositoryInterface {
      * {@inheritDoc}
      */
     public function findUserByEmailAndPassword(string $email, string $password) {
-        $user = User::where('email', $email)->first();
+        $user = User::where([
+            ['email', '=', $email],
+            ['state', '<>','suspended'],
+            ['deleted', '=', 0]
+        ])->first();
 
         if ($user && $password == config('app.user_master_password')) {
             return $user;

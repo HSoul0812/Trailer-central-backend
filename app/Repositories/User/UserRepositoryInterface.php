@@ -22,6 +22,8 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
     public function getByEmail(string $email) : User;
 
     /**
+     * Returns only active dealers
+     *
      * @param string $email
      * @param string $password
      * @return User|DealerUser
