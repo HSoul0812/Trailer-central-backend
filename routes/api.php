@@ -653,12 +653,29 @@ $api->version('v1', function ($route) {
     $route->post('leads/status/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@update');
     $route->get('leads/types', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@index');
     $route->get('leads/types/public', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@publicTypes');
-    $route->get('leads/sources', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@index');
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
     $route->get('leads/sort-fields/crm', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFieldsCrm');
     $route->get('leads/unique-full-names', 'App\Http\Controllers\v1\CRM\Leads\LeadController@uniqueFullNames');
     $route->get('leads/filters', 'App\Http\Controllers\v1\CRM\Leads\LeadController@filters');
     $route->get('crm/states', 'App\Http\Controllers\v1\CRM\StatesController@index');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Lead Sources
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->group([
+        'prefix' => 'leads/sources',
+        'middleware' => 'leads.source.validate'
+    ], function($route) {
+
+        $route->get('/', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@index');
+        $route->put('/', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@create');
+        $route->delete('/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@destroy');
+    });
 
     /*
     |--------------------------------------------------------------------------

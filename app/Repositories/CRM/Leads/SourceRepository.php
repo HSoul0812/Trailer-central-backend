@@ -15,8 +15,13 @@ class SourceRepository implements SourceRepositoryInterface {
         return LeadSource::create($params);
     }
 
+    /**
+     * Soft Delete by ID
+     */
     public function delete($params) {
-        throw new NotImplementedException;
+
+        return LeadSource::findOrFail($params['id'])
+            ->update(['deleted' => 1]);
     }
 
     public function get($params): LeadSource {
