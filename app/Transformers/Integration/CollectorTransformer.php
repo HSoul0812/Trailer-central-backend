@@ -101,6 +101,8 @@ class CollectorTransformer extends TransformerAbstract
             'conditional_title_format' => $collector->conditional_title_format,
             'use_brands_for_factory_mapping' => $collector->use_brands_for_factory_mapping,
             'check_images_for_bdv_matching' => $collector->check_images_for_bdv_matching,
+            'factory_mapping_filter_year_from' => $collector->factory_mapping_filter_year_from,
+            'factory_mapping_filter_skip_units' => $collector->factory_mapping_filter_skip_units,
         ];
     }
 }

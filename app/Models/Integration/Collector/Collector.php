@@ -108,6 +108,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $check_images_for_bdv_matching
  * @property bool $mark_sold_manually_added_items
  * @property bool $not_save_unmapped_on_factory_units
+ * @property int|null $factory_mapping_filter_year_from
+ * @property int|null $factory_mapping_filter_skip_units
  *
  */
 class Collector extends Model implements Filterable
@@ -245,6 +247,8 @@ class Collector extends Model implements Filterable
         'conditional_title_format',
         'use_brands_for_factory_mapping',
         'check_for_bdv_matching',
+        'factory_mapping_filter_year_from',
+        'factory_mapping_filter_skip_units'
     ];
 
     protected $casts = [

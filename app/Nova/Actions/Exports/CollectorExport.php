@@ -110,6 +110,8 @@ class CollectorExport extends DownloadExcel implements WithHeadings, WithMapping
             'Use brands',
             'Check for matching with existing bdv images',
             'Mark Sold Manually Added Items',
+            'FV Filter Year',
+            'FV Filter Skip',
             'Created At',
             'Updated At',
         ];
@@ -205,6 +207,8 @@ class CollectorExport extends DownloadExcel implements WithHeadings, WithMapping
             $mapping->use_brands_for_factory_mapping,
             $mapping->check_images_for_bdv_matching,
             $mapping->mark_sold_manually_added_items,
+            $mapping->factory_mapping_filter_year_from,
+            $mapping->factory_mapping_filter_skip_units,
             $mapping->created_at,
             $mapping->updated_at,
         ];
