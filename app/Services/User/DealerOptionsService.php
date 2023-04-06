@@ -261,7 +261,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             ];
 
             $this->userRepository->manageDealerActiveState($dealerId, $active, $datetime);
-            $this->inventoryRepository->manageDealerInventory($dealerId, $inventoryParams, $deletedAt);
+            $this->inventoryRepository->massUpdateDealerInventoryOnActiveStateChange($dealerId, $inventoryParams, $deletedAt);
 
             DB::commit();
             return true;

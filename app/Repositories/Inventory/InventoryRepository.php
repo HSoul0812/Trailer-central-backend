@@ -1183,7 +1183,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @return int
      * @throws \Exception
      */
-    public function manageDealerInventory(int $dealerId, array $inventoryParams, $deletedAt): int
+    public function massUpdateDealerInventoryOnActiveStateChange(int $dealerId, array $inventoryParams, $deletedAt): int
     {
         if ($inventoryParams['active'] && is_null($deletedAt)) {
             throw new \Exception('Deleted at is required when activating dealer inventories.');

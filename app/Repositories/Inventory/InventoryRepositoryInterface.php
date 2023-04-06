@@ -71,7 +71,7 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
      * @param $deletedAt
      * @return int
      */
-    public function manageDealerInventory(int $dealerId, array $inventoryParams, $deletedAt): int;
+    public function massUpdateDealerInventoryOnActiveStateChange(int $dealerId, array $inventoryParams, $deletedAt): int;
 
     /**
      * Find the inventory by stock
