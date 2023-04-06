@@ -33,7 +33,8 @@ class InventoryTransformer extends TransformerAbstract
         'features',
         'clapps',
         'activeListings',
-        'paymentCalculator'
+        'paymentCalculator',
+        'attributeValues'
     ];
 
     /**
@@ -238,6 +239,15 @@ class InventoryTransformer extends TransformerAbstract
     public function includeAttributes(Inventory $inventory): FractalCollection
     {
         return $this->collection($inventory->attributeValues, $this->attributeValueTransformer);
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @return FractalCollection
+     */
+    public function includeAttributeValues(Inventory $inventory): FractalCollection
+    {
+        return $this->includeAttributes($inventory);
     }
 
     /**
