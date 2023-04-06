@@ -43,7 +43,7 @@ class FBMarketplaceAccounts extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'dealer', 'fb_username',
+        'id', 'dealer', 'fb_username', 'last_known_error_type',
     ];
 
     public static function label(): string
