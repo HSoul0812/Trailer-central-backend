@@ -15,8 +15,8 @@ class OptimizeFbme extends Migration
         $conn = DB::connection()->getDoctrineConnection();
         $conn->executeStatement($this->cleanFbAPPErrors());
 
-        $conn->executeStatement($this->dropView1());
-        $conn->executeStatement($this->dropView2());
+        $conn->executeStatement($this->dropView3());
+        $conn->executeStatement($this->dropView4());
         $conn->executeStatement($this->dropUCFunctions());
 
         $conn->executeStatement($this->createView1());
@@ -38,6 +38,9 @@ class OptimizeFbme extends Migration
         $conn = DB::connection()->getDoctrineConnection();
         $conn->executeStatement($this->dropIndexFbListings());
         $conn->executeStatement($this->dropIndexFbAppErrors());
+        $conn->executeStatement($this->dropView1());
+        $conn->executeStatement($this->dropView3());
+        $conn->executeStatement($this->dropView4());
         $conn->close();
     }
 
@@ -45,6 +48,7 @@ class OptimizeFbme extends Migration
     {
         return "DELETE FROM fbapp_errors WHERE created_at < DATE_SUB(NOW(), INTERVAL 1 WEEK);";
     }
+
 
     private function dropView1(): string
     {
@@ -54,6 +58,16 @@ class OptimizeFbme extends Migration
     private function dropView2(): string
     {
         return "DROP VIEW IF EXISTS fbme_listings;";
+    }
+
+    private function dropView3(): string
+    {
+        return "DROP VIEW IF EXISTS fbmi_listings_aggregated;";
+    }
+
+    private function dropView4(): string
+    {
+        return "DROP VIEW IF EXISTS fbmi_errors_aggregated;";
     }
 
     private function dropUCFunctions(): string
@@ -96,7 +110,8 @@ class OptimizeFbme extends Migration
         SELECT
             e1.marketplace_id AS integration_id,
             MAX(e1.updated_at) AS latest_error_timestamp,
-            (SELECT e2.error_message FROM fbapp_errors e2 WHERE e2.marketplace_id = e1.marketplace_id AND e2.updated_at = MAX(e1.updated_at)) AS latest_error_message,
+            (SELECT e2.error_type FROM fbapp_errors e2 WHERE e2.marketplace_id = e1.marketplace_id AND e2.updated_at = MAX(e1.updated_at)) AS latest_error_type,
+            (SELECT e3.error_message FROM fbapp_errors e3 WHERE e3.marketplace_id = e1.marketplace_id AND e3.updated_at = MAX(e1.updated_at)) AS latest_error_message,
             MAX(CASE WHEN DATE(e1.updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 4 HOUR)) THEN e1.updated_at ELSE NULL END) AS latest_error_timestamp_today,
             MAX(CASE WHEN DATE(e1.updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 28 HOUR)) THEN e1.updated_at ELSE NULL END) AS latest_error_timestamp_1dayago,
             MAX(CASE WHEN DATE(e1.updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 52 HOUR)) THEN e1.updated_at ELSE NULL END) AS latest_error_timestamp_2dayago,
@@ -116,22 +131,39 @@ class OptimizeFbme extends Migration
             e1.marketplace_id;";
     }
 
-    private function createView(): string
+    private function createView3(): string
     {
         return "
         CREATE VIEW dealer_fbm_overview AS
         SELECT
             fbm.id AS id,
-            d.dealer_id AS dealer_id,
-            d.name AS dealer_name,
+            CONCAT(d.dealer_id, ' - ', d.name, '( ',IFNULL(dl.name, 'ALL'),' )') AS dealer,
             IFNULL(fbm.fb_username, 'n/a') AS fb_username,
-            IFNULL(dl.name, 'ALL') AS location,
             IFNULL(fbm.posts_per_day, 3) AS posts_per_day,
             GREATEST(COALESCE(l.max_listed_at, '1000-01-01 00:00:00'), COALESCE(e.latest_error_timestamp, '1000-01-01 00:00:00')) AS last_attempt_ts,
             
-            -- COUNT(l.listed_at) > 0 AS last_run_status,
-            
-            
+            IFNULL(fbm.posts_per_day, 3) - (
+                CASE
+                    WHEN DATE(last_attempt_ts) = DATE(DATE_SUB(NOW(), INTERVAL 4 HOUR)) THEN IFNULL(l.count_units_posted_today, 0)
+                    WHEN DATE(last_attempt_ts) = DATE(DATE_SUB(NOW(), INTERVAL 28 HOUR)) THEN IFNULL(l.count_units_posted_1dayago, 0)
+                    WHEN DATE(last_attempt_ts) = DATE(DATE_SUB(NOW(), INTERVAL 52 HOUR)) THEN IFNULL(l.count_units_posted_2dayago, 0)
+                    WHEN DATE(last_attempt_ts) = DATE(DATE_SUB(NOW(), INTERVAL 76 HOUR)) THEN IFNULL(l.count_units_posted_3dayago, 0)
+                    WHEN DATE(last_attempt_ts) = DATE(DATE_SUB(NOW(), INTERVAL 100 HOUR)) THEN IFNULL(l.count_units_posted_4dayago, 0)
+                    WHEN DATE(last_attempt_ts) = DATE(DATE_SUB(NOW(), INTERVAL 124 HOUR)) THEN IFNULL(l.count_units_posted_5dayago, 0)
+                    ELSE 0
+                END
+            ) AS last_attempt_posts_remaining,
+            (
+                CASE
+                    WHEN DATE(last_attempt_ts) = DATE(DATE_SUB(NOW(), INTERVAL 4 HOUR)) THEN IFNULL(l.units_posted_today, 0)
+                    WHEN DATE(last_attempt_ts) = DATE(DATE_SUB(NOW(), INTERVAL 28 HOUR)) THEN IFNULL(l.units_posted_1dayago, 0)
+                    WHEN DATE(last_attempt_ts) = DATE(DATE_SUB(NOW(), INTERVAL 52 HOUR)) THEN IFNULL(l.units_posted_2dayago, 0)
+                    WHEN DATE(last_attempt_ts) = DATE(DATE_SUB(NOW(), INTERVAL 76 HOUR)) THEN IFNULL(l.units_posted_3dayago, 0)
+                    WHEN DATE(last_attempt_ts) = DATE(DATE_SUB(NOW(), INTERVAL 100 HOUR)) THEN IFNULL(l.units_posted_4dayago, 0)
+                    WHEN DATE(last_attempt_ts) = DATE(DATE_SUB(NOW(), INTERVAL 124 HOUR)) THEN IFNULL(l.units_posted_5dayago, 0)
+                    ELSE 0
+                END
+            ) AS last_attempt_posts,
             
             COALESCE(e.latest_error_timestamp, '1000-01-01 00:00:00') AS last_known_error_ts,
             COALESCE(e.latest_error_type, 'no error') AS last_known_error_type,
@@ -172,7 +204,7 @@ class OptimizeFbme extends Migration
             fb_username,
             dl.name
         ORDER BY
-            last_attempt_ts DESC";
+            last_attempt_ts DESC;   ";
     }
 
     private function addIndexFbListings()
