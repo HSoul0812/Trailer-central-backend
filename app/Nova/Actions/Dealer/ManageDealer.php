@@ -73,10 +73,16 @@ class ManageDealer extends Action
                 return Action::danger($message . ' deactivated.');
             }
 
-            $result = $this->dealerOptionsService->manageDealerActiveState($model->dealer_id, $fields->active);
+            try {
+                $result = $this->dealerOptionsService->toggleDealerActiveStatus($model->dealer_id, $fields->active);
 
-            if (!$result) {
-                throw new InvalidArgumentException('Error trying managing Dealer', 500);
+                if (!$result) {
+                    throw new InvalidArgumentException('Error trying managing Dealer', 500);
+                }
+
+            } catch (\InvalidArgumentException|\Exception $e) {
+                Action::message($e->getMessage());
+                throw new \Exception($e->getMessage(), 500);
             }
         }
     }

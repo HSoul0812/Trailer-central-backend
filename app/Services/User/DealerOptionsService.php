@@ -245,7 +245,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      * @return bool
      * @throws Exception
      */
-    public function manageDealerActiveState(int $dealerId, bool $active): bool
+    public function toggleDealerActiveStatus(int $dealerId, bool $active): bool
     {
         try {
             // Transaction added in case of any exception occurs we don't mess any data
@@ -268,7 +268,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         } catch (\Exception $e) {
             Log::error("Dealer managing error. dealer_id - {$dealerId}", $e->getTrace());
             DB::rollback();
-            return false;
+            throw new Exception($e->getMessage());
         }
     }
 
