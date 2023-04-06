@@ -260,7 +260,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
                 'archived_at' => $active ? null : $datetime
             ];
 
-            $this->userRepository->manageDealerActiveState($dealerId, $active, $datetime);
+            $this->userRepository->toggleDealerStatus($dealerId, $active, $datetime);
             $this->inventoryRepository->massUpdateDealerInventoryOnActiveStateChange($dealerId, $inventoryParams, $deletedAt);
 
             DB::commit();
