@@ -500,12 +500,12 @@ $api->version('v1', function ($route) {
         $route->get('leads/{leadId}/contact-date', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@getContactDate');
 
         /**
-         * Email Interaction
+         * Email Draft
          */
-        $route->get('leads/{leadId}/interactions/draft-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@getEmailDraft');
-        $route->post('leads/{leadId}/interactions/draft-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@saveEmailDraft');
-        $route->post('leads/{leadId}/interactions/send-email-draft', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmailDraft');
-        $route->get('leads/{leadId}/interactions/{id}/reply-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@getReplyEmailDraft');
+        $route->get('leads/{leadId}/interactions/draft', 'App\Http\Controllers\v1\CRM\Interactions\DraftController@getEmailDraft');
+        $route->post('leads/{leadId}/interactions/draft', 'App\Http\Controllers\v1\CRM\Interactions\DraftController@saveEmailDraft');
+        $route->get('leads/{leadId}/interactions/{id}/draft', 'App\Http\Controllers\v1\CRM\Interactions\DraftController@getReplyEmailDraft');
+        $route->post('leads/{leadId}/interactions/draft/send', 'App\Http\Controllers\v1\CRM\Interactions\DraftController@sendEmailDraft');
     });
 
     /**
