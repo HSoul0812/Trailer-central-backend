@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console;
 
+use App\Console\Commands\Crawlers\CacheCrawlerIpAddressesCommand;
 use App\Console\Commands\UserTracking\ProcessUserTrackingsCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -39,6 +40,14 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule
+            ->command(CacheCrawlerIpAddressesCommand::class)
+            ->daily()
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/commands/cache-crawler-ip-addresses.log'));
+
+		$schedule
             ->command(ProcessUserTrackingsCommand::class)
             ->daily()
             ->withoutOverlapping()

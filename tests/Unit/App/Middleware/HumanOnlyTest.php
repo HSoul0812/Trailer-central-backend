@@ -3,15 +3,23 @@
 namespace Tests\Unit\App\Middleware;
 
 use App\Http\Middleware\HumanOnly;
-use Http;
+use Cache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Common\TestCase;
 
 class HumanOnlyTest extends TestCase
 {
-    public function testItBlocksRequestWithoutUserAgent()
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Cache::clear();
+    }
+
+    public function testItBlocksRequestWithoutUserAgent(): void
     {
         $request = new Request();
 
@@ -22,70 +30,91 @@ class HumanOnlyTest extends TestCase
         $this->assertMiddlewareReturnsEmpty($response);
     }
 
-    public function testItAllowsRequestWithAllowedUserAgent()
+    public function testItAllowsRequestWithAllowedUserAgent(): void
     {
         $request = new Request();
+
         $request->headers->set('User-Agent', 'trailertrader-testing');
 
-        (new HumanOnly())->handle($request, function () {
-            $this->assertTrue(true);
-        });
+        $response = (new HumanOnly())->handle($request, fn() => true);
+
+        $this->assertTrue($response);
     }
 
-    public function testItAllowsRequestWithAllowedIpAddress()
+    public function testItAllowsRequestWithAllowedCrawlerUserAgent(): void
     {
-        // @see https://developers.google.com/static/search/apis/ipranges/googlebot.json
-        $googleBotIpAddress = '66.249.79.1';
+        $request = new Request();
 
-        $fakeAllowedIpAddress = '123.4.5.6';
+        $request->headers->set('User-Agent', config('crawlers.providers.yahoo.user_agents')[0]);
+
+        $response = (new HumanOnly())->handle($request, fn() => true);
+
+        $this->assertTrue($response);
+    }
+
+    public function testItAllowsRequestWithAllowedIpAddressFromConfig(): void
+    {
+        $allowedIpAddress = '123.4.5.6';
 
         $request = new Request();
-        config(['trailertrader.middlewares.human_only.allow_ips' => $fakeAllowedIpAddress]);
-        $request->server->add(['REMOTE_ADDR' => $fakeAllowedIpAddress]);
-
-        $fakeGoogleBotResponseArray = [
-            'prefixes' => [[
-                'ipv4Prefix' => '66.249.79.0/27',
-            ]],
-        ];
-
-        $httpFakeResponses = Http::sequence()
-            ->push($fakeGoogleBotResponseArray)
-            ->push($fakeGoogleBotResponseArray);
-
-        Http::fake([
-            'developers.google.com/*' => $httpFakeResponses,
-        ]);
+        config(['trailertrader.middlewares.human_only.allow_ips' => $allowedIpAddress]);
+        $request->server->add(['REMOTE_ADDR' => $allowedIpAddress]);
 
         // This test is to make sure that the allowed ip in the config works
-        (new HumanOnly())->handle($request, function () {
-            $this->assertTrue(true);
-        });
+        $response = (new HumanOnly())->handle($request, fn() => true);
 
-        // This is to make sure that the allowed GoogleBot IP addresses works
-        $request->headers->set('User-Agent', 'trailertrader-testing');
+        $this->assertTrue($response);
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function testItDoesNotAllowRequestWithNotAllowedCrawlerIpAddresses()
+    {
+        $cacheKey = config('crawlers.providers.google.ips_cache_key');
+
+        Cache::set($cacheKey, collect([
+            '66.249.79.0/27',
+        ]), 20);
+
+        $googleBotIpAddress = '50.249.71.1';
+
+        $request = new Request();
+        $request->headers->set('User-Agent', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/W.X.Y.Z Safari/537.36');
         config(['trailertrader.middlewares.human_only.allow_ips' => '']);
         $request->server->add(['REMOTE_ADDR' => $googleBotIpAddress]);
 
-        (new HumanOnly())->handle($request, function () {
-            $this->assertTrue(true);
+        $response = (new HumanOnly())->handle($request, function () {
         });
+
+        $this->assertMiddlewareReturnsEmpty($response);
     }
 
-    public function testItBlocksRequestFromCrawlers()
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function testItAllowsRequestWithAllowedCrawlerIpAddresses(): void
     {
-        $fakeGoogleBotResponseArray = [
-            'prefixes' => [[
-                'ipv4Prefix' => '66.249.79.0/27',
-            ]],
-        ];
+        $cacheKey = config('crawlers.providers.google.ips_cache_key');
 
-        $httpFakeResponses = Http::sequence()->push($fakeGoogleBotResponseArray);
+        Cache::set($cacheKey, collect([
+            '66.249.79.0/27',
+        ]), 20);
 
-        Http::fake([
-            'developers.google.com/*' => $httpFakeResponses,
-        ]);
+        $googleBotIpAddress = '66.249.79.1';
 
+        $request = new Request();
+        $request->headers->set('User-Agent', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/W.X.Y.Z Safari/537.36');
+        config(['trailertrader.middlewares.human_only.allow_ips' => '']);
+        $request->server->add(['REMOTE_ADDR' => $googleBotIpAddress]);
+
+        $response = (new HumanOnly())->handle($request, fn() => true);
+
+        $this->assertTrue($response);
+    }
+
+    public function testItBlocksRequestFromCrawlers(): void
+    {
         $request = new Request();
         $request->headers->set('User-Agent', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/W.X.Y.Z Safari/537.36');
 
