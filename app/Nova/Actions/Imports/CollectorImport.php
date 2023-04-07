@@ -20,7 +20,7 @@ class CollectorImport implements ToModel, WithStartRow
      */
     public function model(array $row): Collector
     {
-        return new Collector([
+        $data = [
             'id' => $row[0],
             'process_name' => $row[1],
             'dealer_id' => $row[2],
@@ -41,7 +41,7 @@ class CollectorImport implements ToModel, WithStartRow
             'import_prices' => $row[17],
             'import_description' => $row[18],
             'images_delimiter' => $row[19],
-            'overridable_fields' => json_encode(json_decode($row[20], true)),
+            'overridable_fields' => json_decode($row[20], true),
             'path_to_fields_to_description' => $row[21],
             'fields_to_description' => $row[22],
             'use_secondary_image' => $row[23] ?? 0,
@@ -107,7 +107,9 @@ class CollectorImport implements ToModel, WithStartRow
             'factory_mapping_filter_skip_units' => $row[83] ?? 0,
             'created_at' => $row[84],
             'updated_at' => $row[85],
-        ]);
+        ];
+
+        return new Collector($data);
     }
 
     /**
