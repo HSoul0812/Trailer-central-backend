@@ -22,6 +22,8 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
     public function getByEmail(string $email) : User;
 
     /**
+     * Returns only active dealers
+     *
      * @param string $email
      * @param string $password
      * @return User|DealerUser
@@ -83,9 +85,11 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
 
     /**
      * @param int $dealerId
+     * @param bool $active
+     * @param $datetime
      * @return mixed
      */
-    public function deactivateDealer(int $dealerId): User;
+    public function toggleDealerStatus(int $dealerId, bool $active, $datetime): User;
 
     /**
      * @param int $dealerId
