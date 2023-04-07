@@ -184,7 +184,7 @@ class ShowroomService implements ShowroomServiceInterface
     protected function getShowroomByUnit(array $unit): ?Showroom
     {
         if (!isset($unit['year']) || !isset($unit['manufacturer']) || !isset($unit['model'])) {
-            throw new ShowroomException('Some params are absent', $unit);
+            throw new ShowroomException('Some params are absent. Unit - ' . json_encode($unit));
         }
 
         $searchParams = ['external_mfg_key' => "{$unit['year']};{$unit['manufacturer']};{$unit['model']}"];
@@ -288,7 +288,7 @@ class ShowroomService implements ShowroomServiceInterface
             ];
 
             if ($showroomImage->is_floorplan) {
-                $image['is_secondary'] = 1;
+                $image['is_secondary'] = true;
             }
 
             if ($showroomImage->has_stock_overlay) {
