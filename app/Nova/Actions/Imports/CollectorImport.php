@@ -94,8 +94,19 @@ class CollectorImport implements ToModel, WithStartRow
             'override_prices' => $row[70] ?? 0,
             'override_attributes' => $row[71] ?? 0,
             'override_descriptions' => $row[72] ?? 0,
-            'created_at' => $row[73],
-            'updated_at' => $row[74],
+            'third_party_provider' => $row[73],
+            'use_partial_update' => $row[74] ?? 0,
+            'last_full_run' => $row[75] ?? 0,
+            'days_till_full_run' => $row[76] ?? 0,
+            'not_save_unmapped_on_factory_units' => $row[77] ?? 0,
+            'conditional_title_format' => $row[78] ?? 0,
+            'use_brands_for_factory_mapping' => $row[79] ?? 0,
+            'check_images_for_bdv_matching' => $row[80] ?? 0,
+            'mark_sold_manually_added_items' => $row[81] ?? 0,
+            'factory_mapping_filter_year_from' => $row[82] ?? 0,
+            'factory_mapping_filter_skip_units' => $row[83] ?? 0,
+            'created_at' => $row[84],
+            'updated_at' => $row[85],
         ]);
     }
 

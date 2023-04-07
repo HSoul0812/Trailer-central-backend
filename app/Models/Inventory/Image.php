@@ -4,18 +4,18 @@ namespace App\Models\Inventory;
 
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Class Image
- * @package App\Models\Inventory
- *
- * @property int $image_id,
- * @property \DateTimeInterface $created_at,
- * @property \DateTimeInterface $updated_at,
- * @property string $filename,
- * @property string $filename_noverlay,
- * @property string $hash,
- * @property string $program,
+ * @property int $image_id
+ * @property \DateTimeInterface $created_at
+ * @property \DateTimeInterface $updated_at
+ * @property string $filename image URL which is shown in dealer websites
+ * @property string $filename_with_overlay
+ * @property string $filename_without_overlay image URL shown in TrailerTrade
+ * @property string $filename_noverlay this column is @deprecated
+ * @property string $hash
+ * @property string $program
  */
 class Image extends Model
 {
@@ -34,17 +34,19 @@ class Image extends Model
      * @var string
      */
     protected $primaryKey = 'image_id';
-    
+
     public $timestamps = true;
 
     protected $fillable = [
         'filename',
+        'filename_with_overlay',
+        'filename_without_overlay',
         'filename_noverlay',
         'hash',
         'program',
     ];
 
-    public function inventoryImages()
+    public function inventoryImages(): HasMany
     {
         return $this->hasMany(InventoryImage::class, 'image_id', 'image_id');
     }

@@ -378,9 +378,10 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param array $params
+     * @param array $queryParams
      * @return bool
      */
-    public function massUpdate(array $params): bool
+    public function massUpdate(array $params, array $queryParams = []): bool
     {
         if (!isset($params['dealer_id'])) {
             throw new RepositoryInvalidArgumentException('dealer_id has been missed. Params - ' . json_encode($params));
@@ -389,7 +390,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         $dealerId = $params['dealer_id'];
         unset($params['dealer_id']);
 
-        Inventory::query()->where('dealer_id', $dealerId)->update($params);
+        $queryParams += ['dealer_id', $dealerId];
+
+        Inventory::query()->where(
+            $queryParams
+        )->update($params);
 
         return true;
     }
@@ -1173,11 +1178,25 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param int $dealerId
-     * @param array $params
+     * @param array $inventoryParams
+     * @param null $deletedAt
      * @return int
+     * @throws \Exception
      */
-    public function archiveInventory(int $dealerId, array $inventoryParams): int {
-        return Inventory::where('dealer_id', $dealerId)->update($inventoryParams);
+    public function massUpdateDealerInventoryOnActiveStateChange(int $dealerId, array $inventoryParams, $deletedAt): int
+    {
+        if ($inventoryParams['active'] && is_null($deletedAt)) {
+            throw new \Exception('Deleted at is required when activating dealer inventories.');
+        }
+
+        $archivedAt = $inventoryParams['active'] ? $deletedAt : null;
+
+        $queryParams = [
+            ['active', !$inventoryParams['active']],
+            ['archived_at', $archivedAt]
+        ];
+
+        return $this->massUpdate($inventoryParams, $queryParams);
     }
 
     /**
@@ -1193,27 +1212,80 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
-     * Get necessary parameters to generate overlays
+     * Get necessary configuration to generate overlays
      *
-     * @param int $inventoryId
-     * @return array
+     * @param  int  $inventoryId
+     * @return array{
+     *     dealer_id:int,
+     *     inventory_id: int,
+     *     overlay_logo: string,
+     *     overlay_logo_position: string,
+     *     overlay_logo_width: int,
+     *     overlay_upper: string,
+     *     overlay_upper_bg: string,
+     *     overlay_upper_alpha: string,
+     *     overlay_upper_text: string,
+     *     overlay_upper_size: int,
+     *     overlay_upper_margin: string,
+     *     overlay_lower: string,
+     *     overlay_lower_bg: string,
+     *     overlay_lower_alpha: string,
+     *     overlay_lower_text: string,
+     *     overlay_lower_size: int,
+     *     overlay_lower_margin: string,
+     *     overlay_default: int,
+     *     overlay_enabled: int,
+     *     dealer_overlay_enabled: int,
+     *     overlay_text_dealer: string,
+     *     overlay_text_phone: string,
+     *     country: string,
+     *     overlay_text_location: string,
+     *     overlay_updated_at: string
+     *     }
      */
-    public function getOverlayParams(int $inventoryId)
+    public function getOverlayParams(int $inventoryId): array
     {
-        $query = Inventory::select(User::getTableName() .'.dealer_id', 'inventory_id', 'overlay_logo', 'overlay_logo_position', 'overlay_logo_width', 'overlay_logo_height',
-            'overlay_upper', 'overlay_upper_bg', 'overlay_upper_alpha', 'overlay_upper_text', 'overlay_upper_size', 'overlay_upper_margin',
-            'overlay_lower', 'overlay_lower_bg', 'overlay_lower_alpha', 'overlay_lower_text', 'overlay_lower_size', 'overlay_lower_margin',
-            'overlay_default', Inventory::getTableName() .'.overlay_enabled', User::getTableName() .'.overlay_enabled AS dealer_overlay_enabled',
-            User::getTableName() .'.name AS overlay_text_dealer', DealerLocation::getTableName() .'.phone AS overlay_text_phone',
-            DealerLocation::getTableName() .'.country',
-            \DB::raw("CONCAT(".DealerLocation::getTableName() .".city, ', ',".DealerLocation::getTableName() .".region) AS overlay_text_location"))
-        ->leftJoin(User::getTableName(), Inventory::getTableName() .'.dealer_id', '=', User::getTableName() .'.dealer_id')
-        ->leftJoin(DealerLocation::getTableName(), Inventory::getTableName() .'.dealer_location_id', '=', DealerLocation::getTableName() .'.dealer_location_id')
-        ->where(Inventory::getTableName() .'.inventory_id', $inventoryId);
+        $userTableName = User::getTableName();
+        $dealerLocationTable = DealerLocation::getTableName();
+        $inventoryTable = Inventory::getTableName();
+
+        $columns = [
+            $userTableName.'.dealer_id',
+            'inventory_id',
+            'overlay_logo',
+            'overlay_logo_position',
+            'overlay_logo_width',
+            'overlay_logo_height',
+            'overlay_upper',
+            'overlay_upper_bg',
+            'overlay_upper_alpha',
+            'overlay_upper_text',
+            'overlay_upper_size',
+            'overlay_upper_margin',
+            'overlay_lower',
+            'overlay_lower_bg',
+            'overlay_lower_alpha',
+            'overlay_lower_text',
+            'overlay_lower_size',
+            'overlay_lower_margin',
+            'overlay_default',
+            $inventoryTable.'.overlay_enabled',
+            $userTableName.'.overlay_enabled AS dealer_overlay_enabled',
+            $userTableName.'.name AS overlay_text_dealer',
+            $dealerLocationTable.'.phone AS overlay_text_phone',
+            $dealerLocationTable.'.country',
+            $userTableName.'.overlay_updated_at',
+            DB::raw(sprintf("CONCAT(%s.city,', ',%s.region) AS overlay_text_location", $dealerLocationTable, $dealerLocationTable))
+        ];
+
+        $query = Inventory::select($columns)
+                        ->leftJoin($userTableName, $inventoryTable .'.dealer_id', '=', $userTableName .'.dealer_id')
+                        ->leftJoin($dealerLocationTable, $inventoryTable .'.dealer_location_id', '=', $dealerLocationTable .'.dealer_location_id')
+                        ->where($inventoryTable .'.inventory_id', $inventoryId);
 
         $overlayParams = $query->first()->toArray();
 
-        if(isset($overlayParams['overlay_text_phone'])){
+        if (isset($overlayParams['overlay_text_phone'])) {
             $overlayParams['overlay_text_phone'] = DealerLocation::phoneWithNationalFormat(
                 $overlayParams['overlay_text_phone'],
                 $overlayParams['country']
@@ -1226,13 +1298,23 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
-     * @param int $inventoryId
-     * @return Collection
+     * @param  int  $inventoryId
+     * @return \Illuminate\Database\Eloquent\Collection<InventoryImage>|InventoryImage[] all images related to the inventory
      */
-    public function getInventoryImages(int $inventoryId)
+    public function getInventoryImages(int $inventoryId): \Illuminate\Database\Eloquent\Collection
     {
         $inventory = $this->get(['id' => $inventoryId]);
 
         return $inventory->inventoryImages()->get();
+    }
+
+    /**
+     * @return bool true when it changed desired image, false when it di not
+     */
+    public function markImageAsOverlayGenerated(int $imageId): bool
+    {
+        return (bool) InventoryImage::query()
+            ->where('image_id', $imageId)
+            ->update(['overlay_updated_at' => now()]);
     }
 }

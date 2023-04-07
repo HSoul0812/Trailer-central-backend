@@ -7,17 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Class InventoryImage
- * @package App\Models\Inventory
- *
- * @property int $image_id,
- * @property int $inventory_id,
- * @property bool $is_default,
- * @property int $is_secondary,
- * @property int $position,
- * @property string $showroom_image,
- * @property bool $was_manually_added,
- * @property bool $is_stock,
+ * @property int $image_id
+ * @property int $inventory_id
+ * @property bool $is_default
+ * @property int $is_secondary
+ * @property int $position
+ * @property string $showroom_image
+ * @property bool $was_manually_added
+ * @property bool $is_stock
+ * @property \DateTimeInterface $overlay_updated_at
  *
  * @property Image $image
  * @property Inventory $inventory
@@ -30,7 +28,13 @@ class InventoryImage extends Model
     public const LAST_IMAGE_POSITION = 100;
 
     /** @var int to make the sorting consistent across ES worker, Legacy API and New API */
-    public const FIRST_IMAGE_POSITION = -1;
+    public const FIRST_IMAGE_POSITION_EDGE_CASE = -1;
+
+    /** @var int  */
+    public const FIRST_IMAGE_POSITION = 1;
+
+    /** @var int  */
+    public const IS_DEFAULT = 1;
 
     /**
      * The table associated with the model.
@@ -50,7 +54,10 @@ class InventoryImage extends Model
         'showroom_image',
         'was_manually_added',
         'is_stock',
+        'overlay_updated_at'
     ];
+
+    protected $casts = ['overlay_updated_at' => 'datetime'];
 
     /**
      * @return BelongsTo
@@ -73,5 +80,24 @@ class InventoryImage extends Model
     public function isSecondary(): bool
     {
         return (bool)$this->is_secondary;
+    }
+
+    public function originalFilenameRegardingInventoryOverlayConfig(?int $typeOfOverlay): string
+    {
+        // @todo fix the way it determines it is the primary image
+        if ($typeOfOverlay == Inventory::OVERLAY_ENABLED_ALL) {
+            return $this->image->filename_without_overlay;
+        } elseif ($typeOfOverlay == Inventory::OVERLAY_ENABLED_PRIMARY &&
+            ($this->position == self::FIRST_IMAGE_POSITION || $this->isDefault())
+        ) {
+            return $this->image->filename_without_overlay;
+        }
+
+        return $this->image->filename;
+    }
+
+    public function hasBeenOverlay(): bool
+    {
+        return (bool) $this->overlay_updated_at;
     }
 }

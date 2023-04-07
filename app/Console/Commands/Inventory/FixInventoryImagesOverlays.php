@@ -80,9 +80,10 @@ class FixInventoryImagesOverlays extends Command
 
             $cursor->each(function (Row $inventory): void {
                 dispatch(new GenerateOverlayImageJob(
-                    $inventory->inventory_id,
-                    self::DO_NOT_REINDEX_AND_INVALIDATE
-                ))->onQueue('overlay-images');
+                        $inventory->inventory_id,
+                        self::DO_NOT_REINDEX_AND_INVALIDATE
+                    )
+                );
             });
 
             $this->service->invalidateCacheAndReindexByDealerIds([$dealer->dealer_id]);

@@ -24,7 +24,7 @@ class AccessToken
 
         // if the request is coming from integration processes, then it will avoid to dispatch many inventory-related jobs
         if ($clientId && $clientId === config('integrations.inventory_cache_auth.credentials.integration_client_id')) {
-            Inventory::disableCacheInvalidationAndSearchSyncing();
+            Inventory::disableImageOverlayGenerationCacheInvalidationAndSearchSyncing();
         }
 
         if ($request->has('dealer_id')) {

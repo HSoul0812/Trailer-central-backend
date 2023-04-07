@@ -92,7 +92,7 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property bool $show_on_racingjunk
  * @property bool $show_on_website
  * @property \DateTimeInterface|Carbon $tt_payment_expiration_date
- * @property bool $overlay_enabled 0 -> disabled, 1 -> only primary image, 2 -> all images
+ * @property int $overlay_enabled 0 -> disabled, 1 -> only primary image, 2 -> all images
  * @property bool $is_special
  * @property bool $is_featured
  * @property double $latitude
@@ -164,9 +164,9 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property Collection<mixed> $attributes_indexed_by_id A collection of attribute values indexed by the attribute id
  * @property DealerLocation $dealerLocation
  * @property Collection<Payment> $floorplanPayments
- * @property Collection<InventoryImage> $inventoryImages
- * @property Collection<InventoryImage> $orderedImages
- * @property Collection<Image> $images
+ * @property Collection<InventoryImage>|InventoryImage[] $inventoryImages
+ * @property Collection<InventoryImage>|InventoryImage[] $orderedImages
+ * @property Collection<Image>|Image[] $images
  * @property Collection<InventoryFile> $inventoryFiles
  * @property Collection<File> $files
  * @property Collection<InventoryFeature> $inventoryFeatures
@@ -193,6 +193,9 @@ class Inventory extends Model
 
     /** @var null|string */
     public static $searchableAs = null;
+
+    /** @var bool to determines when the image overlay generation jobs should be dispatched */
+    private static $isOverlayGenerationEnabled = true;
 
     const TABLE_NAME = 'inventory';
 
@@ -248,6 +251,7 @@ class Inventory extends Model
         self::CONDITION_RE_MFG => 'Re-manufactured',
     ];
 
+    const OVERLAY_ENABLED_NONE = User::OVERLAY_ENABLED_NONE;
     const OVERLAY_ENABLED_PRIMARY = User::OVERLAY_ENABLED_PRIMARY;
     const OVERLAY_ENABLED_ALL = User::OVERLAY_ENABLED_ALL;
 

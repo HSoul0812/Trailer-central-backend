@@ -122,6 +122,8 @@ abstract class BaseExportAction
         $result = $this->storage->putStream($this->filename, $this->tmpStorage->readStream($this->filename));
 
         throw_if(!$result, new \Exception("Can't upload CSV file to S3, please check configuration variables."));
+
+        $this->tmpStorage->delete($this->filename);
     }
 
     public function export()

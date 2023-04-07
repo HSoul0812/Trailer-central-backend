@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class ShowroomGenericMap extends Model
 {
+    public $timestamps = false;
+
     protected $table = 'showroom_generic_map';
 
     /**

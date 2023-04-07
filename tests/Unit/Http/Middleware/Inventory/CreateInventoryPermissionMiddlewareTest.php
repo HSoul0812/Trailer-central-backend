@@ -13,6 +13,9 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use Tests\TestCase;
 
 /**
+ * @group DW
+ * @group DW_INVENTORY
+ *
  * Test for App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware
  *
  * Class CreateInventoryPermissionMiddlewareTest
