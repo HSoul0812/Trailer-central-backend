@@ -18,7 +18,7 @@ use Illuminate\Support\Collection;
 /**
  * Test for App\Services\User\DealerOptionsService
  *
- * class DeactivateDealerTest
+ * class ToggleDealerActivateStatus
  * @package Tests\Unit\Services\User\DealerOptionService
  *
  * @coversDefaultClass \App\Services\User\DealerOptionsService
@@ -47,7 +47,7 @@ class ToggleDealerActiveStatusTest extends TestCase
     }
 
     /**
-     * @covers ::deactivateDealer
+     * @covers ::toggleDealerActiveStatus
      *
      * @dataProvider validDataProviderForToggleDealerActiveStatus
      *
@@ -55,7 +55,7 @@ class ToggleDealerActiveStatusTest extends TestCase
      * @group DMS_DEALER_OPTIONS
      * @throws Exception
      */
-    public function testDeactivateDealer($dealerId, $params)
+    public function testToggleDealerActiveStatusDealer($dealerId, $params)
     {
         /** @var DealerOptionsService $service **/
         $service = $this->app->make(DealerOptionsService::class);
@@ -93,7 +93,7 @@ class ToggleDealerActiveStatusTest extends TestCase
     }
 
     /**
-     * @covers ::deactivateDealer
+     * @covers ::toggleDealerActiveStatus
      *
      * @dataProvider invalidValueTypesDataProviderForToggleDealerActiveStatus
      *
@@ -101,7 +101,7 @@ class ToggleDealerActiveStatusTest extends TestCase
      * @group DMS_DEALER_OPTIONS
      * @throws Exception
      */
-    public function testDeactivateDealerWithInvalidValueTypes($dealerId, $active)
+    public function testToggleDealerActiveStatusWithInvalidValueTypes($dealerId, $active)
     {
         Log::shouldReceive('error');
         $this->expectException(\TypeError::class);
