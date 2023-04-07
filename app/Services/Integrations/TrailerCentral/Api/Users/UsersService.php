@@ -68,10 +68,8 @@ class UsersService implements UsersServiceInterface
     }
 
     public function createLocation(array $location): TcApiResponseUserLocation {
-        if(!$accessToken = request()->header('access-token')) {
-            $authToken = $this->authTokenRepository->get(['user_id' => $location['dealer_id']]);
-            $accessToken = $authToken->access_token;
-        }
+        $authToken = $this->authTokenRepository->get(['user_id' => $location['dealer_id']]);
+        $accessToken = $authToken->access_token;
 
         if (!array_key_exists('name', $location) || empty($location['name'])) {
             $location['name'] = collect([
