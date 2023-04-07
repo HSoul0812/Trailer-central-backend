@@ -46,7 +46,7 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
 
     public function update($params, array $options = []): Inventory;
 
-    public function massUpdate(array $params): bool;
+    public function massUpdate(array $params, array $queryParams = []): bool;
 
     public function bulkUpdate(array $where, array $params): bool;
 
@@ -65,13 +65,14 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
     public function getAndIncrementTimesViewed(array $params): Inventory;
 
     /**
-     * Archived Inventory units from specific dealer id
+     * Archive/Unarchive Dealer inventory based on dealer operations status
      *
      * @param int $dealerId
      * @param array $inventoryParams
-     * @return mixed
+     * @param $deletedAt
+     * @return int
      */
-    public function archiveInventory(int $dealerId, array $inventoryParams);
+    public function massUpdateDealerInventoryOnActiveStateChange(int $dealerId, array $inventoryParams, $deletedAt): int;
 
     /**
      * Find the inventory by stock

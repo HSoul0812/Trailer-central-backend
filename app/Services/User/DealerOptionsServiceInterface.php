@@ -94,10 +94,11 @@ interface DealerOptionsServiceInterface
 
     /**
      * @param int $dealerId
+     * @param bool $active
      * @return bool
      * @throws Exception
      */
-    public function deactivateDealer(int $dealerId): bool;
+    public function toggleDealerActiveStatus(int $dealerId, bool $active): bool;
 
     /**
      * @param int $dealerId
