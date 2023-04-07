@@ -10,6 +10,30 @@
  */
 
 
+namespace App\Models\Dealer{
+/**
+ * App\Models\Dealer\ViewedDealer
+ *
+ * @property int $id
+ * @property string $name
+ * @property int $dealer_id
+ * @property int $inventory_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Database\Factories\Dealer\ViewedDealerFactory factory(...$parameters)
+ * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer whereDealerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer whereInventoryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ViewedDealer whereUpdatedAt($value)
+ */
+	class ViewedDealer extends \Eloquent {}
+}
+
 namespace App\Models\Geolocation{
 /**
  * App\Models\Geolocation\Geolocation
@@ -260,6 +284,35 @@ namespace App\Models\Parts{
 	class Type extends \Eloquent {}
 }
 
+namespace App\Models\Payment{
+/**
+ * App\Models\Payment\PaymentLog
+ *
+ * @property int $id
+ * @property string $payment_id
+ * @property string $client_reference_id
+ * @property string $full_response
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $plan_key
+ * @property string|null $plan_name
+ * @property int|null $plan_duration
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog query()
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereClientReferenceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereFullResponse($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog wherePaymentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog wherePlanDuration($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog wherePlanKey($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog wherePlanName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereUpdatedAt($value)
+ */
+	class PaymentLog extends \Eloquent {}
+}
+
 namespace App\Models\SubscribeEmailSearch{
 /**
  * App\Models\SubscribeEmailSearch\SubscribeEmailSearch
@@ -360,6 +413,47 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
  */
 	class User extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\UserTracking
+ *
+ * @property int $id
+ * @property string $visitor_id
+ * @property int|null $website_user_id
+ * @property string $event
+ * @property string $url
+ * @property string|null $page_name
+ * @property array|null $meta
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $ip_address
+ * @property bool $location_processed
+ * @property string|null $city
+ * @property string|null $state
+ * @property string|null $country
+ * @property-read \App\Models\WebsiteUser\WebsiteUser|null $websiteUser
+ * @method static \Database\Factories\UserTrackingFactory factory(...$parameters)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking query()
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereCountry($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereEvent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereIpAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereLocationProcessed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereMeta($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking wherePageName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereState($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereVisitorId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserTracking whereWebsiteUserId($value)
+ */
+	class UserTracking extends \Eloquent {}
 }
 
 namespace App\Models\WebsiteUser{

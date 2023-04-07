@@ -16,4 +16,46 @@ return [
             'allow_ips' => env('TT_MIDDLEWARES_HUMAN_ONLY_ALLOW_IPS', ''),
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Domain configs
+    |--------------------------------------------------------------------------
+    |
+    | We can use this array to see which domain are hosting frontend and backend
+    | code
+    |
+    */
+
+    'domains' => [
+        'frontend' => [
+            'localhost',
+            'qa.trailertrader.com',
+            'deployment.trailertrader.com',
+            'trailertrader.com',
+        ],
+        'backend' => [
+            'localhost',
+            'https://trailertrader-staging.trailercentral.com',
+            'https://backend.trailertrader.com'
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Report configs
+    |--------------------------------------------------------------------------
+    |
+    | This config keep all the settings related to each report
+    |
+    */
+
+    'report' => [
+        'inventory-view-and-impression' => [
+            'send_mail' => env('TT_REPORT_INVENTORY_VIEW_AND_IMPRESSION_SEND_MAIL', false),
+            'mail_to' => [
+                'francois@trailercentral.com',
+            ],
+        ],
+    ],
 ];
