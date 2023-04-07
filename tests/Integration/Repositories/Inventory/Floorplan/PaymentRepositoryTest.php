@@ -13,9 +13,12 @@ use App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Faker\Factory as Faker;
-use Faker\Provider\Uuid;
 use Tests\TestCase;
 
+/**
+ * @group DW
+ * @group DW_INVENTORY
+ */
 class PaymentRepositoryTest extends TestCase
 {
     use DatabaseTransactions;

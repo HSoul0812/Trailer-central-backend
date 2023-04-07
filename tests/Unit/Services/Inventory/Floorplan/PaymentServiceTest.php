@@ -11,6 +11,9 @@ use Faker\Provider\Uuid;
 use Tests\TestCase;
 
 /**
+ * @group DW
+ * @group DW_INVENTORY
+ *
  * Test for App\Services\Inventory\Floorplan\PaymentService
  *
  * Class PaymentServiceTest
