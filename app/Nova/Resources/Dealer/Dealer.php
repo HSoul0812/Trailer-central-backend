@@ -14,7 +14,7 @@ use Laravel\Nova\Fields\BooleanGroup;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Integration\Integration;
 use App\Nova\Actions\Dealer\ChangeStatus;
-use App\Nova\Actions\Dealer\DeactivateDealer;
+use App\Nova\Actions\Dealer\ManageDealer;
 use Laravel\Nova\Http\Requests\ActionRequest;
 use Trailercentral\PasswordlessLoginUrl\PasswordlessLoginUrl;
 use App\Nova\Actions\Dealer\Subscriptions\ManageDealerSubscriptions;
@@ -243,7 +243,7 @@ class Dealer extends Resource
             app()->make(ManageDealerSubscriptions::class),
             app()->make(ManageHiddenIntegrations::class),
 
-            app()->make(DeactivateDealer::class),
+            app()->make(ManageDealer::class),
             app()->make(ChangeStatus::class),
         ];
     }

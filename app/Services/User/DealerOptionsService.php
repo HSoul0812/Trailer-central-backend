@@ -9,6 +9,7 @@ use App\Models\User\NewUser;
 use App\Helpers\StringHelper;
 use App\Models\User\DealerClapp;
 use App\Models\User\NewDealerUser;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\User\DealerAdminSetting;
 use App\Repositories\GenericRepository;
@@ -230,6 +231,44 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             Log::error("Activation error. dealer_id - {$dealerId}", $e->getTrace());
 
             return false;
+        }
+    }
+
+    /**
+     * Change dealer Active state from active/deleted
+     * Also
+     * Deactivate: Archive active units
+     * Active: Unarchive the archived units from last deactivation date
+     *
+     * @param int $dealerId
+     * @param bool $active
+     * @return bool
+     * @throws Exception
+     */
+    public function toggleDealerActiveStatus(int $dealerId, bool $active): bool
+    {
+        try {
+            // Transaction added in case of any exception occurs we don't mess any data
+            DB::beginTransaction();
+            $deletedAt = User::find($dealerId)->deleted_at;
+            $datetime = Carbon::now()->format('Y-m-d H:i:s');
+
+            $inventoryParams = [
+                'dealer_id' => $dealerId,
+                'active' => $active,
+                'is_archived' => $active ? 0 : self::ARCHIVED_ON,
+                'archived_at' => $active ? null : $datetime
+            ];
+
+            $this->userRepository->toggleDealerStatus($dealerId, $active, $datetime);
+            $this->inventoryRepository->massUpdateDealerInventoryOnActiveStateChange($dealerId, $inventoryParams, $deletedAt);
+
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Dealer managing error. dealer_id - {$dealerId}", $e->getTrace());
+            DB::rollback();
+            throw new Exception($e->getMessage());
         }
     }
 
@@ -586,31 +625,6 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             return true;
         } catch(Exception $e) {
             \Log::error($e->getMessage());
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function deactivateDealer(int $dealerId): bool {
-        try {
-            $this->userRepository->beginTransaction();
-
-            $inventoryParams = [
-                'active' => self::INACTIVE,
-                'is_archived' => self::ARCHIVED_ON,
-                'archived_at' => Carbon::now()->format('Y-m-d H:i:s')
-            ];
-
-            $this->userRepository->deactivateDealer($dealerId);
-            $this->inventoryRepository->archiveInventory($dealerId, $inventoryParams);
-
-            $this->userRepository->commitTransaction();
-            return true;
-        } catch (Exception $e) {
-            Log::error("Dealer deactivation error. dealer_id - {$dealerId}", $e->getTrace());
-            $this->userRepository->rollbackTransaction();
             throw new Exception($e->getMessage());
         }
     }
