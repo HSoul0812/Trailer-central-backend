@@ -104,11 +104,12 @@ class ShowroomService implements ShowroomServiceInterface
 
     /**
      * @param array $unit
+     * @param array $additionalSearchParams
      * @return array
      */
-    public function mapInventoryToFactory(array $unit): array
+    public function mapInventoryToFactory(array $unit, array $additionalSearchParams = []): array
     {
-        $showroom = $this->getShowroomByUnit($unit);
+        $showroom = $this->getShowroomByUnit($unit, $additionalSearchParams);
 
         if ($showroom === null) {
             return $unit;
@@ -179,9 +180,10 @@ class ShowroomService implements ShowroomServiceInterface
 
     /**
      * @param array $unit
+     * @param array $additionalSearchParams
      * @return Showroom|null
      */
-    protected function getShowroomByUnit(array $unit): ?Showroom
+    protected function getShowroomByUnit(array $unit, array $additionalSearchParams): ?Showroom
     {
         if (!isset($unit['year']) || !isset($unit['manufacturer']) || !isset($unit['model'])) {
             throw new ShowroomException('Some params are absent. Unit - ' . json_encode($unit));
@@ -209,6 +211,13 @@ class ShowroomService implements ShowroomServiceInterface
             $showrooms = $this->showroomRepository->getAll($searchParams);
         } else {
             $showrooms = $showroomGenericMaps->first()->showrooms;
+        }
+
+        if (!empty($additionalSearchParams) && $showrooms->isEmpty()) {
+            $searchParams = array_merge($searchParams, $additionalSearchParams);
+
+            /** @var Collection $showrooms */
+            $showrooms = $this->showroomRepository->getAll($searchParams);
         }
 
         if ($showrooms->isEmpty()) {
