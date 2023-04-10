@@ -429,7 +429,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         if($step->isError()) {
             // Dismiss Existing Errors
             $this->errors->dismissAll($step->marketplaceId, $step->inventoryId ?? 0);
-
+            
             // Return Error
             return $this->errors->create([
                 'marketplace_id' => $step->marketplaceId,

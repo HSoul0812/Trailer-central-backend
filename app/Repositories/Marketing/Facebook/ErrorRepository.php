@@ -54,8 +54,24 @@ class ErrorRepository implements ErrorRepositoryInterface {
      * @return Error
      */
     public function create($params) {
-        // Create Error
-        return Error::create($params);
+        // Create Error if there is not present in the same day
+        $error = Error::where('marketplace_id', $params['marketplace_id'])
+            ->where(function ($query) use ($params) {
+                if ($params['inventory_id'] !== null) {
+                    $query->where('inventory_id', $params['inventory_id']);
+                } else {
+                    $query->whereNull('inventory_id');
+                }
+                return $query;
+            })
+            ->whereDate('created_at', date('Y-m-d'))
+            ->first();
+        if ($error) {
+            $error->update($params);
+        } else {
+            $error = Error::create($params);
+        }
+        return $error;
     }
 
     /**
@@ -200,7 +216,7 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
         // Get First
         $collection = new Collection();
-        foreach($errors as $error) {
+        foreach ($errors as $error) {
             $collection->push($this->update([
                 'id' => $error->id,
                 'dismissed' => 1
@@ -213,7 +229,7 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
     /**
      * Dismiss All Active Errors on Marketplace Integration
-     * 
+     *
      * @param int $marketplaceId
      * @return Collection<Error>
      */

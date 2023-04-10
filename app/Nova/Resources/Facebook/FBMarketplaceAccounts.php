@@ -5,25 +5,29 @@ namespace App\Nova\Resources\Facebook;
 use App\Nova\Actions\Dealer\ClearFBMEErrors;
 use App\Nova\Actions\FME\DownloadIntegrationRunHistory;
 use App\Nova\Actions\FME\DownloadRunHistory;
+use App\Nova\Lenses\Marketing\FmeFailedToday;
+use App\Nova\Lenses\Marketing\FmePartialToday;
 use App\Nova\Metrics\Marketing\FmeDealersAttempted;
 use App\Nova\Metrics\Marketing\FmeErrors;
+use App\Nova\Metrics\Marketing\FmeErrorTypes;
 use App\Nova\Metrics\Marketing\FmeIntegrations;
 use App\Nova\Metrics\Marketing\FmeListings;
+use App\Nova\Metrics\Marketing\FmePostingResults;
+use App\Nova\Metrics\Marketing\FmePostsPerDay;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\BelongsTo;
 use App\Nova\Resource;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 
 class FBMarketplaceAccounts extends Resource
 {
     public static $group = 'Marketplaces';
     public static $orderBy = ['last_attempt_ts' => 'asc'];
-
-    public static $tableStyle = 'tight';
 
     /**
      * The model the resource corresponds to.
@@ -45,7 +49,7 @@ class FBMarketplaceAccounts extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'dealer_id', 'dealer_name', 'fb_username', 'units_posted_today'
+        'id', 'dealer', 'fb_username', 'last_known_error_type',
     ];
 
     public static function label(): string
@@ -82,15 +86,15 @@ class FBMarketplaceAccounts extends Resource
         return [
             Text::make('ID', 'id'),
 
-            Text::make('Dealer ID', 'dealer_id')->sortable(),
-
-            Text::make('Dealer Name', 'dealer_name')
+            Text::make('Dealer', 'dealer')
                 ->sortable(),
 
             Text::make('Facebook Username')
                 ->sortable(),
 
-            Text::make('Location')
+
+            Number::make('Posts per Day', 'posts_per_day')
+                ->onlyOnDetail()
                 ->sortable(),
         ];
     }
@@ -98,25 +102,35 @@ class FBMarketplaceAccounts extends Resource
     protected function panelStatus(): array
     {
         return [
-            DateTime::make('Last Attempt', 'last_attempt_ts')
-            ->sortable(),
+            Text::make('Last Attempt', function () {
+                if (stripos($this->last_attempt_ts, '1000') !== false) {
+                    return "never";
+                } else {
+                    return date('M-d H:i', strtotime($this->last_attempt_ts));
+                }
+            })->sortable(),
 
-            Boolean::make('Last Status', 'last_run_status')
+            Number::make('Remaining', 'last_attempt_posts_remaining')
                 ->sortable(),
 
-            DateTime::make('Last Error', 'last_known_error_ts')
-                ->sortable(),
+            Text::make('Last Run', function () {
+                if ($this->last_attempt_posts_remaining === 0) {
+                    return "complete";
+                } elseif ($this->last_attempt_posts_remaining == $this->posts_per_day) {
+                    return "fail";
+                } else {
+                    return "partial";
+                }
+            }),
 
-            Text::make('Last Error Code', 'last_known_error_code')
+            Text::make('Last Error Code', 'last_known_error_type')
                 ->sortable(),
 
             Text::make('Last Error Message', 'last_known_error_message')
                 ->onlyOnDetail(),
 
-            DateTime::make('Last Success', 'last_success_ts')
-                ->sortable(),
-
-            Text::make('Lastest Posts', 'last_units_posted'),
+            Text::make('Today Attempt Posts', 'last_attempt_posts')
+                ->onlyOnDetail(),
 
         ];
     }
@@ -124,7 +138,8 @@ class FBMarketplaceAccounts extends Resource
     protected function panelTodaysResults(): array
     {
         return [
-            Text::make('Units Posted', "units_posted_today")->onlyOnDetail(),
+            Text::make('Units Posted', "count_units_posted_today")->onlyOnDetail(),
+            Text::make('Units SKUs', "units_posted_today")->onlyOnDetail(),
             Text::make('Last Error', "error_today")->onlyOnDetail(),
         ];
     }
@@ -132,7 +147,8 @@ class FBMarketplaceAccounts extends Resource
     protected function panelResults(int $nrDaysAgo): array
     {
         return [
-            Text::make('Units Posted', "units_posted_{$nrDaysAgo}dayago")->onlyOnDetail(),
+            Text::make('Units Posted', "count_units_posted_{$nrDaysAgo}dayago")->onlyOnDetail(),
+            Text::make('Units SKUs', "units_posted_{$nrDaysAgo}dayago")->onlyOnDetail(),
             Text::make('Last Error', "error_{$nrDaysAgo}dayago")->onlyOnDetail(),
         ];
     }
@@ -150,6 +166,9 @@ class FBMarketplaceAccounts extends Resource
             new FmeListings,
             new FmeDealersAttempted,
             new FmeIntegrations,
+            new FmePostingResults,
+            new FmePostsPerDay,
+            new FmeErrorTypes
         ];
     }
 
@@ -172,7 +191,10 @@ class FBMarketplaceAccounts extends Resource
      */
     public function lenses(Request $request): array
     {
-        return [];
+        return [
+            new FmePartialToday,
+            new FmeFailedToday,
+        ];
     }
 
     /**

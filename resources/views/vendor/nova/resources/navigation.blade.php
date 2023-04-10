@@ -66,13 +66,19 @@
 
         // Find the active link and expand the corresponding group
         const activeLink = document.querySelector('a.router-link-active');
-        console.log(activeLink)
         if (activeLink) {
             const activeGroupHeader = activeLink.parentElement.parentElement.previousElementSibling;
             console.log(activeGroupHeader)
             if (activeGroupHeader) {
                 toggleGroup(activeGroupHeader);
             }
+        } else {
+            const lists = document.querySelectorAll('ul[data-group]');
+            const icon = document.querySelector('.toggle-icon');
+            icon.classList.remove('open');
+            lists.forEach(list => {
+                list.style.display = 'none';
+            });
         }
     });
 
@@ -80,15 +86,18 @@
         const groupKey = header.getAttribute('data-group');
         const lists = document.querySelectorAll('ul[data-group]');
         const icon = header.querySelector('.toggle-icon');
-        console.log(icon)
+
+        document.querySelectorAll('.toggle-icon').forEach(icon => {
+            icon.classList.remove('open');
+        })
+        let open = false
         lists.forEach(list => {
             if (list.getAttribute('data-group') === groupKey) {
                 if (list.style.display === 'none' || list.style.display === '') {
                     list.style.display = 'block';
-                    icon.classList.add('open');
+                    open = true;
                 } else {
                     list.style.display = 'none';
-                    icon.classList.remove('open');
                 }
             } else {
                 list.style.display = 'none';
@@ -96,6 +105,9 @@
                 otherIcon.classList.remove('open');
             }
         });
+        if (open) {
+            icon.classList.add('open');
+        }
     }
 </script>
 
