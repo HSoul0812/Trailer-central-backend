@@ -58,20 +58,6 @@ class DraftController extends RestfulControllerV2
         return $this->response->errorBadRequest();
     }
 
-    public function sendEmailDraft(int $leadId, Request $request)
-    {
-        $requestData = $request->all();
-        $requestData['lead_id'] = $leadId;
-        $request = new SaveEmailDraftRequest($requestData);
-
-        if ($request->validate()) {
-            
-            return $this->response->item($this->service->sendEmailDraft($request->all()), $this->interactionTransformer);
-        }
-
-        return $this->response->errorBadRequest();
-    }
-
     public function getReplyEmailDraft(int $leadId, int $id, Request $request)
     {
         $requestData = $request->all();

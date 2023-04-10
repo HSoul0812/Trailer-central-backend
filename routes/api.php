@@ -505,7 +505,6 @@ $api->version('v1', function ($route) {
         $route->get('leads/{leadId}/interactions/draft', 'App\Http\Controllers\v1\CRM\Interactions\DraftController@getEmailDraft');
         $route->post('leads/{leadId}/interactions/draft', 'App\Http\Controllers\v1\CRM\Interactions\DraftController@saveEmailDraft');
         $route->get('leads/{leadId}/interactions/{id}/draft', 'App\Http\Controllers\v1\CRM\Interactions\DraftController@getReplyEmailDraft');
-        $route->post('leads/{leadId}/interactions/draft/send', 'App\Http\Controllers\v1\CRM\Interactions\DraftController@sendEmailDraft');
     });
 
     /**

@@ -12,14 +12,19 @@ use App\Http\Requests\Request;
 class SendEmailRequest extends Request {
 
     protected $rules = [
+
         'dealer_id' => 'required|integer',
-        'sales_person_id' => 'integer',
-        'lead_id' => 'nullable|integer',
+        'user_id' => 'required|integer',
+        'lead_id' => 'required|integer',
         'quote_id' => 'nullable|integer',
+        'sales_person_id' => 'integer',
         'subject' => 'required|string',
         'body' => 'required|string',
         'files' => 'array',
-        'files.*' => 'string', 
-//        'attachments' => 'array'
+        'files.*' => 'string',
+
+        'existing_attachments' => 'array',
+        'existing_attachments.*.filename' => 'string',
+        'existing_attachments.*.original_filename' => 'string',
     ];
 }

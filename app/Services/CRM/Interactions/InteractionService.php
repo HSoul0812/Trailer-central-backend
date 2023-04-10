@@ -272,20 +272,34 @@ class InteractionService implements InteractionServiceInterface
             }
         }
 
+        // Handling Attachments
+
         if(!isset($params['attachments'])) {
             $params['attachments'] = $attachments;
         }
 
+        // If Single Attachment is detected
         if ($params['attachments'] instanceof UploadedFile) {
             $params['attachments'] = array_fill(0, 1, $params['attachments']);
         }
 
+        // If Attachments are not manually Uploaded
         $this->log->info('Found ' . count($params['attachments']) . ' Attachments To Send Via Email');
         foreach($params['attachments'] as $key => $attachment) {
             if (!is_a($attachment, UploadedFile::class)) {
                 unset($params['attachments'][$key]);
             }
         }
+
+        // Handling Remote File Attachments
+        if (isset($params['existing_attachments'])) {
+
+            // only return file URL
+            $params['files'] = array_map(function ($file) {
+                return $file['filename'];
+            }, $params['existing_attachments']);
+        }
+
 
         // Get From Email
         if($smtpConfig !== null) {
@@ -301,11 +315,12 @@ class InteractionService implements InteractionServiceInterface
         $this->log->info('Configured Email With Subject ' . $parsedEmail->subject . ' To Send to Lead');
 
         // Get Draft if Exists
-        $emailHistory = $this->emailHistory->findEmailDraft($fromEmail, $params['lead_id'], $params['quote_id']);
+        $emailHistory = $this->emailHistory->findEmailDraft($fromEmail, $params['lead_id'], $params['quote_id'] ?? null);
         if(!empty($emailHistory->email_id)) {
             $this->log->info('Found Draft #' . $emailHistory->email_id . ' of Email We Are Currently Sending');
             $parsedEmail->setEmailHistoryId($emailHistory->email_id);
             $parsedEmail->setMessageId($emailHistory->message_id);
+            $parsedEmail->setInteractionId($emailHistory->interaction_id);
         }
 
         // Send Email
@@ -323,6 +338,7 @@ class InteractionService implements InteractionServiceInterface
             $interactionEmail = true;
         }
 
+        // Update Lead Status
         if (!empty($params['lead_id'])) {
             $lead = Lead::findOrFail($params['lead_id']);
             $this->log->info('Found Lead ID #' . $lead->identifier . ' to Send Email To');
@@ -421,7 +437,7 @@ class InteractionService implements InteractionServiceInterface
             $interaction = $this->interactions->createOrUpdate([
                 'id'                => $parsedEmail->getInteractionId(),
                 'lead_id'           => (!empty($params['lead_id'])) ? trim($params['lead_id']) : '',
-                'quote_id'          => (int) $params['quote_id'] ?? '',
+                'quote_id'          => $params['quote_id'] ?? '',
                 'user_id'           => $userId,
                 'sales_person_id'   => !empty($salesPerson) ? $salesPerson->id : NULL,
                 'interaction_type'  => 'EMAIL',
@@ -504,6 +520,9 @@ class InteractionService implements InteractionServiceInterface
 
     /**
      * get Email Draft data to show on UI
+     * 
+     * @param array $params
+     * @return EmailDraft
      */
     public function getEmailDraft(array $params)
     {
@@ -538,7 +557,9 @@ class InteractionService implements InteractionServiceInterface
 
                 $parentEmailHistory = $this->interactions->getEmailInteraction($params['interaction_id']);
                 $subject .= 'RE: '. $parentEmailHistory->subject;
-                $body .= "\n\n\n[". ($parentEmailHistory->date_sent ?: Carbon::now()) ."] <". $parentEmailHistory->from_email .">\n<blockquote>" . $parentEmailHistory->body . "</blockquote>";
+                $parentDate = 'On '. Carbon::parse($parentEmailHistory->date_sent)->format('D, M j, Y') .' at '. Carbon::parse($parentEmailHistory->date_sent)->format('g:i A');
+                $parentFrom = $parentEmailHistory->from_name .'<'. $parentEmailHistory->from_email .'> wrote: ';
+                $body .= "\n\n\n". $parentDate .", ". $parentFrom ."\n<blockquote>" . $parentEmailHistory->body . "</blockquote>";
             }
 
             // adding email signature
@@ -567,6 +588,9 @@ class InteractionService implements InteractionServiceInterface
 
     /**
      * save Email Draft data
+     * 
+     * @param array $params
+     * @return EmailDraft
      */
     public function saveEmailDraft(array $params)
     {
@@ -576,9 +600,9 @@ class InteractionService implements InteractionServiceInterface
 
         $emailAttachments = [];
         // upload new attachments
-        if (isset($params['new_attachments'])) {
+        if (isset($params['files'])) {
 
-            foreach ($params['new_attachments'] as $file) {
+            foreach ($params['files'] as $file) {
 
                 if (!($file instanceof UploadedFile)) continue;
 
@@ -677,106 +701,5 @@ class InteractionService implements InteractionServiceInterface
             'replyto_name' => $emailConfig->replyName,
             'attachments' => $emailAttachments
         ]);
-    }
-
-    /**
-     * save & send Email Draft
-     */
-    public function sendEmailDraft(array $params)
-    {
-        $emailDraft = $this->saveEmailDraft($params);
-
-        // update Lead Status
-        // If there was no status, or it was uncontacted, set to medium, otherwise, don't change.
-        $lead = $this->leadRepo->get(['id' => $emailDraft->leadId]);
-        if (empty($lead->leadStatus) || $lead->leadStatus->status === Lead::STATUS_UNCONTACTED) {
-            $status = Lead::STATUS_MEDIUM;
-        } else {
-            $status = $lead->leadStatus->status;
-        }
-
-        $this->leadStatus->createOrUpdate([
-            'lead_id' => $lead->identifier,
-            'status' => $status,
-            'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
-        ]);
-
-        // update interaction_notes
-        $interaction = $this->interactions->update([
-            'id' => $emailDraft->interactionId,
-            'lead_id' => $emailDraft->leadId,
-            'interaction_notes' => 'E-mail Sent: '. $emailDraft->subject
-        ]);
-
-        // mark EmailHistory as sent
-        $this->emailHistory->update([
-            'id' => $emailDraft->emailId,
-            'draft_saved' => 0,
-            'date_sent' => 1
-        ]);
-
-        // send email
-        $this->sendEmail($emailDraft, $params);
-
-        return $interaction;
-    }
-
-    /**
-     * Send Email Via SMTP|Gmail|NTLM
-     *
-     * @param EmailDraft $emailDraft
-     * @return ParsedEmail
-     */
-    public function sendEmail(EmailDraft $emailDraft, array $params): ParsedEmail 
-    {
-        // Initialize SMTP Config
-        $smtpConfig = null;
-        if(!empty($params['sales_person_id'])) {
-            $salesPerson = $this->salespeople->get(['sales_person_id' => $params['sales_person_id']]);
-
-            // Get SMTP Config
-            $smtpConfig = SmtpConfig::fillFromSalesPerson($salesPerson);
-            if($smtpConfig->isAuthConfigOauth()) {
-                $smtpConfig->setAccessToken($this->refreshToken($smtpConfig->accessToken));
-                $smtpConfig->calcAuthConfig();
-            }
-        }
-        
-        // prepare parsedEmail
-        $params['from_email'] = $emailDraft->fromEmail;
-        $params['from_name'] = $emailDraft->fromName;
-        $params['message_id'] = $emailDraft->messageId;
-        $params['files'] =  [];
-        foreach ($emailDraft->attachments as $file) {
-            $params['files'][] = $file['filename'];
-        }
-        $parsedEmail = $this->getParsedEmail($smtpConfig, $params);
-        // no idea why messageId not assigned from above
-        $parsedEmail->setMessageId($emailDraft->messageId);
-
-        // start sending email
-        // Send Gmail Email
-        if(!empty($smtpConfig) && $smtpConfig->isAuthTypeGmail()) {
-            $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
-        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeOffice()) {
-            // Send Office Email
-            $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
-        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
-            // Send NTLM Email
-            $finalEmail = $this->ntlm->send($params['dealer_id'], $smtpConfig, $parsedEmail);
-        } elseif($smtpConfig) {
-            // Send Custom Email
-            $this->sendCustomEmail($smtpConfig, 
-                ['email' => $emailDraft->toEmail, 'name' => $emailDraft->toName], 
-                new EmailBuilderEmail($parsedEmail));
-        } else {
-            // Send SES Email
-            $user = $this->users->get(['dealer_id' => $params['dealer_id']]);
-            $this->sendCustomSesEmail($user,
-                ['email' => $emailDraft->toEmail, 'name' => $emailDraft->toName], 
-                new EmailBuilderEmail($parsedEmail));
-        }
-
-        return $finalEmail ?? $parsedEmail;
     }
 }

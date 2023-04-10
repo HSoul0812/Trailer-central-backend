@@ -8,15 +8,10 @@ use Tests\database\seeds\CRM\Interactions\InteractionSeeder;
 use Faker\Factory as Faker;
 use App\Helpers\ImageHelper;
 use Illuminate\Support\Facades\Storage;
-use App\Models\CRM\Email\Attachment;
-use App\Models\CRM\Interactions\InteractionEmail;
-use App\Models\CRM\Interactions\EmailHistory;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\CRM\Interactions\EmailBuilderEmail;
-use App\Mail\CRM\CustomEmail;
-use App\Services\CRM\Interactions\InteractionService;
 use Mockery;
+use App\Mail\InteractionEmail;
 
 class DraftControllerTest extends IntegrationTestCase {
 
@@ -68,6 +63,7 @@ class DraftControllerTest extends IntegrationTestCase {
     /**
      * @group CRM
      * 
+     * Combining tests so you don't have to seed data for each test
      * Test: 
      *  - Save Email Draft
      *  - Save Email Draft with Existing Attachment
@@ -98,7 +94,7 @@ class DraftControllerTest extends IntegrationTestCase {
             [
                 'subject' => $emailSubject,
                 'body' => $emailBody,
-                'new_attachments' => [
+                'files' => [
                     UploadedFile::fake()->create($fileName)->size(1000)
                 ]
             ],
@@ -157,7 +153,7 @@ class DraftControllerTest extends IntegrationTestCase {
             [
                 'subject' => $emailSubject,
                 'body' => $emailBody,
-                'new_attachments' => [
+                'files' => [
                     UploadedFile::fake()->create($anotherFileName)->size(1000)
                 ],
                 'existing_attachments' => $content['attachments']
@@ -186,10 +182,13 @@ class DraftControllerTest extends IntegrationTestCase {
 
         // test Send Email Draft
 
+        Mail::fake();
+
         $response = $this->json(
             'POST',
-            '/api/leads/'. $lead->getKey() .'/interactions/draft/send',
+            '/api/interactions/send-email',
             [
+                'lead_id' => $lead->getKey(),
                 'subject' => $emailSubject,
                 'body' => $emailBody,
                 'existing_attachments' => $content['attachments']
@@ -198,6 +197,8 @@ class DraftControllerTest extends IntegrationTestCase {
         );
         
         $response->assertStatus(200);
+
+        Mail::assertSent(InteractionEmail::class);
 
         $content = json_decode($response->getContent(), true)['data'];
 

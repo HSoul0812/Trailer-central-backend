@@ -192,7 +192,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      */
 
     public function createInteractionEmail($params) {
-        return InteractionEmail::create($params);
+        return InteractionEmail::firstOrCreate($params);
     }
 
     public function getTasksByDealerId($dealerId, $sort = '-created_at', $perPage = 15) {
