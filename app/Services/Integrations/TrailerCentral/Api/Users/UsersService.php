@@ -28,12 +28,10 @@ class UsersService implements UsersServiceInterface
 
     public function create(array $attributes): TcApiResponseUser
     {
-        $accessToken = $this->integrationToken;
-
         $responseContent = $this->handleHttpRequest('POST', $this->usersUrl, [
             'json' => $attributes,
             'headers' => [
-                'access-token' => $accessToken
+                'access-token' => $this->integrationToken
             ]
         ]);
         return TcApiResponseUser::fromData($responseContent['data']);
