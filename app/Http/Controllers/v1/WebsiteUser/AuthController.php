@@ -68,18 +68,6 @@ class AuthController extends AbstractRestfulController
         return $this->response->item($user, $this->transformer);
     }
 
-    public function updateProfile(UpdateRequestInterface $request)
-    {
-        $user = auth('api')->user();
-        if($request->validate()) {
-            $this->authService->update($user, $request->all());
-            return $this->response->array(
-                ['success' => true]
-            );
-        }
-        return $this->response->errorBadRequest();
-    }
-
     public function index(IndexRequestInterface $request)
     {
         // TODO: Implement index() method.

@@ -53,7 +53,6 @@ $api->version('v1', function ($api) {
     $api->group(['prefix' => '/user', 'middleware' => 'auth:api'], function ($api) {
         $api->get('', [AuthController::class, 'getProfile']);
         $api->post('/jwt/logout', [AuthController::class, 'jwtLogout']);
-        $api->put('', [AuthController::class, 'updateProfile']);
         $api->post('/images', [ImageController::class, 'create']);
     });
 });
