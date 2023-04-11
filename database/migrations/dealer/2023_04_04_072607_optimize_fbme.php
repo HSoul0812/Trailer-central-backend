@@ -15,6 +15,8 @@ class OptimizeFbme extends Migration
         $conn = DB::connection()->getDoctrineConnection();
         $conn->executeStatement($this->cleanFbAPPErrors());
 
+        $conn->executeStatement($this->dropView1());
+        $conn->executeStatement($this->dropView2());
         $conn->executeStatement($this->dropView3());
         $conn->executeStatement($this->dropView4());
         $conn->executeStatement($this->dropUCFunctions());
