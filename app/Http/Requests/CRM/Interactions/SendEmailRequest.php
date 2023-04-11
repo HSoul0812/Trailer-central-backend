@@ -22,6 +22,7 @@ class SendEmailRequest extends Request {
         'body' => 'required|string',
         'files' => 'array',
         'files.*' => 'string',
+        // 'files.*' => 'file',
 
         'existing_attachments' => 'array',
         'existing_attachments.*.filename' => 'string',

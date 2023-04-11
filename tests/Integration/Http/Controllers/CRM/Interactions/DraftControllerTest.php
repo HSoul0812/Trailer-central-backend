@@ -184,6 +184,16 @@ class DraftControllerTest extends IntegrationTestCase {
 
         Mail::fake();
 
+        // // mock getRandomString()
+        // $randomString3 = $this->faker->md5();
+        // $this->imageHelper
+        //     ->shouldAllowMockingProtectedMethods()
+        //     ->shouldReceive('getRandomString')
+        //     ->once()
+        //     ->andReturn($randomString2);
+
+        // $anotherFileName2 = $this->faker->md5() .'.pdf';
+
         $response = $this->json(
             'POST',
             '/api/interactions/send-email',
@@ -191,6 +201,9 @@ class DraftControllerTest extends IntegrationTestCase {
                 'lead_id' => $lead->getKey(),
                 'subject' => $emailSubject,
                 'body' => $emailBody,
+                // 'files' => [
+                //     UploadedFile::fake()->create($anotherFileName2)->size(1000)
+                // ],
                 'existing_attachments' => $content['attachments']
             ],
             ['access-token' => $seeder->authToken->access_token]
@@ -198,6 +211,10 @@ class DraftControllerTest extends IntegrationTestCase {
         
         $response->assertStatus(200);
 
+        // Mail::assertSent(InteractionEmail::class, function($mail) {
+
+        //     return count($mail->attachments) > 0;
+        // });
         Mail::assertSent(InteractionEmail::class);
 
         $content = json_decode($response->getContent(), true)['data'];
