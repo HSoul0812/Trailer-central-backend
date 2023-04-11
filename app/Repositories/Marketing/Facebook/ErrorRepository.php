@@ -54,24 +54,7 @@ class ErrorRepository implements ErrorRepositoryInterface {
      * @return Error
      */
     public function create($params) {
-        // Create Error if there is not present in the same day
-        $error = Error::where('marketplace_id', $params['marketplace_id'])
-            ->where(function ($query) use ($params) {
-                if ($params['inventory_id'] !== null) {
-                    $query->where('inventory_id', $params['inventory_id']);
-                } else {
-                    $query->whereNull('inventory_id');
-                }
-                return $query;
-            })
-            ->whereDate('created_at', date('Y-m-d'))
-            ->first();
-        if ($error) {
-            $error->update($params);
-        } else {
-            $error = Error::create($params);
-        }
-        return $error;
+        return Error::createOrUpdate($params);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Models\Marketing\Facebook;
 
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 
 /**
  * Class Error
@@ -133,14 +134,46 @@ class Error extends Model
     ];
 
 
-    public function getErrorDescAttribute(): string {
+    public function getErrorDescAttribute(): string
+    {
         // Get Error Description
         $type = $this->error_type;
-        if(!isset(self::ERROR_TYPES[$type])) {
+        if (!isset(self::ERROR_TYPES[$type])) {
             $type = self::ERROR_TYPE_DEFAULT;
         }
 
         // Return Error Type Description
         return self::ERROR_TYPES[$type];
+    }
+
+    /**
+     * Create or update Facebook Error
+     *
+     * @param array $params
+     * @return Error
+     */
+    public static function createOrUpdate($params)
+    {
+        $error = self::where('marketplace_id', $params['marketplace_id'])
+            ->where(function ($query) use ($params) {
+                if ($params['inventory_id'] !== null) {
+                    $query->where('inventory_id', $params['inventory_id']);
+                } else {
+                    $query->whereNull('inventory_id');
+                }
+                return $query;
+            })
+            ->whereDate('created_at', date('Y-m-d'))
+            ->first();
+
+        // If an existing Error is found, update it; otherwise, create a new one
+        if ($error) {
+            $params['updated_at'] = date('Y-m-d H:i:s');
+            $error->update($params);
+        } else {
+            $error = Error::create($params);
+        }
+
+        return $error;
     }
 }
