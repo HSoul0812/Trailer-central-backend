@@ -56,6 +56,18 @@ class ErrorRepository implements ErrorRepositoryInterface
      */
     public function create($params)
     {
+        // Create Error
+        return Error::create($params);
+    }
+
+    /**
+     * Create Facebook Error if it does not exist
+     *
+     * @param array $params
+     * @return Error
+     */
+    public function createOrUpdate($params)
+    {
         $error = $this->findTheSame($params);
         // If an existing Error is found, update it; otherwise, create a new one
         if ($error) {
