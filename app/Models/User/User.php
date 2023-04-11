@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Services\Common\EncrypterServiceInterface;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\User\Interfaces\PermissionsInterface;
+use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -183,7 +184,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
     /**
      * @var int[]
      */
-    const OVERLAY_CODES = [
+    public const OVERLAY_CODES = [
         self::OVERLAY_ENABLED_PRIMARY,
         self::OVERLAY_ENABLED_ALL,
     ];
@@ -681,6 +682,27 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function collector()
     {
         return $this->hasOne(Collector::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get factory feed providers
+     */
+    public function getFactoryFeedsAttribute(): string
+    {
+        return ApiEntityReference::where('entity_id', '=', $this->dealer_id)
+            ->select('api_key')
+            ->groupBy('api_key')
+            ->pluck('api_key')->implode(', ');
+    }
+
+    /**
+     * Get factory feed inventories
+     */
+    public function factoryFeedInventories(): HasMany
+    {
+        return $this->inventories()
+            ->select('inventory.*', 'feed_api_uploads.code')
+            ->join('feed_api_uploads', 'feed_api_uploads.key', '=', 'inventory.vin');
     }
 
     /**

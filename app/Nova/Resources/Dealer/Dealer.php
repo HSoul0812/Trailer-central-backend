@@ -8,14 +8,14 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Stack;
 use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\BooleanGroup;
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Integration\Integration;
 use App\Nova\Actions\Dealer\ChangeStatus;
 use App\Nova\Actions\Dealer\ManageDealer;
-use Laravel\Nova\Http\Requests\ActionRequest;
+use App\Nova\Resources\Inventory\FactoryFeedInventory;
 use Trailercentral\PasswordlessLoginUrl\PasswordlessLoginUrl;
 use App\Nova\Actions\Dealer\Subscriptions\ManageDealerSubscriptions;
 use App\Nova\Actions\Dealer\HiddenIntegrations\ManageHiddenIntegrations;
@@ -118,6 +118,8 @@ class Dealer extends Resource
                        $locations . ' locations';
             })->asHtml()->exceptOnForms(),
 
+            HasMany::make('Factory Feed Inventories', 'factoryFeedInventories', FactoryFeedInventory::class)->onlyOnDetail(),
+
             new Panel('Subscriptions', $this->subscriptions()),
 
             new Panel('Integrations', $this->hiddenIntegrations()),
@@ -129,6 +131,8 @@ class Dealer extends Resource
             })->exceptOnForms(),
 
             BelongsTo::make('Collector', 'collector', 'App\Nova\Resources\Integration\Collector')->exceptOnForms(),
+
+            Text::make('Factory Feeds', 'factoryFeeds')->onlyOnDetail(),
 
             Password::make('Password')
                 ->onlyOnForms()
