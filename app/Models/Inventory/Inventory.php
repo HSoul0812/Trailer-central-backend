@@ -150,7 +150,8 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property bool $show_on_auction123
  * @property bool $show_on_rvt
  *
- * @property string $category_label
+ * @property string|null $category_label
+ * @property int|null $inventory_category_id
  * @property string $status_label
  * @property string $color
  * @property double $interest_paid
@@ -177,6 +178,7 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property Collection<CustomerInventory> $customerInventory
  * @property DealerInventory $lotVantageInventory
  * @property Vendor $floorplanVendor
+ * @property Category $categoryObj
  *
  * @method static Builder select($columns = ['*'])
  * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
@@ -618,15 +620,42 @@ class Inventory extends Model
         return $this->orderedImages()->first();
     }
 
-    public function getCategoryLabelAttribute()
+    /**
+     * @return BelongsTo
+     */
+    public function categoryObj(): BelongsTo
     {
-        $category = Category::where('legacy_category', $this->category)->first();
+        return $this->belongsTo(Category::class,'category', 'legacy_category');
+    }
 
-        if (empty($category)) {
+    /**
+     * @return string|null
+     */
+    public function getCategoryLabelAttribute(): ?string
+    {
+        /** @var Category|null $categoryObj */
+        $categoryObj = $this->categoryObj;
+
+        if (empty($categoryObj)) {
             return null;
         }
 
-        return $category->label;
+        return $categoryObj->label;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getInventoryCategoryIdAttribute(): ?int
+    {
+        /** @var Category|null $categoryObj */
+        $categoryObj = $this->categoryObj;
+
+        if (empty($categoryObj)) {
+            return null;
+        }
+
+        return $categoryObj->inventory_category_id;
     }
 
     public function getColorAttribute()
@@ -926,6 +955,7 @@ class Inventory extends Model
             'inventory_price' => count($potentialsPrices) ? min($potentialsPrices) : 0,
             'entity_type_id' => $this->entity_type_id,
             'inventory_condition' => $this->condition,
+            'inventory_category_id_or_null' => $this->inventory_category_id,
         ];
     }
 
