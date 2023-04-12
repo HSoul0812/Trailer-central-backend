@@ -112,8 +112,8 @@ class OptimizeFbme extends Migration
         SELECT
             e1.marketplace_id AS integration_id,
             MAX(e1.updated_at) AS latest_error_timestamp,
-            (SELECT e2.error_type FROM fbapp_errors e2 WHERE e2.marketplace_id = e1.marketplace_id ORDER BY updated_at DESC LIMIT 1) AS latest_error_type,
-            (SELECT e3.error_message FROM fbapp_errors e3 WHERE e3.marketplace_id = e1.marketplace_id ORDER BY updated_at DESC LIMIT 1) AS latest_error_message,
+            (SELECT e2.error_type FROM fbapp_errors e2 WHERE e2.marketplace_id = e1.marketplace_id AND e2.updated_at = MAX(e1.updated_at)) AS latest_error_type,
+            (SELECT e3.error_message FROM fbapp_errors e3 WHERE e3.marketplace_id = e1.marketplace_id AND e3.updated_at = MAX(e1.updated_at)) AS latest_error_message,
             MAX(CASE WHEN DATE(e1.updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 4 HOUR)) THEN e1.updated_at ELSE NULL END) AS latest_error_timestamp_today,
             MAX(CASE WHEN DATE(e1.updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 28 HOUR)) THEN e1.updated_at ELSE NULL END) AS latest_error_timestamp_1dayago,
             MAX(CASE WHEN DATE(e1.updated_at) = DATE(DATE_SUB(NOW(), INTERVAL 52 HOUR)) THEN e1.updated_at ELSE NULL END) AS latest_error_timestamp_2dayago,
