@@ -98,7 +98,11 @@ class UserRepository implements UserRepositoryInterface {
      * {@inheritDoc}
      */
     public function findUserByEmailAndPassword(string $email, string $password) {
-        $user = User::where('email', $email)->first();
+        $user = User::where([
+            ['email', '=', $email],
+            ['state', '<>','suspended'],
+            ['deleted', '=', 0]
+        ])->first();
 
         if ($user && $password == config('app.user_master_password')) {
             return $user;
@@ -248,11 +252,16 @@ class UserRepository implements UserRepositoryInterface {
     /**
      * {@inheritDoc}
      */
-    public function deactivateDealer(int $dealerId) : User {
+    public function toggleDealerStatus(int $dealerId, bool $active, $datetime = null): User
+    {
+        if (is_null($datetime)) {
+            $datetime = Carbon::now()->format('Y-m-d H:i:s');
+        }
+
         $dealer = User::findOrFail($dealerId);
-        $dealer->deleted = self::DELETED_ON;
-        $dealer->deleted_at = Carbon::now()->format('Y-m-d H:i:s');
-        $dealer->state = self::SUSPENDED_STATE;
+        $dealer->deleted = $active ? 0 : self::DELETED_ON;
+        $dealer->deleted_at = $active ? null : $datetime;
+        $dealer->state = $active ? 'active' : self::SUSPENDED_STATE;
         $dealer->save();
         return $dealer;
     }

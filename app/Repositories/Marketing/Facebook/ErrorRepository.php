@@ -2,17 +2,18 @@
 
 namespace App\Repositories\Marketing\Facebook;
 
-use App\Exceptions\NotImplementedException;
 use App\Exceptions\Marketing\Facebook\NoMarketplaceErrorToDismissException;
+use App\Exceptions\NotImplementedException;
 use App\Models\Marketing\Facebook\Error;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as DbCollection;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
-class ErrorRepository implements ErrorRepositoryInterface {
+class ErrorRepository implements ErrorRepositoryInterface
+{
     use SortTrait;
 
     /**
@@ -49,49 +50,94 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
     /**
      * Create Facebook Error
-     * 
+     *
      * @param array $params
      * @return Error
      */
-    public function create($params) {
+    public function create($params)
+    {
         // Create Error
         return Error::create($params);
     }
 
     /**
+     * Create Facebook Error if it does not exist
+     *
+     * @param array $params
+     * @return Error
+     */
+    public function createOrUpdate($params)
+    {
+        $error = $this->findTheSame($params);
+        // If an existing Error is found, update it; otherwise, create a new one
+        if ($error) {
+            $params['updated_at'] = date('Y-m-d H:i:s');
+            $error->update($params);
+        } else {
+            $error = Error::create($params);
+        }
+
+        return $error;
+    }
+
+    /**
      * Delete Error
-     * 
+     *
      * @param int $id
      * @throws NotImplementedException
      */
-    public function delete($id) {
+    public function delete($id)
+    {
         throw new NotImplementedException;
     }
 
     /**
      * Get Error
-     * 
+     *
      * @param array $params
      * @return Error
      */
-    public function get($params) {
+    public function get($params)
+    {
         // Return Error
         return Error::findOrFail($params['id']);
     }
 
     /**
+     * Find Error for same marketplace_id, inventory in the same day
+     *
+     * @param array $params
+     * @return Error
+     */
+    public function findTheSame($params)
+    {
+        return Error::where('marketplace_id', $params['marketplace_id'])
+            ->where(function ($query) use ($params) {
+                if ($params['inventory_id'] !== null) {
+                    $query->where('inventory_id', $params['inventory_id']);
+                } else {
+                    $query->whereNull('inventory_id');
+                }
+                return $query;
+            })
+            ->whereDate('created_at', date('Y-m-d'))
+            ->first();
+    }
+
+    /**
      * Get All Errors That Match Params
-     * 
+     *
      * @param array $params
      * @return Collection<Error>
      */
-    public function getAll($params) {
+    public function getAll($params)
+    {
         $query = Error::where('marketplace_id', '=', $params['marketplace_id']);
 
         // Get Inventory ID Match
-        if(isset($params['inventory_id'])) {
-            if(empty($params['inventory_id'])) {
-                $query = $query->where(function(Builder $query) {
+        if (isset($params['inventory_id'])) {
+            if (empty($params['inventory_id'])) {
+                $query = $query->where(function (Builder $query) {
                     $query->where('inventory_id', 0)->orWhereNull('inventory_id');
                 });
             } else {
@@ -100,7 +146,7 @@ class ErrorRepository implements ErrorRepositoryInterface {
         }
 
         // Get Dismissed
-        if(!isset($params['dismissed'])) {
+        if (!isset($params['dismissed'])) {
             $params['dismissed'] = 0;
         }
         $query = $query->where('dismissed', $params['dismissed']);
@@ -200,7 +246,7 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
         // Get First
         $collection = new Collection();
-        foreach($errors as $error) {
+        foreach ($errors as $error) {
             $collection->push($this->update([
                 'id' => $error->id,
                 'dismissed' => 1
@@ -213,7 +259,7 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
     /**
      * Dismiss All Active Errors on Marketplace Integration
-     * 
+     *
      * @param int $marketplaceId
      * @return Collection<Error>
      */

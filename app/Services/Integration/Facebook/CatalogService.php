@@ -335,7 +335,9 @@ class CatalogService implements CatalogServiceInterface
                 $feed = $this->sdk->validateFeed($accessToken, $catalogId, $feedId);
                 $feedId = $feed['id'];
             } catch(\Exception $ex) {
-                $this->log->error("Exception returned during validate feed: " . $ex->getMessage());
+                $this->log->error('Exception returned during validate feed on Catalog ID #' .
+                                    $catalogId . ': ' . $ex->getMessage() . PHP_EOL .
+                                    $ex->getTraceAsString());
             }
         }
 
@@ -347,7 +349,9 @@ class CatalogService implements CatalogServiceInterface
                 $feed = $this->sdk->scheduleFeed($accessToken, $catalogId, $feedUrl, $feedName);
                 $feedId = $feed['id'];
             } catch(\Exception $ex) {
-                $this->log->error("Exception returned during schedule feed: " . $ex->getMessage());
+                $this->log->error('Exception returned during schedule feed on Catalog ID #' .
+                                    $catalogId . ': ' . $ex->getMessage() . PHP_EOL .
+                                    $ex->getTraceAsString());
                 $feedId = 0;
             }
         }

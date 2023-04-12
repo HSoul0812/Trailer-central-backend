@@ -20,6 +20,7 @@ use App\Jobs\DealerExports\DealerDataExportJob;
 use App\Models\DealerExport;
 use App\Models\User\User;
 use App\Domains\DealerExports\POS\SalesLedgerOtherExport;
+use App\Domains\DealerExports\BackOffice\FloorplanPaymentsExportAction;
 
 /**
  * Class ExportManagerAction
@@ -47,6 +48,8 @@ class ExportManagerAction
         PurchaseOrdersExportAction::class,
         // BackOffice -> Invoices
         InvoicesExportAction::class,
+        // BackOffice -> Floorplan Payments
+        FloorplanPaymentsExportAction::class,
         // POS -> Sales
         SalesLedgerExport::class,
         // POS -> Other Sales

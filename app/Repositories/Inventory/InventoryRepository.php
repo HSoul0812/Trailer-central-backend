@@ -378,9 +378,10 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param array $params
+     * @param array $queryParams
      * @return bool
      */
-    public function massUpdate(array $params): bool
+    public function massUpdate(array $params, array $queryParams = []): bool
     {
         if (!isset($params['dealer_id'])) {
             throw new RepositoryInvalidArgumentException('dealer_id has been missed. Params - ' . json_encode($params));
@@ -389,7 +390,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         $dealerId = $params['dealer_id'];
         unset($params['dealer_id']);
 
-        Inventory::query()->where('dealer_id', $dealerId)->update($params);
+        $queryParams += ['dealer_id', $dealerId];
+
+        Inventory::query()->where(
+            $queryParams
+        )->update($params);
 
         return true;
     }
@@ -1173,11 +1178,25 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param int $dealerId
-     * @param array $params
+     * @param array $inventoryParams
+     * @param null $deletedAt
      * @return int
+     * @throws \Exception
      */
-    public function archiveInventory(int $dealerId, array $inventoryParams): int {
-        return Inventory::where('dealer_id', $dealerId)->update($inventoryParams);
+    public function massUpdateDealerInventoryOnActiveStateChange(int $dealerId, array $inventoryParams, $deletedAt): int
+    {
+        if ($inventoryParams['active'] && is_null($deletedAt)) {
+            throw new \Exception('Deleted at is required when activating dealer inventories.');
+        }
+
+        $archivedAt = $inventoryParams['active'] ? $deletedAt : null;
+
+        $queryParams = [
+            ['active', !$inventoryParams['active']],
+            ['archived_at', $archivedAt]
+        ];
+
+        return $this->massUpdate($inventoryParams, $queryParams);
     }
 
     /**

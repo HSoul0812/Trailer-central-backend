@@ -22,12 +22,12 @@ use App\Transformers\Marketing\Facebook\StatusTransformer;
 
 class MarketplaceController extends RestfulControllerV2 {
     /**
-     * @var App\Services\Marketing\MarketplaceRepositoryInterface
+     * @var App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface
      */
     private $repository;
 
     /**
-     * @var App\Services\Marketing\MarketplaceServiceInterface
+     * @var App\Services\Marketing\Facebook\MarketplaceServiceInterface
      */
     private $service;
 
