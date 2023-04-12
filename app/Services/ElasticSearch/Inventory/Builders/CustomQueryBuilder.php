@@ -203,13 +203,34 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
      */
     private function buildAvailabilityQuery(string $operator, array $values): array
     {
+        if ($operator == Term::OPERATOR_EQ) {
+            return [
+                'query' => [
+                    'bool' => [
+                        'must' => [
+                            [
+                                'bool' => [
+                                    'should' => [
+                                        [
+                                            'terms' => [
+                                                'availability' => $values
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+        }
         return [
             'query' => [
                 'bool' => [
-                    $operator == Term::OPERATOR_EQ ? 'must' : 'must_not' => [
+                    'must_not' => [
                         [
-                            'term' => [
-                                'availability' => $values[0]
+                            'terms' => [
+                                'availability' => $values
                             ]
                         ]
                     ]
