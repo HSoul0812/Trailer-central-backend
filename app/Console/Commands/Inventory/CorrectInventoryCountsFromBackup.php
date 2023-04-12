@@ -39,8 +39,11 @@ class CorrectInventoryCountsFromBackup extends Command {
         }
         
         foreach($dealers as $dealer) {
-            $inventories = $dealer->inventories()->where('is_archived', 0)->cursor();
-            foreach($inventories as $inventory) {
+            $inventories = $dealer->inventories()
+                    ->where('is_archived', 0)
+                    ->where('created_at', '<', now()->toDateString() . ' 00:00:00')
+                    ->cursor();
+            foreach($inventories as $inventory) {                
                 if (!$this->inventoryExistsInBackup($dealer->dealer_id, $inventory->stock)) {
                     $this->info("Archiving unit {$inventory->stock} for dealer id {$dealer->dealer_id}"); 
                     Inventory::withoutSyncingToSearch(function () use ($inventory) {
