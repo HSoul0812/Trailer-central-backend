@@ -16,8 +16,9 @@ class CorrectInventoryCountsFromBackup extends Command {
      */
     protected $signature = "
         inventory:correct-inventory-counts-from-backup
-        {--dealer_id= : dealer id we wish to apply this to.}
         {backup_db : The backup database hostname.}
+        {before_date : The date to factor out.}
+        {--dealer_id= : dealer id we wish to apply this to.}
     "; 
 
     protected $description = 'Compares inventory counts against the backup_db and archives any inventory present in the current DB but not present in the backup DB';
@@ -41,7 +42,7 @@ class CorrectInventoryCountsFromBackup extends Command {
         foreach($dealers as $dealer) {
             $inventories = $dealer->inventories()
                     ->where('is_archived', 0)
-                    ->where('created_at', '<', now()->toDateString() . ' 00:00:00')
+                    ->where('created_at', '<', $this->argument('before_date') . ' 00:00:00')
                     ->cursor();
             foreach($inventories as $inventory) {                
                 if (!$this->inventoryExistsInBackup($dealer->dealer_id, $inventory->stock)) {
