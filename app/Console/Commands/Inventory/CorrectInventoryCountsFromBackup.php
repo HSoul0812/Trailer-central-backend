@@ -48,8 +48,8 @@ class CorrectInventoryCountsFromBackup extends Command {
                                 ->where('inventory_id', $inventory->inventory_id)
                                 ->update([
                                     'archived_at' => now(),
-                                    'is_archived' => 1,
-                                    'active' => 0
+                                    'is_archived' => Inventory::IS_ARCHIVED,
+                                    'active' => Inventory::IS_NOT_ACTIVE
                                 ]);
                     });
                 }
@@ -67,7 +67,7 @@ class CorrectInventoryCountsFromBackup extends Command {
                     ->table('inventory')
                     ->where('dealer_id', $dealerId)
                     ->where('stock', $stock)
-                    ->where('is_archived', 0)
+                    ->where('is_archived', Inventory::IS_NOT_ARCHIVED)
                     ->exists();
     }
 }
