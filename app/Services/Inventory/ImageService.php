@@ -152,15 +152,20 @@ class ImageService implements ImageServiceInterface
         // update overlay_enabled on all inventories
         if ($isOverlayEnabledChanged) {
             Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($params, $changes) {
-                $this->inventoryRepository->massUpdate([
-                    'dealer_id' => $params['dealer_id'],
-                    'overlay_enabled' => $changes['overlay_enabled']
-                ]);
+                $this->inventoryRepository->massUpdate(
+                    [
+                        'dealer_id' => $params['dealer_id'],
+                        'overlay_enabled' => $changes['overlay_enabled']
+                    ],
+                    [
+                        'overlay_is_locked' => false // to avoid override those inventories which are overlay locked
+                    ]
+                );
             });
         }
 
         // Generate Overlay Inventory Images if necessary
-        if (count($changes) > 0) {
+        if (!empty($changes)) {
             // @todo we should implement some mechanism to avoid to dispatch many times
             //      `GenerateOverlayImageJobByDealer` successively because that job will spawn as many
             //      `GenerateOverlayImageJob` jobs as many inventory units has the dealer

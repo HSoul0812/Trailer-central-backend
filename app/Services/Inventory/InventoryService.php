@@ -691,6 +691,7 @@ class InventoryService implements InventoryServiceInterface
             $image['filename_with_overlay'] = null;
             $image['filename_without_overlay'] = $fileDto->getPath();
             $image['hash'] = $fileDto->getHash();
+
         }
 
         return $images;
