@@ -29,7 +29,7 @@ class CorrectInventoryCountsFromBackup extends Command {
      */
     public function handle()
     {
-        config(['database.connections.backup_mysql.host' => $this->argument('backup_db')]);
+//        config(['database.connections.backup_mysql.host' => $this->argument('backup_db')]);
         
         $onlyDealer = $this->option('dealer_id');
         if ($onlyDealer) {
@@ -39,7 +39,7 @@ class CorrectInventoryCountsFromBackup extends Command {
         }
         
         foreach($dealers as $dealer) {
-            $inventories = $dealer->inventories()->where('is_archived', 0)->get();
+            $inventories = $dealer->inventories()->where('is_archived', 0)->cursor();
             foreach($inventories as $inventory) {
                 if (!$this->inventoryExistsInBackup($dealer->dealer_id, $inventory->stock)) {
                     $this->info("Archiving unit {$inventory->stock} for dealer id {$dealer->dealer_id}"); 
