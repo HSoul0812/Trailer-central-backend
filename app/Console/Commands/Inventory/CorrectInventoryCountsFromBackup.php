@@ -61,13 +61,13 @@ class CorrectInventoryCountsFromBackup extends Command {
         return true;
     }
     
-    private function inventoryExistsInBackup(int $dealerId, string $stock) 
+    private function inventoryExistsInBackup(int $dealerId, string $stock): bool
     {
-        return (bool)DB::connection('backup_mysql')
-                        ->table('inventory')
-                        ->where('dealer_id', $dealerId)
-                        ->where('stock', $stock)
-                        ->where('is_archived', 0)
-                        ->first();
+        return DB::connection('backup_mysql')
+                    ->table('inventory')
+                    ->where('dealer_id', $dealerId)
+                    ->where('stock', $stock)
+                    ->where('is_archived', 0)
+                    ->exists();
     }
 }
