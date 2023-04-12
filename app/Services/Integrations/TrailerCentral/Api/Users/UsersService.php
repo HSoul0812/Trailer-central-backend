@@ -14,6 +14,7 @@ class UsersService implements UsersServiceInterface
 {
     private string $usersUrl;
     private string $userLocationUrl;
+    private string $integrationToken;
 
     public function __construct(
         private GuzzleHttpClient $httpClient,
@@ -22,12 +23,16 @@ class UsersService implements UsersServiceInterface
         $tcApiPath = config('services.trailercentral.api');
         $this->usersUrl = $tcApiPath . 'users';
         $this->userLocationUrl = $tcApiPath . 'user/dealer-location';
+        $this->integrationToken = config('services.trailercentral.integration_access_token');
     }
 
     public function create(array $attributes): TcApiResponseUser
     {
         $responseContent = $this->handleHttpRequest('POST', $this->usersUrl, [
-            'json' => $attributes
+            'json' => $attributes,
+            'headers' => [
+                'access-token' => $this->integrationToken
+            ]
         ]);
         return TcApiResponseUser::fromData($responseContent['data']);
     }
