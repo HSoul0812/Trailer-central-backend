@@ -208,7 +208,7 @@ class InventoryTransformer extends TransformerAbstract
              'show_on_website' => $inventory->show_on_website,
              'tt_payment_expiration_date' => $inventory->tt_payment_expiration_date,
              'overlay_enabled' => $inventory->overlay_enabled,
-            ' overlay_is_locked' => $inventory->overlay_is_locked,
+            'overlay_is_locked' => $inventory->overlay_is_locked,
              'cost_of_ros' => $inventory->cost_of_ros,
              'quote_url' => optional($inventory->user)->getCrmLoginUrl(
                  $this->getNewQuoteRoute($inventory->identifier),
