@@ -29,7 +29,7 @@ class CorrectInventoryCountsFromBackup extends Command {
      */
     public function handle()
     {
-//        config(['database.connections.backup_mysql.host' => $this->argument('backup_db')]);
+        config(['database.connections.backup_mysql.host' => $this->argument('backup_db')]);
         
         $onlyDealer = $this->option('dealer_id');
         if ($onlyDealer) {
