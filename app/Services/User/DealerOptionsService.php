@@ -282,7 +282,10 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             $this->userRepository->toggleDealerStatus($dealerId, $active, $datetime);
             $this->inventoryRepository->massUpdateDealerInventoryOnActiveStateChange($dealerId, $inventoryParams, $deletedAt);
             $this->dealerIntegrationRepository->updateAllDealerIntegrations(['dealer_id' => $dealerId, 'active' => $active]);
-            $this->collectorRepository->update(['id' => $dealer->collector->id, 'active' => $active]);
+
+            if (!is_null($dealer->collector)) {
+                $this->collectorRepository->update(['id' => $dealer->collector->id, 'active' => $active]);
+            }
 
             DB::commit();
             return true;
