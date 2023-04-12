@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace App\Repositories\User\Integration;
 
-use App\Mail\Integration\DealerIntegrationEmail;
-use App\Models\User\Integration\DealerIntegration;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use InvalidArgumentException;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Mail;
+use App\Models\User\Integration\DealerIntegration;
 
 /**
  * Class DealerIntegrationRepository
@@ -33,10 +29,7 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
     }
 
     /**
-     * @param array $params
-     * @return Collection|DealerIntegration[]
-     * @throws ModelNotFoundException when `dealer_id` was provided but there isn't any record with that id
-     * @throws InvalidArgumentException when `dealer_id` was not provided
+     * {@inheritDoc}
      */
     public function getAll(array $params): Collection
     {
@@ -53,11 +46,7 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
     }
 
     /**
-     * @param array $params
-     * @return DealerIntegration
-     * @throws ModelNotFoundException when `integration_dealer_id` was provided but there isn't any record with that id
-     * @throws InvalidArgumentException when `integration_dealer_id` was not provided and some of `integration_id`
-     *                                  `dealer_id` were not provided
+     * {@inheritDoc}
      */
     public function get(array $params): DealerIntegration
     {
@@ -87,15 +76,17 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
     }
 
     /**
-     * @param array $params
-     * @return DealerIntegration
+     * {@inheritDoc}
      */
     public function update(array $params): DealerIntegration
     {
         $dealerIntegration = $this->get($params);
         $dealerIntegration->active = $params['active'];
 
-        $dealerIntegration->settings = base64_decode($params['settings']);
+        if (!empty($params['settings'])) {
+            $dealerIntegration->settings = base64_decode($params['settings']);
+        }
+
         if (!empty($params['location_ids'])) {
             $ids = $params['location_ids'];
             $idString = '';
@@ -118,8 +109,7 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
     }
 
     /**
-     * @param array $params
-     * @return DealerIntegration
+     * {@inheritDoc}
      */
     public function delete(array $params): DealerIntegration
     {
@@ -133,10 +123,23 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
     }
 
     /**
-     * @param $integrationId
-     * @param $dealerId
-     * @param $dealerIntegrationId
-     * @return mixed
+     * {@inheritDoc}
+     */
+    public function updateAllDealerIntegrations(array $params): void
+    {
+        $integrations = $this->getAll($params);
+
+        foreach ($integrations as $integration) {
+            $this->update([
+                'integration_id' => $integration->integration_id,
+                'dealer_id' => $params['dealer_id'],
+                'active' => $params['active']
+            ]);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
      */
     public function retrieveDealerIntegration($integrationId, $dealerId, $dealerIntegrationId = null)
     {
