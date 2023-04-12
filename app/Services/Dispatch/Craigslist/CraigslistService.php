@@ -284,19 +284,22 @@ class CraigslistService implements CraigslistServiceInterface
      */
     public function create(array $params): ClappListing {
         // Log
-        $this->log->info('Creating Craigslist Inventory #' .
-                            $params['craigslist_id'] . ' with the TC' .
-                            ' Inventory #' . $params['inventory_id'] .
-                            ' for the CL Dealer #' . $params['dealer_id']);
+        $logMessage = sprintf(
+            "Creating Craigslist Inventory #%s with the TC Inventory #%s for the CL Dealer #%s",
+            $params['craigslist_id'] ?? 'NO CL id',
+            $params['inventory_id'],
+            $params['dealer_id']
+        );
+        $this->log->info($logMessage);
 
         // Create ClappPost From Queue
         $queue = $this->queues->get(['queue_id' => $params['queue_id']]);
 
         // Fix Missing Values
-        if(empty($params['session_id'])) {
+        if (empty($params['session_id'])) {
             $params['session_id'] = $queue->session_id;
         }
-        if(empty($params['profile_id'])) {
+        if (empty($params['profile_id'])) {
             $params['profile_id'] = $queue->profile_id;
         }
         if(empty($params['inventory_id'])) {
@@ -307,7 +310,7 @@ class CraigslistService implements CraigslistServiceInterface
         $clappPost = ClappPost::fill($queue);
 
         // No Manage URL, but CLID Exists?
-        if(!empty($params['craigslist_id']) && empty($params['manage_url'])) {
+        if (isset($params['craigslist_id']) && !empty($params['craigslist_id']) && empty($params['manage_url'])) {
             $params['manage_url'] = ClappPost::MANAGE_URL . $params['craigslist_id'];
         }
 
