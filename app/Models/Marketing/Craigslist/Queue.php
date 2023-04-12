@@ -13,6 +13,7 @@ use Awobaz\Compoships\Compoships;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\MarkdownHelper;
 
 /**
  * Class Queue
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Queue extends Model
 {
-    use TableAware, CraigslistHelper, Compoships;
+    use TableAware, CraigslistHelper, MarkdownHelper, Compoships;
 
     /**
      * Rental Suffix on Titles
@@ -204,8 +205,16 @@ class Queue extends Model
      * 
      * @return \stdclass
      */
-    public function getParametersAttribute(): \stdclass {
-        return json_decode($this->parameter);
+    public function getParametersAttribute(): \stdclass
+    {
+        // Decode JSON Parameters
+        $json = json_decode($this->parameter);
+
+        // Initialize \stdclass
+        $std = new \stdclass;
+
+        // No Parameters?!
+        return $json ?? $std;
     }
 
     /**
