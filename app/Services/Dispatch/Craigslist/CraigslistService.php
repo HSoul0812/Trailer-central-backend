@@ -571,23 +571,23 @@ class CraigslistService implements CraigslistServiceInterface
         // Create Post From ClappPost
         return $this->posts->createOrUpdate([
             'inventory_id' => $clappPost->queue->inventory_id,
-            'session_id'   => $clappPost->queue->session_id,
-            'queue_id'     => $clappPost->queue->queue_id,
-            'username'     => $clappPost->fromEmail,
-            'response'     => ($params['status'] === 'done' ? 'OK' : ''),
-            'drafted'      => $params['drafted'],
-            'posted'       => $params['added'],
-            'profile_id'   => $clappPost->queue->profile_id,
-            'title'        => $clappPost->postingTitle,
-            'price'        => $clappPost->ask,
-            'area'         => $clappPost->market,
-            'subarea'      => $clappPost->subarea,
-            'category'     => $clappPost->category,
-            'preview'      => $clappPost->preview(),
-            'clid'         => $params['craigslist_id'],
-            'cl_status'    => $params['status'],
-            'manage_url'   => $params['manage_url'],
-            'view_url'     => $params['view_url']
+            'session_id' => $clappPost->queue->session_id,
+            'queue_id' => $clappPost->queue->queue_id,
+            'username' => $clappPost->fromEmail,
+            'response' => ($params['status'] === 'done' ? 'OK' : ''),
+            'drafted' => $params['drafted'],
+            'posted' => $params['added'],
+            'profile_id' => $clappPost->queue->profile_id,
+            'title' => $clappPost->postingTitle,
+            'price' => $clappPost->ask,
+            'area' => $clappPost->market,
+            'subarea' => $clappPost->subarea,
+            'category' => $clappPost->category,
+            'preview' => $clappPost->preview(),
+            'clid' => $params['craigslist_id'],
+            'cl_status' => $params['status'],
+            'manage_url' => $params['manage_url'] ?? '',
+            'view_url' => $params['view_url']
         ]);
     }
 
@@ -602,23 +602,23 @@ class CraigslistService implements CraigslistServiceInterface
         // Create Active Post From ClappPost
         return $this->activePosts->createOrUpdate([
             'inventory_id' => $clappPost->queue->inventory_id,
-            'session_id'   => $clappPost->queue->session_id,
-            'queue_id'     => $clappPost->queue->queue_id,
-            'username'     => $clappPost->fromEmail,
-            'response'     => ($params['status'] === 'done' ? 'OK' : ''),
-            'drafted'      => $params['drafted'],
-            'posted'       => $params['added'],
-            'profile_id'   => $clappPost->queue->profile_id,
-            'title'        => $clappPost->postingTitle,
-            'price'        => $clappPost->ask,
-            'area'         => $clappPost->market,
-            'subarea'      => $clappPost->subarea,
-            'category'     => $clappPost->category,
-            'preview'      => $clappPost->preview(),
-            'clid'         => $params['craigslist_id'],
-            'cl_status'    => $params['status'],
-            'manage_url'   => $params['manage_url'],
-            'view_url'     => $params['view_url']
+            'session_id' => $clappPost->queue->session_id,
+            'queue_id' => $clappPost->queue->queue_id,
+            'username' => $clappPost->fromEmail,
+            'response' => ($params['status'] === 'done' ? 'OK' : ''),
+            'drafted' => $params['drafted'],
+            'posted' => $params['added'],
+            'profile_id' => $clappPost->queue->profile_id,
+            'title' => $clappPost->postingTitle,
+            'price' => $clappPost->ask,
+            'area' => $clappPost->market,
+            'subarea' => $clappPost->subarea,
+            'category' => $clappPost->category,
+            'preview' => $clappPost->preview(),
+            'clid' => $params['craigslist_id'],
+            'cl_status' => $params['status'],
+            'manage_url' => $params['manage_url'] ?? '',
+            'view_url' => $params['view_url']
         ]);
     }
 
