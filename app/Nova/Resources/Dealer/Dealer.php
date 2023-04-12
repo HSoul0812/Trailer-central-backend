@@ -124,6 +124,10 @@ class Dealer extends Resource
 
             Text::make('Status', 'state')->exceptOnForms(),
 
+            Boolean::make('OEM', function () {
+                return boolval(optional($this->website)->is_oem);
+            })->sortable(),
+
             Boolean::make('Active', function () {
                 return !$this->deleted;
             })->exceptOnForms(),
