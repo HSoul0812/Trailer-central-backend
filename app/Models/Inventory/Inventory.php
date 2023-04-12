@@ -93,6 +93,7 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property bool $show_on_website
  * @property \DateTimeInterface|Carbon $tt_payment_expiration_date
  * @property int $overlay_enabled 0 -> disabled, 1 -> only primary image, 2 -> all images
+ * @property boolean $overlay_is_locked by default it is false
  * @property bool $is_special
  * @property bool $is_featured
  * @property double $latitude
@@ -329,6 +330,7 @@ class Inventory extends Model
         'show_on_website',
         'tt_payment_expiration_date',
         'overlay_enabled',
+        'overlay_is_locked',
         'is_special',
         'is_featured',
         'latitude',
@@ -398,6 +400,7 @@ class Inventory extends Model
         'fp_balance' => 'float',
         'qb_sync_processed' => 'boolean',
         'is_floorplan_bill' => 'boolean',
+        'overlay_is_locked' => 'boolean',
         'sold_at' => 'datetime',
         'changed_fields_in_dashboard' => 'array',
         'tt_payment_expiration_date' => 'date'
