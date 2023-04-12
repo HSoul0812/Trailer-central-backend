@@ -390,7 +390,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         $dealerId = $params['dealer_id'];
         unset($params['dealer_id']);
 
-        $queryParams += ['dealer_id', $dealerId];
+        $queryParams[] = ['dealer_id', $dealerId];
 
         Inventory::query()->where(
             $queryParams
