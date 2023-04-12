@@ -19,7 +19,7 @@ class CorrectInventoryCountsFromBackup extends Command {
         {backup_db : The backup database hostname.}
         {before_date : The date to factor out.}
         {--dealer_id= : dealer id we wish to apply this to.}
-    "; 
+    ";
 
     protected $description = 'Compares inventory counts against the backup_db and archives any inventory present in the current DB but not present in the backup DB';
 
@@ -30,23 +30,25 @@ class CorrectInventoryCountsFromBackup extends Command {
      */
     public function handle()
     {
-        config(['database.connections.backup_mysql.host' => $this->argument('backup_db')]);
-        
+        config(['database.connections.backup_mysql.read.host' => $this->argument('backup_db')]);
+
         $onlyDealer = $this->option('dealer_id');
         if ($onlyDealer) {
             $dealers = User::where('dealer_id', $onlyDealer)->get();
         } else {
             $dealers = User::all();
         }
-        
+
         foreach($dealers as $dealer) {
+            /** @var Inventory[] $inventories */
             $inventories = $dealer->inventories()
-                    ->where('is_archived', 0)
+                    ->where('is_archived', Inventory::IS_NOT_ARCHIVED)
                     ->where('created_at', '<', $this->argument('before_date') . ' 00:00:00')
                     ->cursor();
-            foreach($inventories as $inventory) {                
-                if (!$this->inventoryExistsInBackup($dealer->dealer_id, $inventory->stock)) {
-                    $this->info("Archiving unit {$inventory->stock} for dealer id {$dealer->dealer_id}"); 
+
+            foreach($inventories as $inventory) {
+                if (!$this->inventoryExistsInBackup($dealer->dealer_id, $inventory->inventory_id)) {
+                    $this->info("Archiving unit {$inventory->stock} for dealer id {$dealer->dealer_id}");
                     Inventory::withoutSyncingToSearch(function () use ($inventory) {
                         Inventory::query()
                                 ->where('inventory_id', $inventory->inventory_id)
@@ -57,20 +59,18 @@ class CorrectInventoryCountsFromBackup extends Command {
                                 ]);
                     });
                 }
-            } 
-            
+            }
         }
-       
 
         return true;
     }
-    
-    private function inventoryExistsInBackup(int $dealerId, string $stock): bool
+
+    private function inventoryExistsInBackup(int $dealerId, int $inventoryId): bool
     {
         return DB::connection('backup_mysql')
                     ->table('inventory')
                     ->where('dealer_id', $dealerId)
-                    ->where('stock', $stock)
+                    ->where('inventory_id', $inventoryId)
                     ->where('is_archived', Inventory::IS_NOT_ARCHIVED)
                     ->exists();
     }
