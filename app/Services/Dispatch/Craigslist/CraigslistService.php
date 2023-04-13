@@ -284,19 +284,22 @@ class CraigslistService implements CraigslistServiceInterface
      */
     public function create(array $params): ClappListing {
         // Log
-        $this->log->info('Creating Craigslist Inventory #' .
-                            $params['craigslist_id'] . ' with the TC' .
-                            ' Inventory #' . $params['inventory_id'] .
-                            ' for the CL Dealer #' . $params['dealer_id']);
+        $logMessage = sprintf(
+            "Creating Craigslist Inventory #%s with the TC Inventory #%s for the CL Dealer #%s",
+            $params['craigslist_id'] ?? 'NO CL id',
+            $params['inventory_id'],
+            $params['dealer_id']
+        );
+        $this->log->info($logMessage);
 
         // Create ClappPost From Queue
         $queue = $this->queues->get(['queue_id' => $params['queue_id']]);
 
         // Fix Missing Values
-        if(empty($params['session_id'])) {
+        if (empty($params['session_id'])) {
             $params['session_id'] = $queue->session_id;
         }
-        if(empty($params['profile_id'])) {
+        if (empty($params['profile_id'])) {
             $params['profile_id'] = $queue->profile_id;
         }
         if(empty($params['inventory_id'])) {
@@ -307,7 +310,7 @@ class CraigslistService implements CraigslistServiceInterface
         $clappPost = ClappPost::fill($queue);
 
         // No Manage URL, but CLID Exists?
-        if(!empty($params['craigslist_id']) && empty($params['manage_url'])) {
+        if (isset($params['craigslist_id']) && !empty($params['craigslist_id']) && empty($params['manage_url'])) {
             $params['manage_url'] = ClappPost::MANAGE_URL . $params['craigslist_id'];
         }
 
@@ -568,23 +571,23 @@ class CraigslistService implements CraigslistServiceInterface
         // Create Post From ClappPost
         return $this->posts->createOrUpdate([
             'inventory_id' => $clappPost->queue->inventory_id,
-            'session_id'   => $clappPost->queue->session_id,
-            'queue_id'     => $clappPost->queue->queue_id,
-            'username'     => $clappPost->fromEmail,
-            'response'     => ($params['status'] === 'done' ? 'OK' : ''),
-            'drafted'      => $params['drafted'],
-            'posted'       => $params['added'],
-            'profile_id'   => $clappPost->queue->profile_id,
-            'title'        => $clappPost->postingTitle,
-            'price'        => $clappPost->ask,
-            'area'         => $clappPost->market,
-            'subarea'      => $clappPost->subarea,
-            'category'     => $clappPost->category,
-            'preview'      => $clappPost->preview(),
-            'clid'         => $params['craigslist_id'],
-            'cl_status'    => $params['status'],
-            'manage_url'   => $params['manage_url'],
-            'view_url'     => $params['view_url']
+            'session_id' => $clappPost->queue->session_id,
+            'queue_id' => $clappPost->queue->queue_id,
+            'username' => $clappPost->fromEmail,
+            'response' => ($params['status'] === 'done' ? 'OK' : ''),
+            'drafted' => $params['drafted'],
+            'posted' => $params['added'],
+            'profile_id' => $clappPost->queue->profile_id,
+            'title' => $clappPost->postingTitle,
+            'price' => $clappPost->ask,
+            'area' => $clappPost->market,
+            'subarea' => $clappPost->subarea,
+            'category' => $clappPost->category,
+            'preview' => $clappPost->preview(),
+            'clid' => $params['craigslist_id'],
+            'cl_status' => $params['status'],
+            'manage_url' => $params['manage_url'] ?? '',
+            'view_url' => $params['view_url']
         ]);
     }
 
@@ -599,23 +602,23 @@ class CraigslistService implements CraigslistServiceInterface
         // Create Active Post From ClappPost
         return $this->activePosts->createOrUpdate([
             'inventory_id' => $clappPost->queue->inventory_id,
-            'session_id'   => $clappPost->queue->session_id,
-            'queue_id'     => $clappPost->queue->queue_id,
-            'username'     => $clappPost->fromEmail,
-            'response'     => ($params['status'] === 'done' ? 'OK' : ''),
-            'drafted'      => $params['drafted'],
-            'posted'       => $params['added'],
-            'profile_id'   => $clappPost->queue->profile_id,
-            'title'        => $clappPost->postingTitle,
-            'price'        => $clappPost->ask,
-            'area'         => $clappPost->market,
-            'subarea'      => $clappPost->subarea,
-            'category'     => $clappPost->category,
-            'preview'      => $clappPost->preview(),
-            'clid'         => $params['craigslist_id'],
-            'cl_status'    => $params['status'],
-            'manage_url'   => $params['manage_url'],
-            'view_url'     => $params['view_url']
+            'session_id' => $clappPost->queue->session_id,
+            'queue_id' => $clappPost->queue->queue_id,
+            'username' => $clappPost->fromEmail,
+            'response' => ($params['status'] === 'done' ? 'OK' : ''),
+            'drafted' => $params['drafted'],
+            'posted' => $params['added'],
+            'profile_id' => $clappPost->queue->profile_id,
+            'title' => $clappPost->postingTitle,
+            'price' => $clappPost->ask,
+            'area' => $clappPost->market,
+            'subarea' => $clappPost->subarea,
+            'category' => $clappPost->category,
+            'preview' => $clappPost->preview(),
+            'clid' => $params['craigslist_id'],
+            'cl_status' => $params['status'],
+            'manage_url' => $params['manage_url'] ?? '',
+            'view_url' => $params['view_url']
         ]);
     }
 
