@@ -127,6 +127,10 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
      */
     public function updateAllDealerIntegrations(array $params): void
     {
+        if (empty($params['dealer_id'])) {
+            throw new InvalidArgumentException(sprintf("[%s] 'dealer_id' argument is required", __CLASS__));
+        }
+
         $integrations = $this->getAll($params);
 
         foreach ($integrations as $integration) {
