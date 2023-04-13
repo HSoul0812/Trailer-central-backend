@@ -90,7 +90,7 @@ class FBMarketplaceAccounts extends Resource
             Text::make('Dealer', 'dealer')
                 ->sortable(),
 
-            Text::make('Facebook Username')
+            Text::make('Facebook Username', 'fb_username')
                 ->sortable(),
 
 
@@ -103,13 +103,7 @@ class FBMarketplaceAccounts extends Resource
     protected function panelStatus(): array
     {
         return [
-            Text::make('Last Attempt', function () {
-                if (stripos($this->last_attempt_ts, '1000') !== false) {
-                    return "never";
-                } else {
-                    return date('M-d H:i', strtotime($this->last_attempt_ts));
-                }
-            })->sortable(),
+            DateTime::make('Last Attempt', 'last_attempt_ts')->sortable(),
 
             Number::make('Remaining', 'last_attempt_posts_remaining')
                 ->sortable(),
