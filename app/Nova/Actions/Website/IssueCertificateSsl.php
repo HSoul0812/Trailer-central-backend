@@ -15,7 +15,7 @@ class IssueCertificateSsl extends Action
 {
     use InteractsWithQueue, Queueable;
 
-    public $showOnTableRow = true;
+    public $showOnTableRow = false;
 
     public $confirmButtonText = 'Issue Certificate';
 
