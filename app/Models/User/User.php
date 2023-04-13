@@ -39,6 +39,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property int $dealer_id
  * @property string $name
  * @property string $email
+ * @property string $password
+ * @property string $salt
  *
  * @property bool $clsf_active;
  * @property bool $isCrmActive

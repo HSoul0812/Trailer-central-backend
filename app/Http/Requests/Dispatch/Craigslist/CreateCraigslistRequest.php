@@ -21,8 +21,8 @@ class CreateCraigslistRequest extends Request {
         'status' => 'required|string',
         'state' => 'nullable|string',
         'text_status' => 'nullable|string',
-        'craigslist_id' => 'nullable|string',
-        'view_url' => 'nullable|string',
+        'craigslist_id' => 'required_unless:status,error|string',
+        'view_url' => 'required_unless:status,error|string',
         'manage_url' => 'nullable|string',
         'ip_addr' => 'nullable|string',
         'user_agent' => 'nullable|string'

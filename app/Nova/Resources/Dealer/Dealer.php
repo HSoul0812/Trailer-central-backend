@@ -118,6 +118,14 @@ class Dealer extends Resource
                        $locations . ' locations';
             })->asHtml()->exceptOnForms(),
 
+            new Panel('Collector', [
+                Boolean::make('Active', function () {
+                    return $this->collector ? $this->collector->active : false;
+                })->onlyOnDetail(),
+
+                BelongsTo::make('Process Name', 'collector', 'App\Nova\Resources\Integration\Collector')->exceptOnForms(),
+            ]),
+
             HasMany::make('Factory Feed Inventories', 'factoryFeedInventories', FactoryFeedInventory::class)->onlyOnDetail(),
 
             new Panel('Subscriptions', $this->subscriptions()),
@@ -126,11 +134,15 @@ class Dealer extends Resource
 
             Text::make('Status', 'state')->exceptOnForms(),
 
+            Boolean::make('OEM', function () {
+                return boolval(optional($this->website)->is_oem);
+            })->sortable(),
+
             Boolean::make('Active', function () {
                 return !$this->deleted;
             })->exceptOnForms(),
 
-            BelongsTo::make('Collector', 'collector', 'App\Nova\Resources\Integration\Collector')->exceptOnForms(),
+            BelongsTo::make('Collector', 'collector', 'App\Nova\Resources\Integration\Collector')->onlyOnIndex(),
 
             Text::make('Factory Feeds', 'factoryFeeds')->onlyOnDetail(),
 
@@ -247,7 +259,7 @@ class Dealer extends Resource
             app()->make(ManageDealerSubscriptions::class),
             app()->make(ManageHiddenIntegrations::class),
 
-            app()->make(ManageDealer::class),
+            // app()->make(ManageDealer::class),
             app()->make(ChangeStatus::class),
         ];
     }
