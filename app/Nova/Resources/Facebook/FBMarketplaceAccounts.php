@@ -5,6 +5,8 @@ namespace App\Nova\Resources\Facebook;
 use App\Nova\Actions\Dealer\ClearFBMEErrors;
 use App\Nova\Actions\FME\DownloadIntegrationRunHistory;
 use App\Nova\Actions\FME\DownloadRunHistory;
+use App\Nova\Filters\Marketing\FmiLastRunErrorCode;
+use App\Nova\Filters\Marketing\FmiLastRunStatus;
 use App\Nova\Lenses\Marketing\FmeFailedToday;
 use App\Nova\Lenses\Marketing\FmePartialToday;
 use App\Nova\Metrics\Marketing\FmeDealersAttempted;
@@ -177,7 +179,10 @@ class FBMarketplaceAccounts extends Resource
      */
     public function filters(Request $request): array
     {
-        return [];
+        return [
+            new FmiLastRunStatus(),
+            new FmiLastRunErrorCode()
+        ];
     }
 
     /**
