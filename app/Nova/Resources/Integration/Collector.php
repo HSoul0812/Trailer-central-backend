@@ -262,7 +262,7 @@ class Collector extends Resource
                 ])->dependsOn('use_factory_mapping', true),
 
                 Number::make('Filter since a certain year', 'factory_mapping_filter_year_from')->hideFromIndex()->help(
-                    'If the unit have Year present, this optiol will filter incoming units <strong>from specific year</strong><br>' .
+                    'If the unit have Year present, this option will filter incoming units <strong>from specific year</strong><br>' .
                     'If FV is enabled and next option is null or not enabled all the old units be processed in regular way'
                 )->min(date('Y', strtotime('-20 year')))->max(date('Y', strtotime('+2 year')))->step(1)->rules('numeric')->withMeta(['extraAttributes' => [
                     'placeholder' => date('Y', strtotime('-2 year'))]
