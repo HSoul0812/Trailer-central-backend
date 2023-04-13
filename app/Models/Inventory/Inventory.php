@@ -223,6 +223,9 @@ class Inventory extends Model
     const IS_ARCHIVED = 1;
     const IS_NOT_ARCHIVED = 0;
 
+    const IS_ACTIVE = 1;
+    const IS_NOT_ACTIVE = 0;
+    
     const SHOW_IN_WEBSITE = 1;
 
     const ATTRIBUTE_ZERO_VALUE = 0;
