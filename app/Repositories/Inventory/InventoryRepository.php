@@ -388,16 +388,14 @@ class InventoryRepository implements InventoryRepositoryInterface
             throw new RepositoryInvalidArgumentException('dealer_id has been missed. Params - ' . json_encode($params));
         }
 
-        $dealerId = $params['dealer_id'];
+        $inventories = Inventory::where('dealer_id', '=', $params['dealer_id']);
+
+        if (!empty($queryParams)) {
+            $inventories->where($queryParams);
+        }
+
         unset($params['dealer_id']);
-
-        array_unshift($queryParams, ['dealer_id', $dealerId]);
-
-        Inventory::query()->where(
-            $queryParams
-        )->update($params);
-
-        return true;
+        return $inventories->update($params);
     }
 
     /**
