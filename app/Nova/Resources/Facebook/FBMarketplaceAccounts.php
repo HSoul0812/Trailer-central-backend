@@ -14,6 +14,7 @@ use App\Nova\Metrics\Marketing\FmeIntegrations;
 use App\Nova\Metrics\Marketing\FmeListings;
 use App\Nova\Metrics\Marketing\FmePostingResults;
 use App\Nova\Metrics\Marketing\FmePostsPerDay;
+use App\Nova\Metrics\Marketing\FmeTodayStatus;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Number;
@@ -166,9 +167,11 @@ class FBMarketplaceAccounts extends Resource
             new FmeListings,
             new FmeDealersAttempted,
             new FmeIntegrations,
+            new FmeTodayStatus,
             new FmePostingResults,
             new FmePostsPerDay,
-            new FmeErrorTypes
+            new FmeErrorTypes,
+
         ];
     }
 
