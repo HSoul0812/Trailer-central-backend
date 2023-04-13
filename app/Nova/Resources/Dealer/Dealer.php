@@ -247,7 +247,7 @@ class Dealer extends Resource
             app()->make(ManageDealerSubscriptions::class),
             app()->make(ManageHiddenIntegrations::class),
 
-            app()->make(ManageDealer::class),
+            // app()->make(ManageDealer::class),
             app()->make(ChangeStatus::class),
         ];
     }

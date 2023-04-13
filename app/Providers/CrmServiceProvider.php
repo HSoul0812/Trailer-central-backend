@@ -71,6 +71,8 @@ use App\Services\CRM\Documents\DealerDocumentsService;
 use Illuminate\Support\ServiceProvider;
 use App\Services\CRM\Leads\LeadTradeService;
 use App\Services\CRM\Leads\LeadTradeServiceInterface;
+use App\Services\CRM\User\SettingsService;
+use App\Services\CRM\User\SettingsServiceInterface;
 
 class CrmServiceProvider extends ServiceProvider
 {
@@ -96,6 +98,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(BlastServiceInterface::class, BlastService::class);
         $this->app->bind(DealerDocumentsServiceInterface::class, DealerDocumentsService::class);
         $this->app->bind(LeadTradeServiceInterface::class, LeadTradeService::class);
+        $this->app->bind(SettingsServiceInterface::class, SettingsService::class);
 
         // Repositories
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
@@ -141,6 +144,8 @@ class CrmServiceProvider extends ServiceProvider
         \Validator::extend('unique_text_campaign_name', 'App\Rules\CRM\Text\UniqueTextCampaignName@passes');
         \Validator::extend('unique_email_campaign_name', 'App\Rules\CRM\Email\UniqueEmailCampaignName@passes');
         \Validator::extend('unique_email_blast_name', 'App\Rules\CRM\Email\UniqueEmailBlastName@passes');
+        \Validator::extend('valid_timezone', 'App\Rules\CRM\User\ValidTimezone@passes');
+        \Validator::extend('valid_sort_orders_crm', 'App\Rules\CRM\Leads\ValidSortOrderCrm@passes');
 
         LeadStatus::observe(LeadStatusObserver::class);
         Lead::observe(LeadObserver::class);
