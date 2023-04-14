@@ -100,8 +100,10 @@ class CatalogRepository implements CatalogRepositoryInterface {
      * @return Collection of Catalogs
      */
     public function getAll($params) {
-        $query = Catalog::where('dealer_id', '=', $params['dealer_id']);
-        
+        $query = Catalog::where('dealer_id', '=', $params['dealer_id'])
+            ->whereHas('accessToken')
+            ->whereHas('page');
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
         }

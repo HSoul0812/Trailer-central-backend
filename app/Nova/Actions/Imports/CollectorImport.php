@@ -20,7 +20,7 @@ class CollectorImport implements ToModel, WithStartRow
      */
     public function model(array $row): Collector
     {
-        return new Collector([
+        $data = [
             'id' => $row[0],
             'process_name' => $row[1],
             'dealer_id' => $row[2],
@@ -41,7 +41,7 @@ class CollectorImport implements ToModel, WithStartRow
             'import_prices' => $row[17],
             'import_description' => $row[18],
             'images_delimiter' => $row[19],
-            'overridable_fields' => json_encode(json_decode($row[20], true)),
+            'overridable_fields' => json_decode($row[20], true),
             'path_to_fields_to_description' => $row[21],
             'fields_to_description' => $row[22],
             'use_secondary_image' => $row[23] ?? 0,
@@ -94,9 +94,22 @@ class CollectorImport implements ToModel, WithStartRow
             'override_prices' => $row[70] ?? 0,
             'override_attributes' => $row[71] ?? 0,
             'override_descriptions' => $row[72] ?? 0,
-            'created_at' => $row[73],
-            'updated_at' => $row[74],
-        ]);
+            'third_party_provider' => $row[73],
+            'use_partial_update' => $row[74] ?? 0,
+            'last_full_run' => $row[75] ?? 0,
+            'days_till_full_run' => $row[76] ?? 0,
+            'not_save_unmapped_on_factory_units' => $row[77] ?? 0,
+            'conditional_title_format' => $row[78] ?? 0,
+            'use_brands_for_factory_mapping' => $row[79] ?? 0,
+            'check_images_for_bdv_matching' => $row[80] ?? 0,
+            'mark_sold_manually_added_items' => $row[81] ?? 0,
+            'factory_mapping_filter_year_from' => $row[82] ?? 0,
+            'factory_mapping_filter_skip_units' => $row[83] ?? 0,
+            'created_at' => $row[84],
+            'updated_at' => $row[85],
+        ];
+
+        return new Collector($data);
     }
 
     /**

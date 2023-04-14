@@ -120,7 +120,10 @@ class Inventory extends PjAdapter
             $inventoryParams['new_images'][] = ['url' => $image];
         }
 
-        $inventoryParams = $this->showroomService->mapInventoryToFactory($inventoryParams);
+        // Additional search by stock_id including all digits after -
+        $additionalSearchParams = ['model' => preg_replace('/(\w+-)(\d+)\S+/i', '$1$2', $inventoryParams['stock'])];
+
+        $inventoryParams = $this->showroomService->mapInventoryToFactory($inventoryParams, $additionalSearchParams);
 
         $inventory = $this->inventoryService->create($inventoryParams);
 

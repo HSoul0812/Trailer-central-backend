@@ -21,7 +21,7 @@ class ShowroomGenericMapRepository extends RepositoryAbstract implements Showroo
     public function getAll($params): Collection
     {
         if (!isset($params['external_mfg_key'])) {
-            throw new RepositoryInvalidArgumentException('external_mfg_key is absent', $params);
+            throw new RepositoryInvalidArgumentException('external_mfg_key is absent');
         }
 
         $query = ShowroomGenericMap::query();

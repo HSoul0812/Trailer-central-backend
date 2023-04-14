@@ -3,6 +3,7 @@
 namespace Tests\database\seeds\Inventory;
 
 use App\Models\Inventory\Category;
+use App\Models\Inventory\EntityType;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryMfg;
 use App\Models\Inventory\Manufacturers\Brand;
@@ -99,6 +100,11 @@ class InventorySeeder extends Seeder
     private $withWebsite;
 
     /**
+     * @var boolean
+     */
+    private $withEntityType;
+
+    /**
      * @var Website
      */
     private $website;
@@ -109,16 +115,40 @@ class InventorySeeder extends Seeder
     private $inventory;
 
     /**
+     * @var array
+     */
+    private $inventoryParams;
+
+    /**
      * @var DealerLocationMileageFee|null
      */
     private $dealerLocationMileageFee;
+
+    /**
+     * @var EntityType
+     */
+    private $entityType;
+
+    /**
+     * @var array
+     */
+    private $entityTypeParams;
+
+    /**
+     * @var array
+     */
+    private $categoryParams;
 
     public function __construct(array $params = [])
     {
         $this->userType = $params['userType'] ?? AuthToken::USER_TYPE_DEALER;
         $this->permissions = $params['permissions'] ?? [];
         $this->withInventory = $params['withInventory'] ?? false;
+        $this->inventoryParams = $params['inventoryParams'] ?? [];
         $this->withWebsite = $params['withWebsite'] ?? false;
+        $this->withEntityType = $params['withEntityType'] ?? true;
+        $this->entityTypeParams = $params['entityTypeParams'] ?? [];
+        $this->categoryParams = $params['categoryParams'] ?? [];
     }
 
     public function seed(): void
@@ -157,7 +187,13 @@ class InventorySeeder extends Seeder
 
         $this->inventoryMfg = factory(InventoryMfg::class)->create();
         $this->brand = factory(Brand::class)->create();
-        $this->category = factory(Category::class)->create();
+
+        if ($this->withEntityType) {
+            $this->entityType = factory(EntityType::class)->create($this->entityTypeParams);
+            $this->categoryParams = array_merge($this->categoryParams, ['entity_type_id' => $this->entityType->getKey()]);
+        }
+
+        $this->category = factory(Category::class)->create($this->categoryParams);
         $this->dealerLocationMileageFee = factory(DealerLocationMileageFee::class)->create([
             'dealer_location_id' => $this->dealerLocation->getKey(),
             'inventory_category_id' => $this->category->getKey(),
@@ -177,7 +213,7 @@ class InventorySeeder extends Seeder
             ];
 
             $this->inventory = Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($inventoryParams){
-                return factory(Inventory::class)->create($inventoryParams);
+                return factory(Inventory::class)->create(array_merge($inventoryParams, $this->inventoryParams));
             });
         }
 
@@ -195,6 +231,11 @@ class InventorySeeder extends Seeder
         DealerLocationMileageFee::destroy(['id' => $this->dealerLocationMileageFee->getKey()]);
         Category::destroy($this->category->inventory_category_id);
         Inventory::where(['dealer_id' => $this->dealer->dealer_id])->delete();
+
+        if ($this->withEntityType) {
+            EntityType::destroy($this->entityType->getKey());
+        }
+
         DealerLocation::where(['dealer_id' => $this->dealer->dealer_id])->delete();
         AuthToken::where(['user_id' => $this->authToken->user_id, 'user_type' => $this->userType])->delete();
 
