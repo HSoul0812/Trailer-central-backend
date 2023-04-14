@@ -390,11 +390,13 @@ class InventoryRepository implements InventoryRepositoryInterface
         $dealerId = $params['dealer_id'];
         unset($params['dealer_id']); // to avoid update it
 
-        $queryParams = ['dealer_id' => $dealerId] + $queryParams;
-
-        Inventory::query()->where(
-            $queryParams
-        )->update($params);
+        Inventory::query()
+            ->where('dealer_id', $dealerId)
+            ->when(!empty($queryParams), function ($builder) use ($queryParams): void {
+                /** @var GrimzyBuilder|EloquentBuilder $builder */
+                $builder->where($queryParams);
+            })
+            ->update($params);
 
         return true;
     }
