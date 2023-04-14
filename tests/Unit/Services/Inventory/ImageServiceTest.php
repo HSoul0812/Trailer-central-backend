@@ -298,10 +298,15 @@ class ImageServiceTest extends TestCase
         $userMock->dealer_id = self::DEALER_ID;
 
         $this->inventoryRepositoryMock->expects('massUpdate')
-            ->with([
-                'dealer_id' => $overlayParams['dealer_id'],
-                'overlay_enabled' => $overlayParams['overlay_enabled']
-            ]);
+            ->with(
+                [
+                    'dealer_id' => $overlayParams['dealer_id'],
+                    'overlay_enabled' => $overlayParams['overlay_enabled']
+                ],
+                [
+                    'overlay_is_locked' => Inventory::IS_NOT_OVERLAY_LOCKED
+                ]
+            );
 
         $this->userRepositoryMock->expects('updateOverlaySettings')
             ->with(self::DEALER_ID, $overlayParams)
@@ -370,10 +375,15 @@ class ImageServiceTest extends TestCase
         $dealer->dealer_id = self::DEALER_ID;
 
         $this->inventoryRepositoryMock->expects('massUpdate')
-            ->with([
-                'dealer_id' => $overlayParams['dealer_id'],
-                'overlay_enabled' => $overlayParams['overlay_enabled']
-            ]);
+            ->with(
+                [
+                    'dealer_id' => $overlayParams['dealer_id'],
+                    'overlay_enabled' => $overlayParams['overlay_enabled']
+                ],
+                [
+                    'overlay_is_locked' => Inventory::IS_NOT_OVERLAY_LOCKED
+                ]
+            );
 
         $this->userRepositoryMock->expects('updateOverlaySettings')
             ->with(self::DEALER_ID, $overlayParams)

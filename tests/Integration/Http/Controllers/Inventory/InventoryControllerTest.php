@@ -37,6 +37,9 @@ use App\Models\Inventory\Image;
  * @package Tests\Integration\Http\Controllers\Inventory
  *
  * @coversDefaultClass \App\Http\Controllers\v1\Inventory\InventoryController
+ *
+ * @group DW
+ * @group DW_INVENTORY
  */
 class InventoryControllerTest extends TestCase
 {
@@ -123,8 +126,6 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      * @group DW_ELASTICSEARCH
      *
      * @dataProvider inventoryDataProvider
@@ -192,8 +193,6 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      * @group DW_ELASTICSEARCH
      *
      * @dataProvider inventoryDataProvider
@@ -249,8 +248,6 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      *
      * @dataProvider wrongInventoryDataProvider
      */
@@ -295,8 +292,6 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      * @group DW_ELASTICSEARCH
      *
      * @dataProvider inventoryDataProvider
@@ -356,8 +351,7 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
+
      */
     public function testCreateWithWrongAccessToken()
     {
@@ -373,8 +367,6 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      */
     public function testCreateWithoutAccessToken()
     {
@@ -390,8 +382,6 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      */
     public function testExists()
     {
@@ -426,8 +416,6 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      */
     public function testExistsFalse()
     {
@@ -463,8 +451,6 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      *
      * @dataProvider inventoryDataProvider
      *
@@ -520,8 +506,6 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      *
      * @dataProvider inventoryDataProvider
      *
@@ -564,8 +548,6 @@ class InventoryControllerTest extends TestCase
     /**
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      *
      * @return void
      */
@@ -587,8 +569,6 @@ class InventoryControllerTest extends TestCase
     /**
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      *
      * @return void
      */
@@ -1202,8 +1182,6 @@ HTML,
     /**
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      *
      * @return void
      */
@@ -1232,8 +1210,6 @@ HTML,
     /**
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      *
      * @return void
      */
@@ -1307,8 +1283,6 @@ HTML,
     /**
      * @group DMS
      * @group DMS_INVENTORY
-     * @group DW
-     * @group DW_INVENTORY
      *
      * @return void
      */
@@ -1344,8 +1318,6 @@ HTML,
      *
      * @group Marketing
      * @group Marketing_Overlays
-     * @group DW
-     * @group DW_INVENTORY
      * @group DW_ELASTICSEARCH
      */
     public function testCreateWithImages()
@@ -1397,8 +1369,6 @@ HTML,
      *
      * @group Marketing
      * @group Marketing_Overlays
-     * @group DW
-     * @group DW_INVENTORY
      * @group DW_ELASTICSEARCH
      */
     public function testCreateWithNoImage()
@@ -1434,8 +1404,6 @@ HTML,
      * @covers ::update
      * @group Marketing
      * @group Marketing_Overlays
-     * @group DW
-     * @group DW_INVENTORY
      * @group DW_ELASTICSEARCH
      */
     public function testUpdateWithNewImages()
@@ -1481,8 +1449,6 @@ HTML,
      * @covers ::update
      * @group Marketing
      * @group Marketing_Overlays
-     * @group DW
-     * @group DW_INVENTORY
      * @group DW_ELASTICSEARCH
      */
     public function testUpdateWithExistingImages()
@@ -1530,8 +1496,6 @@ HTML,
      * @covers ::update
      * @group Marketing
      * @group Marketing_Overlays
-     * @group DW
-     * @group DW_INVENTORY
      * @group DW_ELASTICSEARCH
      */
     public function testUpdateWithNoImage()
@@ -1561,8 +1525,6 @@ HTML,
      * @covers ::update
      * @group Marketing
      * @group Marketing_Overlays
-     * @group DW
-     * @group DW_INVENTORY
      * @group DW_ELASTICSEARCH
      */
     public function testUpdateWithBothImages()
