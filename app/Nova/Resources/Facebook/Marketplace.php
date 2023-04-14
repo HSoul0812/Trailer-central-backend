@@ -3,7 +3,6 @@
 namespace App\Nova\Resources\Facebook;
 
 use App\Nova\Resource;
-use App\Nova\Resources\Dealer\Dealer;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Number;
@@ -26,7 +25,7 @@ class Marketplace extends Resource
 
     public static function label(): string
     {
-        return 'Facebook Management';
+        return 'Facebook Integrations';
     }
 
     /**
