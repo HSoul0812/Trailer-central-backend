@@ -111,7 +111,8 @@ class FBMarketplaceAccounts extends Resource
                 ->sortable(),
 
             Text::make('Last Run', function () {
-                if ($this->last_attempt_posts_remaining === 0) {
+
+                if (empty($this->last_attempt_posts_remaining)) {
                     return "complete";
                 } elseif ($this->last_attempt_posts_remaining == $this->posts_per_day) {
                     return "fail";
