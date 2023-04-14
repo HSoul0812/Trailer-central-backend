@@ -15,7 +15,7 @@ class EnableProxiedDomainsSsl extends Action
 {
     use InteractsWithQueue, Queueable;
 
-    public $showOnTableRow = true;
+    public $showOnTableRow = false;
 
     public $confirmButtonText = 'Enable Proxied Domains';
 

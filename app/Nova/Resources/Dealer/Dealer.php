@@ -118,6 +118,14 @@ class Dealer extends Resource
                        $locations . ' locations';
             })->asHtml()->exceptOnForms(),
 
+            new Panel('Collector', [
+                Boolean::make('Active', function () {
+                    return $this->collector ? $this->collector->active : false;
+                })->onlyOnDetail(),
+
+                BelongsTo::make('Process Name', 'collector', 'App\Nova\Resources\Integration\Collector')->exceptOnForms(),
+            ]),
+
             new Panel('Subscriptions', $this->subscriptions()),
 
             new Panel('Integrations', $this->hiddenIntegrations()),
@@ -132,7 +140,7 @@ class Dealer extends Resource
                 return !$this->deleted;
             })->exceptOnForms(),
 
-            BelongsTo::make('Collector', 'collector', 'App\Nova\Resources\Integration\Collector')->exceptOnForms(),
+            BelongsTo::make('Collector', 'collector', 'App\Nova\Resources\Integration\Collector')->onlyOnIndex(),
 
             Password::make('Password')
                 ->onlyOnForms()
@@ -247,7 +255,7 @@ class Dealer extends Resource
             app()->make(ManageDealerSubscriptions::class),
             app()->make(ManageHiddenIntegrations::class),
 
-            app()->make(ManageDealer::class),
+            // app()->make(ManageDealer::class),
             app()->make(ChangeStatus::class),
         ];
     }
