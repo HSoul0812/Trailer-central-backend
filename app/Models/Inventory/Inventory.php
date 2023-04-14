@@ -265,6 +265,9 @@ class Inventory extends Model
     const PAC_TYPE_PERCENT = 'percent';
     const PAC_TYPE_AMOUNT = 'amount';
 
+    const IS_OVERLAY_LOCKED = 1;
+    const IS_NOT_OVERLAY_LOCKED = 0;
+
     /**
      * The table associated with the model.
      *

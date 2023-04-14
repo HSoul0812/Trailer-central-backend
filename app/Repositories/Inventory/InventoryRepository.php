@@ -377,6 +377,9 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
+     * @fix this method has been source of mess because it is too general, it aims the developer to do not create
+     *      another one specific for the new desired task
+     *
      * @param array $params
      * @param array $queryParams
      * @return bool

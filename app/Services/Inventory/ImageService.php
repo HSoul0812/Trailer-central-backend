@@ -158,7 +158,8 @@ class ImageService implements ImageServiceInterface
                         'overlay_enabled' => $changes['overlay_enabled']
                     ],
                     [
-                        'overlay_is_locked' => false // to avoid override those inventories which are overlay locked
+                        // to avoid override those inventories which are overlay locked
+                        'overlay_is_locked' => Inventory::IS_NOT_OVERLAY_LOCKED
                     ]
                 );
             });
