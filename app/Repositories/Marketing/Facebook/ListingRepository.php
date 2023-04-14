@@ -168,7 +168,6 @@ class ListingRepository implements ListingRepositoryInterface {
                     ->orWhereRaw("($inventoryTableName.use_website_price AND IFNULL($inventoryTableName.website_price, 0) > $fbMinPrice)")
                     ->orWhereRaw("IFNULL($inventoryTableName.price, 0) > $fbMinPrice");
             })
-
             ->where(function ($query) use ($inventoryTableName, $minDescriptionLength) {
                 $query->whereRaw("LENGTH(IFNULL({$inventoryTableName}.description, '')) >= " . $minDescriptionLength)
                     ->orWhereRaw("LENGTH(IFNULL({$inventoryTableName}.description_html, '')) >= " . (2 * $minDescriptionLength));
@@ -176,13 +175,12 @@ class ListingRepository implements ListingRepositoryInterface {
             ->has('orderedImages');
 
         // Join with Listings
-        $query = $query->leftJoin(Listings::getTableName(), function ($join) use ($integration) {
-            $join->on(Listings::getTableName() . '.inventory_id', '=', Inventory::getTableName() . '.inventory_id');
-            //$join->orOn(DB::raw("CONCAT(fbapp_listings.year, fbapp_listings.make, fbapp_listings.model)"), '=', DB::raw("CONCAT(inventory.year, inventory.manufacturer, inventory.model)"));
-        })->where(function (Builder $query) use ($listingsTableName, $integration) {
-            $query->whereNull("{$listingsTableName}.facebook_id")
-                ->orWhere(Listings::getTableName() . '.username', '<>', DB::raw("'" . $integration->fb_username . "'"))
-                ->orWhereIn("{$listingsTableName}.status", [Listings::STATUS_DELETED, Listings::STATUS_EXPIRED]);
+        $query = $query->leftJoin(Listings::getTableName(), function ($join) use ($integration, $listingsTableName) {
+            $statusDeleted = Listings::STATUS_DELETED;
+            $statusExpired = Listings::STATUS_EXPIRED;
+            $join->on("$listingsTableName.inventory_id", '=', Inventory::getTableName() . '.inventory_id');
+            $join->on("$listingsTableName.marketplace_id", '=', DB::raw($integration->id));
+            $join->on(DB::raw("$listingsTableName.status NOT IN ('$statusDeleted', '$statusExpired')"), '=', DB::raw(1));
         });
 
         // Skip Integrations With Non-Expired Errors
@@ -194,7 +192,7 @@ class ListingRepository implements ListingRepositoryInterface {
         })->whereNull(Error::getTableName() . '.id');
 
         // Append Location if needed
-        if (!empty($integration->dealer_location_id)) {
+        if ($integration->dealer_location_id !== 0) {
             $query = $query->where('dealer_location_id', '=', $integration->dealer_location_id);
         }
 
@@ -211,7 +209,7 @@ class ListingRepository implements ListingRepositoryInterface {
         // Set Sort By
         $query = $query->orderBy("{$inventoryTableName}.created_at", "asc");
         $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.listings'));
-
+        
         return $query->get();
     }
 
