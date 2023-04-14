@@ -286,7 +286,7 @@ class CraigslistService implements CraigslistServiceInterface
         // Log
         $logMessage = sprintf(
             "Creating Craigslist Inventory #%s with the TC Inventory #%s for the CL Dealer #%s",
-            $params['craigslist_id'] ?? 'NO CL id',
+            (isset($params['craigslist_id']) ? $params['craigslist_id'] : 'NO CL id'),
             $params['inventory_id'],
             $params['dealer_id']
         );
