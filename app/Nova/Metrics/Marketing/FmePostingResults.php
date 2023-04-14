@@ -6,7 +6,7 @@ use App\Models\Marketing\Facebook\PostingHistory;
 use App\Nova\Metrics\Model;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Metrics\Partition;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class FmePostingResults extends Partition
 {
@@ -24,7 +24,7 @@ class FmePostingResults extends Partition
      */
     public function name(): string
     {
-        return 'Success Rate';
+        return 'Success Rate(this week)';
     }
 
     /**
@@ -35,10 +35,10 @@ class FmePostingResults extends Partition
      */
     public function calculate(NovaRequest $request)
     {
-        return $this->count($request, PostingHistory::class, 'type')->colors([
-                'posting' => 'green',
-                'error' => 'red',
-            ]);
+        return $this->count($request, PostingHistory::where('created_at', '>', Carbon::now()->startOfWeek()), 'type')->colors([
+            'posting' => 'green',
+            'error' => 'red',
+        ]);
     }
 
     /**

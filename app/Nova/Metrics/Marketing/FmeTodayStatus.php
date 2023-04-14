@@ -38,10 +38,16 @@ class FmeTodayStatus extends Partition
         $groupBy = 'status_today';
 
         $results = DealerFBMOverview::getTodaysStatus($groupBy);
-
-        return $this->result($results->mapWithKeys(function ($result) use ($groupBy) {
+        $aggregationResult = $this->result($results->mapWithKeys(function ($result) use ($groupBy) {
             return $this->formatAggregateResult($result, $groupBy);
         })->all());
+
+        return $aggregationResult->colors([
+            'success' => 'green',
+            'partial' => 'orange',
+            'fail' => 'yellow',
+            'not attempted' => 'lightgray'
+        ]);
     }
 
     /**

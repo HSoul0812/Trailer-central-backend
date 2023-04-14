@@ -16,7 +16,7 @@ class FmeListings extends Value
      */
     public function name(): string
     {
-        return 'Listings';
+        return 'Inventory Listed';
     }
 
     /**

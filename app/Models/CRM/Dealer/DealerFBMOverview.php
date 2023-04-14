@@ -32,9 +32,9 @@ class DealerFBMOverview extends Model
             ->selectRaw("
                         CASE
                             WHEN last_attempt_ts < CURDATE() THEN 'not attempted'
-                            WHEN last_attempt_posts = 0 THEN 'failed'
-                            WHEN posts_per_day > last_attempt_posts THEN 'partial'
-                            ELSE 'success'
+                            WHEN last_attempt_posts_remaining = 0 THEN 'success'
+                            WHEN last_attempt_posts_remaining = posts_per_day THEN 'fail'
+                            ELSE 'partial'
                         END AS status_today,
                         COUNT(1) AS aggregate
                         ")

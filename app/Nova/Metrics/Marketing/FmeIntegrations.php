@@ -16,7 +16,7 @@ class FmeIntegrations extends Value
      */
     public function name(): string
     {
-        return 'Integrations Added';
+        return 'New Integrations';
     }
 
     /**

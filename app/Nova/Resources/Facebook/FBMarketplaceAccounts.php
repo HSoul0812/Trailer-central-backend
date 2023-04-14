@@ -165,8 +165,8 @@ class FBMarketplaceAccounts extends Resource
             new FmeDealersAttempted,
             new FmeIntegrations,
             new FmeTodayStatus,
-            new FmePostingResults,
             new FmePostsPerDay,
+            new FmePostingResults,
             new FmeErrorTypes,
 
         ];
