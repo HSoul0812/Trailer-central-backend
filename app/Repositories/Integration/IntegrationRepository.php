@@ -43,7 +43,7 @@ class IntegrationRepository implements IntegrationRepositoryInterface
                 ]);
             $query->orderBy('last_updated_at', 'DESC');
         } else {
-            $query = Integration::where('active', 1)->whereDoesntHave('dealers', function ($q) use ($params) {
+            $query = Integration::where('active', 1)->whereDoesntHave('integrationDealers', function ($q) use ($params) {
                 return $q->where('integration_dealer.dealer_id', $params['dealer_id']);
             });
         }

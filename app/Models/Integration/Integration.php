@@ -155,7 +155,7 @@ class Integration extends Model
     /**
      * Get Dealers
      */
-    public function dealers(): HasMany
+    public function integrationDealers(): HasMany
     {
         return $this->hasMany(DealerIntegration::class, 'integration_id', 'integration_id');
     }
