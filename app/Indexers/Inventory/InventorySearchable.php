@@ -4,13 +4,13 @@ namespace App\Indexers\Inventory;
 
 use App\Indexers\Searchable;
 use App\Indexers\WithIndexConfigurator;
-use App\Models\Inventory\Inventory;
 use App\Observers\Inventory\InventoryObserver;
 use App\Repositories\FeatureFlagRepositoryInterface;
 use Exception;
 use App\Jobs\Scout\MakeSearchable;
 use Laravel\Scout\ModelObserver;
 use App\Models\User\User as Dealer;
+
 /**
  * @method \Illuminate\Database\Eloquent\Builder query
  */

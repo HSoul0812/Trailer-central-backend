@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 use Laravel\Scout\Searchable;
 use Exception;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class ElasticSearchEngine extends \ElasticScoutDriver\Engine
 {
@@ -147,10 +147,37 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
         $this->indexManager->putAlias($indexName, new Alias($aliasName));
     }
 
-    public function purgeIndexList(array $list): void
+    /**
+     * It will drop indexes when they have not an alias (safe path) from a list of indexes,
+     * otherwise it will remove alias
+     *
+     * @param  array  $indexes
+     * @param  string  $alias
+     * @return void
+     */
+    public function purgeIndexes(array $indexes, string $alias): void
     {
-        foreach ($list as $index => $aliasMapping) {
-            $this->indexManager->drop($index);
+        foreach ($indexes as $index => $aliasMapping) {
+            $indexAliases = collect($this->indexManager->getAliases($index));
+
+            $isAliased = $indexAliases->filter(function (Alias $indexAlias) use ($alias): bool {
+                return $indexAlias->getName() === $alias;
+            })->isNotEmpty();
+
+            if ($isAliased) {
+                try {
+                    // this is a fallback index
+                    $this->indexManager->deleteAlias($index, $alias);
+                } catch (Exception $exception) {
+                    Log::critical($exception->getMessage(), ['indexName' => $index]);
+                }
+            } else {
+                try {
+                    $this->indexManager->drop($index);
+                } catch (Exception $exception) {
+                    Log::critical($exception->getMessage(), ['indexName' => $index]);
+                }
+            }
         }
     }
 
