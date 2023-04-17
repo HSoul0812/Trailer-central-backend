@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property string $batch_id
  * @property string $group
+ * @property array|null $queues a valid array o monitored queues
  * @property integer $total_jobs
  * @property integer $processed_jobs
  * @property integer $failed_jobs
@@ -65,6 +66,7 @@ class BatchedJob extends Model
         'group',
         'wait_time',
         'context',
+        'queues',
         'total_jobs',
         'processed_jobs',
         'failed_jobs',
@@ -75,7 +77,10 @@ class BatchedJob extends Model
     protected $dates = ['created_at', 'updated_at', 'finished_at'];
 
     /** @var array */
-    protected $casts = ['context' => 'json'];
+    protected $casts = [
+        'context' => 'json',
+        'queues' => 'json',
+    ];
 
     public static function getTableName(): string
     {
