@@ -377,6 +377,9 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
+     * @fix this method has been source of mess because it is too general, it aims the developer to do not create
+     *      another one specific for the new desired task
+     *
      * @param array $params
      * @param array $queryParams
      * @return bool
@@ -388,13 +391,15 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         $dealerId = $params['dealer_id'];
-        unset($params['dealer_id']);
+        unset($params['dealer_id']); // to avoid update it
 
-        $queryParams += ['dealer_id', $dealerId];
-
-        Inventory::query()->where(
-            $queryParams
-        )->update($params);
+        Inventory::query()
+            ->where('dealer_id', $dealerId)
+            ->when(!empty($queryParams), function ($builder) use ($queryParams): void {
+                /** @var GrimzyBuilder|EloquentBuilder $builder */
+                $builder->where($queryParams);
+            })
+            ->update($params);
 
         return true;
     }
