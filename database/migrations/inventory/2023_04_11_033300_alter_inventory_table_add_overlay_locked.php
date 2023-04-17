@@ -17,11 +17,12 @@ class AlterInventoryTableAddOverlayLocked extends Migration
                     ->index()
                     ->after('overlay_enabled');
             }
+        });
 
-            $dealers = DB::table('dealer')->select('dealer_id')->get();
+        $dealers = DB::table('dealer')->select('dealer_id')->get();
 
-            $dealers->each(static function (Dealer $dealer): void {
-                $updateInventorySQL = <<<SQL
+        $dealers->each(static function (Dealer $dealer): void {
+            $updateInventorySQL = <<<SQL
                 UPDATE inventory
                 JOIN dealer on inventory.dealer_id = dealer.dealer_id
                 SET
@@ -34,8 +35,7 @@ class AlterInventoryTableAddOverlayLocked extends Migration
                 WHERE inventory.dealer_id = :dealer_id
 SQL;
 
-                DB::statement($updateInventorySQL, ['dealer_id' => $dealer->dealer_id]);
-            });
+            DB::statement($updateInventorySQL, ['dealer_id' => $dealer->dealer_id]);
         });
     }
 
