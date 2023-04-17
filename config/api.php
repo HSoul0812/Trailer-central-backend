@@ -155,6 +155,7 @@ return [
     */
 
     'middleware' => [
+        \App\Http\Middleware\ApplyHeaderQueue::class,
     ],
 
     /*

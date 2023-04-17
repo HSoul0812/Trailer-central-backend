@@ -2,6 +2,7 @@
 
 namespace App\Services\Inventory;
 
+use App\Domains\Http\Response\Header;
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\Models\Parts\CategoryMappings;
@@ -10,6 +11,8 @@ use App\Services\Inventory\ESQuery\SortOrder;
 use Dingo\Api\Routing\Helpers;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use TrailerCentral\Sdk\Handlers\Search\Filters\Operator;
 use TrailerCentral\Sdk\Handlers\Search\Geolocation\GeoCoordinates;
 use TrailerCentral\Sdk\Handlers\Search\Geolocation\Geolocation;
@@ -28,7 +31,6 @@ use TrailerCentral\Sdk\Handlers\Search\Filters\FilterGroup;
 use TrailerCentral\Sdk\Handlers\Search\Filters\Filter;
 use TrailerCentral\Sdk\Resources\Search;
 use TrailerCentral\Sdk\Sdk;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class InventorySDKService implements InventorySDKServiceInterface
 {
@@ -89,7 +91,6 @@ class InventorySDKService implements InventorySDKServiceInterface
     public function __construct()
     {
         $this->request = new Request();
-        $this->request->add('request_id', config('inventory-sdk.request_id'));
         $this->mainFilterGroup = new FilterGroup();
 
         $this->request->addFilterGroup($this->mainFilterGroup);
@@ -122,7 +123,15 @@ class InventorySDKService implements InventorySDKServiceInterface
         $this->addDealerFilter($params);
 
         $location = $this->addGeolocation($params);
+
         $this->addSorting($params, $location);
+
+        $debugRequest = boolval(Arr::get($params, 'debug-request', 0));
+
+        if ($debugRequest) {
+            Header::queue('TT-Debug-Request-Base64', base64_encode(json_encode($this->request->serialize())));
+        }
+
         return $this->responseFromSDKResponse($this->search->execute($this->request));
     }
 
@@ -284,7 +293,7 @@ class InventorySDKService implements InventorySDKServiceInterface
         );
 
         if (empty($categories)) {
-            throw new BadRequestException('No category was selected');
+            throw new HttpException(400, 'No category was selected');
         }
 
         $this->mainFilterGroup->add(new Filter(
