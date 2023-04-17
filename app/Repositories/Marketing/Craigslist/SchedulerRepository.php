@@ -7,6 +7,7 @@ use App\Exceptions\NotImplementedException;
 use App\Models\Marketing\Craigslist\ActivePost;
 use App\Models\Marketing\Craigslist\Queue;
 use App\Models\Marketing\Craigslist\Session;
+use App\Models\User\User;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
@@ -322,7 +323,13 @@ class SchedulerRepository implements SchedulerRepositoryInterface
             $join->on(Queue::getTableName().'.session_id', '=', Session::getTableName().'.session_id')
                          ->on(Queue::getTableName().'.dealer_id', '=', Session::getTableName().'.session_dealer_id')
                          ->on(Queue::getTableName().'.profile_id', '=', Session::getTableName().'.session_profile_id');
-        })->whereNotNull(Session::getTableName().'.session_scheduled');
+        })->whereNotNull(Session::getTableName().'.session_scheduled')
+          ->leftJoin(User::getTableName(), User::getTableName() . '.dealer_id',
+                        '=', Queue::getTableName().'.dealer_id')
+          ->whereNotNull(User::getTableName() . '.stripe_id')
+          ->where(User::getTableName() . '.state', User::STATUS_ACTIVE)
+          ->where(Session::getTableName() . '.notify_error_init', 0)
+          ->where(Session::getTableName() . '.notify_error_timeout', 0);
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Session::getTableName().'.session_dealer_id', $params['dealer_id']);
@@ -371,10 +378,10 @@ class SchedulerRepository implements SchedulerRepositoryInterface
 
         // Limit within a certain range of dates
         if (isset($params['start'])) {
-            $query->whereDate(Session::getTableName() . '.session_scheduled', '>=', $params['start']);
+            $query->where(Session::getTableName() . '.session_scheduled', '>=', $params['start']);
         }
         if (isset($params['end'])) {
-            $query->whereDate(Session::getTableName() . '.session_scheduled', '<=', $params['end']);
+            $query->where(Session::getTableName() . '.session_scheduled', '<=', $params['end']);
         }
 
         if (isset($params['with'])) {
