@@ -2,6 +2,7 @@
 
 namespace App\Indexers;
 
+use App\Exceptions\ElasticSearch\IndexPurgingException;
 use ElasticAdapter\Exceptions\BulkRequestException;
 use ElasticAdapter\Indices\Alias;
 use ElasticAdapter\Indices\Index;
@@ -158,27 +159,41 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
     public function purgeIndexes(array $indexes, string $alias): void
     {
         foreach ($indexes as $index => $aliasMapping) {
-            $indexAliases = collect($this->indexManager->getAliases($index));
-
-            $isAliased = $indexAliases->filter(function (Alias $indexAlias) use ($alias): bool {
-                return $indexAlias->getName() === $alias;
-            })->isNotEmpty();
-
-            if ($isAliased) {
+            // it is preferable to double check the aliases of the index at this point
+            // no matter if we got the aliases before ingestion time
+            if ($this->indexHasAlias($index, $alias)) {
                 try {
-                    // this is a fallback index
+                    // this could be used as a fallback index
                     $this->indexManager->deleteAlias($index, $alias);
                 } catch (Exception $exception) {
-                    Log::critical($exception->getMessage(), ['indexName' => $index]);
+                    throw new IndexPurgingException($exception->getMessage(), $exception->getCode(), $exception);
                 }
             } else {
                 try {
                     $this->indexManager->drop($index);
                 } catch (Exception $exception) {
+                    // dropping an index should not interrups a subsequent process
+                    // it should only notifies
                     Log::critical($exception->getMessage(), ['indexName' => $index]);
                 }
             }
         }
+    }
+
+    /**
+     * Determines if an index has an alias
+     *
+     * @param  string  $indexName
+     * @param  string  $alias
+     * @return bool
+     */
+    public function indexHasAlias(string $indexName, string $alias): bool
+    {
+        $indexAliases = collect($this->indexManager->getAliases($indexName));
+
+        return $indexAliases->filter(function (Alias $indexAlias) use ($alias): bool {
+            return $indexAlias->getName() === $alias;
+        })->isNotEmpty();
     }
 
     public function ensureIndexDoesNotExists(string $indexAliasName): void

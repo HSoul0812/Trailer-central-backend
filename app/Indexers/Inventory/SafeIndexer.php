@@ -2,6 +2,7 @@
 
 namespace App\Indexers\Inventory;
 
+use App\Exceptions\ElasticSearch\IndexPurgingException;
 use App\Exceptions\ElasticSearch\IndexSwappingException;
 use App\Indexers\ElasticSearchEngine;
 use App\Jobs\Job;
@@ -11,6 +12,8 @@ use Elasticsearch\Client;
 use Illuminate\Contracts\Events\Dispatcher;
 use App\Models\Inventory\Inventory;
 use Exception;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Laravel\Scout\Events\ModelsImported;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
@@ -65,6 +68,9 @@ class SafeIndexer
         Inventory::$searchableAs = $model->indexConfigurator()->name();
 
         $indexesToPurge = $this->getIndexes();
+
+        // the current index will help to rollback if something goes wrong at swapping time
+        $currentIndexName = $this->getCurrentIndex($indexesToPurge);
 
         /** @var ElasticSearchEngine $indexManager */
         $indexManager = $model->searchableUsing();
@@ -185,18 +191,39 @@ class SafeIndexer
         }
 
         try {
-            retry(
-                self::ALIASING_RETRY_TIMES,
-                function () use ($indexManager, $indexesToPurge, $itIsAlreadySwapped) {
-                    $indexManager->purgeIndexes($indexesToPurge->toArray(), $this->indexAlias);
-
-                    if (!$itIsAlreadySwapped) {
-                        $indexManager->swapIndexNames(Inventory::$searchableAs, $this->indexAlias);
-                    }
-                },
-                self::ALIASING_RETRY_TIME_IN_SECONDS
-            );
+            $indexManager->purgeIndexes($indexesToPurge->toArray(), $this->indexAlias);
         } catch (Exception $exception) {
+            // deleting alias should interrups immediately any subsequent process
+            Log::critical(
+                $exception->getMessage(),
+                ['indexName' => Inventory::$searchableAs, 'alias' => $this->indexAlias]
+            );
+
+            throw new IndexPurgingException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+
+        try {
+            if (!$itIsAlreadySwapped) {
+                $indexManager->swapIndexNames(Inventory::$searchableAs, $this->indexAlias);
+            }
+        } catch (Exception $exception) {
+            Log::emergency(
+                $exception->getMessage(),
+                ['indexName' => Inventory::$searchableAs, 'alias' => $this->indexAlias]
+            );
+
+            // rollback to the previous index
+            try {
+                if ($currentIndexName) {
+                    $indexManager->swapIndexNames($currentIndexName, $this->indexAlias);
+                }
+            } catch (Exception $rollbackException) {
+                Log::emergency(
+                    $rollbackException->getMessage(),
+                    ['indexName' => $currentIndexName, 'alias' => $this->indexAlias]
+                );
+            }
+
             throw new IndexSwappingException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
@@ -210,6 +237,27 @@ class SafeIndexer
     {
         return collect($this->client->indices()->getAlias())->filter(function ($info, $indexName) {
             return strstr($indexName, $this->indexAlias);
+        });
+    }
+
+    /**
+     * Gets the current index which has the specific alias
+     *
+     * @param  Collection|null  $indexesToPurge
+     * @return string
+     */
+    public function getCurrentIndex(?Collection $indexesToPurge = null): string
+    {
+        if ($indexesToPurge === null) {
+            $indexesToPurge = $this->getIndexes();
+        }
+
+        return $indexesToPurge->filter(function (array $indexesToPurge): bool {
+            return array_key_exists($this->indexAlias, $indexesToPurge['aliases']);
+        })->map(function (array $aliases, string $indexName): string {
+            return $indexName;
+        })->first(function (string $indexName): string {
+            return $indexName;
         });
     }
 }
