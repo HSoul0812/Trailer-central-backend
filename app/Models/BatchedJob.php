@@ -9,7 +9,6 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property string $batch_id
- * @property string $group
  * @property array|null $queues a valid array o monitored queues
  * @property integer $total_jobs
  * @property integer $processed_jobs
@@ -63,7 +62,6 @@ class BatchedJob extends Model
     /** @var array<string> */
     protected $fillable = [
         'batch_id',
-        'group',
         'wait_time',
         'context',
         'queues',

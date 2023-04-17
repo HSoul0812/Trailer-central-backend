@@ -9,8 +9,8 @@ interface BatchedJobServiceInterface
     /**
      * Creates a batch, then start to monitoring it
      *
-     * @param  string|null  $group
      * @param string[] $queues
+     * @param  string|null  $group
      * @param  int|null  $waitTime  time in seconds
      * @param  array|null  $context
      * @return BatchedJob
@@ -21,6 +21,14 @@ interface BatchedJobServiceInterface
         ?int $waitTime = null,
         ?array $context = null
     ): BatchedJob;
+
+    /**
+     * Generates a unique id like `recreate-index-1681739822-Vm8Kh` where `recreate-index` is the group
+     *
+     * @param  string|null  $group
+     * @return string
+     */
+    public function generateBatchId(?string $group = null): string;
 
     /**
      * Detaches a monitored batch

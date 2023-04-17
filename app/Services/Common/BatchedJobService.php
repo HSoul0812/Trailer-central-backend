@@ -55,9 +55,8 @@ class BatchedJobService implements BatchedJobServiceInterface
         ?array $context = null
     ): BatchedJob {
         $batch = BatchedJob::create([
+            'batch_id' => $this->generateBatchId($group),
             'queues' => $queues,
-            'batch_id' => Str::uuid()->toString(),
-            'group' => $group ?: self::NO_GROUP,
             'wait_time' => $waitTime ?? self::WAIT_TIME_IN_SECONDS,
             'context' => $context
         ]);
@@ -67,6 +66,19 @@ class BatchedJobService implements BatchedJobServiceInterface
         $this->tagRepository->monitor($batch->batch_id);
 
         return $batch;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function generateBatchId(?string $group = null): string
+    {
+        return sprintf(
+            '%s-%s-%s',
+            Str::slug(empty($group) ? self::NO_GROUP : $group),
+            time(),
+            Str::random('5')
+        );
     }
 
     /**
