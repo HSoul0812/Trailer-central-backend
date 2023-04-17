@@ -31,7 +31,12 @@
                     <td valign="top">
                         <!-- begin content -->
                         @if ($website == $simpleDomain)
-                          <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">TrailerTrader.com / A customer is interested in {{ $title }} “</h3>
+                            <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">
+                                TrailerTrader.com / A customer is interested in {{ $title }}
+                            </h3>
+                            <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">
+                                Following is the content of the 'contact form' that was submitted to you through trailertrader.com.
+                            </p>
                         @else
                           <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">New Inventory Information Request on {{ $website }}</h3>
                         @endif
