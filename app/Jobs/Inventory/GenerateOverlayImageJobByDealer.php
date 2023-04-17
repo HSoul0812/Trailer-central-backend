@@ -16,6 +16,9 @@ class GenerateOverlayImageJobByDealer extends Job
     /** @var string[] list of queues which are monitored */
     private const MONITORED_QUEUES = ['overlay-images'];
 
+    /** @var string  */
+    private const MONITORED_GROUP = 'inventory-generate-overlays-by-dealer';
+
     /**
      * The number of times the job may be attempted.
      *
@@ -55,7 +58,7 @@ class GenerateOverlayImageJobByDealer extends Job
                     }
                 },
                 self::MONITORED_QUEUES,
-                __CLASS__,
+                self::MONITORED_GROUP.'-'.$this->dealerId,
                 self::WAIT_TIME_IN_SECONDS
             );
 

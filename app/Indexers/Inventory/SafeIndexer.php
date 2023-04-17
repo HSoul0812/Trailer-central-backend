@@ -22,11 +22,8 @@ class SafeIndexer
     /** @var string[] list of queues which are monitored */
     private const MONITORED_QUEUES = ['scout'];
 
-    /** @var int 5 minutes */
-    public const ALIASING_RETRY_TIME_IN_SECONDS = 300;
-
-    /** @var int */
-    public const ALIASING_RETRY_TIMES = 2;
+    /** @var string  */
+    private const MONITORED_GROUP = 'inventory-recreate-index';
 
     /** @var int time in seconds */
     private const WAIT_TIME_IN_SECONDS = 2;
@@ -130,7 +127,7 @@ class SafeIndexer
                 $this->output->writeln(sprintf('Waiting for batch <comment>%s</comment> ...', $batch->batch_id));
             },
             self::MONITORED_QUEUES,
-            __CLASS__,
+            self::MONITORED_GROUP.'-'.'main',
             self::WAIT_TIME_IN_SECONDS
         );
 
@@ -185,7 +182,7 @@ class SafeIndexer
                     $this->output->writeln(sprintf('Waiting for batch <comment>%s</comment> ...', $batch->batch_id));
                 },
                 self::MONITORED_QUEUES,
-                __CLASS__,
+                self::MONITORED_GROUP.'-'.'remaining',
                 self::WAIT_TIME_IN_SECONDS
             );
         }

@@ -21,6 +21,9 @@ class ReIndexInventoriesByDealerLocationJob extends Job
     /** @var string[] list of queues which are monitored */
     private const MONITORED_QUEUES = ['scout'];
 
+    /** @var string  */
+    private const MONITORED_GROUP = 'inventory-reindex-by-dealer-location';
+
     /** @var array<integer> */
     private $locationId;
 
@@ -59,7 +62,7 @@ class ReIndexInventoriesByDealerLocationJob extends Job
                 Inventory::makeAllSearchableByDealerLocationId($this->locationId);
             },
             self::MONITORED_QUEUES,
-            __CLASS__,
+            self::MONITORED_GROUP.'-'.$dealerLocation->dealer_location_id,
             self::WAIT_TIME_IN_SECONDS,
             array_merge($this->context, ['dealer_id' => $dealerLocation->dealer_id,])
         );

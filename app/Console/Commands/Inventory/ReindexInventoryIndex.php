@@ -8,6 +8,7 @@ use App\Models\Inventory\Inventory;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
 use Illuminate\Console\Command;
+use Str;
 
 /**
  * Once the integration team has moved everything (inventory related) to the API side,
@@ -46,7 +47,7 @@ class ReindexInventoryIndex extends Command
                 $this->line(sprintf('Waiting for batch <comment>%s</comment> ...', $batch->batch_id));
             },
             self::MONITORED_QUEUES,
-            __CLASS__,
+            Str::replaceArray(':', ['-'], $this->signature),
             self::WAIT_TIME_IN_SECONDS
         );
 

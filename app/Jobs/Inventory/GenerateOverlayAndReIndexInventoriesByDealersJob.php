@@ -19,6 +19,9 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
     /** @var string[] list of queues which are monitored */
     private const MONITORED_QUEUES = ['scout'];
 
+    /** @var string  */
+    private const MONITORED_GROUP = 'inventory-generate-overlays-and-reindex-by-dealer';
+
     /**  @var array<integer> */
     private $dealerIds;
 
@@ -75,7 +78,7 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
                     Inventory::makeAllSearchableByDealers([$dealerId]);
                 },
                 self::MONITORED_QUEUES,
-                __CLASS__,
+                self::MONITORED_GROUP.'-p2-'.$dealerId,
                 self::WAIT_TIME_FOR_INDEXATION_IN_SECONDS,
                 array_merge($this->context, ['process' => 'indexation'])
             );
