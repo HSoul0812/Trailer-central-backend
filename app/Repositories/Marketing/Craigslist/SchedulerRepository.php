@@ -8,6 +8,7 @@ use App\Models\Marketing\Craigslist\ActivePost;
 use App\Models\Marketing\Craigslist\Queue;
 use App\Models\Marketing\Craigslist\Session;
 use App\Models\User\User;
+use App\Models\User\DealerClapp;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
@@ -324,12 +325,15 @@ class SchedulerRepository implements SchedulerRepositoryInterface
                          ->on(Queue::getTableName().'.dealer_id', '=', Session::getTableName().'.session_dealer_id')
                          ->on(Queue::getTableName().'.profile_id', '=', Session::getTableName().'.session_profile_id');
         })->whereNotNull(Session::getTableName().'.session_scheduled')
+          ->where(Session::getTableName() . '.notify_error_init', 0)
+          ->where(Session::getTableName() . '.notify_error_timeout', 0)
           ->leftJoin(User::getTableName(), User::getTableName() . '.dealer_id',
                         '=', Queue::getTableName().'.dealer_id')
           ->whereNotNull(User::getTableName() . '.stripe_id')
           ->where(User::getTableName() . '.state', User::STATUS_ACTIVE)
-          ->where(Session::getTableName() . '.notify_error_init', 0)
-          ->where(Session::getTableName() . '.notify_error_timeout', 0);
+          ->leftJoin(DealerClapp::getTableName(), DealerClapp::getTableName() . '.dealer_id',
+                        '=', Queue::getTableName().'.dealer_id')
+          ->whereNotNull(DealerClapp::getTableName() . '.slots');
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Session::getTableName().'.session_dealer_id', $params['dealer_id']);
