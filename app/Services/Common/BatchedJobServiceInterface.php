@@ -23,7 +23,7 @@ interface BatchedJobServiceInterface
     ): BatchedJob;
 
     /**
-     * Generates a unique id like `recreate-index-1681739822-Vm8Kh` where `recreate-index` is the group
+     * Generates a unique id based on the group
      *
      * @param  string|null  $group
      * @return string

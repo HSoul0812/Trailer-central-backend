@@ -69,14 +69,17 @@ class BatchedJobService implements BatchedJobServiceInterface
     }
 
     /**
-     * @inheritDoc
+     * Generates a unique id like `230417_123042_860-recreate-index-Vm8Kh` where `recreate-index` is the group
+     *
+     * @param  string|null  $group
+     * @return string
      */
     public function generateBatchId(?string $group = null): string
     {
         return sprintf(
-            '%s-%s-%s',
+            '%s-%s_%s',
+            now()->format('ymd_His_v'),
             Str::slug(empty($group) ? self::NO_GROUP : $group),
-            time(),
             Str::random('5')
         );
     }
