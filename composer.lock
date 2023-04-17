@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6e475bee7168dd654e840c4b975554bd",
+    "content-hash": "4945e8ddc001dceb987da7e2e6670327",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -8889,11 +8889,11 @@
         },
         {
             "name": "tcentral/inventory-sdk",
-            "version": "1.2.0",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:tcentral/inventory-sdk.git",
-                "reference": "d890ba7de6266efec4c5f95eba8adccf6eac3977"
+                "reference": "6e3c9bd10cd50702c3fb6410865cd8331ed1cb10"
             },
             "require": {
                 "ext-json": "*",
@@ -8921,7 +8921,7 @@
                 }
             ],
             "description": "Inventory SDK for Trailer Central API",
-            "time": "2023-01-26T18:15:06+00:00"
+            "time": "2023-03-02T09:05:46+00:00"
         },
         {
             "name": "tijsverkoyen/css-to-inline-styles",
@@ -12577,7 +12577,8 @@
         "php": "^8.0",
         "ext-json": "*",
         "ext-pcntl": "*",
-        "ext-pdo": "*"
+        "ext-pdo": "*",
+        "ext-zlib": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.2.0"

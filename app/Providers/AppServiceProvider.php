@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Domains\Http\Response\Header;
 use App\Repositories\WebsiteUser\UserTrackingRepository;
 use App\Repositories\WebsiteUser\UserTrackingRepositoryInterface;
 use App\Services\LoggerService;
@@ -55,5 +56,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
 
         $this->app->bind(UserTrackingRepositoryInterface::class, UserTrackingRepository::class);
+
+        $this->app->singleton(Header::class, fn() => new Header());
     }
 }
