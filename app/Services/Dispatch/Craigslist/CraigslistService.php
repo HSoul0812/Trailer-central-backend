@@ -286,7 +286,7 @@ class CraigslistService implements CraigslistServiceInterface
         // Log
         $logMessage = sprintf(
             "Creating Craigslist Inventory #%s with the TC Inventory #%s for the CL Dealer #%s",
-            $params['craigslist_id'] ?? 'NO CL id',
+            (isset($params['craigslist_id']) ? $params['craigslist_id'] : 'NO CL id'),
             $params['inventory_id'],
             $params['dealer_id']
         );
@@ -317,17 +317,27 @@ class CraigslistService implements CraigslistServiceInterface
         // Get Draft
         $params['step'] = 'update-inventory';
         $params['added'] = Carbon::now()->toDateTimeString();
-        $draft = $this->getDraft($clappPost, $params);
-        $params['drafted'] = $draft['drafted'];
+
+        // Not An Error?!
+        $listing = [];
+        if($params['status'] !== 'error') {
+            $draft = $this->getDraft($clappPost, $params);
+            $params['drafted'] = $draft['drafted'];
+
+            // Initialize Listing Details
+            $listing = [
+                'draft'       => $draft,
+                'post'        => $this->getPost($clappPost, $params),
+                'activePost'  => $this->getActivePost($clappPost, $params),
+                'transaction' => $this->updateBalance($clappPost, $params)
+            ];
+        }
+
+        // Session Always Gets Applied
+        $listing['session'] = $this->updateSession($clappPost, $params);
 
         // Return Clapp Listing With Various Related Data
-        return new ClappListing([
-            'draft' => $draft,
-            'post' => $this->getPost($clappPost, $params),
-            'activePost' => $this->getActivePost($clappPost, $params),
-            'transaction' => $this->updateBalance($clappPost, $params),
-            'session' => $this->updateSession($clappPost, $params)
-        ]);
+        return new ClappListing($listing);
     }
 
 
@@ -584,10 +594,10 @@ class CraigslistService implements CraigslistServiceInterface
             'subarea' => $clappPost->subarea,
             'category' => $clappPost->category,
             'preview' => $clappPost->preview(),
-            'clid' => $params['craigslist_id'],
-            'cl_status' => $params['status'],
+            'clid' => $params['craigslist_id'] ?? '',
+            'cl_status' => $params['status'] ?? '',
             'manage_url' => $params['manage_url'] ?? '',
-            'view_url' => $params['view_url']
+            'view_url' => $params['view_url'] ?? ''
         ]);
     }
 
@@ -615,10 +625,10 @@ class CraigslistService implements CraigslistServiceInterface
             'subarea' => $clappPost->subarea,
             'category' => $clappPost->category,
             'preview' => $clappPost->preview(),
-            'clid' => $params['craigslist_id'],
-            'cl_status' => $params['status'],
+            'clid' => $params['craigslist_id'] ?? '',
+            'cl_status' => $params['status'] ?? '',
             'manage_url' => $params['manage_url'] ?? '',
-            'view_url' => $params['view_url']
+            'view_url' => $params['view_url'] ?? ''
         ]);
     }
 
