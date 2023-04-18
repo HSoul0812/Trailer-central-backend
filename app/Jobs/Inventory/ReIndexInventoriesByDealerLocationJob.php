@@ -30,7 +30,7 @@ class ReIndexInventoriesByDealerLocationJob extends Job
     /**  @var array|null */
     private $context;
 
-    public $queue = 'scout';
+    public $queue = 'batched-jobs';
 
     public function __construct(int $locationId, ?array $context = null)
     {
