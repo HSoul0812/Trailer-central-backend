@@ -4,6 +4,7 @@ namespace App\Repositories\WebsiteUser;
 
 use App\Domains\UserTracking\Actions\GetPageNameFromUrlAction;
 use App\Models\UserTracking;
+use Arr;
 use Log;
 use Throwable;
 
@@ -28,7 +29,7 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
 
         $params['page_name'] = $this->getPageName($params['url']);
 
-        $params['ip_address'] = request()->ip();
+        $params['ip_address'] = $this->getUserIpAddress();
 
         // We don't want to process this record for location if the IP
         // address doesn't exist, or if the IP address is in the ignore
@@ -59,5 +60,36 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
     private function getPageName(mixed $url): ?string
     {
         return $this->getPageNameFromUrlAction->execute($url);
+    }
+
+    /**
+     * We need to use our custom IP address getter because we serve
+     * production server under the AWS load balancers.
+     *
+     * This makes the actual user's IP address lives in the HTTP_X_FORWARDED_FOR
+     * variable and the AWS load balancer IP address in the REMOTE_ADDR variable
+     * which Laravel first read the IP from.
+     *
+     * @return string|null
+     */
+    private function getUserIpAddress(): ?string
+    {
+        $ipVariables = [
+            'HTTP_X_FORWARDED_FOR',
+            'REMOTE_ADDR',
+        ];
+
+        foreach ($ipVariables as $ipVariable) {
+            $ipAddress = Arr::get($_SERVER, $ipVariable);
+
+            if ($ipAddress !== null) {
+                return $ipAddress;
+            }
+        }
+
+        // As a last resort, we will use Laravel's ip() method
+        // , so it can read from any server variable that we don't
+        // have on the priority list above
+        return request()->ip();
     }
 }
