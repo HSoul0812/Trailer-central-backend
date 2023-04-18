@@ -31,7 +31,7 @@ class GenerateOverlayImageJobByDealer extends Job
      */
     public $dealerId;
 
-    public $queue = 'overlay-images';
+    public $queue = 'batched-jobs';
 
     public function __construct(int $dealerId)
     {
