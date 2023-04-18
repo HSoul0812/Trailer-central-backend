@@ -126,21 +126,24 @@ class InventorySDKService implements InventorySDKServiceInterface
 
         $this->addSorting($params, $location);
 
-        $debugRequest = boolval(Arr::get($params, 'debug-request', 0));
+        $showQuery = boolval(Arr::get($params, 'x-show-query', 0));
 
-        if ($debugRequest) {
-            Header::queue('TT-Debug-Request-Base64', base64_encode(json_encode($this->request->serialize())));
+        if ($showQuery) {
+            $this->request->withDebug(true);
         }
 
-        return $this->responseFromSDKResponse($this->search->execute($this->request));
+        return $this->responseFromSDKResponse($showQuery);
     }
 
     /**
-     * @param Response $sdkResponse
+     * @param bool $debugEnabled
      * @return TcEsResponseInventoryList
+     * @throws GuzzleException
      */
-    protected function responseFromSDKResponse(Response $sdkResponse): TcEsResponseInventoryList
+    protected function responseFromSDKResponse(bool $debugEnabled = false): TcEsResponseInventoryList
     {
+        $sdkResponse = $this->search->execute($this->request);
+
         $result = [];
         $hits = $sdkResponse->hits();
         foreach ($hits as $hit) {
@@ -157,6 +160,12 @@ class InventorySDKService implements InventorySDKServiceInterface
             $this->perPage,
             $this->currentPage
         );
+
+        if ($debugEnabled) {
+            $response->sdkPayload = $this->request->serialize();
+            $response->esQuery = $sdkResponse->qaQuery();
+        }
+
         return $response;
     }
 
