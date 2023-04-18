@@ -16,7 +16,13 @@ use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 class ReIndexInventoriesByDealerLocationJob extends Job
 {
     /** @var int time in seconds */
-    private const WAIT_TIME = 15;
+    private const WAIT_TIME_IN_SECONDS = 15;
+
+    /** @var string[] list of queues which are monitored */
+    private const MONITORED_QUEUES = ['scout'];
+
+    /** @var string  */
+    private const MONITORED_GROUP = 'inventory-reindex-by-dealer-location';
 
     /** @var array<integer> */
     private $locationId;
@@ -51,11 +57,13 @@ class ReIndexInventoriesByDealerLocationJob extends Job
             $logContext
         );
 
-        Job::batch(function (BatchedJob $batch): void {
-            Inventory::makeAllSearchableByDealerLocationId($this->locationId);
-        },
-            __CLASS__,
-            self::WAIT_TIME,
+        Job::batch(
+            function (BatchedJob $batch): void {
+                Inventory::makeAllSearchableByDealerLocationId($this->locationId);
+            },
+            self::MONITORED_QUEUES,
+            self::MONITORED_GROUP.'-'.$dealerLocation->dealer_location_id,
+            self::WAIT_TIME_IN_SECONDS,
             array_merge($this->context, ['dealer_id' => $dealerLocation->dealer_id,])
         );
 
