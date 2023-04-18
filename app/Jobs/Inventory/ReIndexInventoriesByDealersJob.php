@@ -12,14 +12,20 @@ use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 class ReIndexInventoriesByDealersJob extends Job
 {
     /** @var int time in seconds */
-    private const WAIT_TIME = 15;
+    private const WAIT_TIME_IN_SECONDS = 15;
+
+    /** @var string[] list of queues which are monitored */
+    private const MONITORED_QUEUES = ['scout'];
+
+    /** @var string  */
+    private const MONITORED_GROUP = 'inventory-reindex-by-dealer';
 
     /**
      * @var array<integer>
      */
     private $dealerIds;
 
-    public $queue = 'scout';
+    public $queue = 'batched-jobs';
 
     /**  @var array|null */
     private $context;
@@ -40,9 +46,15 @@ class ReIndexInventoriesByDealersJob extends Job
             ['dealer_ids' => $this->dealerIds]
         );
 
-        Job::batch(function (BatchedJob $batch): void {
-            Inventory::makeAllSearchableByDealers($this->dealerIds);
-        }, __CLASS__, self::WAIT_TIME, $this->context);
+        Job::batch(
+            function (BatchedJob $batch): void {
+                Inventory::makeAllSearchableByDealers($this->dealerIds);
+            },
+            self::MONITORED_QUEUES,
+            self::MONITORED_GROUP.'-'.implode('-', $this->dealerIds),
+            self::WAIT_TIME_IN_SECONDS,
+            $this->context
+        );
 
         $logger->info(
             'Enqueueing the job to invalidate cache by dealer ids',

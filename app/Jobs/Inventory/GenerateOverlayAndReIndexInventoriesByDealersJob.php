@@ -14,13 +14,19 @@ use App\Services\Inventory\InventoryServiceInterface;
 class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
 {
     /** @var int time in seconds */
-    private const WAIT_TIME = 15;
+    private const WAIT_TIME_FOR_INDEXATION_IN_SECONDS = 15;
+
+    /** @var string[] list of queues which are monitored */
+    private const MONITORED_QUEUES = ['scout'];
+
+    /** @var string  */
+    private const MONITORED_GROUP = 'inventory-generate-overlays-and-reindex-by-dealer';
 
     /**  @var array<integer> */
     private $dealerIds;
 
     /** @var string */
-    public $queue = 'overlay-images';
+    public $queue = 'batched-jobs';
 
     /**  @var array|null */
     private $context;
@@ -67,9 +73,15 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
 
             $logger->info('Enqueueing the job to reindex inventory by dealer id', ['dealer_id' => $dealerId]);
 
-            Job::batch(function (BatchedJob $batch) use ($dealerId): void {
-                Inventory::makeAllSearchableByDealers([$dealerId]);
-            }, __CLASS__, self::WAIT_TIME, array_merge($this->context, ['process' => 'indexation']));
+            Job::batch(
+                function (BatchedJob $batch) use ($dealerId): void {
+                    Inventory::makeAllSearchableByDealers([$dealerId]);
+                },
+                self::MONITORED_QUEUES,
+                self::MONITORED_GROUP.'-p2-'.$dealerId,
+                self::WAIT_TIME_FOR_INDEXATION_IN_SECONDS,
+                array_merge($this->context, ['process' => 'indexation'])
+            );
 
             $logger->info('Enqueueing the job to invalidate cache by dealer id', ['dealer_id' => $dealerId]);
 

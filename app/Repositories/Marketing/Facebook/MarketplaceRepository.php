@@ -195,7 +195,8 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
 
     public function getAllIntegrations($params): Collection
     {
-        $query = Marketplace::where('retry_after_ts', '<', DB::raw('NOW()'))->orWhereNull('retry_after_ts');
+        $query = Marketplace::whereHas('user.dealerClapp')
+            ->where('retry_after_ts', '<', DB::raw('NOW()'))->orWhereNull('retry_after_ts');
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
