@@ -26,7 +26,7 @@ class SafeIndexer
     private const MONITORED_GROUP = 'inventory-recreate-index';
 
     /** @var int time in seconds */
-    private const WAIT_TIME_IN_SECONDS = 2;
+    private const WAIT_TIME_IN_SECONDS = 15;
 
     public const RECORDS_PER_BULK = 500;
 
