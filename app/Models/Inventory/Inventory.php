@@ -93,6 +93,7 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property bool $show_on_website
  * @property \DateTimeInterface|Carbon $tt_payment_expiration_date
  * @property int $overlay_enabled 0 -> disabled, 1 -> only primary image, 2 -> all images
+ * @property boolean $overlay_is_locked by default it is false
  * @property bool $is_special
  * @property bool $is_featured
  * @property double $latitude
@@ -150,7 +151,8 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property bool $show_on_auction123
  * @property bool $show_on_rvt
  *
- * @property string $category_label
+ * @property string|null $category_label
+ * @property int|null $inventory_category_id
  * @property string $status_label
  * @property string $color
  * @property double $interest_paid
@@ -177,6 +179,7 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property Collection<CustomerInventory> $customerInventory
  * @property DealerInventory $lotVantageInventory
  * @property Vendor $floorplanVendor
+ * @property Category $categoryObj
  *
  * @method static Builder select($columns = ['*'])
  * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
@@ -226,6 +229,9 @@ class Inventory extends Model
     const IS_ARCHIVED = 1;
     const IS_NOT_ARCHIVED = 0;
 
+    const IS_ACTIVE = 1;
+    const IS_NOT_ACTIVE = 0;
+    
     const SHOW_IN_WEBSITE = 1;
 
     const ATTRIBUTE_ZERO_VALUE = 0;
@@ -263,6 +269,9 @@ class Inventory extends Model
 
     const PAC_TYPE_PERCENT = 'percent';
     const PAC_TYPE_AMOUNT = 'amount';
+
+    const IS_OVERLAY_LOCKED = 1;
+    const IS_NOT_OVERLAY_LOCKED = 0;
 
     /**
      * The table associated with the model.
@@ -329,6 +338,7 @@ class Inventory extends Model
         'show_on_website',
         'tt_payment_expiration_date',
         'overlay_enabled',
+        'overlay_is_locked',
         'is_special',
         'is_featured',
         'latitude',
@@ -398,6 +408,7 @@ class Inventory extends Model
         'fp_balance' => 'float',
         'qb_sync_processed' => 'boolean',
         'is_floorplan_bill' => 'boolean',
+        'overlay_is_locked' => 'boolean',
         'sold_at' => 'datetime',
         'changed_fields_in_dashboard' => 'array',
         'tt_payment_expiration_date' => 'date'
@@ -618,15 +629,42 @@ class Inventory extends Model
         return $this->orderedImages()->first();
     }
 
-    public function getCategoryLabelAttribute()
+    /**
+     * @return BelongsTo
+     */
+    public function categoryObj(): BelongsTo
     {
-        $category = Category::where('legacy_category', $this->category)->first();
+        return $this->belongsTo(Category::class,'category', 'legacy_category');
+    }
 
-        if (empty($category)) {
+    /**
+     * @return string|null
+     */
+    public function getCategoryLabelAttribute(): ?string
+    {
+        /** @var Category|null $categoryObj */
+        $categoryObj = $this->categoryObj;
+
+        if (empty($categoryObj)) {
             return null;
         }
 
-        return $category->label;
+        return $categoryObj->label;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getInventoryCategoryIdAttribute(): ?int
+    {
+        /** @var Category|null $categoryObj */
+        $categoryObj = $this->categoryObj;
+
+        if (empty($categoryObj)) {
+            return null;
+        }
+
+        return $categoryObj->inventory_category_id;
     }
 
     public function getColorAttribute()
@@ -926,6 +964,7 @@ class Inventory extends Model
             'inventory_price' => count($potentialsPrices) ? min($potentialsPrices) : 0,
             'entity_type_id' => $this->entity_type_id,
             'inventory_condition' => $this->condition,
+            'inventory_category_id_or_null' => $this->inventory_category_id,
         ];
     }
 

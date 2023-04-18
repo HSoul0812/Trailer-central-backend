@@ -54,6 +54,10 @@ class ShowroomServiceTest extends TestCase
     private const SHOWROOM_FIELDS_MAPPING_TYPE_ATTRIBUTE = 'attribute';
     private const SHOWROOM_FIELDS_MAPPING_TYPE_INVENTORY = 'inventory';
 
+    private const ADDITIONAL_SEARCH_PARAMS = [
+        'model' => 'some_additional_model'
+    ];
+
     /**
      * @var ShowroomFieldsMappingRepositoryInterface|LegacyMockInterface
      */
@@ -571,6 +575,109 @@ class ShowroomServiceTest extends TestCase
         $this->assertSame(2, $result['new_images'][1]['position']);
         $this->assertArrayHasKey('is_secondary', $result['new_images'][1]);
         $this->assertTrue($result['new_images'][1]['is_secondary']);
+    }
+
+    /**
+     * @covers ::mapInventoryToFactory
+     *
+     * @dataProvider validDataProvider
+     *
+     * @group INTEGRATIONS
+     * @group INTEGRATIONS_SHOWROOM
+     */
+    public function testMapInventoryToFactoryWithAdditionalSearchParams(Showroom $showroom, Collection $showroomMappings, Attribute $attribute, array $unit)
+    {
+        $emptyCollection = new Collection([]);
+        $showrooms = new Collection([$showroom]);
+
+        $searchParams = [
+            'year' => $unit['year'],
+            'model' => $unit['model'],
+            'manufacturer' => $unit['manufacturer']
+        ];
+
+        $this->showroomFieldsMappingRepository
+            ->shouldReceive('getAll')
+            ->with([])
+            ->andReturn($showroomMappings)
+            ->once();
+
+        $this->showroomGenericMapRepository
+            ->shouldReceive('getAll')
+            ->with(['external_mfg_key' => "{$unit['year']};{$unit['manufacturer']};{$unit['model']}"])
+            ->andReturn($emptyCollection)
+            ->once();
+
+        $this->showroomGenericMapRepository
+            ->shouldReceive('getAll')
+            ->with(['external_mfg_key' => "{$unit['year']};{$unit['manufacturer']};{$unit['model']};{$unit['brand']}"])
+            ->andReturn($emptyCollection)
+            ->once();
+
+        $this->showroomRepository
+            ->shouldReceive('getAll')
+            ->with($searchParams)
+            ->andReturn($emptyCollection)
+            ->once();
+
+        $this->showroomRepository
+            ->shouldReceive('getAll')
+            ->with(array_merge($searchParams, self::ADDITIONAL_SEARCH_PARAMS))
+            ->andReturn($showrooms)
+            ->once();
+
+        $this->showroomFeatureRepository
+            ->shouldReceive('getAll')
+            ->with(['showroom_id' => $showroom->id])
+            ->andReturn($emptyCollection)
+            ->once();
+
+        $this->showroomFileRepository
+            ->shouldReceive('getAll')
+            ->with(['showroom_id' => $showroom->id])
+            ->andReturn($emptyCollection)
+            ->once();
+
+        $this->showroomImageRepository
+            ->shouldReceive('getAll')
+            ->with(['showroom_id' => $showroom->id])
+            ->andReturn($emptyCollection)
+            ->once();
+
+        $this->inventoryAttributeRepository
+            ->shouldReceive('getAllByEntityTypeId')
+            ->with($unit['entity_type_id'])
+            ->andReturn($emptyCollection)
+            ->once();
+
+        /** @var ShowroomService $showroomService */
+        $showroomService = app()->make(ShowroomService::class);
+
+        $result = $showroomService->mapInventoryToFactory($unit, self::ADDITIONAL_SEARCH_PARAMS);
+
+        $this->assertArrayHasKey('year', $result);
+        $this->assertSame($unit['year'], $result['year']);
+        $this->assertArrayHasKey('manufacturer', $result);
+        $this->assertSame($unit['manufacturer'], $result['manufacturer']);
+        $this->assertArrayHasKey('model', $result);
+        $this->assertSame($unit['model'], $result['model']);
+        $this->assertArrayHasKey('brand', $result);
+        $this->assertSame($unit['brand'], $result['brand']);
+        $this->assertArrayHasKey('entity_type_id', $result);
+        $this->assertSame($unit['entity_type_id'], $result['entity_type_id']);
+        $this->assertArrayHasKey('has_stock_images', $result);
+        $this->assertFalse($result['has_stock_images']);
+
+        $this->assertArrayHasKey('attributes', $result);
+        $this->assertCount(1, $result['attributes']);
+        $this->assertEquals($unit['attributes'][0], $result['attributes'][0]);
+
+        $this->assertArrayHasKey('payload_capacity', $result);
+        $this->assertSame($showroom->{self::SHOWROOM_PAYLOAD_CAPACITY_FIELD}, $result['payload_capacity']);
+
+        $this->assertEmpty($result['new_images']);
+        $this->assertEmpty($result['new_files']);
+        $this->assertEmpty($result['features']);
     }
 
     /**

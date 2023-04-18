@@ -4,6 +4,9 @@ namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * this is duplicate of App\Models\User\Settings
+ */
 class DealerAdminSetting extends Model
 {
     /**

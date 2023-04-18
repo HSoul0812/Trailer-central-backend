@@ -73,12 +73,12 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
     /**
      * {@inheritDoc}
      */
-    public function completePasswordReset(string $code, string $password, string $current_password): bool
+    public function completePasswordReset(string $code, string $password): bool
     {
         $dealerPasswordReset = $this->getByCode($code);
         $dealer = $dealerPasswordReset->dealer;
 
-        $this->updateDealerPassword($dealer, $password, $current_password);
+        $this->resetDealerPassword($dealer, $password);
 
         $dealerPasswordReset->status = DealerPasswordReset::STATUS_PASSWORD_RESET_COMPLETED;
 
@@ -101,13 +101,7 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
     public function updateDealerPassword(User $dealer, string $password, string $current_password): void
     {
         $this->passwordMatch($dealer->password, $current_password, $dealer->salt);
-
-        if (empty($dealer->salt)) {
-            $salt = uniqid();
-            DB::statement("UPDATE dealer SET salt = '{$salt}' WHERE dealer_id = {$dealer->dealer_id}");
-        }
-
-        DB::statement("UPDATE dealer SET password = ENCRYPT('{$password}', salt) WHERE dealer_id = {$dealer->dealer_id}");
+        $this->resetDealerPassword($dealer, $password);
     }
 
     /**
@@ -120,6 +114,20 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
         $this->passwordMatch($user->password, $current_password, $user->salt);
 
         DB::statement("UPDATE dealer_users SET password = ENCRYPT('{$password}', salt) WHERE dealer_user_id = {$user->dealer_user_id}");
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws TooLongPasswordException when the password is greater than eighth characters
+     */
+    public function resetDealerPassword(User $dealer, string $password): void
+    {
+        if (empty($dealer->salt)) {
+            $salt = uniqid();
+            DB::statement("UPDATE dealer SET salt = '{$salt}' WHERE dealer_id = {$dealer->dealer_id}");
+        }
+
+        DB::statement("UPDATE dealer SET password = ENCRYPT('{$password}', salt) WHERE dealer_id = {$dealer->dealer_id}");
     }
 
     /**

@@ -46,9 +46,9 @@ class PasswordResetService implements PasswordResetServiceInterface {
     /**
      * {@inheritDoc}
      */
-    public function finishReset(string $code, string $password, string $current_password) : bool
+    public function finishReset(string $code, string $password) : bool
     {
-        return $this->passwordResetRepo->completePasswordReset($code, $password, $current_password);
+        return $this->passwordResetRepo->completePasswordReset($code, $password);
     }
 
     public function updatePassword(UserAuthenticatable $user, string $password, string $current_password) : bool

@@ -6,7 +6,16 @@ use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * @property int $inventory_category_id
+ * @property int $entity_type_id
+ * @property string $category
  * @property string $label
+ * @property string $legacy_category
+ * @property string $website_label
+ * @property string $alt_category
+ * @property string $alt_label
+ *
+ * @property EntityType $entityType
  */
 class Category extends Model {
 

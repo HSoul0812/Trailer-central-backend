@@ -22,10 +22,9 @@ interface DealerPasswordResetRepositoryInterface extends Repository {
      *
      * @param string $code
      * @param string $password
-     * @param string $current_password
      * @return bool
      */
-    public function completePasswordReset(string $code, string $password, string $current_password) : bool;
+    public function completePasswordReset(string $code, string $password) : bool;
 
     /**
      *
@@ -44,11 +43,18 @@ interface DealerPasswordResetRepositoryInterface extends Repository {
     public function updateDealerPassword(User $dealer, string $password, string $current_password) : void;
 
     /**
-     * 
+     *
      * @param DealerUser $user
      * @param string $password
      * @param string $current_password
      * @return void
      */
     public function updateDealerUserPassword(DealerUser $user, string $password, string $current_password) : void;
+
+    /**
+     * @param User $dealer
+     * @param string $password
+     * @return void
+     */
+    public function resetDealerPassword(User $dealer, string $password): void;
 }

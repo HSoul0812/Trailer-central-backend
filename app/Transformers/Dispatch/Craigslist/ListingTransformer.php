@@ -83,17 +83,26 @@ class ListingTransformer extends TransformerAbstract
 
     public function includeDraft(ClappListing $listing)
     {
-        return $this->item($listing->draft, $this->draftTransformer);
+        if(!empty($listing->draft)) {
+            return $this->item($listing->draft, $this->draftTransformer);
+        }
+        return $this->null();
     }
 
     public function includePost(ClappListing $listing)
     {
-        return $this->item($listing->post, $this->postTransformer);
+        if(!empty($listing->post)) {
+            return $this->item($listing->post, $this->postTransformer);
+        }
+        return $this->null();
     }
 
     public function includeActivePost(ClappListing $listing)
     {
-        return $this->item($listing->activePost, $this->activePostTransformer);
+        if(!empty($listing->activePost)) {
+            return $this->item($listing->activePost, $this->activePostTransformer);
+        }
+        return $this->null();
     }
 
     public function includeTransaction(ClappListing $listing)

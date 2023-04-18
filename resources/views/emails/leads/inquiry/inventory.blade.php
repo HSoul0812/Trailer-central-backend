@@ -31,7 +31,10 @@
                     <td valign="top">
                         <!-- begin content -->
                         @if ($website == $simpleDomain)
-                          <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">TrailerTrader.com / A customer is interested in {{ $title }} “</h3>
+                            <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">
+                                TrailerTrader.com / A customer is interested in {{ $title }} <br>
+                                Following is the content of the 'contact form' that was submitted to you through trailertrader.com.
+                            </h3>
                         @else
                           <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">New Inventory Information Request on {{ $website }}</h3>
                         @endif
@@ -43,10 +46,8 @@
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Full Name: <strong>{{ $fullName }}</strong></p>
 
-                        <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Preferred Contact: <strong>{{ $preferred }}</strong></p>
-
-                        <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif; color: #8C2B22; font-weight: bold">
-                            Click to Reply: <strong><a href="mailto:{{ $email }}?subject={{ $subject }}&body={{ $comments }}">{{ $email }}</a></strong>
+                        <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif; color: #8C2B22;">
+                            Buyer's email: <strong><a href="mailto:{{ $email }}?subject={{ $subject }}&body={{ $comments }}">{{ $email }}</a></strong>
                         </p>
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Zip Code: <strong>{{ $postal }}</strong></p>

@@ -3,6 +3,7 @@
 namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\User\Settings;
 
 class CrmUser extends Model
 {
@@ -92,5 +93,10 @@ class CrmUser extends Model
     public function newDealerUser()
     {
         return $this->belongsTo(NewDealerUser::class, 'user_id', 'user_id');
+    }
+    
+    public function settings()
+    {
+        return $this->hasMany(Settings::class, 'user_id', 'user_id');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Nova\Actions\Dealer;
 
+use App\Models\Marketing\Facebook\Marketplace;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
@@ -43,9 +44,10 @@ class ClearFBMEErrors extends Action
         $nrErrorsCleared = 0;
         /** @var DealerFBMOverview $model */
         foreach ($models as $model) {
-            $model->retry_after_ts = NULL;
-            $model->save();
-            
+            $integration = Marketplace::find($model->id);
+            $integration->retry_after_ts = NULL;
+            $integration->save();
+
             $nrErrorsCleared += $this->fbErrors->dismissAllActiveForIntegration($model->id)->count();
         }
 
