@@ -3,9 +3,10 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
+use Database\traits\WithIndexes;
 class AddIndexesToFbappListingsTable extends Migration
 {
+    use WithIndexes;
     /**
      * Run the migrations.
      *
@@ -13,28 +14,21 @@ class AddIndexesToFbappListingsTable extends Migration
      */
     public function up()
     {
-        Schema::table('fbapp_listings', function (Blueprint $table) {
-            // Check if the index exists before attempting to create it
-            $indexExists = DB::select(DB::raw("SHOW INDEX FROM fbapp_listings WHERE Key_name = 'idx_inventory_id'"));
-            if (empty($indexExists)) {
+        if (!$this->indexExists('fbapp_listings', 'idx_inventory_id')) {
+            Schema::table('fbapp_listings', function (Blueprint $table) {
                 $table->index('inventory_id', 'idx_inventory_id');
-            }
-
-            $indexExists = DB::select(DB::raw("SHOW INDEX FROM fbapp_listings WHERE Key_name = 'idx_marketplace_id'"));
-            if (empty($indexExists)) {
+            });
+        }
+        if (!$this->indexExists('fbapp_listings', 'idx_marketplace_id')) {
+            Schema::table('fbapp_listings', function (Blueprint $table) {
                 $table->index('marketplace_id', 'idx_marketplace_id');
-            }
-
-            $indexExists = DB::select(DB::raw("SHOW INDEX FROM fbapp_listings WHERE Key_name = 'idx_created_at'"));
-            if (empty($indexExists)) {
-                $table->index('created_at', 'idx_created_at');
-            }
-
-            $indexExists = DB::select(DB::raw("SHOW INDEX FROM fbapp_listings WHERE Key_name = 'idx_marketplace_id_created_at'"));
-            if (empty($indexExists)) {
+            });
+        }
+        if (!$this->indexExists('fbapp_listings', 'idx_marketplace_id_created_at')) {
+            Schema::table('fbapp_listings', function (Blueprint $table) {
                 $table->index(['marketplace_id', 'created_at'], 'idx_marketplace_id_created_at');
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -44,27 +38,8 @@ class AddIndexesToFbappListingsTable extends Migration
      */
     public function down()
     {
-        Schema::table('fbapp_listings', function (Blueprint $table) {
-            // Drop the indexes if they exist
-            $indexExists = DB::select(DB::raw("SHOW INDEX FROM fbapp_listings WHERE Key_name = 'idx_inventory_id'"));
-            if (!empty($indexExists)) {
-                $table->dropIndex('idx_inventory_id');
-            }
-
-            $indexExists = DB::select(DB::raw("SHOW INDEX FROM fbapp_listings WHERE Key_name = 'idx_marketplace_id'"));
-            if (!empty($indexExists)) {
-                $table->dropIndex('idx_marketplace_id');
-            }
-
-            $indexExists = DB::select(DB::raw("SHOW INDEX FROM fbapp_listings WHERE Key_name = 'idx_created_at'"));
-            if (!empty($indexExists)) {
-                $table->dropIndex('idx_created_at');
-            }
-
-            $indexExists = DB::select(DB::raw("SHOW INDEX FROM fbapp_listings WHERE Key_name = 'idx_marketplace_id_created_at'"));
-            if (!empty($indexExists)) {
-                $table->dropIndex('idx_marketplace_id_created_at');
-            }
-        });
+        $this->dropIndexIfExist('fbapp_listings', 'idx_inventory_id');
+        $this->dropIndexIfExist('fbapp_listings', 'idx_marketplace_id');
+        $this->dropIndexIfExist('fbapp_listings', 'idx_created_at');
     }
 }
