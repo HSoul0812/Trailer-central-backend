@@ -313,6 +313,9 @@ class Collector extends Resource
                 Text::make('Images Delimiter', 'images_delimiter')->rules('max:128')->hideFromIndex()->help(
                     'Separator between links to images in the file (by default - ",")'
                 ),
+                Boolean::make('Images Delimiter Used In Image Urls', 'images_delimiter_used_in_image_url')->hideFromIndex()->help(
+                    'Fixes issue when a comma is present in image urls'
+                ),
                 Text::make('Primary Image Field')->hideFromIndex()->help(
                     'Pass this field when you have a column on source telling which one is the primary image'
                 ),
