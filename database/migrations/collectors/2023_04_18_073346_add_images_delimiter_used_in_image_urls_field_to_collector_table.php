@@ -18,9 +18,11 @@ class AddImagesDelimiterUsedInImageUrlsFieldToCollectorTable extends Migration
      */
     public function up()
     {
-        Schema::table(self::TABLE, function (Blueprint $table) {
-            $table->boolean(self::FIELD)->default(false);
-        });
+        if (!Schema::hasColumn(self::TABLE, self::FIELD)) {
+            Schema::table(self::TABLE, function (Blueprint $table) {
+                $table->boolean(self::FIELD)->default(false);
+            });
+        }
 
         DB::table(self::TABLE)->where('dealer_id', '=', self::DEALER_ID)->update([self::FIELD => true]);
     }
