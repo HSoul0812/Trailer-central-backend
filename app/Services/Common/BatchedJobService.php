@@ -98,10 +98,7 @@ class BatchedJobService implements BatchedJobServiceInterface
         ]);
 
         $this->tagRepository->forget($batch->batch_id);
-
-        if ($processedJobs === $batch->total_jobs) {
-            $this->tagRepository->stopMonitoring($batch->batch_id);
-        }
+        $this->tagRepository->stopMonitoring($batch->batch_id);
 
         $this->logger->info(sprintf('Batch [%s] was forgot', $batch->batch_id));
     }
@@ -174,7 +171,7 @@ class BatchedJobService implements BatchedJobServiceInterface
             }
         });
 
-        return count($jobIds);
+        return !$shouldFinishJob && count($jobIds);
     }
 
     private function pendingQueueJobs(string $queue): int
