@@ -391,6 +391,7 @@ class CsvImportService implements CsvImportServiceInterface
         "price" => true,
         "year" => true,
         "condition" => true,
+        "location_phone" => true
     );
 
     /**
@@ -485,9 +486,8 @@ class CsvImportService implements CsvImportServiceInterface
                 return false;
             }
         } catch (\Exception $ex) {
-            $this->validationErrors[] = $ex->getMessage();
-
-            Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
+            Log::info('Exception on bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
+            Log::debug($ex->getTraceAsString());
             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => $this->outputValidationErrors()]);
             return false;
         }
@@ -538,7 +538,7 @@ class CsvImportService implements CsvImportServiceInterface
                 'description' => 'Created/updated using inventory bulk uploader'
             ]));
         } catch (\Exception | InventoryException $ex) {
-            $this->validationErrors[] = 'An error occurred validating the inventory' . $this->inventory['stock'] ? ' with stock: ' . $this->inventory['stock'] . '.' : ' on row: ' . $lineNumber;
+            $this->validationErrors[] = 'Error occurred ' . (!empty($this->inventory['stock']) ? ' with stock: ' . $this->inventory['stock'] : ' on row: ' . $lineNumber);
             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
             Log::info('Error found on inventory for inventory bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString() . json_encode($this->validationErrors));
             Log::info("Index to header mapping: {$this->indexToheaderMapping}");
@@ -613,6 +613,10 @@ class CsvImportService implements CsvImportServiceInterface
                     $this->import($csvData, $lineNumber);
 
                     $this->inventory = [];
+                }
+            } else {
+                if (!$this->validateHeaders()) {
+                    throw new \Exception("Missing required headers");
                 }
             }
 
@@ -774,6 +778,27 @@ class CsvImportService implements CsvImportServiceInterface
     }
 
     /**
+     * @return bool
+     */
+    private function validateHeaders(): bool
+    {
+        $errors = [];
+
+        foreach (self::$_columnRequired as $column => $required) {
+            if (!in_array($column, array_keys(self::$_labels)) && $required) {
+                $errors[] = "$column is a required column.";
+            }
+        }
+
+        if (!empty($errors)) {
+            $this->validationErrors = array_merge($this->validationErrors, $errors);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * @param $line
      * @param $column
      * @param $errorMessage
@@ -846,11 +871,12 @@ class CsvImportService implements CsvImportServiceInterface
                     $this->inventory[$type] = self::$_columnValidation[$type]['list'][strtolower($value)];
                 }
 
-                if (isset(self::$_categoryToEntityTypeId[$this->inventory[$type]])) {
+                if (!empty($this->inventory[$type]) && isset(self::$_categoryToEntityTypeId[$this->inventory[$type]])) {
                     $this->inventory["entity_type_id"] = self::$_categoryToEntityTypeId[$this->inventory[$type]];
                 } else {
                     // this should really fail further up the line
                     $this->inventory["entity_type_id"] = 1;
+                    // return "Category $value is not a valid category"; Allowing units as Rade requested
                 }
                 break;
 
