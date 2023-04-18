@@ -11,11 +11,9 @@ use App\Nova\Actions\Integration\UnhideIntegration;
 use App\Nova\Resource;
 use Illuminate\Http\Request;
 
-use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Http\Requests\ActionRequest;
 
 use Laravel\Nova\Panel;
-use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\HasMany;
@@ -93,13 +91,13 @@ class Integration extends Resource
 
             Textarea::make('Send Email'),
 
-            Boolean::make('Uses Staging')->default(true),
+            Boolean::make('Uses Staging'),
             Boolean::make('Show for Integrated'),
 
             Boolean::make('Is Hidden')->hideWhenUpdating()->hideWhenCreating(),
 
             new Panel('Main', [
-                HasMany::make('Dealers', 'dealers')
+                HasMany::make('Integration Dealers', 'dealers', DealerIntegration::class),
             ]),
         ];
     }

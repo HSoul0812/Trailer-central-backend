@@ -61,10 +61,11 @@ class DealerIntegration extends Model
         'include_pending_sale'
     ];
 
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'last_run_at'
+    protected $casts = [
+        'created_at'  => 'datetime',
+        'updated_at'  => 'datetime',
+        'last_run_at' => 'datetime',
+        'msg_date'    => 'datetime'
     ];
 
     public function integration(): BelongsTo
