@@ -9,12 +9,26 @@ interface BatchedJobServiceInterface
     /**
      * Creates a batch, then start to monitoring it
      *
+     * @param string[] $queues
      * @param  string|null  $group
      * @param  int|null  $waitTime  time in seconds
      * @param  array|null  $context
      * @return BatchedJob
      */
-    public function create(?string $group = null, ?int $waitTime = null, ?array $context = null): BatchedJob;
+    public function create(
+        array $queues,
+        ?string $group = null,
+        ?int $waitTime = null,
+        ?array $context = null
+    ): BatchedJob;
+
+    /**
+     * Generates a unique id based on the group
+     *
+     * @param  string|null  $group
+     * @return string
+     */
+    public function generateBatchId(?string $group = null): string;
 
     /**
      * Detaches a monitored batch
