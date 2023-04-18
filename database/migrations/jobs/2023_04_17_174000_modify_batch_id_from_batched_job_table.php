@@ -11,7 +11,7 @@ class ModifyBatchIdFromBatchedJobTable extends Migration
      */
     public function up()
     {
-        DB::statement('ALTER TABLE batched_job MODIFY COLUMN batch_id varchar(76) NOT NULL');
+        DB::statement('ALTER TABLE batched_job MODIFY COLUMN batch_id varchar(96) NOT NULL');
     }
 
     /**
