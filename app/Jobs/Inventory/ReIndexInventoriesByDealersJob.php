@@ -25,7 +25,7 @@ class ReIndexInventoriesByDealersJob extends Job
      */
     private $dealerIds;
 
-    public $queue = 'scout';
+    public $queue = 'batched-jobs';
 
     /**  @var array|null */
     private $context;
