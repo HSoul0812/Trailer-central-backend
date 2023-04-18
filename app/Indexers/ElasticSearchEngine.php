@@ -2,6 +2,7 @@
 
 namespace App\Indexers;
 
+use App\Exceptions\ElasticSearch\IndexPurgingException;
 use ElasticAdapter\Exceptions\BulkRequestException;
 use ElasticAdapter\Indices\Alias;
 use ElasticAdapter\Indices\Index;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 use Laravel\Scout\Searchable;
 use Exception;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class ElasticSearchEngine extends \ElasticScoutDriver\Engine
 {
@@ -147,11 +148,52 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
         $this->indexManager->putAlias($indexName, new Alias($aliasName));
     }
 
-    public function purgeIndexList(array $list): void
+    /**
+     * It will drop indexes when they have not an alias (safe path) from a list of indexes,
+     * otherwise it will remove alias
+     *
+     * @param  array  $indexes
+     * @param  string  $alias
+     * @return void
+     */
+    public function purgeIndexes(array $indexes, string $alias): void
     {
-        foreach ($list as $index => $aliasMapping) {
-            $this->indexManager->drop($index);
+        foreach ($indexes as $index => $aliasMapping) {
+            // it is preferable to double check the aliases of the index at this point
+            // no matter if we got the aliases before ingestion time
+            if ($this->indexHasAlias($index, $alias)) {
+                try {
+                    // this could be used as a fallback index
+                    $this->indexManager->deleteAlias($index, $alias);
+                } catch (Exception $exception) {
+                    throw new IndexPurgingException($exception->getMessage(), $exception->getCode(), $exception);
+                }
+            } else {
+                try {
+                    $this->indexManager->drop($index);
+                } catch (Exception $exception) {
+                    // dropping an index should not interrups a subsequent process
+                    // it should only notifies
+                    Log::critical($exception->getMessage(), ['indexName' => $index]);
+                }
+            }
         }
+    }
+
+    /**
+     * Determines if an index has an alias
+     *
+     * @param  string  $indexName
+     * @param  string  $alias
+     * @return bool
+     */
+    public function indexHasAlias(string $indexName, string $alias): bool
+    {
+        $indexAliases = collect($this->indexManager->getAliases($indexName));
+
+        return $indexAliases->filter(function (Alias $indexAlias) use ($alias): bool {
+            return $indexAlias->getName() === $alias;
+        })->isNotEmpty();
     }
 
     public function ensureIndexDoesNotExists(string $indexAliasName): void

@@ -10,6 +10,15 @@ use App\Services\Inventory\InventoryServiceInterface;
 
 class GenerateOverlayImageJobByDealer extends Job
 {
+    /** @var int time in seconds */
+    private const WAIT_TIME_IN_SECONDS = 2;
+
+    /** @var string[] list of queues which are monitored */
+    private const MONITORED_QUEUES = ['overlay-images'];
+
+    /** @var string  */
+    private const MONITORED_GROUP = 'inventory-generate-overlays-by-dealer';
+
     /**
      * The number of times the job may be attempted.
      *
@@ -22,7 +31,7 @@ class GenerateOverlayImageJobByDealer extends Job
      */
     public $dealerId;
 
-    public $queue = 'overlay-images';
+    public $queue = 'batched-jobs';
 
     public function __construct(int $dealerId)
     {
@@ -35,15 +44,23 @@ class GenerateOverlayImageJobByDealer extends Job
             [
                 'dealer_id' => $this->dealerId,
                 'images_greater_than' => 1
-            ], false, false, [Inventory::getTableName().'.inventory_id']
+            ],
+            false,
+            false,
+            [Inventory::getTableName().'.inventory_id']
         );
 
         if ($inventories->count() > 0) {
-            Job::batch(static function (BatchedJob $job) use ($inventories) {
-                foreach ($inventories as $inventory) {
-                    dispatch(new GenerateOverlayImageJob($inventory->inventory_id,false))->onQueue('overlay-images');
-                }
-            },__CLASS__, 2);
+            Job::batch(
+                static function (BatchedJob $job) use ($inventories) {
+                    foreach ($inventories as $inventory) {
+                        dispatch(new GenerateOverlayImageJob($inventory->inventory_id, false));
+                    }
+                },
+                self::MONITORED_QUEUES,
+                self::MONITORED_GROUP.'-'.$this->dealerId,
+                self::WAIT_TIME_IN_SECONDS
+            );
 
             // we can not inject `InventoryServiceInterface` into constructor to avoid cyclic dependency
             $service->invalidateCacheAndReindexByDealerIds([$this->dealerId]);
