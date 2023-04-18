@@ -29,20 +29,28 @@ abstract class Job implements ShouldQueue
     use InteractsWithQueue, Queueable, SerializesModels, WithTags;
 
     /**
-     * Will create the batch, then it will run the anonymous function and monitor the batch, when it is finished,
-     * it will return the batch
+     * Will create the batch, then it will run the anonymous function and monitor the batch, it will return the batch
+     * when it is finished or when the related-queues are empty
      *
      * @param  callable  $callback
+     * @param  string[]  $queues list of monitored queues
      * @param  string|null  $group
-     * @param  int|null  $waitTime in seconds
+     * @param  int|null  $waitTime  time in seconds to wait for monitored job to be checked if it was finished
+     * @param  array|null  $context
      * @return BatchedJob
      */
-    public static function batch(callable $callback, ?string $group = null, ?int $waitTime = null, ?array $context = null): BatchedJob
+    public static function batch(
+        callable $callback,
+        array $queues,
+        ?string $group = null,
+        ?int $waitTime = null,
+        ?array $context = null
+    ): BatchedJob
     {
         /** @var BatchedJobServiceInterface $service */
         $service = app(BatchedJobServiceInterface::class);
 
-        $batch = $service->create($group, $waitTime, $context);
+        $batch = $service->create($queues, $group, $waitTime, $context);
 
         self::$batchId = $batch->batch_id;
 

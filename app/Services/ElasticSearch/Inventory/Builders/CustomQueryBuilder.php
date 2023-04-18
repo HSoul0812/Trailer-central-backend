@@ -186,6 +186,13 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
         return [
             'query' => [
                 'bool' => [
+                    'must' => [
+                        [
+                            'exists' => [
+                                'field' => 'image',
+                            ],
+                        ]
+                    ],
                     'must_not' => [
                         [
                             'term' => [

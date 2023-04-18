@@ -18,7 +18,7 @@ class AddWaitTimeJobTable extends Migration
             $table->smallInteger('wait_time')
                 ->after('group')
                 ->unsigned()
-                ->default(BatchedJobService::WAIT_TIME);
+                ->default(BatchedJobService::WAIT_TIME_IN_SECONDS);
         });
     }
 
