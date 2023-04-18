@@ -48,10 +48,8 @@
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Full Name: <strong>{{ $fullName }}</strong></p>
 
-                        <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Preferred Contact: <strong>{{ $preferred }}</strong></p>
-
-                        <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif; color: #8C2B22; font-weight: bold">
-                            Click to Reply: <strong><a href="mailto:{{ $email }}?subject={{ $subject }}&body={{ $comments }}">{{ $email }}</a></strong>
+                        <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif; color: #8C2B22;">
+                            Buyer's email: <strong><a href="mailto:{{ $email }}?subject={{ $subject }}&body={{ $comments }}">{{ $email }}</a></strong>
                         </p>
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Zip Code: <strong>{{ $postal }}</strong></p>
