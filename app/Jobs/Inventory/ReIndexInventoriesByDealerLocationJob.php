@@ -30,7 +30,7 @@ class ReIndexInventoriesByDealerLocationJob extends Job
     /**  @var array|null */
     private $context;
 
-    public $queue = 'scout';
+    public $queue = 'batched-jobs';
 
     /** @var int The number of times the job may be attempted. */
     public $tries = 1;
