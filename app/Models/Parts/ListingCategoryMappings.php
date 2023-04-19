@@ -10,6 +10,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ListingCategoryMappings extends Model
 {
+    const TYPE_INVENTORY = 'Inventory';
+
+    const TYPE_ID_GENERAL_TRAILER = 1;
+
+    const ENTITY_TYPE_ID_TRAILER = 1;
+
     protected $table = 'listing_category_mappings';
 
     /**
