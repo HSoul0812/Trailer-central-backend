@@ -9,6 +9,7 @@ use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Select;
 use App\Models\Website\Config\WebsiteConfig;
+use App\Nova\Actions\Website\ChangeOEMStatus;
 use App\Models\Website\Website as DealerWebsite;
 
 use Laravel\Nova\Panel;
@@ -105,6 +106,8 @@ class Website extends Resource
                 ->displayUsingLabels(),
 
             Text::make('Template')->help("This will apply as the CertificateName on SSL certificates")->hideFromIndex(),
+
+            Boolean::make('OEM', 'is_oem')->sortable(),
 
             Boolean::make('Active', 'is_active')->sortable(),
 
@@ -261,7 +264,8 @@ class Website extends Resource
     {
         return [
             app()->make(IssueCertificateSsl::class),
-            app()->make(EnableProxiedDomainsSsl::class)
+            app()->make(EnableProxiedDomainsSsl::class),
+            app()->make(ChangeOEMStatus::class)
         ];
     }
 }

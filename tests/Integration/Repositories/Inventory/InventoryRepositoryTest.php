@@ -1,16 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\Integration\Repositories\Dms;
+namespace Tests\Integration\Repositories\Inventory;
 
+use App\Models\User\DealerLocation;
 use App\Models\User\User;
 use App\Models\Inventory\Inventory;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 use App\Repositories\Inventory\InventoryRepository;
-use Illuminate\Support\Facades\DB;
+use \Illuminate\Database\QueryException;
 
 /**
+ * @group DW
+ * @group DW_INVENTORY
+ *
  * Class InventoryRepositoryTest
  * @package Tests\Integration\Repositories\Dms
  *
@@ -20,12 +24,38 @@ class InventoryRepositoryTest extends TestCase
 {
     use DatabaseTransactions;
 
+    public const OVERLAY_DEFAULT_CONFIGURATION = [
+        'overlay_logo' => 'logo.png',
+        'overlay_logo_position' => User::OVERLAY_LOGO_POSITION_LOWER_RIGHT,
+        'overlay_logo_width' => '20%',
+        'overlay_logo_height' => '20%',
+        'overlay_upper' => User::OVERLAY_UPPER_DEALER_NAME,
+        'overlay_upper_bg' => '#000000',
+        'overlay_upper_alpha' => 0,
+        'overlay_upper_text' => '#ffffff',
+        'overlay_upper_size' => 40,
+        'overlay_upper_margin' => 40,
+        'overlay_lower' => User::OVERLAY_UPPER_DEALER_PHONE,
+        'overlay_lower_bg' => '#000000',
+        'overlay_lower_alpha' => 0,
+        'overlay_lower_text' => '#ffffff',
+        'overlay_lower_size' => 40,
+        'overlay_lower_margin' => 40,
+        'overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL
+    ];
+
+    /** @var int */
     protected $dealerId;
+
+    /** @var User  */
+    protected $dealer;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->dealerId = factory(User::class)->create()->dealer_id;
+
+        $this->dealer = factory(User::class)->create(self::OVERLAY_DEFAULT_CONFIGURATION);
+        $this->dealerId = $this->dealer->dealer_id;
     }
 
     public function tearDown(): void
@@ -35,7 +65,6 @@ class InventoryRepositoryTest extends TestCase
         $this->dealerId = null;
         parent::tearDown();
     }
-
 
     /**
      * @covers ::getFloorplanned
@@ -73,8 +102,11 @@ class InventoryRepositoryTest extends TestCase
      * @group DMS
      * @group DMS_INVENTORY
      */
-    public function testGetFloorplannedInventoryWithoutStatus()
+    public function testWillThrowAnExceptionWhenStatusNull()
     {
+        $this->expectException(QueryException::class);
+        $this->expectExceptionMessageMatches("/1048 Column 'status' cannot be null/s");
+
         $itemHaveNoStatus = [
             'dealer_id' => $this->dealerId,
             'status' => null,
@@ -158,5 +190,50 @@ class InventoryRepositoryTest extends TestCase
         ]);
 
         $this->assertEquals(0, $inventory->count());
+    }
+
+    /**
+     * @covers ::getOverlayParams
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     */
+    public function testGetOverlayParams()
+    {
+        /** @var Inventory $inventory */
+        $inventory = factory(Inventory::class)->create([
+                'dealer_id' => $this->dealerId,
+                'title' => '**some_random__** Test Inventory 2021 Trailers',
+                'overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL
+            ]
+        );
+
+        $expectedResult = array_merge(
+            self::OVERLAY_DEFAULT_CONFIGURATION,
+            [
+                'overlay_default' => null,
+                'dealer_id' => $this->dealer->dealer_id,
+                'inventory_id' => $inventory->inventory_id,
+                'dealer_overlay_enabled' => $this->dealer->overlay_enabled,
+                'overlay_text_dealer' => $this->dealer->name,
+                'overlay_updated_at' => $this->dealer->overlay_updated_at,
+                'overlay_text_phone' => DealerLocation::phoneWithNationalFormat(
+                    $inventory->dealerLocation->phone,
+                    $inventory->dealerLocation->country
+                ),
+                'overlay_text_location' => sprintf(
+                    '%s, %s',
+                    $inventory->dealerLocation->city,
+                    $inventory->dealerLocation->region
+                )
+            ]
+        );
+
+        /** @var InventoryRepository $inventoryRepository */
+        $inventoryRepository = app()->make(InventoryRepository::class);
+
+        $overlayConfiguration = $inventoryRepository->getOverlayParams($inventory->inventory_id);
+
+        $this->assertEquals($expectedResult, $overlayConfiguration);
     }
 }

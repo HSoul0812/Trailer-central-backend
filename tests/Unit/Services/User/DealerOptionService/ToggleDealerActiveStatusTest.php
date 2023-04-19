@@ -2,12 +2,13 @@
 
 namespace Tests\Unit\Services\User\DealerOptionService;
 
+use App\Models\User\User;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\User\DealerOptionsService;
+use Exception;
 use Mockery;
 use Tests\TestCase;
-use Mockery\LegacyMockInterface;
 use Illuminate\Support\Facades\Log;
 
 use Carbon\Carbon;
@@ -17,12 +18,12 @@ use Illuminate\Support\Collection;
 /**
  * Test for App\Services\User\DealerOptionsService
  *
- * class DeactivateDealerTest
+ * class ToggleDealerActivateStatus
  * @package Tests\Unit\Services\User\DealerOptionService
  *
  * @coversDefaultClass \App\Services\User\DealerOptionsService
  */
-class DeactivateDealerTest extends TestCase
+class ToggleDealerActiveStatusTest extends TestCase
 {
     /**
      * @var UserRepositoryInterface
@@ -46,67 +47,68 @@ class DeactivateDealerTest extends TestCase
     }
 
     /**
-     * @covers ::deactivateDealer
+     * @covers ::toggleDealerActiveStatus
      *
-     * @dataProvider validDataProviderForDeactivateDealer
+     * @dataProvider validDataProviderForToggleDealerActiveStatus
      *
      * @group DMS
      * @group DMS_DEALER_OPTIONS
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testDeactivateDealer($dealerId)
+    public function testToggleDealerActiveStatusDealer($dealerId, $params)
     {
         /** @var DealerOptionsService $service **/
         $service = $this->app->make(DealerOptionsService::class);
 
-        $this->userRepository
-            ->shouldReceive('beginTransaction')
-            ->once();
+        $deletedAt = User::find($dealerId)->deleted_at;
+        $datetime = Carbon::now()->format('Y-m-d H:i:s');
 
         $inventoryParams = [
-            'active' => $service::INACTIVE,
-            'is_archived' => $service::ARCHIVED_ON,
-            'archived_at' => Carbon::now()->format('Y-m-d H:i:s')
+            'dealer_id' => $dealerId,
+            'active' => $params['active'],
+            'is_archived' => $params['is_archived'],
+            'archived_at' => $params['active'] ? null : $datetime
         ];
 
         $this->userRepository
-            ->shouldReceive('deactivateDealer')
-            ->with($dealerId)
-            ->once();
-
-        $this->inventoryRepository
-            ->shouldReceive('archiveInventory')
+            ->shouldReceive('toggleDealerStatus')
             ->with(
                 $dealerId,
-                $inventoryParams
+                $params['active'],
+                $datetime
             )
             ->once();
 
-        $this->userRepository
-            ->shouldReceive('commitTransaction')
+        $this->inventoryRepository
+            ->shouldReceive('massUpdateDealerInventoryOnActiveStateChange')
+            ->with(
+                $dealerId,
+                $inventoryParams,
+                $deletedAt
+            )
             ->once();
 
-        $result = $service->deactivateDealer($dealerId);
+        $result = $service->toggleDealerActiveStatus($dealerId, $params['active']);
         $this->assertTrue($result);
     }
 
     /**
-     * @covers ::deactivateDealer
+     * @covers ::toggleDealerActiveStatus
      *
-     * @dataProvider invalidValueTypesDataProviderForDeactivateDealer
+     * @dataProvider invalidValueTypesDataProviderForToggleDealerActiveStatus
      *
      * @group DMS
      * @group DMS_DEALER_OPTIONS
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testDeactivateDealerWithInvalidValueTypes($dealerId)
+    public function testToggleDealerActiveStatusWithInvalidValueTypes($dealerId, $active)
     {
         Log::shouldReceive('error');
         $this->expectException(\TypeError::class);
 
         /** @var DealerOptionsService $service **/
         $service = $this->app->make(DealerOptionsService::class);
-        $result = $service->deactivateDealer($dealerId);
+        $result = $service->toggleDealerActiveStatus($dealerId, $active);
 
         $this->assertTrue($result);
     }
@@ -114,11 +116,22 @@ class DeactivateDealerTest extends TestCase
     /**
      * @return array[]
      */
-    public function validDataProviderForDeactivateDealer(): array
+    public function validDataProviderForToggleDealerActiveStatus(): array
     {
         return [
             'Deactivate Dealer' => [
-                'dealer_id' => 1001
+                'dealer_id' => 1004,
+                'params' => [
+                    'active' => 0,
+                    'is_archived' => 1
+                ]
+            ],
+            'Activate Dealer' => [
+                'dealer_id' => 1004,
+                'params' => [
+                    'active' => 1,
+                    'is_archived' => 0
+                ]
             ],
         ];
     }
@@ -126,17 +139,19 @@ class DeactivateDealerTest extends TestCase
     /**
      * @return array[]
      */
-    public function invalidValueTypesDataProviderForDeactivateDealer(): array
+    public function invalidValueTypesDataProviderForToggleDealerActiveStatus(): array
     {
         $badDealers = ['TESTING', null, ''];
         $dealerId = $badDealers[array_rand($badDealers)];
 
         return [
-            'Activate Parts with invalid dealer id' => [
-                'dealer_id' => $dealerId
+            'Activate with invalid dealer id' => [
+                'dealer_id' => $dealerId,
+                'active' => 1
             ],
-            'Deactivate Parts with invalid dealer id' => [
-                'dealer_id' => $dealerId
+            'Deactivate with invalid dealer id' => [
+                'dealer_id' => $dealerId,
+                'active' => 0
             ]
         ];
     }

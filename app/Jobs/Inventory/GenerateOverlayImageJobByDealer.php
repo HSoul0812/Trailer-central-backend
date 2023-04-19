@@ -19,18 +19,13 @@ class GenerateOverlayImageJobByDealer extends Job
     /** @var string  */
     private const MONITORED_GROUP = 'inventory-generate-overlays-by-dealer';
 
-    /**
-     * The number of times the job may be attempted.
-     *
-     * @var int
-     */
-    public $tries = 5;
+    /** @var int The number of times the job may be attempted. */
+    public $tries = 1;
 
-    /**
-     * @var int
-     */
+    /** @var int */
     public $dealerId;
 
+    /** @var string */
     public $queue = 'batched-jobs';
 
     public function __construct(int $dealerId)

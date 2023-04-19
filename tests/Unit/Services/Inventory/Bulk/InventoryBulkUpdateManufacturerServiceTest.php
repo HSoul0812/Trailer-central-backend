@@ -12,6 +12,9 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\InventoryBulkUpdateManufacturerService;
 
 /**
+ * @group DW
+ * @group DW_INVENTORY
+ *
  * Test for App\Services\Inventory\InventoryBulkUpdateManufacturerService
  *
  * Class InventoryBulkUpdateManufacturerServiceTest
