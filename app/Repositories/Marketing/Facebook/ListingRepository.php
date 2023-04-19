@@ -171,8 +171,10 @@ class ListingRepository implements ListingRepositoryInterface {
             ->where(function ($query) use ($inventoryTableName, $minDescriptionLength) {
                 $query->whereRaw("LENGTH(IFNULL({$inventoryTableName}.description, '')) >= " . $minDescriptionLength)
                     ->orWhereRaw("LENGTH(IFNULL({$inventoryTableName}.description_html, '')) >= " . (2 * $minDescriptionLength));
-            })
-            ->has('orderedImages');
+            });
+
+        // Only the inventory with images
+        $query = $query->has('orderedImages');
 
         // Join with Listings
         $query = $query->leftJoin(Listings::getTableName(), function ($join) use ($integration, $listingsTableName) {
@@ -181,7 +183,7 @@ class ListingRepository implements ListingRepositoryInterface {
             $join->on("$listingsTableName.inventory_id", '=', Inventory::getTableName() . '.inventory_id');
             $join->on("$listingsTableName.marketplace_id", '=', DB::raw($integration->id));
             $join->on(DB::raw("$listingsTableName.status NOT IN ('$statusDeleted', '$statusExpired')"), '=', DB::raw(1));
-        });
+        })->whereNull("$listingsTableName.id");
 
         // Skip Integrations With Non-Expired Errors
         $query = $query->leftJoin(Error::getTableName(), function ($join) {
@@ -209,7 +211,7 @@ class ListingRepository implements ListingRepositoryInterface {
         // Set Sort By
         $query = $query->orderBy("{$inventoryTableName}.created_at", "asc");
         $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.listings'));
-        
+
         return $query->get();
     }
 
