@@ -113,7 +113,7 @@ class Website extends Resource
 
             Boolean::make('Responsive', 'responsive')->sortable(),
 
-            Select::make('Inventory Source', 'inventory_source')->withMeta(['value' => $sourceConfig->value ?? 'env' ])->options(self::INVENTORY_SOURCE_MAP),
+            Select::make('Inventory Source', 'inventory_source')->withMeta(['value' => $sourceConfig->value ?? 'env' ])->options(self::INVENTORY_SOURCE_MAP)->hideWhenCreating(),
 
             Textarea::make('Global Filter', 'type_config')->sortable()->help(
               "Usage:<br>
@@ -173,7 +173,7 @@ class Website extends Resource
               lte (is less than or equal)<br>"
             ),
 
-            Textarea::make('Head Scripts', 'HeadScripts')->hideFromIndex(),
+            Textarea::make('Head Scripts', 'HeadScripts')->hideWhenCreating()->hideFromIndex(),
 
         ];
     }
