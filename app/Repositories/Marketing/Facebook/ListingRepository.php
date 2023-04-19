@@ -178,7 +178,11 @@ class ListingRepository implements ListingRepositoryInterface {
         $query = $query->leftJoin(Listings::getTableName(), function ($join) use ($integration, $listingsTableName) {
             $statusDeleted = Listings::STATUS_DELETED;
             $statusExpired = Listings::STATUS_EXPIRED;
-            $join->on("$listingsTableName.inventory_id", '=', Inventory::getTableName() . '.inventory_id');
+
+            $identifyInventoryId = "fbapp_listings.inventory_id = inventory.inventory_id";
+            $identifyTitle = "(fbapp_listings.year = inventory.year AND fbapp_listings.make = inventory.make AND fbapp_listings.model = inventory.model)";
+
+            $join->on(DB::raw("($identifyInventoryId OR $identifyTitle)"), '=', DB::raw("1"));
             $join->on("$listingsTableName.marketplace_id", '=', DB::raw($integration->id));
             $join->on(DB::raw("$listingsTableName.status NOT IN ('$statusDeleted', '$statusExpired')"), '=', DB::raw(1));
         });
@@ -209,7 +213,9 @@ class ListingRepository implements ListingRepositoryInterface {
         // Set Sort By
         $query = $query->orderBy("{$inventoryTableName}.created_at", "asc");
         $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.listings'));
-        
+
+        dd($query->toSql());
+
         return $query->get();
     }
 
