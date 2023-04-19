@@ -214,8 +214,6 @@ class ListingRepository implements ListingRepositoryInterface {
         $query = $query->orderBy("{$inventoryTableName}.created_at", "asc");
         $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.listings'));
 
-        dd($query->toSql());
-
         return $query->get();
     }
 
