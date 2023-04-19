@@ -20,6 +20,15 @@ class InventoryListResponseTransformer extends TransformerAbstract
         $resource = new Collection($inventories, new InventoryTransformer());
         $resource->setPaginator(new IlluminatePaginatorAdapter($response->inventories));
         $paginatedArray = $manager->createData($resource)->toArray();
+
+        if (isset($response->sdkPayload)) {
+            $paginatedArray['meta']['sdk_payload'] = $response->sdkPayload;
+        }
+
+        if (isset($response->esQuery)) {
+            $paginatedArray['meta']['es_query'] = $response->esQuery;
+        }
+
         return [
             'inventories' => $paginatedArray['data'],
             'meta' => $paginatedArray['meta'],
