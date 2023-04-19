@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Class WebsiteObserver
- * @package App\Nova\Observer
  */
 class WebsiteObserver
 {
