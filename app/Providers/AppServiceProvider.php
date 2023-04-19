@@ -14,7 +14,7 @@ use App\Models\Website\Website;
 use App\Nova\Observer\CollectorObserver;
 use App\Nova\Observer\DealerIncomingMappingObserver;
 use App\Nova\Observer\IntegrationObserver;
-use App\Nova\Observer\WebsiteObserver;
+use App\Observers\Website\WebsiteObserver;
 use App\Repositories\Bulk\Parts\BulkUploadRepository;
 use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepository;

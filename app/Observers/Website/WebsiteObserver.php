@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Nova\Observer;
+namespace App\Observers\Website;
 
-use App\Models\Website\Website;
 use App\Models\Inventory\CustomOverlay;
+use App\Models\Website\Website;
 use Illuminate\Support\Facades\DB;
 
 /**
