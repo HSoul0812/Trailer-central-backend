@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'enabled' => env('CLOUDWATCH_ENABLED', true),
+    'enabled' => env('CLOUDWATCH_ENABLED', false),
     'group_name' => env('CLOUDWATCH_GROUP_NAME'),
     'stream_name' => env('CLOUDWATCH_STREAM_NAME', 'laravel.log'),
     'sdk' => [

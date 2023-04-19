@@ -159,7 +159,7 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
-            'tap' => [Testing::class],
+            'tap' => [CloudWatchPusher::class]
         ],
 
         'inventory-overlays' => [
@@ -168,7 +168,7 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
-            'tap' => [Testing::class],
+            'tap' => [CloudWatchPusher::class]
         ],
 
         'auth' => [
