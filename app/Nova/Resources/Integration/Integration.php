@@ -97,7 +97,7 @@ class Integration extends Resource
             Boolean::make('Is Hidden')->hideWhenUpdating()->hideWhenCreating(),
 
             new Panel('Main', [
-                HasMany::make('Integration Dealers', 'dealers', DealerIntegration::class),
+                HasMany::make('Integration Dealers', 'integrationDealers', DealerIntegration::class),
             ]),
         ];
     }
