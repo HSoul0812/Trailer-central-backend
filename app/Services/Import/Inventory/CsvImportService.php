@@ -24,7 +24,7 @@ use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
  */
 class CsvImportService implements CsvImportServiceInterface
 {
-    const MAX_VALIDATION_ERROR_CHAR_COUNT = 3072;
+    public const MAX_VALIDATION_ERROR_CHAR_COUNT = 3072;
     private const S3_VALIDATION_ERRORS_PATH = 'inventory/validation-errors/%s';
 
     /**
@@ -40,17 +40,17 @@ class CsvImportService implements CsvImportServiceInterface
     /**
      * @var array
      */
-    static private $_categoryToEntityTypeId = array();
+    private static $_categoryToEntityTypeId = array();
 
     /**
      * @var array
      */
-    static private $_attributes = array();
+    private static $_attributes = array();
 
     /**
      * @var array
      */
-    static private $_labels = array();
+    private static $_labels = array();
 
     /**
      * @var ConvertHelper
@@ -60,17 +60,17 @@ class CsvImportService implements CsvImportServiceInterface
     /**
      * @private
      */
-    const IM_IGNORE = 0;
+    public const IM_IGNORE = 0;
 
     /**
      * @private
      */
-    const IM_REPLACE = 1;
+    public const IM_REPLACE = 1;
 
     /**
      * @private
      */
-    const IM_APPEND = 2;
+    public const IM_APPEND = 2;
 
     /**
      * @var int
@@ -143,7 +143,7 @@ class CsvImportService implements CsvImportServiceInterface
     /**
      * @var array
      */
-    static private $_columnMap = array(
+    private static $_columnMap = array(
         "inventory_id" => "identifier",
         "on website & classifieds" => array("on website & classifieds", "on website and classifieds", "show on website"),
         "stock" => array("stock", "stock #", "stock#", "stock nr", "stock number"),
@@ -195,7 +195,7 @@ class CsvImportService implements CsvImportServiceInterface
     /**
      * @var array
      */
-    static private $_columnValidation = array(
+    private static $_columnValidation = array(
         "inventory_id" => array("type" => "string", "regex" => "([a-zA-Z0-9]+)"),
         "on website & classifieds" => array(
             "type" => "enum",
@@ -381,7 +381,7 @@ class CsvImportService implements CsvImportServiceInterface
     /**
      * @var array
      */
-    static private $_columnRequired = array(
+    private static $_columnRequired = array(
         "inventory_id" => false,
         "stock" => true,
         "title" => true,
@@ -405,7 +405,7 @@ class CsvImportService implements CsvImportServiceInterface
     /**
      * @var string[]
      */
-    static $locationColumns = array(
+    public static $locationColumns = array(
         "location city",
         "location country",
         "location postal code",
@@ -416,7 +416,7 @@ class CsvImportService implements CsvImportServiceInterface
     /**
      * @var string[]
      */
-    static $ignorableColumns = array(
+    public static $ignorableColumns = array(
         "number of images",
         "admin-notes",
         "created at date"
@@ -431,6 +431,11 @@ class CsvImportService implements CsvImportServiceInterface
      * @var array Array of validation errors per row
      */
     private $validationErrors = [];
+
+    /**
+     * @var array Array of all errors
+     */
+    private $globalListOfErrors = [];
 
     /**
      * @var array Array of CSV headers. Of the form `array[index] = value` where index is the position and value is the header
@@ -449,8 +454,7 @@ class CsvImportService implements CsvImportServiceInterface
     public function __construct(
         BulkUploadRepositoryInterface $bulkUploadRepository,
         InventoryServiceInterface $inventoryService
-    )
-    {
+    ) {
         $this->bulkUploadRepository = $bulkUploadRepository;
         $this->inventoryService = $inventoryService;
 
@@ -522,8 +526,8 @@ class CsvImportService implements CsvImportServiceInterface
             return;
         }
 
-        Log::info('Importing bulk uploaded inventory. Inventory Bulk Upload #' . $this->bulkUpload->id . PHP_EOL);
-        Log::debug($this->inventory);
+        /*Log::info('Importing bulk uploaded inventory. Inventory Bulk Upload #' . $this->bulkUpload->id . PHP_EOL);
+        Log::debug($this->inventory);*/
 
         try {
             $this->inventory['dealer_id'] = $this->bulkUpload->dealer_id;
@@ -560,10 +564,11 @@ class CsvImportService implements CsvImportServiceInterface
                 // for the header line
                 if ($lineNumber === 1) {
                     // if column header is not allowed
+                    $value = trim($value);
                     if (!$this->isAllowedHeader($value)) {
                         $this->validationErrors[$lineNumber][] = $this->printError($lineNumber, $index + 1, "Invalid Header: " . $value);
                         Log::info("Invalid Header: " . $value);
-                        // else, the column header is allowed
+                    // else, the column header is allowed
                     } else {
                         $this->indexToheaderMapping[$index] = strtolower($value);
                         $appendImages = array_search(strtolower($value), self::$_labels);
@@ -572,7 +577,7 @@ class CsvImportService implements CsvImportServiceInterface
                             $this->appendIndex = $index;
                         }
                     }
-                    // for lines > 1
+                // for lines > 1
                 } else {
                     if ($this->appendIndex) {
                         $isAppend = $csvData[$this->appendIndex];
@@ -588,23 +593,42 @@ class CsvImportService implements CsvImportServiceInterface
                     }
 
                     $header = array_search(strtolower($this->indexToheaderMapping[$index]), array_map('strtolower', self::$_labels));
-                    Log::debug(array("header" => $header, 'headerMapping' => $this->indexToheaderMapping[$index]));
+                    // Log::debug(array("header" => $header, 'headerMapping' => $this->indexToheaderMapping[$index]));
 
                     if ($header) {
                         if ($errorMessage = $this->isDataInvalid($header, $value)) {
                             $this->validationErrors[$lineNumber][] = $this->printError($lineNumber, $index + 1, $errorMessage);
-                            Log::info("Error: " . $errorMessage);
+
+                            // Include errors to a global list to evaluate later
+                            if (!array_key_exists($errorMessage, $this->globalListOfErrors)) {
+                                $this->globalListOfErrors[$errorMessage] = 1;
+                            } else {
+                                $this->globalListOfErrors[$errorMessage] += 1;
+                            }
                         }
                     }
                 }
             }
 
-            // Log::debug(self::$_labels);
+            //Log::debug(self::$_labels);
 
             // if there's an error return false, if not, import part
             if ($lineNumber != 1) {
                 if (isset($this->validationErrors[$lineNumber]) && count($this->validationErrors[$lineNumber]) > 0) {
-                    Log::info("Errors: " . json_encode($this->validationErrors));
+                    // Remove duplicate errors on other units to avoid having a massive validation errors list
+                    foreach ($this->validationErrors[$lineNumber] as $keyError => $error) {
+                        $exploded = trim(explode('in line', $error)[0]);
+                        if (isset($this->globalListOfErrors[$exploded]) && $this->globalListOfErrors[$exploded] > 1) {
+                            unset($this->validationErrors[$lineNumber][$keyError]);
+                            $this->globalListOfErrors[$exploded] -= 1;
+
+                            // If there's no errors left, remove from list
+                            if (empty($this->validationErrors[$lineNumber])) {
+                                unset($this->validationErrors[$lineNumber]);
+                            }
+                        }
+                    }
+
                     $this->inventory = [];
 
                     return false;
@@ -817,7 +841,7 @@ class CsvImportService implements CsvImportServiceInterface
      */
     private function sanitizeValue(string $value)
     {
-        return filter_var($value, FILTER_SANITIZE_STRING, array('flags' => FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_HIGH));;
+        return filter_var($value, FILTER_SANITIZE_STRING, array('flags' => FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_HIGH));
     }
 
     /**
@@ -833,6 +857,13 @@ class CsvImportService implements CsvImportServiceInterface
             return false;
         } elseif ((in_array($type, self::$locationColumns) || in_array($type, self::$ignorableColumns))) {
             return false;
+        }
+
+        // Validate if the required column isn't empty
+        if (array_key_exists($type, self::$_columnRequired)) {
+            if (self::$_columnRequired[$type] && !($value === "0" || $value)) {
+                return $type . " is a required field, can't be empty";
+            }
         }
 
         Log::info('Type: ' . $type . ' Value: ' . $value);
@@ -884,7 +915,7 @@ class CsvImportService implements CsvImportServiceInterface
                 if (isset(self::$_columnValidation[$type]['list'][strtolower($value)])) {
                     $this->inventory[$type] = self::$_columnValidation[$type]['list'][strtolower($value)];
                 } else {
-                    if (in_array($this->inventory["entity_type_id"], $this->requiredBrandCategories)) {
+                    if (isset($this->inventory["entity_type_id"]) && in_array($this->inventory["entity_type_id"], $this->requiredBrandCategories)) {
                         return "A valid brand name is required for Recreational Vehicles and Watercraft";
                     }
                 }
@@ -1046,26 +1077,19 @@ class CsvImportService implements CsvImportServiceInterface
             case 'location_phone':
                 // lookup location by phone number
                 $phone = str_replace(array('(', ')', ' ', '-'), '', $value);
-                $dealerLocation = DealerLocation::where([
-                    'phone' => $phone,
+                $dealerLocations = DealerLocation::where([
                     'dealer_id' => $this->bulkUpload->dealer_id
-                ])->first();
+                ]);
 
                 // If no dealerLocation is found by phone, use default dealer location
-                if (!$dealerLocation) {
-                    $dealerLocation = DealerLocation::where([
-                        'dealer_id' => $this->bulkUpload->dealer_id,
-                        'is_default' => 1
-                    ])->first();
+                $dealerLocation = $dealerLocations->where(function ($query) use ($phone) {
+                    $query->where(['phone' => $phone])
+                        ->orWhere(['is_default' => 1]);
+                })->first();
 
-                    // If no default location found use first location found for dealer
-                    if (!$dealerLocation) {
-                        $dealerLocation = DealerLocation::where([
-                            'dealer_id' => $this->bulkUpload->dealer_id,
-                        ])->first();
-                    } else { // If no location found return default error
-                        return "Location based on phone number '{$value}' not found and no location has been found for this dealer.";
-                    }
+                // If no location found return default error
+                if (is_null($dealerLocation)) {
+                    return "Location based on phone number '{$value}' not found and no location has been found for this dealer.";
                 }
 
                 $this->inventory['dealer_location_id'] = $dealerLocation->dealer_location_id;
@@ -1138,5 +1162,4 @@ class CsvImportService implements CsvImportServiceInterface
 
         return null;
     }
-
 }
