@@ -3,14 +3,17 @@
 namespace App\Nova\Resources\Craigslist;
 
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\DateTime;
 use App\Nova\Resource;
 
 class ClappBalance extends Resource
 {
-    
-    public static $group = 'Craigslist';
-    
+
+    public static $group = 'Marketplaces';
+
     /**
      * The model the resource corresponds to.
      *
@@ -34,10 +37,15 @@ class ClappBalance extends Resource
         'dealer_id'
     ];
 
+    public static function label(): string
+    {
+        return 'Craiglist Balances';
+    }
+
     /**
      * Get the fields displayed by the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function fields(Request $request)
@@ -46,11 +54,17 @@ class ClappBalance extends Resource
             Text::make('Dealer ID')
                 ->hideWhenUpdating()
                 ->sortable(),
-
-            Text::make('Balance')
+            BelongsTo::make('Dealer', 'user', 'App\Nova\Resources\Dealer\Dealer')
+                ->sortable()
+                ->withMeta(['extraAttributes' => [
+                    'readonly' => true,
+                    'disabled' => true,
+                ]]),
+            Currency::make('Balance')
+                ->textAlign('right')
                 ->sortable(),
 
-            Text::make('Last Updated')
+            DateTime::make('Last Updated')
                 ->sortable()
                 ->hideWhenCreating()
                 ->hideWhenUpdating(),

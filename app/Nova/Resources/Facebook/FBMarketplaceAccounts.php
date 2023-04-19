@@ -5,22 +5,31 @@ namespace App\Nova\Resources\Facebook;
 use App\Nova\Actions\Dealer\ClearFBMEErrors;
 use App\Nova\Actions\FME\DownloadIntegrationRunHistory;
 use App\Nova\Actions\FME\DownloadRunHistory;
+use App\Nova\Filters\Marketing\FmiLastRunErrorCode;
+use App\Nova\Filters\Marketing\FmiLastRunStatus;
+use App\Nova\Lenses\Marketing\FmeFailedToday;
+use App\Nova\Lenses\Marketing\FmePartialToday;
 use App\Nova\Metrics\Marketing\FmeDealersAttempted;
 use App\Nova\Metrics\Marketing\FmeErrors;
+use App\Nova\Metrics\Marketing\FmeErrorTypes;
 use App\Nova\Metrics\Marketing\FmeIntegrations;
 use App\Nova\Metrics\Marketing\FmeListings;
+use App\Nova\Metrics\Marketing\FmePostingResults;
+use App\Nova\Metrics\Marketing\FmePostsPerDay;
+use App\Nova\Metrics\Marketing\FmeTodayStatus;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\BelongsTo;
 use App\Nova\Resource;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 
 class FBMarketplaceAccounts extends Resource
 {
-    public static $group = 'Facebook';
+    public static $group = 'Marketplaces';
     public static $orderBy = ['last_attempt_ts' => 'asc'];
 
     /**
@@ -48,7 +57,7 @@ class FBMarketplaceAccounts extends Resource
 
     public static function label(): string
     {
-        return 'FB Marketplace Accounts';
+        return 'Facebook Overview';
     }
 
     /**
@@ -60,9 +69,9 @@ class FBMarketplaceAccounts extends Resource
     public function fields(Request $request): array
     {
         return [
-            new Panel('FB Integration Details', $this->panelIntegration()),
+            new Panel('Integration Details', $this->panelIntegration()),
 
-            new Panel("FBME Status", $this->panelStatus()),
+            new Panel("Status", $this->panelStatus()),
 
             new Panel("Today's status", $this->panelTodaysResults()),
 
@@ -83,7 +92,7 @@ class FBMarketplaceAccounts extends Resource
             Text::make('Dealer', 'dealer')
                 ->sortable(),
 
-            Text::make('FB Username')
+            Text::make('Facebook Username', 'fb_username')
                 ->sortable(),
 
 
@@ -96,19 +105,14 @@ class FBMarketplaceAccounts extends Resource
     protected function panelStatus(): array
     {
         return [
-            Text::make('Last Attempt', function () {
-                if (stripos($this->last_attempt_ts, '1000') !== false) {
-                    return "never";
-                } else {
-                    return date('M-d H:i', strtotime($this->last_attempt_ts));
-                }
-            })->sortable(),
+            DateTime::make('Last Attempt', 'last_attempt_ts')->sortable(),
 
             Number::make('Remaining', 'last_attempt_posts_remaining')
                 ->sortable(),
 
             Text::make('Last Run', function () {
-                if ($this->last_attempt_posts_remaining === 0) {
+
+                if (empty($this->last_attempt_posts_remaining)) {
                     return "complete";
                 } elseif ($this->last_attempt_posts_remaining == $this->posts_per_day) {
                     return "fail";
@@ -160,6 +164,11 @@ class FBMarketplaceAccounts extends Resource
             new FmeListings,
             new FmeDealersAttempted,
             new FmeIntegrations,
+            new FmeTodayStatus,
+            new FmePostsPerDay,
+            new FmePostingResults,
+            new FmeErrorTypes,
+
         ];
     }
 
@@ -171,7 +180,10 @@ class FBMarketplaceAccounts extends Resource
      */
     public function filters(Request $request): array
     {
-        return [];
+        return [
+            new FmiLastRunStatus(),
+            new FmiLastRunErrorCode()
+        ];
     }
 
     /**
@@ -182,7 +194,10 @@ class FBMarketplaceAccounts extends Resource
      */
     public function lenses(Request $request): array
     {
-        return [];
+        return [
+            new FmePartialToday,
+            new FmeFailedToday,
+        ];
     }
 
     /**

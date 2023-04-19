@@ -2,23 +2,13 @@
 
 namespace App\Nova\Metrics\Marketing;
 
-use App\Models\Marketing\Facebook\Error;
+use App\Models\Marketing\Facebook\PostingHistory;
+use App\Nova\Metrics\Model;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Laravel\Nova\Metrics\Value;
-use Laravel\Nova\Metrics\ValueResult;
+use Laravel\Nova\Metrics\Trend;
 
-class FmeErrors extends Value
+class FmePostsPerDay extends Trend
 {
-    /**
-     * Title of the Metric
-     *
-     * @return string
-     */
-    public function name(): string
-    {
-        return 'Errors';
-    }
-
     /**
      * The width of the card (1/3, 2/3, 1/2, 1/4, 3/4, or full).
      *
@@ -27,14 +17,24 @@ class FmeErrors extends Value
     public $width = '1/4';
 
     /**
+     * Title of the Metric
+     *
+     * @return string
+     */
+    public function name(): string
+    {
+        return 'Listings Trend';
+    }
+
+    /**
      * Calculate the value of the metric.
      *
-     * @param NovaRequest $request
-     * @return ValueResult
+     * @param \Laravel\Nova\Http\Requests\NovaRequest $request
+     * @return mixed
      */
-    public function calculate(NovaRequest $request): ValueResult
+    public function calculate(NovaRequest $request)
     {
-        return $this->count($request, Error::class);
+        return $this->countByDays($request, PostingHistory::where('type', 'posting'));
     }
 
     /**
@@ -52,14 +52,12 @@ class FmeErrors extends Value
      *
      * @return array
      */
-    public function ranges(): array
+    public function ranges()
     {
         return [
-            'TODAY' => 'Today',
-            1 => 'Yesterday',
-            7 => '7 Days',
-            14 => '14 Days',
-            28 => '28 Days',
+            30 => '30 Days',
+            60 => '60 Days',
+            90 => '90 Days',
         ];
     }
 
@@ -68,8 +66,8 @@ class FmeErrors extends Value
      *
      * @return string
      */
-    public function uriKey(): string
+    public function uriKey()
     {
-        return 'fme-errors';
+        return 'fme-posts-per-day';
     }
 }
