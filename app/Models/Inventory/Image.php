@@ -50,4 +50,14 @@ class Image extends Model
     {
         return $this->hasMany(InventoryImage::class, 'image_id', 'image_id');
     }
+
+    public function getFilenameOfOriginalImage(): ?string
+    {
+        if ($this->filename_without_overlay) {
+            return $this->filename_without_overlay;
+        }
+
+        // we're forced to always check `filename_noverlay` to avoid data inconsistency due previous versions
+        return empty($this->filename_noverlay) ? $this->filename : $this->filename_noverlay;
+    }
 }
