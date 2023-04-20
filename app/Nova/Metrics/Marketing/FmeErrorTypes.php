@@ -3,11 +3,12 @@
 namespace App\Nova\Metrics\Marketing;
 
 use App\Models\Marketing\Facebook\Error;
+use App\Nova\Metrics\Model;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Laravel\Nova\Metrics\Value;
-use Laravel\Nova\Metrics\ValueResult;
+use Laravel\Nova\Metrics\Partition;
+use Carbon\Carbon;
 
-class FmeErrors extends Value
+class FmeErrorTypes extends Partition
 {
     /**
      * Title of the Metric
@@ -16,7 +17,7 @@ class FmeErrors extends Value
      */
     public function name(): string
     {
-        return 'Errors';
+        return 'Error Types(this week)';
     }
 
     /**
@@ -29,12 +30,12 @@ class FmeErrors extends Value
     /**
      * Calculate the value of the metric.
      *
-     * @param NovaRequest $request
-     * @return ValueResult
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @return mixed
      */
-    public function calculate(NovaRequest $request): ValueResult
+    public function calculate(NovaRequest $request)
     {
-        return $this->count($request, Error::class);
+        return $this->count($request, Error::where('created_at', '>', Carbon::now()->startOfWeek()), 'error_type');
     }
 
     /**
@@ -48,28 +49,12 @@ class FmeErrors extends Value
     }
 
     /**
-     * Get the ranges available for the metric.
-     *
-     * @return array
-     */
-    public function ranges(): array
-    {
-        return [
-            'TODAY' => 'Today',
-            1 => 'Yesterday',
-            7 => '7 Days',
-            14 => '14 Days',
-            28 => '28 Days',
-        ];
-    }
-
-    /**
      * Get the URI key for the metric.
      *
      * @return string
      */
-    public function uriKey(): string
+    public function uriKey()
     {
-        return 'fme-errors';
+        return 'fme-error-types';
     }
 }

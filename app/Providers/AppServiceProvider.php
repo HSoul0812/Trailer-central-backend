@@ -10,9 +10,11 @@ use App\Http\Controllers\v1\File\ImageController;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Models\Integration\Collector\Collector;
 use App\Models\Integration\Integration;
+use App\Models\Website\Website;
 use App\Nova\Observer\CollectorObserver;
 use App\Nova\Observer\DealerIncomingMappingObserver;
 use App\Nova\Observer\IntegrationObserver;
+use App\Observers\Website\WebsiteObserver;
 use App\Repositories\Bulk\Parts\BulkUploadRepository;
 use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepository;
@@ -218,6 +220,7 @@ class AppServiceProvider extends ServiceProvider
             DealerIncomingMapping::observe(DealerIncomingMappingObserver::class);
             Integration::observe(IntegrationObserver::class);
             Collector::observe(CollectorObserver::class);
+            Website::observe(WebsiteObserver::class);
         });
 
         // Increase default database character set length (Specified key was too long)
