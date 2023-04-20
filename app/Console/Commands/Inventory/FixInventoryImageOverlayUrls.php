@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands\Inventory;
 
+use App\Constants\Date;
+use App\Models\Inventory\Inventory;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use stdClass as Dealer;
@@ -34,12 +36,24 @@ class FixInventoryImageOverlayUrls extends Command
                     JOIN inventory_image on inventory_image.image_id = image.image_id
                     JOIN inventory on inventory.inventory_id = inventory_image.inventory_id
                 SET
-                    filename_without_overlay = IF(filename_noverlay IS NOT NULL AND filename_noverlay != '', filename_noverlay, filename),
-                    filename_with_overlay = IF(filename_noverlay IS NOT NULL AND filename_noverlay != '', filename, NULL)
-                WHERE inventory.dealer_id = :dealer_id
+                    filename_without_overlay = filename_noverlay,
+                    filename_with_overlay = filename,
+                    overlay_updated_at = :overlay_updated_at
+                WHERE
+                    inventory.dealer_id = :dealer_id AND
+                    inventory.overlay_enabled IN (:primary_image,:all_images) AND
+                    (filename_noverlay IS NOT NULL AND filename_noverlay != '')
 SQL;
 
-            DB::statement($updateFilenameCompanionsSQL, ['dealer_id' => $dealer->dealer_id]);
+            DB::statement(
+                $updateFilenameCompanionsSQL,
+                [
+                    'dealer_id' => $dealer->dealer_id,
+                    'primary_image' => Inventory::OVERLAY_ENABLED_PRIMARY,
+                    'all_images' => Inventory::OVERLAY_ENABLED_ALL,
+                    'overlay_updated_at' => now()->format(Date::FORMAT_Y_M_D_T)
+                ]
+            );
         });
     }
 }
