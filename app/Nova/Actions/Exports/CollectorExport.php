@@ -2,6 +2,7 @@
 
 namespace App\Nova\Actions\Exports;
 
+use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -15,7 +16,7 @@ use Maatwebsite\LaravelNovaExcel\Actions\DownloadExcel;
  * Class CollectorExport
  * @package App\Nova\Actions\Exports
  */
-class CollectorExport extends DownloadExcel implements WithHeadings, WithMapping, WithStyles, WithEvents
+class CollectorExport extends DownloadExcel implements WithHeadings, WithMapping, WithStyles, WithEvents, WithStrictNullComparison
 {
     /**
      * @var string
