@@ -5,6 +5,8 @@ namespace App\Helpers;
 use App\Models\User\User;
 use Illuminate\Support\Facades\Storage;
 use App\Exceptions\Helpers\MissingOverlayLogoParametersException;
+use Imagick, ImagickDraw;
+use App\Services\CRM\Email\MosaicoServiceInterface;
 
 /**
  * Class ImageHelper
@@ -700,5 +702,149 @@ class ImageHelper
         ob_end_clean();
 
         return $imageContent;
+    }
+
+    /**
+     * Get Image Placeholder
+     * 
+     * @param int $width
+     * @param int $height
+     * 
+     * @return string file content
+     */
+    public function getImagePlaceholder($width, $height)
+    {
+        $image = new Imagick();
+
+        $image->newImage( $width, $height, "#707070" );
+        $image->setImageFormat( "png" );
+
+        $x = 0;
+        $y = 0;
+        $size = 40;
+
+        $draw = new ImagickDraw();
+
+        while ( $y < $height )
+        {
+            $draw->setFillColor( "#808080" );
+
+            $points = [
+                [ "x" => $x, "y" => $y ],
+                [ "x" => $x + $size, "y" => $y ],
+                [ "x" => $x + $size * 2, "y" => $y + $size ],
+                [ "x" => $x + $size * 2, "y" => $y + $size * 2 ]
+            ];
+
+            $draw->polygon( $points );
+
+            $points = [
+                [ "x" => $x, "y" => $y + $size ],
+                [ "x" => $x + $size, "y" => $y + $size * 2 ],
+                [ "x" => $x, "y" => $y + $size * 2 ]
+            ];
+
+            $draw->polygon( $points );
+
+            $x += $size * 2;
+
+            if ( $x > $width )
+            {
+                $x = 0;
+                $y += $size * 2;
+            }
+        }
+
+        $draw->setFillColor( "#B0B0B0" );
+        $draw->setFontSize( $width / 5 );
+        $draw->setFontWeight( 800 );
+        $draw->setGravity( Imagick::GRAVITY_CENTER );
+        $draw->annotation( 0, 0, $width . " x " . $height );
+
+        $image->drawImage( $draw );
+
+        return $image->getImageBlob();
+    }
+
+    /**
+     * Alternative to resize() Method above without the original file getting deleted
+     * 
+     * @param string $file
+     * @param int $width
+     * @param int $height
+     * 
+     * @return string file content
+     */
+    public function resizeImage(string $file, int $width, int $height)
+    {
+        $image = new Imagick($file);
+        $image->resizeImage( $width, $height, Imagick::FILTER_LANCZOS, 1.0 );
+
+        return $image->getImageBlob();
+    }
+
+    /**
+     * Not sure what this do
+     * 
+     * @param string $file
+     * @param int $width
+     * @param int $height
+     * 
+     * @return string file content
+     */
+    public function coverImage(string $file, int $width, int $height)
+    {
+        $image = new Imagick($file);
+
+        $image_geometry = $image->getImageGeometry();
+
+        $width_ratio = $image_geometry[ "width" ] / $width;
+        $height_ratio = $image_geometry[ "height" ] / $height;
+
+        $resize_width = $width;
+        $resize_height = $height;
+
+        if ( $width_ratio > $height_ratio )
+            $resize_width = 0;
+        else
+            $resize_height = 0;
+
+        $image->resizeImage( $resize_width, $resize_height, Imagick::FILTER_LANCZOS, 1.0 );
+
+        $image_geometry = $image->getImageGeometry();
+
+        $x = ( $image_geometry[ "width" ] - $width ) / 2;
+        $y = ( $image_geometry[ "height" ] - $height ) / 2;
+
+        $image->cropImage( $width, $height, $x, $y );
+
+        return $image->getImageBlob();
+    }
+
+    /**
+     * Create Thumbnail Image
+     * 
+     * @param string $file
+     * @return string
+     */
+    public function createThumbnailImage(string $file)
+    {
+        $tempThumbnailPath = $this->createTempFile();
+        $newImage = new Imagick($file);
+        $newImage->resizeImage(MosaicoServiceInterface::THUMBNAIL_WIDTH, 
+            MosaicoServiceInterface::THUMBNAIL_HEIGHT, Imagick::FILTER_LANCZOS, 1.0, TRUE );
+        $newImage->writeImage($tempThumbnailPath);
+
+        return $tempThumbnailPath;
+    }
+
+    /**
+     * Get filesize() for Remote File
+     */
+    public function getRemoteFileSize(string $url)
+    {
+        $headers = get_headers($url, 1);
+        $filesize = $headers["Content-Length"] ?? 0;
+        return $filesize;
     }
 }

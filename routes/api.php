@@ -1159,6 +1159,17 @@ $api->version('v1', function ($route) {
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');
                 });
+
+                // Mosaico
+                $route->group([
+                    'prefix' => 'mosaico'
+                ], function($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Email\MosaicoController@getConfigs');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\MosaicoController@processHtml');
+                    $route->post('/upload', 'App\Http\Controllers\v1\CRM\Email\MosaicoController@uploadImages');
+                    $route->get('/upload', 'App\Http\Controllers\v1\CRM\Email\MosaicoController@getImages');
+                    $route->get('/img', 'App\Http\Controllers\v1\CRM\Email\MosaicoController@processImage');
+                });
             });
 
             /*
