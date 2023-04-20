@@ -102,6 +102,7 @@ class CollectorLog extends Resource
             Text::make('Exception'),
 
             DateTime::make('Created At', 'created_at')
+                ->format('DD MMM, YYYY - LT')
                 ->exceptOnForms(),
         ];
     }
