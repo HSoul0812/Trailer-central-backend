@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Nova\Resources\Dealer\Dealer;
-use Feed\EditMapping\EditMapping;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Nova;
@@ -91,8 +90,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
             new NovaImport(),
             (new BulkConfiguration())->canSee(function ($request) {
                 return $request->user()->hasAnyRole('Admin', 'Support');
-            }),
-            new EditMapping()
+            })
         ];
     }
 
