@@ -149,6 +149,7 @@ class CrmServiceProvider extends ServiceProvider
         \Validator::extend('unique_email_blast_name', 'App\Rules\CRM\Email\UniqueEmailBlastName@passes');
         \Validator::extend('valid_timezone', 'App\Rules\CRM\User\ValidTimezone@passes');
         \Validator::extend('valid_sort_orders_crm', 'App\Rules\CRM\Leads\ValidSortOrderCrm@passes');
+        \Validator::extend('valid_email_interaction', 'App\Rules\CRM\Interactions\ValidEmailInteraction@passes');
 
         LeadStatus::observe(LeadStatusObserver::class);
         Lead::observe(LeadObserver::class);

@@ -33,6 +33,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use App\Helpers\ImageHelper;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Services\CRM\Interactions\DTOs\EmailDraft;
+use App\Services\CRM\Interactions\DTOs\EmailDraftAttachment;
+use App\Mail\CRM\Interactions\EmailBuilderEmail;
 
 /**
  * Class InteractionEmailService
@@ -100,7 +106,7 @@ class InteractionService implements InteractionServiceInterface
     protected $users;
 
     /**
-     * @var SalesPeresonRepositoryInterface
+     * @var SalesPersonRepositoryInterface
      */
     protected $salespeople;
 
@@ -109,6 +115,15 @@ class InteractionService implements InteractionServiceInterface
      */
     protected $log;
 
+    /**
+     * @var ImageHelper
+     */
+    protected $imageHelper;
+
+    /**
+     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
+     */
+    protected $leadRepo;
 
     /**
      * InteractionsRepository constructor.
@@ -125,6 +140,8 @@ class InteractionService implements InteractionServiceInterface
      * @param StatusRepositoryInterface $leadStatus
      * @param UserRepositoryInterface $users
      * @param SalesPersonRepositoryInterface $salespeople
+     * @param ImageHelper $imageHelper
+     * @param LeadRepositoryInterface $leadRepo
      */
     public function __construct(
         AuthServiceInterface $auth,
@@ -138,7 +155,9 @@ class InteractionService implements InteractionServiceInterface
         TokenRepositoryInterface $tokens,
         StatusRepositoryInterface $leadStatus,
         UserRepositoryInterface $users,
-        SalesPersonRepositoryInterface $salespeople
+        SalesPersonRepositoryInterface $salespeople,
+        ImageHelper $imageHelper,
+        LeadRepositoryInterface $leadRepo
     ) {
         // Initialize Services
         $this->auth = $auth;
@@ -155,6 +174,9 @@ class InteractionService implements InteractionServiceInterface
         $this->leadStatus = $leadStatus;
         $this->users = $users;
         $this->salespeople = $salespeople;
+
+        $this->imageHelper = $imageHelper;
+        $this->leadRepo = $leadRepo;
 
         // Initialize Log File for Interactions
         $this->log = Log::channel('interaction');
@@ -250,20 +272,34 @@ class InteractionService implements InteractionServiceInterface
             }
         }
 
+        // Handling Attachments
+
         if(!isset($params['attachments'])) {
             $params['attachments'] = $attachments;
         }
 
+        // If Single Attachment is detected
         if ($params['attachments'] instanceof UploadedFile) {
             $params['attachments'] = array_fill(0, 1, $params['attachments']);
         }
 
+        // If Attachments are not manually Uploaded
         $this->log->info('Found ' . count($params['attachments']) . ' Attachments To Send Via Email');
         foreach($params['attachments'] as $key => $attachment) {
             if (!is_a($attachment, UploadedFile::class)) {
                 unset($params['attachments'][$key]);
             }
         }
+
+        // Handling Remote File Attachments
+        if (isset($params['existing_attachments'])) {
+
+            // only return file URL
+            $params['files'] = array_map(function ($file) {
+                return $file['filename'];
+            }, $params['existing_attachments']);
+        }
+
 
         // Get From Email
         if($smtpConfig !== null) {
@@ -279,11 +315,12 @@ class InteractionService implements InteractionServiceInterface
         $this->log->info('Configured Email With Subject ' . $parsedEmail->subject . ' To Send to Lead');
 
         // Get Draft if Exists
-        $emailHistory = $this->emailHistory->findEmailDraft($fromEmail, $params['lead_id'], $params['quote_id']);
+        $emailHistory = $this->emailHistory->findEmailDraft($fromEmail, $params['lead_id'], $params['quote_id'] ?? null);
         if(!empty($emailHistory->email_id)) {
             $this->log->info('Found Draft #' . $emailHistory->email_id . ' of Email We Are Currently Sending');
             $parsedEmail->setEmailHistoryId($emailHistory->email_id);
             $parsedEmail->setMessageId($emailHistory->message_id);
+            $parsedEmail->setInteractionId($emailHistory->interaction_id);
         }
 
         // Send Email
@@ -301,6 +338,7 @@ class InteractionService implements InteractionServiceInterface
             $interactionEmail = true;
         }
 
+        // Update Lead Status
         if (!empty($params['lead_id'])) {
             $lead = Lead::findOrFail($params['lead_id']);
             $this->log->info('Found Lead ID #' . $lead->identifier . ' to Send Email To');
@@ -363,8 +401,10 @@ class InteractionService implements InteractionServiceInterface
         $parsedEmail->setBody($params['body']);
 
         // Append Attachments
-        foreach($params['attachments'] as $attachment) {
-            $parsedEmail->addAttachment(AttachmentFile::getFromUploadedFile($attachment));
+        if (isset($params['attachments'])) {
+            foreach($params['attachments'] as $attachment) {
+                $parsedEmail->addAttachment(AttachmentFile::getFromUploadedFile($attachment));
+            }
         }
 
         // Append Existing Attachments
@@ -397,7 +437,7 @@ class InteractionService implements InteractionServiceInterface
             $interaction = $this->interactions->createOrUpdate([
                 'id'                => $parsedEmail->getInteractionId(),
                 'lead_id'           => (!empty($params['lead_id'])) ? trim($params['lead_id']) : '',
-                'quote_id'          => (int) $params['quote_id'] ?? '',
+                'quote_id'          => $params['quote_id'] ?? '',
                 'user_id'           => $userId,
                 'sales_person_id'   => !empty($salesPerson) ? $salesPerson->id : NULL,
                 'interaction_type'  => 'EMAIL',
@@ -476,5 +516,190 @@ class InteractionService implements InteractionServiceInterface
             'contact_date' => $contactDate,
             'task_details' => $interactionNote
         ];
+    }
+
+    /**
+     * get Email Draft data to show on UI
+     * 
+     * @param array $params
+     * @return EmailDraft
+     */
+    public function getEmailDraft(array $params)
+    {
+        $emailConfig = $this->config($params['dealer_id'], $params['sales_person_id'] ?? null);
+
+        $emailHistory = $this->emailHistory->findEmailDraft($emailConfig->fromEmail, $params['lead_id'], null);
+
+        if ($emailHistory) {
+
+            return new EmailDraft([
+                'email_id' => $emailHistory->emailId,
+                'interaction_id' => $emailHistory->interactionId,
+                'lead_id' => $params['lead_id'],
+                'message_id' => $emailHistory->message_id,
+                'subject' => $emailHistory->subject,
+                'body' => utf8_encode($emailHistory->body),
+                'from_email' => $emailHistory->from_email,
+                'from_name' => $emailHistory->from_name,
+                'to_email' => $emailHistory->to_email,
+                'to_name' => $emailHistory->to_name,
+                'replyto_email' => $emailConfig->replyEmail,
+                'replyto_name' => $emailConfig->replyName,
+                'attachments' => $emailHistory->attachments
+            ]);
+
+        } else {
+
+            $subject = ''; $body = '';
+
+            // get appropiate subject & body if replying interaction
+            if (isset($params['interaction_id'])) {
+
+                $parentEmailHistory = $this->interactions->getEmailInteraction($params['interaction_id']);
+                $subject .= 'RE: '. $parentEmailHistory->subject;
+                $parentDate = 'On '. Carbon::parse($parentEmailHistory->date_sent)->format('D, M j, Y') .' at '. Carbon::parse($parentEmailHistory->date_sent)->format('g:i A');
+                $parentFrom = $parentEmailHistory->from_name .'<'. $parentEmailHistory->from_email .'> wrote: ';
+                $body .= "\n\n\n". $parentDate .", ". $parentFrom ."\n<blockquote>" . $parentEmailHistory->body . "</blockquote>";
+            }
+
+            // adding email signature
+            $emailSignature = isset($params['sales_person_id']) ? 
+                $this->salespeople->getEmailSignature($params['sales_person_id'])
+                : $this->users->getEmailSignature($params['dealer_id']);
+
+            $body .= "\n\n\n". $emailSignature;
+
+            // get Lead
+            $lead = $this->leadRepo->get(['id' => $params['lead_id']]);
+
+            return new EmailDraft([
+                'lead_id' => $params['lead_id'],
+                'subject' => $subject,
+                'body' => utf8_encode($body),
+                'from_email' => $emailConfig->fromEmail,
+                'from_name' => $emailConfig->fromName,
+                'to_email' => $lead->email_address,
+                'to_name' => $lead->full_name,
+                'replyto_email' => $emailConfig->replyEmail,
+                'replyto_name' => $emailConfig->replyName
+            ]);
+        }
+    }
+
+    /**
+     * save Email Draft data
+     * 
+     * @param array $params
+     * @return EmailDraft
+     */
+    public function saveEmailDraft(array $params)
+    {
+        $emailConfig = $this->config($params['dealer_id'], $params['sales_person_id'] ?? null);
+
+        $emailHistory = $this->emailHistory->findEmailDraft($emailConfig->fromEmail, $params['lead_id'], null) ?? null;
+
+        $emailAttachments = [];
+        // upload new attachments
+        if (isset($params['files'])) {
+
+            foreach ($params['files'] as $file) {
+
+                if (!($file instanceof UploadedFile)) continue;
+
+                $fileContent = $file->get();
+                $fileName = $file->getClientOriginalName();
+                $randomS3Filename = $this->imageHelper->getRandomString($fileContent);
+                Storage::disk('s3')->put($randomS3Filename, $fileContent);
+
+                $emailAttachments[] = [
+                    'filename' => config('app.cdn_url') .'/'. $randomS3Filename,
+                    'original_filename' => $fileName
+                ];
+            }
+        }
+
+        // prepare data for keeping existing attachments
+        if (isset($params['existing_attachments'])) {
+
+            $existingAttachments = [];
+            foreach ($params['existing_attachments'] as $attachment) {
+
+                $existingAttachment = new EmailDraftAttachment($attachment);
+                $existingAttachments[] = $existingAttachment->toArray();
+            }
+
+            $emailAttachments = array_merge($emailAttachments, $existingAttachments);
+        }
+
+        if ($emailHistory) {
+
+            // update EmailHistory
+            $emailHistory = $this->emailHistory->update([
+                'id' => $emailHistory->email_id,
+                'message_id' => $emailHistory->message_id,
+                'subject' => $params['subject'],
+                'body' => $params['body'],
+                'draft_saved' => 1,
+                'attachments' => $emailAttachments
+            ]);
+
+        } else {
+
+            // create Interaction
+            $interaction = $this->interactions->create([
+                'lead_id'           => $params['lead_id'],
+                'user_id'           => $params['user_id'],
+                'sales_person_id'   => $params['sales_person_id'] ?? null,
+                'interaction_type'  => Interaction::TYPE_EMAIL,
+                'interaction_notes' => 'E-Mail Draft Saved: '. $params['subject'],
+                'interaction_time'  => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
+                'from_email'        => $emailConfig->fromEmail,
+                'sent_by'           => isset($params['sales_person_id']) ? $emailConfig->replyEmail : null
+            ]);
+
+            // create messageId
+            $messageId = preg_replace("/[<>]/", "", sprintf('%s@%s', $this->generateId(), $this->serverHostname()));
+
+            // get Lead
+            $lead = $this->leadRepo->get(['id' => $params['lead_id']]);
+
+            // create EmailHistory
+            $emailHistory = $this->emailHistory->create([
+                'lead_id' => $params['lead_id'],
+                'interaction_id' => $interaction->interaction_id,
+                'message_id' => $messageId,
+                'subject' => $params['subject'],
+                'body' => $params['body'],
+                'to_email' => $lead->email_address,
+                'to_name' => $lead->full_name,
+                'from_email' => $emailConfig->fromEmail,
+                'from_name' => $emailConfig->fromName,
+                'draft_saved' => 1,
+                'use_html' => true,
+                'attachments' => $emailAttachments
+            ]);
+
+            // link Interaction & EmailHistory
+            $this->interactions->createInteractionEmail([
+                'interaction_id' => $interaction->interaction_id,
+                'message_id'     => $emailHistory->message_id
+            ]);
+        }
+
+        return new EmailDraft([
+            'email_id' => $emailHistory->email_id,
+            'lead_id' => $params['lead_id'],
+            'interaction_id' => $emailHistory->interaction_id,
+            'message_id' => $emailHistory->message_id,
+            'subject' => $emailHistory->subject,
+            'body' => $emailHistory->body,
+            'from_email' => $emailHistory->from_email,
+            'from_name' => $emailHistory->from_name,
+            'to_email' => $emailHistory->to_email,
+            'to_name' => $emailHistory->to_name,
+            'replyto_email' => $emailConfig->replyEmail,
+            'replyto_name' => $emailConfig->replyName,
+            'attachments' => $emailAttachments
+        ]);
     }
 }

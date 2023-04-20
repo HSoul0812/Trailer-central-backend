@@ -192,7 +192,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
      */
 
     public function createInteractionEmail($params) {
-        return InteractionEmail::create($params);
+        return InteractionEmail::firstOrCreate($params);
     }
 
     public function getTasksByDealerId($dealerId, $sort = '-created_at', $perPage = 15) {
@@ -290,5 +290,16 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $query->orderBy('interaction_id', 'DESC');
 
         return $query->first() ?? [];
+    }
+
+    /**
+     * get email details from EMAIL interaction by interaction_id
+     * 
+     * @param int $interactionId
+     * @return EmailHistory
+     */
+    public function getEmailInteraction(int $interactionId)
+    {
+        return $this->get(['id' => $interactionId])->emailHistory->first();
     }
 }
