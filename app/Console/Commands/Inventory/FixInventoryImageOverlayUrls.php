@@ -2,11 +2,12 @@
 
 namespace App\Console\Commands\Inventory;
 
-use App\Constants\Date;
+use App\Constants\Date as Constants;
 use App\Models\Inventory\Inventory;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use stdClass as Dealer;
+use Illuminate\Support\Facades\Date;
 
 class FixInventoryImageOverlayUrls extends Command
 {
@@ -26,9 +27,25 @@ class FixInventoryImageOverlayUrls extends Command
 
     public function handle()
     {
-        $dealers = DB::table('dealer')->select('dealer_id')->get();
+        $dealers = DB::table('dealer')->select(['dealer_id', 'overlay_updated_at'])->get();
 
         $dealers->each(static function (Dealer $dealer): void {
+            $dealerOverlayUpdatedAt = empty($dealer->overlay_updated_at) ?
+                null :
+                Date::createFromFormat(
+                    Constants::FORMAT_Y_M_D_T,
+                    $dealer->overlay_updated_at
+                );
+
+            if ($dealerOverlayUpdatedAt) {
+                // one minute after to ensure next time it will not generate overlay
+                // (unless some dealer inventory config change), instead it will swap images as expected
+                // filename_with_overlay -> filename
+                $oneMinuteAfterDealerOverlayUpdatedAt = $dealerOverlayUpdatedAt
+                    ->addMinute()
+                    ->format(Constants::FORMAT_Y_M_D_T);
+            }
+
             // to be able to swap the image with/without overlay to filename we need to have them
             // stored as concrete columns
             $updateFilenameCompanionsSQL = <<<SQL
@@ -51,7 +68,7 @@ SQL;
                     'dealer_id' => $dealer->dealer_id,
                     'primary_image' => Inventory::OVERLAY_ENABLED_PRIMARY,
                     'all_images' => Inventory::OVERLAY_ENABLED_ALL,
-                    'overlay_updated_at' => now()->format(Date::FORMAT_Y_M_D_T)
+                    'overlay_updated_at' => $dealerOverlayUpdatedAt ? $oneMinuteAfterDealerOverlayUpdatedAt : null
                 ]
             );
         });
