@@ -754,6 +754,12 @@ class InventoryService implements InventoryServiceInterface
 
                 return true;
             });
+
+        if ($overlayConfig['dealer_overlay_enabled'] > User::OVERLAY_ENABLED_NONE) {
+            // to avoid AWS rate limiting
+            // todo: in the future we need to implement a back-off strategy
+            usleep(ImageService::WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS);
+        }
     }
 
     /**
