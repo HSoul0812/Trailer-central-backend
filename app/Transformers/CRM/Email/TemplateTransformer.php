@@ -15,6 +15,9 @@ class TemplateTransformer extends TransformerAbstract
              'name' => $template->name ?? $template->custom_template_name,
              'key' => $template->template_key,
              'created_at' => (string)$template->date,
+             'html' => $template->html,
+             'template_metadata' => $template->template_metadata,
+             'template_json' => $template->template_json
          ];
     }
 }

@@ -73,6 +73,8 @@ use App\Services\CRM\Leads\LeadTradeService;
 use App\Services\CRM\Leads\LeadTradeServiceInterface;
 use App\Services\CRM\User\SettingsService;
 use App\Services\CRM\User\SettingsServiceInterface;
+use App\Services\CRM\Email\MosaicoService;
+use App\Services\CRM\Email\MosaicoServiceInterface;
 
 class CrmServiceProvider extends ServiceProvider
 {
@@ -99,6 +101,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(DealerDocumentsServiceInterface::class, DealerDocumentsService::class);
         $this->app->bind(LeadTradeServiceInterface::class, LeadTradeService::class);
         $this->app->bind(SettingsServiceInterface::class, SettingsService::class);
+        $this->app->bind(MosaicoServiceInterface::class, MosaicoService::class);
 
         // Repositories
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);

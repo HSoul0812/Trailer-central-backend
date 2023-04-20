@@ -15,6 +15,9 @@ class UpdateTemplateRequest extends Request {
         'id' => 'required|email_template_exists',
         'name' => 'string',
         'template' => 'string',
+        'html' => 'string',
+        'template_metadata' => 'string',
+        'template_json' => 'string'
     ];
     
 }
