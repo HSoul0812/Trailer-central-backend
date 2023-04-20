@@ -1668,12 +1668,18 @@ class InventoryServiceTest extends TestCase
 
         /** @var InventoryImage[]|EloquentCollection $inventoryImages */
         $inventoryImages = new EloquentCollection();
+        $originalImage1 = 'filename_1';
+        $originalImage2 = 'filename_2';
 
         /** @var Image|LegacyMockInterface $image1 */
         $image1 = $this->getEloquentMock(Image::class);
         $image1->image_id = 1;
         $image1->filename = 'filename_1';
-        $image1->filename_without_overlay = 'filename_1';
+        if ($this->faker->randomDigit % 2) {
+            $image1->filename_noverlay = $originalImage1;
+        } else {
+            $image1->filename_without_overlay = $originalImage1;
+        }
 
         /** @var InventoryImage|LegacyMockInterface $inventoryImage1 */
         $inventoryImage1 = $this->getEloquentMock(InventoryImage::class);
@@ -1690,7 +1696,11 @@ class InventoryServiceTest extends TestCase
         $image2 = $this->getEloquentMock(Image::class);
         $image2->image_id = 2;
         $image2->filename = 'filename_with_overlay_2';
-        $image2->filename_without_overlay = 'filename_2';
+        if ($this->faker->randomDigit % 2) {
+            $image2->filename_noverlay = $originalImage2;
+        } else {
+            $image2->filename_without_overlay = $originalImage2;
+        }
 
         /** @var InventoryImage|LegacyMockInterface $inventoryImage2 */
         $inventoryImage2 = $this->getEloquentMock(InventoryImage::class);
@@ -1729,7 +1739,7 @@ class InventoryServiceTest extends TestCase
             $this->imageServiceMock
                 ->shouldReceive('addOverlayAndSaveToStorage')
                 ->once()
-                ->with($image->filename_without_overlay, $overlayParams)
+                ->with($image->getFilenameOfOriginalImage(), $overlayParams)
                 ->andReturn($s3Filename);
 
             Storage::disk('tmp')->put($tmpFilename, '');
