@@ -13,10 +13,9 @@
 }
 
 .table th {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     background-color: var(--30);
     font-weight: 600;
-    font-size: .75rem;
     color: var(--80);
     text-transform: none;
     border-bottom-width: 2px;
@@ -26,7 +25,7 @@
 }
 
 .table td {
-    font-size: 0.8rem;
+    font-size: 1rem;
     font-weight: 300;
     color: var(--90);
     border-top-width: 1px;
@@ -35,7 +34,6 @@
     padding-left: .25rem;
     padding-right: .25rem;
     min-width: 35px;
-    height: 2.5rem;
     text-wrap: avoid;
 }
 
@@ -56,4 +54,9 @@
 
 .navigation-group-title {
     position: relative;
+}
+
+input.checkbox {
+    margin: 0 auto;
+    display: block;
 }
