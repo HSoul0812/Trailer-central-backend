@@ -86,11 +86,11 @@ class InventoryImage extends Model
     {
         // @todo fix the way it determines it is the primary image
         if ($typeOfOverlay == Inventory::OVERLAY_ENABLED_ALL) {
-            return $this->image->filename_without_overlay;
+            return $this->image->getFilenameOfOriginalImage();
         } elseif ($typeOfOverlay == Inventory::OVERLAY_ENABLED_PRIMARY &&
             ($this->position == self::FIRST_IMAGE_POSITION || $this->isDefault())
         ) {
-            return $this->image->filename_without_overlay;
+            return $this->image->getFilenameOfOriginalImage();
         }
 
         return $this->image->filename;
@@ -98,6 +98,7 @@ class InventoryImage extends Model
 
     public function hasBeenOverlay(): bool
     {
-        return (bool) $this->overlay_updated_at;
+        // we're forced to check `filename_noverlay` to avoid data inconsistency due previous versions
+        return ((bool)$this->overlay_updated_at) || $this->image->filename_noverlay;
     }
 }

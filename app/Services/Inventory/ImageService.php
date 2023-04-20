@@ -52,7 +52,9 @@ class ImageService implements ImageServiceInterface
             'id' => $image->image_id,
             'hash' =>  $this->getFileHash($filename),
             'filename' => $filename,
-            'filename_with_overlay' => $filename
+            'filename_with_overlay' => $filename,
+            // we're forced to always store `filename_without_overlay` to avoid data inconsistency due previous versions
+            'filename_without_overlay' => $image->getFilenameOfOriginalImage()
         ]);
 
         $this->inventoryRepository->markImageAsOverlayGenerated($image->image_id);
@@ -74,8 +76,8 @@ class ImageService implements ImageServiceInterface
         $this->imageRepository->update([
             'id' => $image->image_id,
             // @todo investigate what the purpose of `hash` value
-            'hash' => $this->getFileHash($image->filename_without_overlay),
-            'filename' => $image->filename_without_overlay
+            'hash' => $this->getFileHash($image->getFilenameOfOriginalImage()),
+            'filename' => $image->getFilenameOfOriginalImage()
         ]);
     }
 

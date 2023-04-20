@@ -708,19 +708,19 @@ class InventoryService implements InventoryServiceInterface
             return;
         }
 
-        $inventoryOverlayConfig = $this->inventoryRepository->getOverlayParams($inventoryId);
+        $overlayConfig = $this->inventoryRepository->getOverlayParams($inventoryId);
 
-        Log::channel('inventory-overlays')->info('Adding Overlays on Inventory Images', $inventoryOverlayConfig);
+        Log::channel('inventory-overlays')->info('Adding Overlays on Inventory Images', $overlayConfig);
 
         $imageIndex = 0;
 
         $inventoryImages
             ->sortBy(InventoryHelper::singleton()->imageSorter())
-            ->each(function (InventoryImage $inventoryImage) use (&$imageIndex, $inventoryOverlayConfig): bool {
+            ->each(function (InventoryImage $inventoryImage) use (&$imageIndex, $overlayConfig): bool {
                 $isOverlayDisabledOrImageShouldNotOverlay = $this->isOverlayDisabledOrImageShouldNotOverlay(
                     $inventoryImage,
                     $imageIndex,
-                    $inventoryOverlayConfig['overlay_enabled']
+                    $overlayConfig['overlay_enabled']
                 );
 
                 if ($inventoryImage->hasBeenOverlay()) {
@@ -732,7 +732,7 @@ class InventoryService implements InventoryServiceInterface
                         return true;
                     }
 
-                    if ($this->shouldRestoreImageOverlay($inventoryImage, $inventoryOverlayConfig['overlay_updated_at'])) {
+                    if ($this->shouldRestoreImageOverlay($inventoryImage, $overlayConfig['overlay_updated_at'])) {
                         $this->imageTableService->tryToRestoreImageOverlay($inventoryImage->image);
 
                         $imageIndex++;
@@ -748,7 +748,7 @@ class InventoryService implements InventoryServiceInterface
                     return true;
                 }
 
-                $this->applyOverlayToImage($inventoryImage, $inventoryOverlayConfig);
+                $this->applyOverlayToImage($inventoryImage, $overlayConfig);
 
                 $imageIndex++;
 
@@ -780,23 +780,31 @@ class InventoryService implements InventoryServiceInterface
         return false;
     }
 
-    private function shouldRestoreImageOverlay(InventoryImage $inventoryImage, ?string $overlayUpdatedAt): bool
+    /**
+     * True when the last time of inventory overlay update (inventory_image.`overlay_updated_at`) is lower or equal than the
+     * last time of dealer inventory overlay update (global dealer overlay configuration or dealer.`overlay_updated_at`)
+     *
+     * @param  InventoryImage  $inventoryImage
+     * @param  string|null  $dealerOverlayUpdatedAt
+     * @return bool
+     */
+    private function shouldRestoreImageOverlay(InventoryImage $inventoryImage, ?string $dealerOverlayUpdatedAt): bool
     {
         $imageOverlayUpdatedAt = $inventoryImage->overlay_updated_at;
 
-        if ($inventoryImage->overlay_updated_at && is_object($inventoryImage->overlay_updated_at)) {
-            $imageOverlayUpdatedAt = $inventoryImage->overlay_updated_at->format(Date::FORMAT_Y_M_D_T);
+        if ($imageOverlayUpdatedAt && is_object($imageOverlayUpdatedAt)) {
+            $imageOverlayUpdatedAt = $imageOverlayUpdatedAt->format(Date::FORMAT_Y_M_D_T);
         }
 
-        return $overlayUpdatedAt <= $imageOverlayUpdatedAt;
+        return $dealerOverlayUpdatedAt <= $imageOverlayUpdatedAt;
     }
 
     /**
      * @param  InventoryImage  $inventoryImage
-     * @param  array  $inventoryOverlayConfig
+     * @param  array  $overlayConfig
      * @return void
      */
-    private function applyOverlayToImage(InventoryImage $inventoryImage, array $inventoryOverlayConfig): void
+    private function applyOverlayToImage(InventoryImage $inventoryImage, array $overlayConfig): void
     {
         $overlayFilename = null;
         // overlay only should be generated when it is a new image or when the dealer has changed
@@ -805,8 +813,8 @@ class InventoryService implements InventoryServiceInterface
             DB::beginTransaction();
 
             $overlayFilename = $this->imageService->addOverlayAndSaveToStorage(
-                $inventoryImage->image->filename_without_overlay,
-                $inventoryOverlayConfig
+                $inventoryImage->image->getFilenameOfOriginalImage(),
+                $overlayConfig
             );
 
             $this->imageTableService->saveOverlay($inventoryImage->image, $overlayFilename);
@@ -822,7 +830,7 @@ class InventoryService implements InventoryServiceInterface
             Log::channel('inventory-overlays')
                 ->error(
                     'Failed Adding Overlays, Invalid OverlayParams: '.$exception->getMessage(),
-                    array_merge($inventoryOverlayConfig, ['image_id' => $inventoryImage->image->image_id])
+                    array_merge($overlayConfig, ['image_id' => $inventoryImage->image->image_id])
                 );
         }
     }
