@@ -52,7 +52,10 @@ class TemplateControllerTest extends IntegrationTestCase
             'user_id',
             'key',
             'name',
-            'created_at'
+            'created_at',
+            'html',
+            'template_metadata',
+            'template_json'
         ]
     ];
 
@@ -66,7 +69,10 @@ class TemplateControllerTest extends IntegrationTestCase
                 'user_id',
                 'key',
                 'name',
-                'created_at'
+                'created_at',
+                'html',
+                'template_metadata',
+                'template_json'
             ]
         ],
         'meta' => [
@@ -277,7 +283,7 @@ class TemplateControllerTest extends IntegrationTestCase
         );
 
         // Check that the response is a no content response.
-        $response->assertStatus(204);
+        $response->assertStatus(200);
 
         // Corroborate the record was deleted in the database
         $this->assertDatabaseMissing(Template::getTableName(), [
@@ -297,6 +303,9 @@ class TemplateControllerTest extends IntegrationTestCase
             'name' => $template->name ?? $template->custom_template_name,
             'key' => $template->template_key,
             'created_at' => (string)$template->date,
+            'html' => $template->html,
+            'template_metadata' => $template->template_metadata,
+            'template_json' => $template->template_json
         ];
     }
 
