@@ -13,6 +13,7 @@ use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User\User;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ImageService
@@ -46,6 +47,7 @@ class ImageService extends AbstractFileService
         parent::__construct($httpClient, $sanitizeHelper);
 
         $this->imageHelper = $imageHelper;
+        $this->log = Log::channel('image');
     }
 
     /**
@@ -84,18 +86,23 @@ class ImageService extends AbstractFileService
         $s3Filename = $this->sanitizeHelper->cleanFilename($inventoryFilenameTitle);
 
         if ($localFilename) {
-            $this->imageHelper->resize($localFilename, 800, 800, true);
+            try {
+                $this->imageHelper->resize($localFilename, 800, 800, true);
 
-            if ($overlayText) {
-                $this->imageHelper->addOverlay($localFilename, $overlayText);
+                if ($overlayText) {
+                    $this->imageHelper->addOverlay($localFilename, $overlayText);
+                }
+
+                $s3Path = $this->uploadToS3($localFilename, $s3Filename, $dealerId, $identifier, $params);
+
+                $hash = sha1_file($localFilename);
+                unlink($localFilename);
+
+                return new FileDto($s3Path, $hash);
+            } catch(\Exception $ex) {
+                $this->log->error($ex->getMessage() . ': ' . $ex->getTraceAsString());
             }
 
-            $s3Path = $this->uploadToS3($localFilename, $s3Filename, $dealerId, $identifier, $params);
-
-            $hash = sha1_file($localFilename);
-            unlink($localFilename);
-
-            return new FileDto($s3Path, $hash);
         }
 
         return null;
