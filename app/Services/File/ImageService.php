@@ -83,18 +83,22 @@ class ImageService extends AbstractFileService
         $inventoryFilenameTitle = $title . "_" . CompactHelper::getRandomString() . ($overlayText ? ("_overlay_" . time()) : '') . ".{$extension}";
         $s3Filename = $this->sanitizeHelper->cleanFilename($inventoryFilenameTitle);
 
-        $this->imageHelper->resize($localFilename, 800, 800, true);
+        if ($localFilename) {
+            $this->imageHelper->resize($localFilename, 800, 800, true);
 
-        if ($overlayText) {
-            $this->imageHelper->addOverlay($localFilename, $overlayText);
+            if ($overlayText) {
+                $this->imageHelper->addOverlay($localFilename, $overlayText);
+            }
+
+            $s3Path = $this->uploadToS3($localFilename, $s3Filename, $dealerId, $identifier, $params);
+
+            $hash = sha1_file($localFilename);
+            unlink($localFilename);
+
+            return new FileDto($s3Path, $hash);
         }
 
-        $s3Path = $this->uploadToS3($localFilename, $s3Filename, $dealerId, $identifier, $params);
-
-        $hash = sha1_file($localFilename);
-        unlink($localFilename);
-
-        return new FileDto($s3Path, $hash);
+        return null;
     }
 
     /**
