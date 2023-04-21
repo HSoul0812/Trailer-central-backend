@@ -34,6 +34,24 @@ class HumanOnly
 
         // We use trailertrader-frontend on the server.js file of the frontend side
         'trailertrader',
+
+        // We'll allow Google Bots
+        // @see https://developers.google.com/search/docs/crawling-indexing/overview-google-crawlers
+        'APIs-Google',
+        'AdsBot-Google-Mobile',
+        'AdsBot-Google',
+        'Mediapartners-Google',
+        'Googlebot-Image',
+        'Googlebot',
+        'Googlebot-News',
+        'GoogleProducer',
+        'Googlebot-Video',
+        'GoogleOther',
+        'AdsBot-Google-Mobile-Apps',
+        'FeedFetcher-Google',
+        'Google-Read-Aloud',
+        'Storebot-Google',
+        'Google-Site-Verification',
     ];
 
     public function handle(Request $request, Closure $next)
