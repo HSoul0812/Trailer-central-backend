@@ -3,11 +3,9 @@
 namespace App\Providers;
 
 use App\Listeners\CRM\Email\SesMessageSentNotification;
-use App\Models\Inventory\Image;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryImage;
 use App\Models\Website\PaymentCalculator\Settings;
-use App\Observers\Inventory\ImageObserver;
 use App\Observers\Inventory\InventoryImageObserver;
 use App\Observers\Inventory\InventoryObserver;
 use App\Observers\Website\PaymentCalculator\SettingsObserver;
@@ -44,6 +42,5 @@ class EventServiceProvider extends ServiceProvider
         Inventory::observe(InventoryObserver::class);
         Settings::observe(SettingsObserver::class);
         InventoryImage::observe(InventoryImageObserver::class);
-        Image::observe(ImageObserver::class);
     }
 }

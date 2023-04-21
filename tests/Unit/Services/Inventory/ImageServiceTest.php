@@ -7,8 +7,6 @@ use App\Jobs\Inventory\GenerateOverlayImageJobByDealer;
 use App\Jobs\Inventory\ReIndexInventoriesByDealersJob;
 use App\Models\Inventory\Inventory;
 use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
-use Mockery;
 use App\Jobs\Inventory\GenerateOverlayImageJob;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -20,6 +18,8 @@ use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Models\Inventory\Image;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use Mockery\LegacyMockInterface;
+use Tests\TestCase;
+use Mockery;
 
 /**
  * @group DW
@@ -125,16 +125,20 @@ class ImageServiceTest extends TestCase
 
     /**
      * Test that SUT will save the image when the S3 object exists, then it will mark the image as overlay generated,
-     * finally it will mark previous S3 object to be dropped from storage
+     * also it will try to get image without overlay simulating a random situation of having it in the legacy
+     * `filename_noverlay` or the new version `filename_without_overlay`, finally it will mark previous S3 object
+     * to be dropped from storage
      *
      * @group Marketing
      * @group Marketing_Overlays
      * @covers ::saveOverlay
+     * @covers \App\Models\Inventory\Image::getFilenameOfOriginalImage
      */
     public function testSaveOverlayWithEmptyNoverlay()
     {
         Storage::fake('s3');
 
+        $originalImage = 'image_without_overlay_1_'.$this->faker->slug('2');
         $oldImageOverlay = 'image_with_overlay_1_'.$this->faker->slug('2');
         $newImageOverlay = 'image_with_overlay_2_'.$this->faker->slug('2');
 
@@ -144,12 +148,21 @@ class ImageServiceTest extends TestCase
         /** @var Image|LegacyMockInterface $image1 */
         $image1 = $this->getEloquentMock(Image::class);
         $image1->image_id = 1;
+
+        if ($this->faker->randomDigit % 2) {
+            $image1->filename_noverlay = $originalImage;
+        } else {
+            $image1->filename_without_overlay = $originalImage;
+        }
+
         $image1->filename = $oldImageOverlay;
+        $image1->shouldReceive('getFilenameOfOriginalImage')->andReturns($originalImage);
 
         $this->imageRepositoryMock->expects('update')
             ->with([
                 'filename' => $newImageOverlay,
                 'filename_with_overlay' => $newImageOverlay,
+                'filename_without_overlay' => $originalImage,
                 'hash' => 'test_hash',
                 'id' => 1
             ]);
@@ -198,6 +211,7 @@ class ImageServiceTest extends TestCase
      * @group Marketing
      * @group Marketing_Overlays
      * @covers ::tryToRestoreOriginalImage
+     * @covers \App\Models\Inventory\Image::getFilenameOfOriginalImage
      */
     public function testResetOverlayWithEmptyNoverlay()
     {
@@ -214,7 +228,14 @@ class ImageServiceTest extends TestCase
         $image1->image_id = 1;
         $image1->filename = $imageOverlay;
         $image1->filename_with_overlay = $imageOverlay;
-        $image1->filename_without_overlay = $originalImage;
+
+        if ($this->faker->randomDigit % 2) {
+            $image1->filename_noverlay = $originalImage;
+        } else {
+            $image1->filename_without_overlay = $originalImage;
+        }
+
+        $image1->shouldReceive('getFilenameOfOriginalImage')->andReturns($originalImage);
 
         $this->imageService->expects($this->once())
             ->method('getFileHash')
@@ -223,7 +244,7 @@ class ImageServiceTest extends TestCase
         $this->imageRepositoryMock->allows('update')->with([
             'id' => $image1->image_id,
             'hash' => 'test_hash',
-            'filename' => $image1->filename_without_overlay
+            'filename' => $originalImage
         ]);
 
         $this->imageService->tryToRestoreOriginalImage($image1);

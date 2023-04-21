@@ -12,7 +12,7 @@ class ImageTransformer extends TransformerAbstract
         // Get Filename
         $file = '';
         if(!empty($invImage->image)) {
-            $file = $invImage->image->filename_without_overlay;
+            $file = $invImage->image->getFilenameOfOriginalImage();
         }
 
         // Return Mapping
