@@ -7,7 +7,7 @@ use App\Models\Parts\Category;
 use App\Models\Parts\CategoryMappings;
 use App\Models\Parts\Type;
 
-class UpdateCategoryMappings extends Migration
+class UpdateCategoryMappingsSecondTime extends Migration
 {
     const CATEGORY_NEW_MAPPINGS = [
         'General Trailers' => [
