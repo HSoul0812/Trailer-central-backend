@@ -17,7 +17,7 @@ class FmeDealersAttempted extends Value
      */
     public function name(): string
     {
-        return 'Dealers Attempted';
+        return 'Integrations Attempted';
     }
 
     /**
@@ -40,14 +40,24 @@ class FmeDealersAttempted extends Value
         $previousValue = round(with(clone $query)->whereBetween(
             $dateColumn ?? $query->getModel()->getCreatedAtColumn(),
             $this->previousRange($request->range, $timezone)
-        )->distinct('dealer_id')->count('dealer_id'), $this->precision);
+        )->distinct('marketplace_id')->count('marketplace_id'), $this->precision);
 
         return $this->result(
             round(with(clone $query)->whereBetween(
                 $dateColumn ?? $query->getModel()->getCreatedAtColumn(),
                 $this->currentRange($request->range, $timezone)
-            )->distinct('dealer_id')->count('record_id'), $this->precision)
+            )->distinct('marketplace_id')->count('record_id'), $this->precision)
         )->previous($previousValue);
+    }
+
+    /**
+     * Determine for how many minutes the metric should be cached.
+     *
+     * @return  \DateTimeInterface|\DateInterval|float|int
+     */
+    public function cacheFor()
+    {
+        return now()->addMinutes(5);
     }
 
     /**

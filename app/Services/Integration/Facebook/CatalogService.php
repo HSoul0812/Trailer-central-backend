@@ -335,8 +335,8 @@ class CatalogService implements CatalogServiceInterface
                 $feed = $this->sdk->validateFeed($accessToken, $catalogId, $feedId);
                 $feedId = $feed['id'];
             } catch(\Exception $ex) {
-                $this->log->error("Exception returned during validate feed on Catalog ID #' .
-                                    $catalogId . ': " . $ex->getMessage() . PHP_EOL .
+                $this->log->error('Exception returned during validate feed on Catalog ID #' .
+                                    $catalogId . ': ' . $ex->getMessage() . PHP_EOL .
                                     $ex->getTraceAsString());
             }
         }

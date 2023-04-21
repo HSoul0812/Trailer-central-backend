@@ -65,8 +65,6 @@ class Website extends Resource
      */
     public function fields(Request $request)
     {
-        $certificate = $this->ssl_certificate;
-
         $model = $this->model();
         if (!empty($model)) {
             $configs = $model->websiteConfigs()->get();
@@ -83,32 +81,24 @@ class Website extends Resource
             Text::make('App ID', 'identifier')->exceptOnForms(),
 
             new Panel('Domain', [
-                Boolean::make('Certified', function () use ($certificate) {
-                    return $certificate ? $certificate->isValid() : null;
-                }),
+                Boolean::make('Certified', function () {
+                    return $this->ssl_certificate ? $this->ssl_certificate->isValid() : null;
+                })->hideFromIndex(),
 
                 Text::make('Domain')
                     ->sortable(),
 
-                Text::make('Issuer', function () use ($certificate) {
-                    return $certificate ? $certificate->getIssuer() : null;
-                })
-                    ->hideFromIndex()
-                    ->exceptOnForms(),
+                Text::make('Issuer', function () {
+                    return $this->ssl_certificate ? $this->ssl_certificate->getIssuer() : null;
+                })->hideFromIndex(),
 
-                DateTime::make('Valid From', function () use ($certificate) {
-                    return $certificate ? $certificate->validFromDate() : null;
-                })
-                    ->hideFromIndex()
-                    ->exceptOnForms()
-                    ->format('DD MMM, YYYY - LT'),
+                DateTime::make('Valid From', function () {
+                    return $this->ssl_certificate ? $this->ssl_certificate->validFromDate() : null;
+                })->hideFromIndex()->format('DD MMM, YYYY - LT'),
 
-                DateTime::make('Expiration Date', function () use ($certificate) {
-                    return $certificate ? $certificate->expirationDate() : null;
-                })
-                    ->hideFromIndex()
-                    ->exceptOnForms()
-                    ->format('DD MMM, YYYY - LT')
+                DateTime::make('Expiration Date', function () {
+                    return $this->ssl_certificate ? $this->ssl_certificate->expirationDate() : null;
+                })->hideFromIndex()->format('DD MMM, YYYY - LT')
             ]),
 
             Select::make('Type', 'type')
@@ -123,7 +113,7 @@ class Website extends Resource
 
             Boolean::make('Responsive', 'responsive')->sortable(),
 
-            Select::make('Inventory Source', 'inventory_source')->withMeta(['value' => $sourceConfig->value ?? 'env' ])->options(self::INVENTORY_SOURCE_MAP),
+            Select::make('Inventory Source', 'inventory_source')->withMeta(['value' => $sourceConfig->value ?? 'env' ])->options(self::INVENTORY_SOURCE_MAP)->hideWhenCreating(),
 
             Textarea::make('Global Filter', 'type_config')->sortable()->help(
               "Usage:<br>
@@ -183,7 +173,7 @@ class Website extends Resource
               lte (is less than or equal)<br>"
             ),
 
-            Textarea::make('Head Scripts', 'HeadScripts')->hideFromIndex(),
+            Textarea::make('Head Scripts', 'HeadScripts')->hideWhenCreating()->hideFromIndex(),
 
         ];
     }
@@ -273,10 +263,7 @@ class Website extends Resource
     public function actions(Request $request)
     {
         return [
-            app()->make(IssueCertificateSsl::class)
-                ->canSee(function ($request) {
-                    return !$this->ssl_certificate;
-                }),
+            app()->make(IssueCertificateSsl::class),
             app()->make(EnableProxiedDomainsSsl::class),
             app()->make(ChangeOEMStatus::class)
         ];

@@ -54,7 +54,7 @@ class LocationPolicy
      * @return bool
      */
     public function create(NovaUser $user): bool {
-        return $user->hasAnyRole(self::VALID_ROLES);
+        return false;
     }
 
     /**
@@ -65,7 +65,7 @@ class LocationPolicy
      * @return bool
      */
     public function update(NovaUser $user, DealerLocation $location): bool {
-        return $user->hasAnyRole(self::VALID_ROLES);
+        return false;
     }
 
     /**

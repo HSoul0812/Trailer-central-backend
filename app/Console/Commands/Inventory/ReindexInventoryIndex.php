@@ -8,14 +8,19 @@ use App\Models\Inventory\Inventory;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
 use Illuminate\Console\Command;
+use Str;
 
 /**
- * Once the integration team has moved everything (inventory related) to the API side, then this command should be removed
+ * Once the integration team has moved everything (inventory related) to the API side,
+ * then this command should be removed
  */
 class ReindexInventoryIndex extends Command
 {
     /** @var int time in seconds */
-    private const WAIT_TIME = 15;
+    private const WAIT_TIME_IN_SECONDS = 15;
+
+    /** @var string[] list of queues which are monitored */
+    private const MONITORED_QUEUES = ['scout'];
 
     /**
      * The name and signature of the console command.
@@ -33,18 +38,24 @@ class ReindexInventoryIndex extends Command
 
     public function handle(InventoryResponseCacheInterface $responseCache): void
     {
-        Job::batch(function (BatchedJob $batch): void {
-            $this->line(sprintf('Working on batch <comment>%s</comment> ...', $batch->batch_id));
+        Job::batch(
+            function (BatchedJob $batch): void {
+                $this->line(sprintf('Working on batch <comment>%s</comment> ...', $batch->batch_id));
 
-            $this->call('scout:import', ['model' => Inventory::class]);
+                $this->call('scout:import', ['model' => Inventory::class]);
 
-            $this->line(sprintf('Waiting for batch <comment>%s</comment> ...', $batch->batch_id));
-        }, __CLASS__, self::WAIT_TIME);
+                $this->line(sprintf('Waiting for batch <comment>%s</comment> ...', $batch->batch_id));
+            },
+            self::MONITORED_QUEUES,
+            Str::replaceArray(':', ['-'], $this->signature),
+            self::WAIT_TIME_IN_SECONDS
+        );
 
         // no matter if cache is disabled, invalidating the entire cache should be done
         $responseCache->forget([RedisResponseCacheKey::CLEAR_ALL_PATTERN]);
 
-        $this->line(sprintf(
+        $this->line(
+            sprintf(
                 'InvalidateCacheJob was dispatched using the pattern: <comment>%s</comment>',
                 RedisResponseCacheKey::CLEAR_ALL_PATTERN
             )

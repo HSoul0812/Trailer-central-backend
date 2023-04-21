@@ -4,6 +4,7 @@ namespace App\Models\Marketing\Facebook;
 
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 
 /**
  * Class Error
@@ -133,10 +134,11 @@ class Error extends Model
     ];
 
 
-    public function getErrorDescAttribute(): string {
+    public function getErrorDescAttribute(): string
+    {
         // Get Error Description
         $type = $this->error_type;
-        if(!isset(self::ERROR_TYPES[$type])) {
+        if (!isset(self::ERROR_TYPES[$type])) {
             $type = self::ERROR_TYPE_DEFAULT;
         }
 

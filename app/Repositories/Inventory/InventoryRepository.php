@@ -36,8 +36,7 @@ use App\Models\User\DealerLocation;
  */
 class InventoryRepository implements InventoryRepositoryInterface
 {
-    use SortTrait;
-    use Transaction;
+    use SortTrait, Transaction;
 
     private const DEFAULT_PAGE_SIZE = 15;
 
@@ -378,6 +377,9 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
+     * @fix this method has been source of mess because it is too general, it aims the developer to do not create
+     *      another one specific for the new desired task
+     *
      * @param array $params
      * @param array $queryParams
      * @return bool
@@ -388,14 +390,18 @@ class InventoryRepository implements InventoryRepositoryInterface
             throw new RepositoryInvalidArgumentException('dealer_id has been missed. Params - ' . json_encode($params));
         }
 
-        $inventories = Inventory::where('dealer_id', '=', $params['dealer_id']);
+        $dealerId = $params['dealer_id'];
+        unset($params['dealer_id']); // to avoid update it
 
-        if (!empty($queryParams)) {
-            $inventories->where($queryParams);
-        }
+        Inventory::query()
+            ->where('dealer_id', $dealerId)
+            ->when(!empty($queryParams), function ($builder) use ($queryParams): void {
+                /** @var GrimzyBuilder|EloquentBuilder $builder */
+                $builder->where($queryParams);
+            })
+            ->update($params);
 
-        unset($params['dealer_id']);
-        return $inventories->update($params);
+        return true;
     }
 
     /**

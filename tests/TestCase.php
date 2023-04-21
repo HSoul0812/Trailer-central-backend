@@ -114,34 +114,34 @@ abstract class TestCase extends BaseTestCase
 
     public static function getEloquentMock($class)
     {
-        $mock = Mockery::mock($class);
+        $mock = Mockery::mock($class)->makePartial();
 
-        $mock->shouldReceive('setAttribute')->passthru();
-        $mock->shouldReceive('getAttribute')->passthru();
-        $mock->shouldReceive('hasSetMutator')->passthru();
-        $mock->shouldReceive('hasCast')->passthru();
-        $mock->shouldReceive('getCasts')->passthru();
-        $mock->shouldReceive('getIncrementing')->passthru();
-        $mock->shouldReceive('getKeyName')->passthru();
-        $mock->shouldReceive('getKeyType')->passthru();
-        $mock->shouldReceive('getDates')->passthru();
-        $mock->shouldReceive('getCreatedAtColumn')->passthru();
-        $mock->shouldReceive('getUpdatedAtColumn')->passthru();
-        $mock->shouldReceive('hasSetMutator')->passthru();
-        $mock->shouldReceive('usesTimestamps')->passthru();
-        $mock->shouldReceive('getAttributeValue')->passthru();
-        $mock->shouldReceive('setAttributeValue')->passthru();
-        $mock->shouldReceive('hasGetMutator')->passthru();
-        $mock->shouldReceive('offsetExists')->passthru();
-        $mock->shouldReceive('offsetGet')->passthru();
-        $mock->shouldReceive('fromDateTime')->passthru();
-        $mock->shouldReceive('getDateFormat')->passthru();
-        $mock->shouldReceive('getRelationValue')->passthru();
-        $mock->shouldReceive('relationLoaded')->passthru();
-        $mock->shouldReceive('fromFloat')->passthru();
-        $mock->shouldReceive('getConnection')->passthru();
-        $mock->shouldReceive('getConnectionName')->passthru();
-        $mock->shouldReceive('resolveConnection')->passthru();
+        $mock->allows('setAttribute')->passthru();
+        $mock->allows('getAttribute')->passthru();
+        $mock->allows('hasSetMutator')->passthru();
+        $mock->allows('hasCast')->passthru();
+        $mock->allows('getCasts')->passthru();
+        $mock->allows('getIncrementing')->passthru();
+        $mock->allows('getKeyName')->passthru();
+        $mock->allows('getKeyType')->passthru();
+        $mock->allows('getDates')->passthru();
+        $mock->allows('getCreatedAtColumn')->passthru();
+        $mock->allows('getUpdatedAtColumn')->passthru();
+        $mock->allows('hasSetMutator')->passthru();
+        $mock->allows('usesTimestamps')->passthru();
+        $mock->allows('getAttributeValue')->passthru();
+        $mock->allows('setAttributeValue')->passthru();
+        $mock->allows('hasGetMutator')->passthru();
+        $mock->allows('offsetExists')->passthru();
+        $mock->allows('offsetGet')->passthru();
+        $mock->allows('fromDateTime')->passthru();
+        $mock->allows('getDateFormat')->passthru();
+        $mock->allows('getRelationValue')->passthru();
+        $mock->allows('relationLoaded')->passthru();
+        $mock->allows('fromFloat')->passthru();
+        $mock->allows('getConnection')->passthru();
+        $mock->allows('getConnectionName')->passthru();
+        $mock->allows('resolveConnection')->passthru();
 
         $mock->wasRecentlyCreated = true;
 

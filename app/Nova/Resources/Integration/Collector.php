@@ -257,19 +257,19 @@ class Collector extends Resource
                     ),
                     Boolean::make('Don\'t save unmapped items', 'not_save_unmapped_on_factory_units')
                         ->withMeta(['value' => $this->not_save_unmapped_on_factory_units ?? true])->hideFromIndex()->help(
-                        "If a unit is not found in the factory vantage, do not save it"
-                    ),
+                            "If a unit is not found in the factory vantage, do not save it"
+                        ),
                 ])->dependsOn('use_factory_mapping', true),
                 NovaDependencyContainer::make([
                     Number::make('Filter since a certain year', 'factory_mapping_filter_year_from')->hideFromIndex()->help(
-                        'If the unit have Year present, this optiol will filter incoming units <strong>from specific year</strong><br>' .
+                        'If the unit have Year present, this option will filter incoming units <strong>from specific year</strong><br>' .
                         'If FV is enabled and next option is null or not enabled all the old units be processed in regular way'
-                    )->min(date('Y', strtotime('-20 year')))->max(date('Y', strtotime('+2 year')))->step(1)->rules('numeric')->withMeta(['extraAttributes' => [
+                    )->nullable()->min(date('Y', strtotime('-20 year')))->max(date('Y', strtotime('+2 year')))->step(1)->withMeta(['extraAttributes' => [
                         'placeholder' => date('Y', strtotime('-2 year'))]
                     ]),
-                    Boolean::make('Skip Filtered Year Units?', 'factory_mapping_filter_skip_units')->hideFromIndex()->help(
+                    Boolean::make('Skip Filtered Year Units?', 'factory_mapping_filter_skip_units')->nullable()->hideFromIndex()->help(
                         'If you enable this option, older units from the desired year will be skipped'
-                    )
+                    ),
                 ])->dependsOn('use_factory_mapping', true),
             ]),
 
@@ -312,6 +312,9 @@ class Collector extends Resource
                 ),
                 Text::make('Images Delimiter', 'images_delimiter')->rules('max:128')->hideFromIndex()->help(
                     'Separator between links to images in the file (by default - ",")'
+                ),
+                Boolean::make('Images Delimiter Used In Image Urls', 'images_delimiter_used_in_image_url')->hideFromIndex()->help(
+                    'Fixes issue when a comma is present in image urls'
                 ),
                 Text::make('Primary Image Field')->hideFromIndex()->help(
                     'Pass this field when you have a column on source telling which one is the primary image'

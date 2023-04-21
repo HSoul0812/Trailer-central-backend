@@ -52,7 +52,9 @@ class ImageService implements ImageServiceInterface
             'id' => $image->image_id,
             'hash' =>  $this->getFileHash($filename),
             'filename' => $filename,
-            'filename_with_overlay' => $filename
+            'filename_with_overlay' => $filename,
+            // we're forced to always store `filename_without_overlay` to avoid data inconsistency due previous versions
+            'filename_without_overlay' => $image->getFilenameOfOriginalImage()
         ]);
 
         $this->inventoryRepository->markImageAsOverlayGenerated($image->image_id);
@@ -74,8 +76,8 @@ class ImageService implements ImageServiceInterface
         $this->imageRepository->update([
             'id' => $image->image_id,
             // @todo investigate what the purpose of `hash` value
-            'hash' => $this->getFileHash($image->filename_without_overlay),
-            'filename' => $image->filename_without_overlay
+            'hash' => $this->getFileHash($image->getFilenameOfOriginalImage()),
+            'filename' => $image->getFilenameOfOriginalImage()
         ]);
     }
 
@@ -152,15 +154,21 @@ class ImageService implements ImageServiceInterface
         // update overlay_enabled on all inventories
         if ($isOverlayEnabledChanged) {
             Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($params, $changes) {
-                $this->inventoryRepository->massUpdate([
-                    'dealer_id' => $params['dealer_id'],
-                    'overlay_enabled' => $changes['overlay_enabled']
-                ]);
+                $this->inventoryRepository->massUpdate(
+                    [
+                        'dealer_id' => $params['dealer_id'],
+                        'overlay_enabled' => $changes['overlay_enabled']
+                    ],
+                    [
+                        // to avoid override those inventories which are overlay locked
+                        'overlay_is_locked' => Inventory::IS_NOT_OVERLAY_LOCKED
+                    ]
+                );
             });
         }
 
         // Generate Overlay Inventory Images if necessary
-        if (count($changes) > 0) {
+        if (!empty($changes)) {
             // @todo we should implement some mechanism to avoid to dispatch many times
             //      `GenerateOverlayImageJobByDealer` successively because that job will spawn as many
             //      `GenerateOverlayImageJob` jobs as many inventory units has the dealer

@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Nova\Resources\Dealer\Dealer;
-use Feed\EditMapping\EditMapping;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Nova;
@@ -26,6 +25,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
         Nova::userTimezone(function () {
             return config('app.db_timezone');
         });
+
+        Nova::style('tc', public_path('css/tc.css'));
+        Nova::script('fontawesome', 'https://kit.fontawesome.com/f9ae06e4af.js');
     }
 
     /**
@@ -88,8 +90,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
             new NovaImport(),
             (new BulkConfiguration())->canSee(function ($request) {
                 return $request->user()->hasAnyRole('Admin', 'Support');
-            }),
-            new EditMapping()
+            })
         ];
     }
 

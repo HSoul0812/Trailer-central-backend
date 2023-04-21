@@ -186,6 +186,15 @@ return [
                 'processes' => 5,
                 'tries' => 3,
                 'timeout' => 3600,
+            ],
+            'supervisor-4' => [
+                'connection' => 'redis',
+                'queue' => ['batched-jobs'],
+                'balance' => 'auto',
+                'minProcesses' => 1,
+                'maxProcesses' => 5,
+                'tries' => 1,
+                'timeout' => 21600,
             ]
         ],
 
@@ -229,9 +238,19 @@ return [
                 'connection' => 'redis',
                 'queue' => ['scout'],
                 'balance' => 'auto',
-                'processes' => 5,
+                'minProcesses' => 1,
+                'maxProcesses' => 5,
                 'tries' => 3,
                 'timeout' => 3600,
+            ],
+            'supervisor-4' => [
+                'connection' => 'redis',
+                'queue' => ['batched-jobs'],
+                'balance' => 'auto',
+                'minProcesses' => 1,
+                'maxProcesses' => 5,
+                'tries' => 1,
+                'timeout' => 21600,
             ]
         ],
 
@@ -307,6 +326,15 @@ return [
                 'tries' => 1,
                 'timeout' => 600,
             ],
+            'supervisor-8' => [
+                'connection' => 'redis',
+                'queue' => ['batched-jobs'],
+                'balance' => 'auto',
+                'minProcesses' => 3,
+                'maxProcesses' => 6,
+                'tries' => 1,
+                'timeout' => 21600,
+            ]
         ],
 
         'production' => [
@@ -399,6 +427,15 @@ return [
                 'tries' => 3,
                 'timeout' => 14400
             ],
+            'supervisor-10' => [
+                'connection' => 'redis',
+                'queue' => ['batched-jobs'],
+                'balance' => 'auto',
+                'minProcesses' => 3,
+                'maxProcesses' => 10,
+                'tries' => 1,
+                'timeout' => 21600,
+            ]
         ],
     ],
 ];

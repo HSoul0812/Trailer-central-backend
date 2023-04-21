@@ -70,6 +70,7 @@ class SaveInventoryRequest extends Request
             'show_on_website' => 'boolean|nullable',
             'tt_payment_expiration_date' => 'date|nullable',
             'overlay_enabled' => 'in:0,1,2|nullable',
+            'overlay_is_locked' => 'checkbox|nullable',
             'is_special' => 'boolean|nullable',
             'is_featured' => 'boolean|nullable',
             'latitude' => 'numeric|nullable',
