@@ -134,7 +134,15 @@ return [
 
         'inventory-overlays' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/jobs/inventory-overlays.log'),
+            'path' => storage_path('logs/jobs/images.log'),
+            'level' => env('LOG_LEVEL', 'error'),
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
+        'images' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/jobs/images.log'),
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
