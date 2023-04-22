@@ -47,7 +47,7 @@ class ImageService extends AbstractFileService
         parent::__construct($httpClient, $sanitizeHelper);
 
         $this->imageHelper = $imageHelper;
-        $this->log = Log::channel('image');
+        $this->log = Log::channel('images');
     }
 
     /**
