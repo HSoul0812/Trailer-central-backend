@@ -327,11 +327,12 @@ return [
         ],
 
         'emergency' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/emergency.log'),
-            'days' => 7,
-            'permission' => 0664,
-            'tap' => [\App\Logging\DailyLogWithUsername::class],
+            'driver' => 'monolog',
+            'handler' => StreamHandler::class,
+            'formatter' => env('LOG_STDERR_FORMATTER'),
+            'with' => [
+                'stream' => 'php://stderr',
+            ],
         ],
 
         'showroom-imports' => [
