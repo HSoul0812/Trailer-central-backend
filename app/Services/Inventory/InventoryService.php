@@ -667,13 +667,14 @@ class InventoryService implements InventoryServiceInterface
     protected function uploadImages(array $params, string $imagesKey): array
     {
         $images = $params[$imagesKey];
+        $withoutOverlay = $images;
 
         $otherParams = [
             'skipNotExisting' => true,
             'visibility' => config('filesystems.disks.s3.visibility')
         ];
 
-        foreach ($images as &$image) {
+        foreach ($withoutOverlay as $key => &$image) {
             $fileDto = $this->imageService->upload(
                 $image['url'],
                 $params['title'],
@@ -683,6 +684,7 @@ class InventoryService implements InventoryServiceInterface
             );
 
             if (empty($fileDto)) {
+                unset($withoutOverlay[$key]);
                 continue;
             }
 
@@ -693,9 +695,8 @@ class InventoryService implements InventoryServiceInterface
             $image['hash'] = $fileDto->getHash();
         }
 
-        return $images;
+        return $withoutOverlay;
     }
-
     /**
      * Applies overlays to inventory images by inventory id,
      * or reset its image to the original/overlay image when needed
@@ -706,8 +707,6 @@ class InventoryService implements InventoryServiceInterface
 
         if ($inventoryImages->count() === 0) {
             return;
-        }
-
         $overlayConfig = $this->inventoryRepository->getOverlayParams($inventoryId);
 
         Log::channel('inventory-overlays')->info('Adding Overlays on Inventory Images', $overlayConfig);
@@ -760,7 +759,6 @@ class InventoryService implements InventoryServiceInterface
             // todo: in the future we need to implement a back-off strategy
             usleep(ImageService::WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS);
         }
-    }
 
     /**
      * This requieres the images are sorted by `InventoryHelper::imageSorter`
