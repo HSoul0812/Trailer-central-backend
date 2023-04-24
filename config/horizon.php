@@ -362,7 +362,7 @@ return [
                 'queue' => ['inventory-cache'],
                 'balance' => 'auto',
                 'minProcesses' => 3,
-                'maxProcesses' => 15,
+                'maxProcesses' => 25,
                 'tries' => 3,
                 'timeout' => 900
             ],
@@ -371,7 +371,7 @@ return [
                 'queue' => ['scout'],
                 'balance' => 'auto',
                 'minProcesses' => 5,
-                'maxProcesses' => 45,
+                'maxProcesses' => 100,
                 'tries' => 3,
                 'timeout' => 900,
             ],
