@@ -200,7 +200,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         $inventoryFilesObjs = $this->createFiles($params['new_files'] ?? []);
 
         // Set Geolocation if Not Exists
-        if(empty($params['geolocation'])) {
+        if (empty($params['geolocation'])) {
             $params['geolocation'] = DB::raw('POINT(0, 0)');
         }
 
@@ -644,7 +644,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         if ($paginate && !isset($params['per_page'])) {
             $params['per_page'] = 15;
-        } else if (!$paginate && isset($params['per_page'])) {
+        } elseif (!$paginate && isset($params['per_page'])) {
             unset($params['per_page']);
         }
 
@@ -755,7 +755,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         array $params,
         bool $withDefault = true,
         array $select = ['inventory.*']
-    ) : GrimzyBuilder {
+    ): GrimzyBuilder {
         /** @var Builder $query */
         $query = Inventory::query()
             ->select($select);
@@ -836,7 +836,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params['units_with_true_cost'])) {
             if ($params['units_with_true_cost'] == self::SHOW_UNITS_WITH_TRUE_COST) {
                 $query = $query->where('true_cost', '>', 0);
-            } else if ($params['units_with_true_cost'] == self::DO_NOT_SHOW_UNITS_WITH_TRUE_COST) {
+            } elseif ($params['units_with_true_cost'] == self::DO_NOT_SHOW_UNITS_WITH_TRUE_COST) {
                 $query = $query->where('true_cost', 0);
             }
         }
@@ -868,8 +868,8 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['search_term'])) {
-            if(preg_match(self::DIMENSION_SEARCH_TERM_PATTERN, $params['search_term'])){
-                $params['search_term'] = floatval(trim($params['search_term'],' \'"'));
+            if (preg_match(self::DIMENSION_SEARCH_TERM_PATTERN, $params['search_term'])) {
+                $params['search_term'] = floatval(trim($params['search_term'], ' \'"'));
                 $query = $query->where(function ($q) use ($params) {
                     $q->where('length', $params['search_term'])
                         ->orWhere('width', $params['search_term'])
@@ -878,7 +878,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->orWhere('width_inches', $params['search_term'])
                         ->orWhere('height_inches', $params['search_term']);
                 });
-            }else{
+            } else {
                 /**
                  * This converts strings like 4 Star Trailers to 4%Star%Trailers
                  * so it matches inventories with all words included in the search query
@@ -932,7 +932,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query;
     }
 
-    private function getResultsCountFromQuery(GrimzyBuilder $query) : int
+    private function getResultsCountFromQuery(GrimzyBuilder $query): int
     {
         $queryString = str_replace(array('?'), array('\'%s\''), $query->toSql());
         $queryString = vsprintf($queryString, $query->getBindings());
@@ -968,7 +968,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         $inventoryImageObjs = [];
 
         foreach ($newImages as $newImage) {
-            if(empty($newImage['filename'])) {
+            if (empty($newImage['filename'])) {
                 throw new ResourceException("Validation Failed", 'Filename cant be blank');
             }
             $imageObj = new Image($newImage);
