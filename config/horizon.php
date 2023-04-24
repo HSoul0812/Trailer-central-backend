@@ -370,7 +370,7 @@ return [
                 'connection' => 'redis',
                 'queue' => ['scout'],
                 'balance' => 'auto',
-                'minProcesses' => 5,
+                'minProcesses' => 15,
                 'maxProcesses' => 100,
                 'tries' => 3,
                 'timeout' => 900,
