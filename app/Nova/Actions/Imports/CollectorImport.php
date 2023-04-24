@@ -32,9 +32,9 @@ class CollectorImport implements ToModel, WithStartRow, WithHeadingRow
 
             if ($column == 'overridable_fields') {
                 $data[$column] = json_decode($row[$column], true);
+            } else {
+                $data[$column] = $row[$column];
             }
-
-            $data[$column] = $row[$column];
         }
 
         return new Collector($data);
