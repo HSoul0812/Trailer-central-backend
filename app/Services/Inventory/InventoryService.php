@@ -697,6 +697,7 @@ class InventoryService implements InventoryServiceInterface
 
         return $withoutOverlay;
     }
+
     /**
      * Applies overlays to inventory images by inventory id,
      * or reset its image to the original/overlay image when needed
@@ -707,6 +708,8 @@ class InventoryService implements InventoryServiceInterface
 
         if ($inventoryImages->count() === 0) {
             return;
+        }
+
         $overlayConfig = $this->inventoryRepository->getOverlayParams($inventoryId);
 
         Log::channel('inventory-overlays')->info('Adding Overlays on Inventory Images', $overlayConfig);
@@ -759,6 +762,7 @@ class InventoryService implements InventoryServiceInterface
             // todo: in the future we need to implement a back-off strategy
             usleep(ImageService::WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS);
         }
+    }
 
     /**
      * This requieres the images are sorted by `InventoryHelper::imageSorter`
