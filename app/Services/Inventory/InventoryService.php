@@ -694,9 +694,10 @@ class InventoryService implements InventoryServiceInterface
             $withoutOverlay = $images;
         }
 
-        foreach ($withoutOverlay as &$image) {
+        foreach ($withoutOverlay as $key => &$image) {
             $fileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id'], null, $overlayEnabledParams);
             if (empty($fileDto)) {
+                unset($withoutOverlay[$key]);
                 continue;
             }
 
@@ -705,10 +706,11 @@ class InventoryService implements InventoryServiceInterface
             $image['hash'] = $fileDto->getHash();
         }
 
-        foreach ($withOverlay as &$image) {
+        foreach ($withOverlay as $key => &$image) {
             $noOverlayFileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id'], null, $overlayEnabledParams);
             $overlayFileDto = $this->imageService->upload($image['url'], $params['title'], $params['dealer_id'], null, $overlayEnabledParams);
             if (empty($noOverlayFileDto) || empty($overlayFileDto)) {
+                unset($withOverlay[$key]);
                 continue;
             }
 
