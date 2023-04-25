@@ -8,6 +8,7 @@ use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\DateTime;
 use App\Nova\Resource;
+use App\Nova\Resources\Dealer\LightDealer;
 
 class ClappBalance extends Resource
 {
@@ -51,15 +52,16 @@ class ClappBalance extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make('Dealer ID')
-                ->hideWhenUpdating()
-                ->sortable(),
-            BelongsTo::make('Dealer', 'user', 'App\Nova\Resources\Dealer\Dealer')
-                ->sortable()
-                ->withMeta(['extraAttributes' => [
-                    'readonly' => true,
-                    'disabled' => true,
-                ]]),
+            /*
+             * 2 specific fields, 1 to create Clapp Balance
+             * the other one is just informative, and avoid block edit values when the user already have been associated here
+             * */
+            BelongsTo::make('Dealer', 'user', LightDealer::class)->searchable()->sortable()->rules('required')->hideWhenUpdating()->showOnCreating()->hideFromDetail(),
+
+            Text::make('Dealer Information', 'user', function ($model) {
+                return $model->dealer_id . ' - ' . $model->name;
+            })->asHtml()->showOnUpdating()->hideFromIndex()->hideWhenCreating()->readonly(),
+
             Currency::make('Balance')
                 ->textAlign('right')
                 ->sortable(),
