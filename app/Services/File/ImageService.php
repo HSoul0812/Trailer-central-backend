@@ -29,6 +29,9 @@ class ImageService extends AbstractFileService
     /** @var float three quarters of second (0.75  seconds) */
     const WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS = 750 * 1000;
 
+    /** @var string */
+    const PRODUCTION_AWS_CDN_BASE_URL = 'https://dealer-cdn.com';
+
     /**
      * @var ImageHelper
      */
@@ -194,6 +197,11 @@ class ImageService extends AbstractFileService
     public function addOverlays(string $imagePath, array $params)
     {
         $imagePath = $this->imageHelper->encodeUrl($imagePath);
+
+        if (!$this->exist($imagePath)) {
+            $imagePath = str_replace(config('services.aws.url'), self::PRODUCTION_AWS_CDN_BASE_URL, $imagePath);
+        }
+
         $originalImagePath = $imagePath;
         $tempFiles = [];
 
