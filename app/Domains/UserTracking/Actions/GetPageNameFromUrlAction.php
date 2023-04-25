@@ -7,9 +7,9 @@ use App\Domains\TrailerTrader\TrailerTraderDomain;
 class GetPageNameFromUrlAction
 {
     const PAGE_NAMES = [
-        'TT_PLP' => 'TT_PLP',
-        'TT_PDP' => 'TT_PDP',
-        'TT_DEALER' => 'TT_DEALER',
+        'TT_PLP' => 'TT_PLP_PAGE',
+        'TT_PDP' => 'TT_PDP_PAGE',
+        'TT_DEALER' => 'TT_DEALER_PAGE',
     ];
 
     public function __construct(private TrailerTraderDomain $trailerTraderDomain)
