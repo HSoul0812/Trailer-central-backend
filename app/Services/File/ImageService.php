@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\User\User;
 use InvalidArgumentException;
 use Illuminate\Support\Facades\Log;
+use App;
 
 /**
  * Class ImageService
@@ -30,10 +31,14 @@ class ImageService extends AbstractFileService
     /** @var float three quarters of second (0.75  seconds) */
     const WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS = 750 * 1000;
 
-    /**
-     * @var ImageHelper
-     */
+    /** @var string */
+    const PRODUCTION_AWS_CDN_BASE_URL = 'https://dealer-cdn.com';
+
+    /** @var ImageHelper */
     private $imageHelper;
+
+    /** @var \Psr\Log\LoggerInterface  */
+    private $log;
 
     public const DEFAULT_EXTENSION = 'jpg';
 
@@ -200,6 +205,13 @@ class ImageService extends AbstractFileService
     public function addOverlays(string $imagePath, array $params)
     {
         $imagePath = $this->imageHelper->encodeUrl($imagePath);
+
+        // when the image has been imported from production it will not be available in the staging/dev bucket
+        // so we need to check if the image exists, if not we gonna use the production S3 bucket base URL
+        if (!App::environment('production') && !App::runningUnitTests() && !$this->exist($imagePath)) {
+            $imagePath = str_replace(config('services.aws.url'), self::PRODUCTION_AWS_CDN_BASE_URL, $imagePath);
+        }
+
         $originalImagePath = $imagePath;
         $tempFiles = [];
 
