@@ -25,7 +25,7 @@ trait CategoryMappingHelpers
             foreach ($mappedCategories as $currentCategory) {
                 $mapToCategories = explode(';', $currentCategory->map_to);
                 foreach ($mapToCategories as $mapToCategory) {
-                    if ($mapToCategory == $oldCategory) {
+                    if ($mapToCategory === $oldCategory) {
                         $mappedCategory = $currentCategory;
                     }
                 }

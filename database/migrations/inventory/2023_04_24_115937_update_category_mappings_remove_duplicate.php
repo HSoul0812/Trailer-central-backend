@@ -33,9 +33,9 @@ class UpdateCategoryMappingsRemoveDuplicate extends Migration
     public function up()
     {
         foreach (self::CATEGORY_NEW_MAPPINGS as $type => $categories) {
-            $current_type = Type::where('name', $type)->first();
+            $currentType = Type::where('name', $type)->first();
             foreach ($categories as $category) {
-                $current_category = $current_type->categories()->where('name', $category['map_from'])->first();
+                $current_category = $currentType->categories()->where('name', $category['map_from'])->first();
                 $category_mapping = CategoryMappings::where('map_from', $category['map_from'])->where('category_id', $current_category->id)->first();
                 if ($category_mapping) {
                     $category_mapping->update(['map_to'=> $category['map_to']]);
@@ -59,9 +59,9 @@ class UpdateCategoryMappingsRemoveDuplicate extends Migration
     public function down()
     {
         foreach (self::OLD_CATEGORY_MAPPINGS as $type => $categories) {
-            $current_type = Type::where('name', $type)->first();
+            $currentType = Type::where('name', $type)->first();
             foreach ($categories as $category) {
-                $current_category = $current_type->categories()->where('name', $category['map_from'])->first();
+                $current_category = $currentType->categories()->where('name', $category['map_from'])->first();
 
                 CategoryMappings::where('map_from', $category['map_from'])->where('category_id', $current_category->id)->update(['map_to'=> $category['map_to']]);
             }
