@@ -118,7 +118,7 @@ class SafeIndexer
 
         $this->numberUnitsToBeProcessed = $this->model->newQuery()->count('inventory_id');
 
-        $this->ensureItWIllNotBeIndexNameCollisions();
+        $this->ensureItWIllNotHaveIndexCollisionName();
 
         $lastUpdateTime = $this->getLastUpdateTime();
 
@@ -137,7 +137,7 @@ class SafeIndexer
      * It must avoid index name collisions, it happens when we have a physical index using the name
      * as the upcoming index alias, therefore it needs to apply a cloning strategy to rename such index
      */
-    private function ensureItWIllNotBeIndexNameCollisions(): void
+    private function ensureItWIllNotHaveIndexCollisionName(): void
     {
         $this->indexManager->ensureIndexDoesNotExists($this->indexAlias);
     }
