@@ -127,7 +127,7 @@ class SafeIndexer
         $itHasBeenAlreadySwapped = $this->tryToDoEarlySwapping();
 
         $this->dispatchAndMonitorMainInventoryIngestion();
-        $this->dispatchAndMonitorRecentlyUpdatedInventory($lastUpdateTime);
+        $this->dispatchAndMonitorRecentlyUpdatedInventoryIngestion($lastUpdateTime);
 
         $this->purgeIndexes();
         $this->swapIndexes($itHasBeenAlreadySwapped);
@@ -224,7 +224,7 @@ class SafeIndexer
      * Dispatches the jobs to ingest the inventory which were updated since the main ingestion started,
      * then it waits until all jobs are processed
      */
-    private function dispatchAndMonitorRecentlyUpdatedInventory(string $lastUpdateTime): void
+    private function dispatchAndMonitorRecentlyUpdatedInventoryIngestion(string $lastUpdateTime): void
     {
         // given it could be some record which was changed/added between main ingesting process and
         // the index swapping process, so, we need to cover them by pulling them once again and ingest them
