@@ -44,14 +44,14 @@ trait CategoryMappingHelpers
         });
     }
 
-    private function getMappedCategories(?int $type_id, ?string $categories_string): string
+    private function getMappedCategories(?int $type_id, ?string $categoriesString): string
     {
         if (isset($type_id)) {
             $type = Type::find($type_id);
-            $mapped_categories = "";
-            if ($categories_string) {
-                $categories_array = explode(';', $categories_string);
-                $categories = $type->categories()->whereIn('name', $categories_array)->get();
+            $mappedCategories = "";
+            if ($categoriesString) {
+                $categoriesArray = explode(';', $categoriesString);
+                $categories = $type->categories()->whereIn('name', $categoriesArray)->get();
 
             } else {
                 $categories = $type->categories;
@@ -59,16 +59,16 @@ trait CategoryMappingHelpers
 
             foreach ($categories as $category) {
                 if ($category->category_mappings) {
-                    $mapped_categories = $mapped_categories . $category->category_mappings->map_to . ';';
+                    $mappedCategories = $mappedCategories . $category->category_mappings->map_to . ';';
                 }
             }
         } else {
-            $mapped_categories = "";
+            $mappedCategories = "";
             foreach (CategoryMappings::all() as $mapping) {
-                $mapped_categories = $mapped_categories . $mapping->map_to . ';';
+                $mappedCategories = $mappedCategories . $mapping->map_to . ';';
             }
         }
 
-        return rtrim($mapped_categories, ";");
+        return rtrim($mappedCategories, ";");
     }
 }
