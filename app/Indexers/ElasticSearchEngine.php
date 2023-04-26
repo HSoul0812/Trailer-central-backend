@@ -161,20 +161,22 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
         foreach ($indexes as $index => $aliasMapping) {
             // it is preferable to double check the aliases of the index at this point
             // no matter if we got the aliases before ingestion time
-            if ($this->indexHasAlias($index, $alias)) {
-                try {
-                    // this could be used as a fallback index
-                    $this->indexManager->deleteAlias($index, $alias);
-                } catch (Exception $exception) {
-                    throw new IndexPurgingException($exception->getMessage(), $exception->getCode(), $exception);
-                }
-            } else {
-                try {
-                    $this->indexManager->drop($index);
-                } catch (Exception $exception) {
-                    // dropping an index should not interrups a subsequent process
-                    // it should only notifies
-                    Log::critical($exception->getMessage(), ['indexName' => $index]);
+            if ($this->indexManager->exists($index)) {
+                if ($this->indexHasAlias($index, $alias)) {
+                    try {
+                        // this could be used as a fallback index
+                        $this->indexManager->deleteAlias($index, $alias);
+                    } catch (Exception $exception) {
+                        throw new IndexPurgingException($exception->getMessage(), $exception->getCode(), $exception);
+                    }
+                } else {
+                    try {
+                        $this->indexManager->drop($index);
+                    } catch (Exception $exception) {
+                        // dropping an index should not interrups a subsequent process
+                        // it should only notifies
+                        Log::critical($exception->getMessage(), ['indexName' => $index]);
+                    }
                 }
             }
         }

@@ -667,13 +667,14 @@ class InventoryService implements InventoryServiceInterface
     protected function uploadImages(array $params, string $imagesKey): array
     {
         $images = $params[$imagesKey];
+        $withoutOverlay = $images;
 
         $otherParams = [
             'skipNotExisting' => true,
             'visibility' => config('filesystems.disks.s3.visibility')
         ];
 
-        foreach ($images as &$image) {
+        foreach ($withoutOverlay as $key => &$image) {
             $fileDto = $this->imageService->upload(
                 $image['url'],
                 $params['title'],
@@ -683,6 +684,7 @@ class InventoryService implements InventoryServiceInterface
             );
 
             if (empty($fileDto)) {
+                unset($withoutOverlay[$key]);
                 continue;
             }
 
@@ -693,7 +695,7 @@ class InventoryService implements InventoryServiceInterface
             $image['hash'] = $fileDto->getHash();
         }
 
-        return $images;
+        return $withoutOverlay;
     }
 
     /**
