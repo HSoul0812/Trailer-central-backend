@@ -556,10 +556,14 @@ class InteractionService implements InteractionServiceInterface
             if (isset($params['interaction_id'])) {
 
                 $parentEmailHistory = $this->interactions->getEmailInteraction($params['interaction_id']);
-                $subject .= 'RE: '. $parentEmailHistory->subject;
-                $parentDate = 'On '. Carbon::parse($parentEmailHistory->date_sent)->format('D, M j, Y') .' at '. Carbon::parse($parentEmailHistory->date_sent)->format('g:i A');
-                $parentFrom = $parentEmailHistory->from_name .'<'. $parentEmailHistory->from_email .'> wrote: ';
-                $body .= "\n\n\n". $parentDate .", ". $parentFrom ."\n<blockquote>" . $parentEmailHistory->body . "</blockquote>";
+
+                if ($parentEmailHistory) {
+                    
+                    $subject .= 'RE: '. $parentEmailHistory->subject;
+                    $parentDate = 'On '. Carbon::parse($parentEmailHistory->date_sent)->format('D, M j, Y') .' at '. Carbon::parse($parentEmailHistory->date_sent)->format('g:i A');
+                    $parentFrom = $parentEmailHistory->from_name .'<'. $parentEmailHistory->from_email .'> wrote: ';
+                    $body .= "\n\n\n". $parentDate .", ". $parentFrom ."\n<blockquote>" . $parentEmailHistory->body . "</blockquote>";
+                }
             }
 
             // adding email signature
