@@ -44,10 +44,10 @@ trait CategoryMappingHelpers
         });
     }
 
-    private function getMappedCategories(?int $type_id, ?string $categoriesString): string
+    private function getMappedCategories(?int $typeId, ?string $categoriesString): string
     {
-        if (isset($type_id)) {
-            $type = Type::find($type_id);
+        if (isset($typeId)) {
+            $type = Type::find($typeId);
             $mappedCategories = "";
             if ($categoriesString) {
                 $categoriesArray = explode(';', $categoriesString);
