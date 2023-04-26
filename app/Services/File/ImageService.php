@@ -17,6 +17,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User\User;
 use InvalidArgumentException;
+use App;
 
 /**
  * Class ImageService
@@ -198,7 +199,9 @@ class ImageService extends AbstractFileService
     {
         $imagePath = $this->imageHelper->encodeUrl($imagePath);
 
-        if (!$this->exist($imagePath)) {
+        // when the image has been imported from production it will not be available in the staging/dev bucket
+        // so we need to check if the image exists, if not we gonna use the production S3 bucket base URL
+        if (!App::environment('production') && !App::runningUnitTests() && !$this->exist($imagePath)) {
             $imagePath = str_replace(config('services.aws.url'), self::PRODUCTION_AWS_CDN_BASE_URL, $imagePath);
         }
 

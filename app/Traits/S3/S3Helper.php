@@ -34,7 +34,7 @@ trait S3Helper
     }
 
     /**
-     * Will only check the status code, when it is 200 or 300 it will return true
+     * Will only check the status code, when it is greater or  equal to 200 and less or equal to 300, then it will return true
      */
     protected function exist(string $url): bool
     {
