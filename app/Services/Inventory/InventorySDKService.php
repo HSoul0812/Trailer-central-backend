@@ -32,7 +32,7 @@ use TrailerCentral\Sdk\Sdk;
 
 class InventorySDKService implements InventorySDKServiceInterface
 {
-    use Helpers;
+    use Helpers, CategoryMappingHelpers;
 
     private Request $request;
     private Search $search;
@@ -135,7 +135,10 @@ class InventorySDKService implements InventorySDKServiceInterface
         $result = [];
         $hits = $sdkResponse->hits();
         foreach ($hits as $hit) {
-            $result[] = TcEsInventory::fromData($hit);
+            $esInventory = TcEsInventory::fromData($hit);
+            $esInventory->type_id = $this->mapOldCategoryToNew($esInventory->category)['type_id'];
+
+            $result[] = $esInventory;
         }
 
         $response = new TcEsResponseInventoryList();
