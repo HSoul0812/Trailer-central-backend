@@ -28,7 +28,7 @@ use JetBrains\PhpStorm\Pure;
 
 class InventoryService implements InventoryServiceInterface
 {
-    use Helpers;
+    use Helpers, CategoryMappingHelpers;
 
     const ES_INDEX = 'inventoryclsf';
     const HTTP_SUCCESS = 200;
@@ -59,12 +59,6 @@ class InventoryService implements InventoryServiceInterface
         'height' => 'height',
         'gvwr' => 'gvwr',
         'payload_capacity' => 'payloadCapacity'
-    ];
-
-    const DEFAULT_CATEGORY = [
-        'name'      => 'Other',
-        'type_id'   => 1,
-        'type_label' => 'General Trailers'
     ];
 
     const INVENTORY_SOLD = 'sold';
@@ -210,37 +204,8 @@ class InventoryService implements InventoryServiceInterface
         return $respObj;
     }
 
-    #[ArrayShape(["key" => "string", "type_id" => "int"])]
-    private function mapOldCategoryToNew($oldCategory): array
+    private function mapCategoryBuckets(array $buckets): array
     {
-        return \Cache::remember('category/' . $oldCategory, self::ES_CACHE_EXPIRY, function() use ($oldCategory) {
-            $value = [];
-            $mappedCategories = CategoryMappings::where('map_to', 'like', '%' . $oldCategory . '%')->get();
-            $mappedCategory = null;
-
-            foreach ($mappedCategories as $currentCategory) {
-                $mapToCategories = explode(';', $currentCategory->map_to);
-                foreach ($mapToCategories as $mapToCategory) {
-                    if ($mapToCategory == $oldCategory) {
-                        $mappedCategory = $currentCategory;
-                    }
-                }
-            }
-
-            if ($mappedCategory && $mappedCategory->category) {
-                $value['key'] = $mappedCategory->map_from;
-                $value['type_id'] = $mappedCategory->category->types[0]->id;
-                $value['type_label'] = $mappedCategory->category->types[0]->name;
-            } else {
-                $value['key'] = self::DEFAULT_CATEGORY['name'];
-                $value['type_id'] = self::DEFAULT_CATEGORY['type_id'];
-                $value['type_label'] = self::DEFAULT_CATEGORY['type_label'];
-            }
-            return $value;
-        });
-    }
-
-    private function mapCategoryBuckets(array $buckets): array {
         foreach ($buckets as $key => &$value) {
             $oldCategory = $value['key'];
             if ($oldCategory) {
@@ -445,35 +410,8 @@ class InventoryService implements InventoryServiceInterface
         ]);
     }
 
-    private function getMappedCategories(?int $type_id, ?string $categories_string): string
+    private function addPaginateQuery(ESInventoryQueryBuilder $queryBuilder, array $params)
     {
-        if(isset($type_id)) {
-            $type = Type::find($type_id);
-            $mapped_categories = "";
-            if ($categories_string) {
-                $categories_array = explode(';', $categories_string);
-                $categories = $type->categories()->whereIn('name', $categories_array)->get();
-
-            } else {
-                $categories = $type->categories;
-            }
-
-            foreach ($categories as $category) {
-                if ($category->category_mappings) {
-                    $mapped_categories = $mapped_categories . $category->category_mappings->map_to . ';';
-                }
-            }
-        } else {
-            $mapped_categories = "";
-            foreach(CategoryMappings::all() as $mapping) {
-                $mapped_categories = $mapped_categories . $mapping->map_to . ';';
-            }
-        }
-
-        return rtrim($mapped_categories, ";");
-    }
-
-    private function addPaginateQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $queryBuilder->paginate($currentPage, $params['per_page'] ?? self::PAGE_SIZE);
     }
