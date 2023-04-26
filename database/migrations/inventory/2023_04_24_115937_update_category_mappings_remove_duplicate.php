@@ -35,13 +35,13 @@ class UpdateCategoryMappingsRemoveDuplicate extends Migration
         foreach (self::CATEGORY_NEW_MAPPINGS as $type => $categories) {
             $currentType = Type::where('name', $type)->first();
             foreach ($categories as $category) {
-                $current_category = $currentType->categories()->where('name', $category['map_from'])->first();
-                $category_mapping = CategoryMappings::where('map_from', $category['map_from'])->where('category_id', $current_category->id)->first();
-                if ($category_mapping) {
-                    $category_mapping->update(['map_to'=> $category['map_to']]);
+                $currentCategory = $currentType->categories()->where('name', $category['map_from'])->first();
+                $categoryMapping = CategoryMappings::where('map_from', $category['map_from'])->where('category_id', $currentCategory->id)->first();
+                if ($categoryMapping) {
+                    $categoryMapping->update(['map_to'=> $category['map_to']]);
                 } else {
                     CategoryMappings::create([
-                        'category_id' => $current_category->id,
+                        'category_id' => $currentCategory->id,
                         'map_from' => $category['map_from'],
                         'map_to'   => $category['map_to'],
                         'type'     => 'Inventory'
@@ -61,9 +61,9 @@ class UpdateCategoryMappingsRemoveDuplicate extends Migration
         foreach (self::OLD_CATEGORY_MAPPINGS as $type => $categories) {
             $currentType = Type::where('name', $type)->first();
             foreach ($categories as $category) {
-                $current_category = $currentType->categories()->where('name', $category['map_from'])->first();
+                $currentCategory = $currentType->categories()->where('name', $category['map_from'])->first();
 
-                CategoryMappings::where('map_from', $category['map_from'])->where('category_id', $current_category->id)->update(['map_to'=> $category['map_to']]);
+                CategoryMappings::where('map_from', $category['map_from'])->where('category_id', $currentCategory->id)->update(['map_to'=> $category['map_to']]);
             }
         }
     }
