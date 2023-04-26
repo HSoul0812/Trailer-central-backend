@@ -13,7 +13,7 @@ trait CategoryMappingHelpers
     private function mapOldCategoryToNew($oldCategory): array
     {
         return Cache::remember('category/' . $oldCategory, 300, function () use ($oldCategory) {
-            $DEFAULT_CATEGORY = [
+            $defaultCategory = [
                 'name' => 'Other',
                 'type_id' => 1,
                 'type_label' => 'General Trailers'
@@ -36,9 +36,9 @@ trait CategoryMappingHelpers
                 $value['type_id'] = $mappedCategory->category->types[0]->id;
                 $value['type_label'] = $mappedCategory->category->types[0]->name;
             } else {
-                $value['key'] = $DEFAULT_CATEGORY['name'];
-                $value['type_id'] = $DEFAULT_CATEGORY['type_id'];
-                $value['type_label'] = $DEFAULT_CATEGORY['type_label'];
+                $value['key'] = $defaultCategory['name'];
+                $value['type_id'] = $defaultCategory['type_id'];
+                $value['type_label'] = $defaultCategory['type_label'];
             }
             return $value;
         });
