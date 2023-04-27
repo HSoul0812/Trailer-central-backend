@@ -68,7 +68,7 @@ class InventoryObserver
     public function created(Inventory $inventory)
     {
         if (self::$isCacheInvalidationEnabled) {
-            $this->responseCache->forget([$this->cacheKey->deleteByDealer($inventory->dealer_id)]);
+
         }
     }
 
@@ -81,11 +81,7 @@ class InventoryObserver
     public function updated(Inventory $inventory)
     {
         if (self::$isCacheInvalidationEnabled) {
-            $this->responseCache->forget([
-                    $this->cacheKey->deleteByDealer($inventory->dealer_id),
-                    $this->cacheKey->deleteSingle($inventory->inventory_id, $inventory->dealer_id)
-                ]
-            );
+
         }
     }
 
@@ -98,10 +94,7 @@ class InventoryObserver
     public function deleted(Inventory $inventory)
     {
         if (self::$isCacheInvalidationEnabled) {
-            $this->responseCache->forget([
-                $this->cacheKey->deleteSingleFromCollection($inventory->inventory_id),
-                $this->cacheKey->deleteSingle($inventory->inventory_id, $inventory->dealer_id)
-            ]);
+
         }
 
         // Add record to deleted_inventory table
@@ -120,7 +113,7 @@ class InventoryObserver
     public function restored(Inventory $inventory)
     {
         if (self::$isCacheInvalidationEnabled) {
-            $this->responseCache->forget([$this->cacheKey->deleteByDealer($inventory->dealer_id)]);
+
         }
     }
 
