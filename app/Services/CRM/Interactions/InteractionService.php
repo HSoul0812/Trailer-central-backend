@@ -34,7 +34,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
-use App\Helpers\ImageHelper;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Interactions\DTOs\EmailDraft;
 use App\Services\CRM\Interactions\DTOs\EmailDraftAttachment;
@@ -116,11 +115,6 @@ class InteractionService implements InteractionServiceInterface
     protected $log;
 
     /**
-     * @var ImageHelper
-     */
-    protected $imageHelper;
-
-    /**
      * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
      */
     protected $leadRepo;
@@ -140,7 +134,6 @@ class InteractionService implements InteractionServiceInterface
      * @param StatusRepositoryInterface $leadStatus
      * @param UserRepositoryInterface $users
      * @param SalesPersonRepositoryInterface $salespeople
-     * @param ImageHelper $imageHelper
      * @param LeadRepositoryInterface $leadRepo
      */
     public function __construct(
@@ -156,7 +149,6 @@ class InteractionService implements InteractionServiceInterface
         StatusRepositoryInterface $leadStatus,
         UserRepositoryInterface $users,
         SalesPersonRepositoryInterface $salespeople,
-        ImageHelper $imageHelper,
         LeadRepositoryInterface $leadRepo
     ) {
         // Initialize Services
@@ -175,7 +167,6 @@ class InteractionService implements InteractionServiceInterface
         $this->users = $users;
         $this->salespeople = $salespeople;
 
-        $this->imageHelper = $imageHelper;
         $this->leadRepo = $leadRepo;
 
         // Initialize Log File for Interactions
@@ -612,11 +603,11 @@ class InteractionService implements InteractionServiceInterface
 
                 $fileContent = $file->get();
                 $fileName = $file->getClientOriginalName();
-                $randomS3Filename = $this->imageHelper->getRandomString($fileContent);
-                Storage::disk('s3')->put($randomS3Filename, $fileContent);
+                $s3Filename = 'lead/'. $params['lead_id']. '/email-draft/'. $fileName;
+                Storage::disk('s3')->put($s3Filename, $fileContent);
 
                 $emailAttachments[] = [
-                    'filename' => config('app.cdn_url') .'/'. $randomS3Filename,
+                    'filename' => config('app.cdn_url') .'/'. $s3Filename,
                     'original_filename' => $fileName
                 ];
             }
