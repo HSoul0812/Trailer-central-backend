@@ -171,6 +171,14 @@ return [
             'tap' => [CloudWatchPusher::class]
         ],
 
+        'images' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/jobs/images.log'),
+            'level' => env('LOG_LEVEL', 'error'),
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
         'auth' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/auth.log'),

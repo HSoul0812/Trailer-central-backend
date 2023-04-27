@@ -56,7 +56,13 @@
     position: relative;
 }
 
-input.checkbox {
+td input.checkbox {
     margin: 0 auto;
     display: block;
+}
+
+/* fix Tooltip issues*/
+div.tooltip, div.vue-tooltip-theme {
+    pointer-events: none;
+    container: body;
 }

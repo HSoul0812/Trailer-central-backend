@@ -17,6 +17,8 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User\User;
 use InvalidArgumentException;
+use Illuminate\Support\Facades\Log;
+use App;
 
 /**
  * Class ImageService
@@ -29,10 +31,14 @@ class ImageService extends AbstractFileService
     /** @var float three quarters of second (0.75  seconds) */
     const WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS = 750 * 1000;
 
-    /**
-     * @var ImageHelper
-     */
+    /** @var string */
+    const PRODUCTION_AWS_CDN_BASE_URL = 'https://dealer-cdn.com';
+
+    /** @var ImageHelper */
     private $imageHelper;
+
+    /** @var \Psr\Log\LoggerInterface  */
+    private $log;
 
     public const DEFAULT_EXTENSION = 'jpg';
 
@@ -55,6 +61,7 @@ class ImageService extends AbstractFileService
         parent::__construct($httpClient, $sanitizeHelper);
 
         $this->imageHelper = $imageHelper;
+        $this->log = Log::channel('images');
     }
 
     /**
@@ -105,15 +112,19 @@ class ImageService extends AbstractFileService
 
         $s3Filename = $this->sanitizeHelper->cleanFilename($inventoryFilenameTitle);
 
-        if ($localFilename) {
-            $this->imageHelper->resize($localFilename, 800, 800, true);
+        try {
+            if ($localFilename) {
+                $this->imageHelper->resize($localFilename, 800, 800, true);
 
-            $s3Path = $this->uploadToS3($localFilename, $s3Filename, $dealerId, $identifier, $params);
+                $s3Path = $this->uploadToS3($localFilename, $s3Filename, $dealerId, $identifier, $params);
 
-            $hash = sha1_file($localFilename);
-            unlink($localFilename);
+                $hash = sha1_file($localFilename);
+                unlink($localFilename);
 
-            return new FileDto($s3Path, $hash);
+                return new FileDto($s3Path, $hash);
+            }
+        } catch (\Exception $ex) {
+            $this->log->error($ex->getMessage().': '.$ex->getTraceAsString());
         }
 
         return null;
@@ -194,6 +205,13 @@ class ImageService extends AbstractFileService
     public function addOverlays(string $imagePath, array $params)
     {
         $imagePath = $this->imageHelper->encodeUrl($imagePath);
+
+        // when the image has been imported from production it will not be available in the staging/dev bucket
+        // so we need to check if the image exists, if not we gonna use the production S3 bucket base URL
+        if (!App::environment('production') && !App::runningUnitTests() && !$this->exist($imagePath)) {
+            $imagePath = str_replace(config('services.aws.url'), self::PRODUCTION_AWS_CDN_BASE_URL, $imagePath);
+        }
+
         $originalImagePath = $imagePath;
         $tempFiles = [];
 
