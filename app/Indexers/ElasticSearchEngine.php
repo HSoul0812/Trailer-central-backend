@@ -111,7 +111,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
             ($configurator = $first->indexConfigurator()) &&
             ($searchableAs = $configurator->aliasName()) &&
             config('elastic.scout_driver.check_index.inventory', true) && // to save a RPC in ES server
-            !$this->isIndexAlreadyCreated($searchableAs)
+            !$this->indexExists($searchableAs)
         ) {
             $indexName = $configurator->name();
 
@@ -134,7 +134,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
      * @param string $indexName
      * @return bool
      */
-    public function isIndexAlreadyCreated(string $indexName): bool
+    public function indexExists(string $indexName): bool
     {
         if (!isset(self::$indexStatus[$indexName])) {
             self::$indexStatus[$indexName] = $this->indexManager->exists($indexName);
@@ -155,6 +155,9 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
      * @param  array  $indexes
      * @param  string  $alias
      * @return void
+     *
+     * @throws IndexPurgingException when it was impossible to remove the alias from an index
+     * @throws IndexPurgingException when some elastic client request has failed
      */
     public function purgeIndexes(array $indexes, string $alias): void
     {
