@@ -676,7 +676,7 @@ class InventoryService implements InventoryServiceInterface
 
         foreach ($withoutOverlay as $key => &$image) {
             $fileDto = $this->imageService->upload(
-                $image['url'],
+                !empty($image['original_url']) ? $image['original_url'] : $image['url'],
                 $params['title'],
                 $params['dealer_id'],
                 null,
