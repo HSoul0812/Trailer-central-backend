@@ -2,7 +2,6 @@
 
 namespace App\Indexers\Inventory;
 
-use App\Exceptions\ElasticSearch\IndexPurgingException;
 use App\Exceptions\ElasticSearch\IndexSwappingException;
 use App\Indexers\ElasticSearchEngine;
 use App\Jobs\Job;
@@ -26,7 +25,7 @@ class SafeIndexer
     private const MONITORED_GROUP = 'inventory-recreate-index';
 
     /** @var int time in seconds */
-    private const WAIT_TIME_IN_SECONDS = 90;
+    private const WAIT_TIME_IN_SECONDS = 60;
 
     /** @var ConsoleOutput */
     private $output;
@@ -47,10 +46,10 @@ class SafeIndexer
     private $model;
 
     /** @var ElasticSearchEngine */
-    private $indexManager;
+    private $elasticEngine;
 
     /** @var Collection */
-    private $indexesToPurge;
+    private $indexes;
 
     /** @var string|null */
     private $currentIndexName;
@@ -61,6 +60,9 @@ class SafeIndexer
     /** @var string */
     private $modelClassName;
 
+    /** @var string date with format Y-m-d H:i:s */
+    private $lastUpdateTime;
+
     public function __construct(Client $client, ConsoleOutput $output, Dispatcher $events)
     {
         $this->client = $client;
@@ -68,15 +70,15 @@ class SafeIndexer
         $this->events = $events;
 
         $this->model = new Inventory();
-        $this->indexManager = $this->model->searchableUsing();
+        $this->elasticEngine = $this->model->searchableUsing();
         $this->indexAlias = $this->model->indexConfigurator()->aliasName();
 
         Inventory::$searchableAs = $this->model->indexConfigurator()->name();
         $this->newIndexName = Inventory::$searchableAs;
 
-        $this->indexesToPurge = $this->getIndexes();
+        $this->indexes = $this->getIndexes();
         // the current index will help to rollback if something goes wrong at swapping time
-        $this->currentIndexName = $this->getCurrentIndex($this->indexesToPurge);
+        $this->currentIndexName = $this->getCurrentIndex($this->indexes);
 
         $this->modelClassName = get_class($this->model);
     }
@@ -94,10 +96,10 @@ class SafeIndexer
     /**
      * Gets the current index which has the specific alias
      */
-    private function getCurrentIndex(Collection $indexesToPurge): ?string
+    private function getCurrentIndex(Collection $indexes): ?string
     {
-        return $indexesToPurge->filter(function (array $indexWithAliases): bool {
-            return array_key_exists($this->indexAlias, $indexWithAliases['aliases']);
+        return $indexes->filter(function (array $aliases): bool {
+            return array_key_exists($this->indexAlias, $aliases['aliases']);
         })->map(function (array $aliases, string $indexName): string {
             return $indexName;
         })->first(function (string $indexName): string {
@@ -106,9 +108,7 @@ class SafeIndexer
     }
 
     /**
-     * @throws IndexPurgingException when it was impossible to remove the alias from an index
      * @throws IndexSwappingException when a critical issue has occurs in swapping time
-     * @throws IndexPurgingException when some elastic client request has failed
      * @throws Exception when some unknown error has been thrown
      */
     public function ingest(): void
@@ -118,33 +118,43 @@ class SafeIndexer
 
         $this->numberUnitsToBeProcessed = $this->model->newQuery()->count('inventory_id');
 
-        $this->ensureItWIllNotHaveIndexCollisionName();
+        // ensure it will not have name collisions
+        // it happens when we have a physical index using the name as the upcoming index alias,
+        // thus it needs to apply a cloning strategy to rename such index
+        $this->elasticEngine->ensureIndexDoesNotExists($this->indexAlias);
 
-        $lastUpdateTime = $this->getLastUpdateTime();
+        $this->lastUpdateTime = $this->getLastUpdateTime();
 
         $this->createNewIndexToIngestEverything();
 
-        $itHasBeenAlreadySwapped = $this->tryToDoEarlySwapping();
+        $indexHasBeenSwapped = $this->tryToDoEarlySwapping();
 
         $this->dispatchAndMonitorMainInventoryIngestion();
-        $this->dispatchAndMonitorRecentlyUpdatedInventoryIngestion($lastUpdateTime);
+        $this->dispatchAndMonitorRecentlyUpdatedInventoryIngestion();
 
-        $this->purgeIndexes();
-        $this->swapIndexes($itHasBeenAlreadySwapped);
-    }
+        // it will delete all indexes excepts the current one, so it may help as rollback
+        $indexesToDelete = $this->indexes->filter(function (array $aliases, string $indexName): bool {
+            return $indexName !== $this->currentIndexName;
+        })->toArray();
 
-    /**
-     * It must avoid index name collisions, it happens when we have a physical index using the name
-     * as the upcoming index alias, therefore it needs to apply a cloning strategy to rename such index
-     */
-    private function ensureItWIllNotHaveIndexCollisionName(): void
-    {
-        $this->indexManager->ensureIndexDoesNotExists($this->indexAlias);
+        $numberOfDocuments = $this->elasticEngine->numberOfDocuments($this->newIndexName);
+
+        // It only has to proceed to index swapping when the number of units already indexed are greater or equals
+        // to 97% or units which should be indexed
+
+        // no risky order to finish the process is:
+        //  1) try to swap indexes, if everything goes fine
+        //  2) proceed to delete al indexes
+        if (!$indexHasBeenSwapped && $numberOfDocuments >= $this->numberUnitsToBeProcessed * 0.97) {
+            $this->swapIndexes();
+        }
+
+        $this->elasticEngine->deleteIndexes($indexesToDelete);
     }
 
     private function createNewIndexToIngestEverything(): void
     {
-        $this->indexManager->createIndex(
+        $this->elasticEngine->createIndex(
             $this->newIndexName,
             [
                 'mapping' => $this->model->indexConfigurator()->mapping(),
@@ -154,16 +164,17 @@ class SafeIndexer
     }
 
     /**
-     * Basically this should be done in development environments where the index inventory doesn't exists yet
+     * Basically, this should be done in development environments where the index inventory doesn't exists yet
      */
     private function tryToDoEarlySwapping(): bool
     {
-        if (!$this->indexManager->indexExists($this->indexAlias)) {
+        if (!$this->elasticEngine->indexExists($this->indexAlias)) {
             // early aliasing
 
-            // this edge case happens only in the development environment when we've removed by manually any index
-            // so, this will alias the new index and any queued job will use it
-            $this->indexManager->swapIndexNames($this->newIndexName, $this->indexAlias);
+            // this edge case happens only in development environments when we have an index named `inventory`
+            // before migration from ES6 the ES7 cluster had a real index with that name.
+            // this will alias the new index and any queued job will use it
+            $this->elasticEngine->swapIndexNames($this->newIndexName, $this->indexAlias);
 
             return true;
         }
@@ -174,8 +185,8 @@ class SafeIndexer
     private function getLastUpdateTime(): string
     {
         // @todo we need to consider another potential source of changes like dealer, payment calculator,
-        //       dealer location and overlay settings updating
-        // for now, this command should be ran in time frames where those changes wont happen
+        //       dealer location and overlay settings updating.
+        //       for now, this command should be ran in time frames where those changes would not happen
 
         return $this->model->newQuery()->max('updated_at_auto');
     }
@@ -224,7 +235,7 @@ class SafeIndexer
      * Dispatches the jobs to ingest the inventory which were updated since the main ingestion started,
      * then it waits until all jobs are processed
      */
-    private function dispatchAndMonitorRecentlyUpdatedInventoryIngestion(string $lastUpdateTime): void
+    private function dispatchAndMonitorRecentlyUpdatedInventoryIngestion(): void
     {
         // given it could be some record which was changed/added between main ingesting process and
         // the index swapping process, so, we need to cover them by pulling them once again and ingest them
@@ -232,17 +243,17 @@ class SafeIndexer
             'Checking if some records were affected while the main ingestion was working...'
         );
 
-        $this->numberUnitsToBeProcessed = $this->model->newQuery()
-            ->where('updated_at_auto', '>', $lastUpdateTime)
+        $numberUnitsToBeProcessed = $this->model->newQuery()
+            ->where('updated_at_auto', '>', $this->lastUpdateTime)
             ->count('inventory.inventory_id');
 
-        if ($this->numberUnitsToBeProcessed) {
+        if ($numberUnitsToBeProcessed) {
             Job::batch(
-                function (BatchedJob $batch) use ($lastUpdateTime) {
+                function (BatchedJob $batch) use ($numberUnitsToBeProcessed) {
                     $this->output->writeln(
                         sprintf(
                             'It will ingest <comment>%d</comment> records to the index [%s]...',
-                            $this->numberUnitsToBeProcessed,
+                            $numberUnitsToBeProcessed,
                             $this->newIndexName
                         )
                     );
@@ -263,12 +274,12 @@ class SafeIndexer
 
                     Dealer::query()->select('dealer.dealer_id')
                         ->get()
-                        ->each(function (Dealer $dealer) use ($lastUpdateTime): void {
+                        ->each(function (Dealer $dealer): void {
                             $this->model->newQuery()
                                 ->select('inventory.inventory_id')
                                 ->with('user', 'user.website', 'dealerLocation')
                                 ->where('inventory.dealer_id', $dealer->dealer_id)
-                                ->where('updated_at_auto', '>', $lastUpdateTime)
+                                ->where('updated_at_auto', '>', $this->lastUpdateTime)
                                 ->searchable();
                         });
 
@@ -284,52 +295,35 @@ class SafeIndexer
     }
 
     /**
-     * @throws IndexPurgingException when it was impossible to remove the alias from an index
-     * @throws IndexPurgingException when some elastic client request has failed
-     */
-    private function purgeIndexes(): void
-    {
-        try {
-            $this->indexManager->purgeIndexes($this->indexesToPurge->toArray(), $this->indexAlias);
-        } catch (Exception $exception) {
-            // deleting alias should interrups immediately any subsequent process
-            Log::critical(
-                $exception->getMessage(),
-                ['indexName' => $this->newIndexName, 'alias' => $this->indexAlias]
-            );
-
-            throw new IndexPurgingException($exception->getMessage(), $exception->getCode(), $exception);
-        }
-    }
-
-    /**
+     * it will alias the new index to `inventory`, then it will remove alias from previous index,
+     * if it fails removing alias from previous one, then it will try to remove alias from new index.
+     *
      * @throws IndexSwappingException when a critical issue has occurs in swapping time
      */
-    private function swapIndexes(bool $itHasBeenAlreadySwapped): void
+    private function swapIndexes(): void
     {
-        if (!$itHasBeenAlreadySwapped) {
+        $this->elasticEngine->putAlias($this->newIndexName, $this->indexAlias);
+
+        if ($this->currentIndexName) {
             try {
-                $this->indexManager->swapIndexNames($this->newIndexName, $this->indexAlias);
+                $this->elasticEngine->deleteAlias($this->currentIndexName, $this->indexAlias);
             } catch (Exception $exception) {
-                Log::emergency(
+                Log::critical(
                     $exception->getMessage(),
-                    ['indexName' => $this->newIndexName, 'alias' => $this->indexAlias]
+                    ['indexName' => $this->currentIndexName, 'alias' => $this->indexAlias]
                 );
 
-                if ($this->currentIndexName) {
-                    // rollback to the previous index
-                    try {
-                        $this->indexManager->swapIndexNames($this->currentIndexName, $this->indexAlias);
+                try {
+                    // to avoid duplicated aliasing
+                    $this->elasticEngine->deleteAlias($this->newIndexName, $this->indexAlias);
+                } catch (Exception $rollbackException) {
+                    Log::emergency(
+                        sprintf('[swapIndexes.rollback] %s', $rollbackException->getMessage()),
+                        ['indexName' => $this->newIndexName, 'alias' => $this->indexAlias]
+                    );
 
-                    } catch (Exception $rollbackException) {
-                        Log::emergency(
-                            $rollbackException->getMessage(),
-                            ['indexName' => $this->currentIndexName, 'alias' => $this->indexAlias]
-                        );
-                    }
+                    throw new IndexSwappingException($exception->getMessage(), $exception->getCode(), $exception);
                 }
-
-                throw new IndexSwappingException($exception->getMessage(), $exception->getCode(), $exception);
             }
         }
     }

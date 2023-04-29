@@ -176,10 +176,7 @@ class BatchedJobService implements BatchedJobServiceInterface
 
     private function pendingQueueJobs(string $queue): int
     {
-        $size = $this->redisClient->zcount("queues:$queue:delayed", '-inf', '+inf');
-        $size += $this->redisClient->zcount("queues:$queue:reserved", '-inf', '+inf');
-
-        return $size;
+        return $this->redisClient->lLen("queues:$queue");
     }
 
     /**
