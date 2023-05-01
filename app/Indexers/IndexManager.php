@@ -11,7 +11,6 @@ use Elasticsearch\Namespaces\IndicesNamespace;
 
 /**
  * This index manager is able to interact with ElasticSearch 6
- * Also, is able to set the index alias as writable, somehow in our dev environments it just fail, see `putAlias` method
  */
 class IndexManager
 {
@@ -46,8 +45,18 @@ class IndexManager
     public function exists(string $indexName): bool
     {
         return $this->indices->exists([
-            'index' => $indexName,
+            'index' => $indexName
         ]);
+    }
+
+    public function numberOfDocuments(string $indexName): int
+    {
+        $stats = $this->indices->stats([
+            'index' => $indexName,
+            'metric' => 'docs'
+        ]);
+
+        return $stats['indices'][$indexName]['total']['docs']['count'] ?? 0;
     }
 
     public function create(Index $index): self
@@ -138,9 +147,6 @@ class IndexManager
         if ($alias->getFilter()) {
             $params['body']['filter'] = $alias->getFilter();
         }
-
-        // test cases were failing somehow, this ensure all test related with ElasticSearch wont fail
-        $params['body']['is_write_index'] = true;
 
         $this->indices->putAlias($params);
 

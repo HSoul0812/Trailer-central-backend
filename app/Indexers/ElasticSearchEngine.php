@@ -2,7 +2,6 @@
 
 namespace App\Indexers;
 
-use App\Exceptions\ElasticSearch\IndexPurgingException;
 use ElasticAdapter\Exceptions\BulkRequestException;
 use ElasticAdapter\Indices\Alias;
 use ElasticAdapter\Indices\Index;
@@ -111,7 +110,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
             ($configurator = $first->indexConfigurator()) &&
             ($searchableAs = $configurator->aliasName()) &&
             config('elastic.scout_driver.check_index.inventory', true) && // to save a RPC in ES server
-            !$this->isIndexAlreadyCreated($searchableAs)
+            !$this->indexExists($searchableAs)
         ) {
             $indexName = $configurator->name();
 
@@ -134,7 +133,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
      * @param string $indexName
      * @return bool
      */
-    public function isIndexAlreadyCreated(string $indexName): bool
+    public function indexExists(string $indexName): bool
     {
         if (!isset(self::$indexStatus[$indexName])) {
             self::$indexStatus[$indexName] = $this->indexManager->exists($indexName);
@@ -143,40 +142,38 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
         return self::$indexStatus[$indexName];
     }
 
-    public function swapIndexNames(string $indexName, string $aliasName): void
+    public function putAlias(string $indexName, string $aliasName): void
     {
         $this->indexManager->putAlias($indexName, new Alias($aliasName));
     }
 
-    /**
-     * It will drop indexes when they have not an alias (safe path) from a list of indexes,
-     * otherwise it will remove alias
-     *
-     * @param  array  $indexes
-     * @param  string  $alias
-     * @return void
-     */
-    public function purgeIndexes(array $indexes, string $alias): void
+    public function deleteAlias(string $indexName, string $aliasName): void
     {
-        foreach ($indexes as $index => $aliasMapping) {
+        if ($this->indexHasAlias($indexName, $aliasName)) { // just a double check to do not get errors
+            $this->indexManager->deleteAlias($indexName, $aliasName);
+        }
+    }
+
+    public function numberOfDocuments(string $indexName): int
+    {
+        return $this->indexManager->numberOfDocuments($indexName);
+    }
+
+    /**
+     * It will try to drop all indexes provided
+     */
+    public function deleteIndexes(array $indexes): void
+    {
+        foreach ($indexes as $indexName => $aliases) {
             // it is preferable to double check the aliases of the index at this point
             // no matter if we got the aliases before ingestion time
-            if ($this->indexManager->exists($index)) {
-                if ($this->indexHasAlias($index, $alias)) {
-                    try {
-                        // this could be used as a fallback index
-                        $this->indexManager->deleteAlias($index, $alias);
-                    } catch (Exception $exception) {
-                        throw new IndexPurgingException($exception->getMessage(), $exception->getCode(), $exception);
-                    }
-                } else {
-                    try {
-                        $this->indexManager->drop($index);
-                    } catch (Exception $exception) {
-                        // dropping an index should not interrups a subsequent process
-                        // it should only notifies
-                        Log::critical($exception->getMessage(), ['indexName' => $index]);
-                    }
+            if ($this->indexManager->exists($indexName)) {
+                try {
+                    $this->indexManager->drop($indexName);
+                } catch (Exception $exception) {
+                    // dropping an index should not interrups a subsequent process
+                    // it should only notifies
+                    Log::critical($exception->getMessage(), ['indexName' => $indexName]);
                 }
             }
         }
@@ -202,7 +199,10 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
     {
         $esClient = $this->getElasticClient();
 
-        if ($this->indexManager->exists($indexAliasName) && !$esClient->indices()->existsalias(['name' => $indexAliasName])) {
+        $shouldItBeFreeze = $this->indexManager->exists($indexAliasName) &&
+            !$esClient->indices()->existsalias(['name' => $indexAliasName]);
+
+        if ($shouldItBeFreeze) {
             $tempIndex = $indexAliasName . '_temp_' . now()->format('YmdHi');
 
             $esClient->indices()->freeze(['index' => $indexAliasName]);

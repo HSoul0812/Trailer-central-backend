@@ -186,6 +186,9 @@ class Inventory extends Model
 {
     use TableAware, SpatialTrait, GeospatialHelper, Searchable, CustomSearch;
 
+    /** @var Collection|Category[] */
+    private static $categoriesCache;
+
     /** @var InventoryElasticSearchConfigurator */
     private static $indexConfigurator;
 
@@ -225,7 +228,7 @@ class Inventory extends Model
 
     const IS_ACTIVE = 1;
     const IS_NOT_ACTIVE = 0;
-    
+
     const SHOW_IN_WEBSITE = 1;
 
     const ATTRIBUTE_ZERO_VALUE = 0;
@@ -619,13 +622,13 @@ class Inventory extends Model
 
     public function getCategoryLabelAttribute()
     {
-        $category = Category::where('legacy_category', $this->category)->first();
-
-        if (empty($category)) {
-            return null;
+        if (!self::$categoriesCache) {
+            self::$categoriesCache = Category::query()->get();
         }
 
-        return $category->label;
+        $category = self::$categoriesCache->firstWhere('legacy_category', '=', $this->category);
+
+        return $category ? $category->label : null;
     }
 
     public function getColorAttribute()
