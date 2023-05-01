@@ -458,15 +458,20 @@ class DealerOptionsService implements DealerOptionsServiceInterface
                 $dealer->delete();
             }
 
-            if ($active && empty($dealer)) {
-                DealerClapp::create([
-                    'dealer_id' => $dealerId
-                ]);
-            }
             return true;
         } catch (\Exception $e) {
-            Log::error("Marketing activation error. dealer_id - {$dealerId}", $e->getTrace());
-            throw new Exception($e->getMessage());
+            try {
+                if ($active && empty($dealer)) {
+                    DealerClapp::create([
+                        'dealer_id' => $dealerId
+                    ]);
+                }
+
+                return true;
+            } catch (Exception $ex) {
+                Log::error("Marketing activation error. dealer_id - {$dealerId}", $ex->getTrace());
+                throw new Exception($ex->getMessage());
+            }
         }
     }
 

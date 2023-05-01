@@ -65,7 +65,7 @@ class DealerRepository implements DealerRepositoryInterface
      */
     public function get($params)
     {
-        return DealerClapp::find($params['dealer_id']);
+        return DealerClapp::findOrFail($params['dealer_id']);
     }
 
     /**
