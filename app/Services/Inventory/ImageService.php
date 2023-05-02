@@ -13,6 +13,7 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Models\User\User;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Models\Inventory\Inventory;
+use App;
 
 class ImageService implements ImageServiceInterface
 {
@@ -107,7 +108,13 @@ class ImageService implements ImageServiceInterface
     public function getFileHash(string $filename): string
     {
         if (Storage::disk('s3')->missing($filename)) {
-            throw new MissingS3FileException;
+            $productionUrl = $this->getProductionS3BaseUrl().$filename;
+
+            if (!App::environment('production') && !App::runningUnitTests() && $this->exist($productionUrl)) {
+                return sha1_file($productionUrl);
+            }
+
+            throw new MissingS3FileException(sprintf("S3 object '%s' is missing", $filename));
         }
 
         return sha1_file($this->getS3BaseUrl() . $filename);
