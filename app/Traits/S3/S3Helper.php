@@ -13,6 +13,16 @@ trait S3Helper
     /**
      * @return string
      */
+    protected function getProductionS3BaseUrl(): string
+    {
+        $urlMetadata = parse_url(config('services.aws.prod_url'));
+
+        return $urlMetadata['scheme'].'://'.$urlMetadata['host'];
+    }
+
+    /**
+     * @return string
+     */
     protected function getS3BaseUrl(): string
     {
         if (!empty(config('app.cdn_storage_url'))) {
