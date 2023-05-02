@@ -60,6 +60,8 @@ class TcApiResponseInventoryTransformer extends TransformerAbstract
             'status' => $type->status,
             'axle_capacity' => $type->axle_capacity,
             'notes' => $type->notes,
+            'logo_url' => $type->logo_url,
+            'benefit_statement' => $type->benefit_statement,
          ];
     }
 }

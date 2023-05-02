@@ -580,6 +580,13 @@ class InventoryService implements InventoryServiceInterface
         $respObj->category = $newCategory['key'];
         $respObj->type_id = $newCategory['type_id'];
         $respObj->type_label = $newCategory['type_label'];
+
+        $dealerName = $inventory['data']['dealer']['name'];
+        $url = config('services.trailercentral.api') . 'users-by-name?name=' . $dealerName;
+        $dealer = $this->handleHttpRequest('GET', $url);
+        $respObj->logo_url = $dealer['data'][0]['logo']['data']['url'] ?? '';
+        $respObj->benefit_statement = $dealer['data'][0]['logo']['data']['benefit_statement'] ?? '';
+        
         return $respObj;
     }
 

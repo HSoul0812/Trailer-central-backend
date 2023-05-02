@@ -54,6 +54,8 @@ class TcApiResponseInventory
     public ?int $year;
     public ?string $status;
     public ?string $axle_capacity;
+    public ?string $logo_url;
+    public ?string $benefit_statement;
 
     #[Pure]
     public static function fromData(array $data): self
