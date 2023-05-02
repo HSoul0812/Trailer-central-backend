@@ -13,6 +13,7 @@ use App\Http\Requests\Inventory\UpdateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
+use App\Services\Inventory\InventorySDKServiceInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Transformers\Inventory\InventoryListResponseTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryTransformer;
@@ -28,8 +29,10 @@ class InventoryController extends AbstractRestfulController
      *
      */
     public function __construct(
-        private InventoryServiceInterface $inventoryService,
-        private TcApiResponseInventoryTransformer $transformer)
+        private InventoryServiceInterface         $inventoryService,
+        private InventorySDKServiceInterface      $inventorySDKService,
+        private TcApiResponseInventoryTransformer $transformer,
+    )
     {
         parent::__construct();
     }
