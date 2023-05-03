@@ -44,6 +44,8 @@ use App\Services\Integrations\TrailerCentral\Console\Leads\LogService as LeadLog
 use App\Services\Integrations\TrailerCentral\Console\Leads\LogServiceInterface as LeadLogServiceInterface;
 use App\Services\Integrations\TrailerCentral\Console\Leads\SyncService as LeadSyncService;
 use App\Services\Integrations\TrailerCentral\Console\Leads\SyncServiceInterface as LeadSyncServiceInterface;
+use App\Services\Inventory\InventorySDKService;
+use App\Services\Inventory\InventorySDKServiceInterface;
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\IpInfo\IpInfoService;
@@ -86,6 +88,7 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(AuthTokenRepositoryInterface::class, AuthTokenRepository::class);
 
         $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
+        $this->app->bind(InventorySDKServiceInterface::class, InventorySDKService::class);
         $this->app->bind(SysConfigServiceInterface::class, SysConfigService::class);
 
         $this->app->bind(SyncProcessRepositoryInterface::class, SyncProcessRepository::class);
