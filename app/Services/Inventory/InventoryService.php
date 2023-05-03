@@ -585,8 +585,8 @@ class InventoryService implements InventoryServiceInterface
 
         $dealerName = $inventory['data']['dealer']['name'];
         $dealer = $this->dealerService->listByName($dealerName);
-        $respObj->logo_url = $dealer[0]->logo['data']['url'] ?? '';
-        $respObj->benefit_statement = $dealer[0]->logo['data']['benefit_statement'] ?? '';
+        $respObj->dealer['logo_url'] = $dealer[0]->logo['data']['url'] ?? '';
+        $respObj->dealer['benefit_statement'] = $dealer[0]->logo['data']['benefit_statement'] ?? '';
         
         return $respObj;
     }
