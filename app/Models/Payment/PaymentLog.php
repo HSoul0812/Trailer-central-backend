@@ -3,7 +3,6 @@
 namespace App\Models\Payment;
 
 use App\Support\Traits\TableAware;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PaymentLog extends Model
@@ -16,6 +15,6 @@ class PaymentLog extends Model
         'full_response',
         'plan_key',
         'plan_name',
-        'plan_duration'
+        'plan_duration',
     ];
 }

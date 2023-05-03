@@ -18,7 +18,7 @@ class DeleteOldLocalImagesCommandTest extends TestCase
 
         $this->instance(
             abstract: ImageServiceInterface::class,
-            instance: Mockery::mock(ImageService::class, function(MockInterface $mock) use($days){
+            instance: Mockery::mock(ImageService::class, function (MockInterface $mock) use ($days) {
                 $mock->shouldReceive('deleteOldLocalImages')->with($days)->andReturns();
             }),
         );

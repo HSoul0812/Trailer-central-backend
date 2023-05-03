@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 $api = app(Dingo\Api\Routing\Router::class);

@@ -11,7 +11,7 @@ use Tests\Common\FeatureTestCase;
 
 class UploadLocalImageTest extends FeatureTestCase
 {
-    const UPLOAD_LOCAL_IMAGE_ENDPOINT = '/api/images/local';
+    public const UPLOAD_LOCAL_IMAGE_ENDPOINT = '/api/images/local';
 
     public function testItCanThrowValidationErrorWhenFileIsNotImage()
     {

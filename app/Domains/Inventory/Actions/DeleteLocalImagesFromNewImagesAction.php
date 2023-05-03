@@ -27,19 +27,19 @@ class DeleteLocalImagesFromNewImagesAction
 
         return $newImages
             // Only get the one that has URL
-            ->filter(fn(array $image) => data_get($image, 'url') !== null)
+            ->filter(fn (array $image) => data_get($image, 'url') !== null)
 
             // Get only url string from each one
-            ->map(fn(array $image) => data_get($image, 'url'))
+            ->map(fn (array $image) => data_get($image, 'url'))
 
             // Get only image path for each one
-            ->map(fn(string $imageUrl) => $this->urlToLocalImagePath($imageUrl))
+            ->map(fn (string $imageUrl) => $this->urlToLocalImagePath($imageUrl))
 
             // Remove the null one (if it's not local image, it will be null)
             ->filter()
 
             // Delete each of them
-            ->map(fn(string $imagePath) => $this->deleteImageByPath($imagePath))
+            ->map(fn (string $imagePath) => $this->deleteImageByPath($imagePath))
 
             // Remove null (just a precaution)
             ->filter();
@@ -47,7 +47,6 @@ class DeleteLocalImagesFromNewImagesAction
 
     /**
      * @param string $imageUrl Example: https://trailertrader.com/upload/tmp/images/CpKhEksurmAqQ92o3GpiLRHBBZYXei3Hf7KEUBVQ.jpg
-     * @return string|null
      */
     public function urlToLocalImagePath(string $imageUrl): ?string
     {

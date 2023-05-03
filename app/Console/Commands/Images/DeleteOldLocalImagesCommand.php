@@ -10,9 +10,10 @@ use Illuminate\Console\Command;
 
 class DeleteOldLocalImagesCommand extends Command
 {
-    use PrependsOutput, PrependsTimestamp;
+    use PrependsOutput;
+    use PrependsTimestamp;
 
-    const DELETE_OLDER_THAN_MONTHS = 6;
+    public const DELETE_OLDER_THAN_MONTHS = 6;
 
     /**
      * The name and signature of the console command.

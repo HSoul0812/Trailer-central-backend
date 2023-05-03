@@ -10,9 +10,7 @@ use Tests\Common\IntegrationTestCase;
 class JWTAuthTest extends IntegrationTestCase
 {
     /**
-     * Test that the system can return error when we try to authenticate with invalid credentials
-     *
-     * @return void
+     * Test that the system can return error when we try to authenticate with invalid credentials.
      */
     public function testItReturnsErrorWhenProvidingInvalidUserCredentials(): void
     {
@@ -28,9 +26,7 @@ class JWTAuthTest extends IntegrationTestCase
     }
 
     /**
-     * Test that the system can generate a new JWT token if credentials is valid
-     *
-     * @return void
+     * Test that the system can generate a new JWT token if credentials is valid.
      */
     public function testItCanGenerateAJwtTokenWhenCredentialsIsCorrect(): void
     {
@@ -52,9 +48,7 @@ class JWTAuthTest extends IntegrationTestCase
     }
 
     /**
-     * Test that the system can refresh a JWT token
-     *
-     * @return void
+     * Test that the system can refresh a JWT token.
      */
     public function testItCanRefreshJwtToken(): void
     {
@@ -81,9 +75,7 @@ class JWTAuthTest extends IntegrationTestCase
     }
 
     /**
-     * Test that the system can invalidate the JWT token
-     *
-     * @return void
+     * Test that the system can invalidate the JWT token.
      */
     public function testItCanLogOutOrInvalidateJwtToken(): void
     {
@@ -115,9 +107,8 @@ class JWTAuthTest extends IntegrationTestCase
     }
 
     /**
-     * A helper method, use to get the header with token included
+     * A helper method, use to get the header with token included.
      *
-     * @param string $token
      * @return string[]
      */
     private function headerWithToken(string $token): array

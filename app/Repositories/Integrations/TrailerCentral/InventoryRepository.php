@@ -38,7 +38,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         return collect(Schema::connection('mysql')
             ->getColumnListing('inventory'))
-            ->filter(fn(string $columnName): bool => !in_array($columnName, self::SELECT_EXCEPT_COLUMNS))
+            ->filter(fn (string $columnName): bool => !in_array($columnName, self::SELECT_EXCEPT_COLUMNS))
             ->toArray();
     }
 }

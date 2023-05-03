@@ -12,9 +12,9 @@ class DeleteLocalImagesFromNewImagesActionTest extends TestCase
 {
     public function testItWontProcessEmptyCollection()
     {
-       $deletedImagesUrls = resolve(DeleteLocalImagesFromNewImagesAction::class)->execute(collect([]));
+        $deletedImagesUrls = resolve(DeleteLocalImagesFromNewImagesAction::class)->execute(collect([]));
 
-       $this->assertEmpty($deletedImagesUrls);
+        $this->assertEmpty($deletedImagesUrls);
     }
 
     public function testItCanDeleteImagesFromNewImagesCollection()

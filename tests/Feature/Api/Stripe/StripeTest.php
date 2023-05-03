@@ -14,10 +14,8 @@ class StripeTest extends FeatureTestCase
 
         self::assertIsArray($json);
 
-        $response->assertJson(fn (AssertableJson $json) =>
-            $json->each(fn (AssertableJson $json) =>
-                $json->hasAll(['id', 'name', 'price', 'duration', 'description'])
-            )
+        $response->assertJson(fn (AssertableJson $json) => $json->each(fn (AssertableJson $json) => $json->hasAll(['id', 'name', 'price', 'duration', 'description'])
+        )
         );
     }
 }

@@ -21,7 +21,7 @@ class TcApiResponseUserLocationTransformer extends TransformerAbstract
             'country' => $location->country,
             'postalCode' => $location->postalCode,
             'phone' => $location->phone,
-            'is_default' => $location->is_default
+            'is_default' => $location->is_default,
         ];
     }
 }

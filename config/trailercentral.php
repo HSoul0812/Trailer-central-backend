@@ -35,5 +35,5 @@ return [
     ],
 
     'api_timezone' => 'America/Indiana/Indianapolis',
-    'api_datetime_format' => 'Y-m-d H:i:s'
+    'api_datetime_format' => 'Y-m-d H:i:s',
 ];

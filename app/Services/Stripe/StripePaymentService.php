@@ -4,25 +4,26 @@ namespace App\Services\Stripe;
 
 use App\Repositories\Payment\PaymentLogRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
-use \Log as Logger;
+use Exception;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Log as Logger;
+use Stripe\Checkout\Session;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Exception\UnexpectedValueException;
 use Stripe\Product;
 use Stripe\Stripe;
 use Stripe\StripeObject;
 use Stripe\Webhook;
-use Stripe\Checkout\Session;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class StripePaymentService implements StripePaymentServiceInterface
 {
-    const STRIPE_SUCCESS_URL = '/trailers/{id}/?payment_status=success';
-    const STRIPE_FAILURE_URL = '/trailers/{id}/?payment_status=failed';
-    const CHECKOUT_SESSION_COMPLETED_EVENT = 'checkout.session.completed';
+    public const STRIPE_SUCCESS_URL = '/trailers/{id}/?payment_status=success';
+    public const STRIPE_FAILURE_URL = '/trailers/{id}/?payment_status=failed';
+    public const CHECKOUT_SESSION_COMPLETED_EVENT = 'checkout.session.completed';
 
-    const PLANS = [
+    public const PLANS = [
         'tt1' => [
             'name' => 'TrailerTrader-1days',
             'price' => 75.00,
@@ -45,104 +46,9 @@ class StripePaymentService implements StripePaymentServiceInterface
 
     public function __construct(
         private PaymentLogRepositoryInterface $paymentLogRepository,
-        private InventoryServiceInterface     $inventoryService
-    )
-    {
+        private InventoryServiceInterface $inventoryService
+    ) {
         Stripe::setApiKey(config('services.stripe.secret_key'));
-    }
-
-    /**
-     * Parses a number, then returns the same number but without decimals separator, just like Stripe requires it
-     * e.g. 123.44 -> 12344
-     *      120 -> 12000
-     *      120.0 -> 12000
-     *      5.0 -> 500
-     *
-     * @param numeric $number
-     * @return int
-     */
-    private function numberToStripeFormat($number): int
-    {
-        $numberWithTwoDecimals = number_format((float)$number, 2, '.', '');
-
-        return (int)str_replace('.', '', $numberWithTwoDecimals);
-    }
-
-    private function findOrCreatePlan(string $planId): StripeObject {
-        $plan = self::PLANS[$planId];
-        $response = Product::search([
-            'query' => "name:'{$plan['name']}' and active:'true'"
-        ]);
-
-        if(count($response->data) > 0) {
-            return $response->data[0];
-        }
-
-        $product = Product::create([
-            'name' => $planId,
-            'description' => $plan['description'],
-            'default_price_data' => [
-                "currency" => "usd",
-                "unit_amount" => $this->numberToStripeFormat($plan['price']),
-            ]
-        ]);
-
-        return $product;
-    }
-
-    private function completeOrder(Session $session): int
-    {
-        try {
-            DB::beginTransaction();
-
-            $inventoryId = $session->metadata->inventory_id;
-            $userId = $session->metadata->user_id;
-            $planKey = $session->metadata->planKey;
-            $planName = $session->metadata->planName;
-            $planDescription = $session->metadata->planDescription;
-            $planDuration = $session->metadata->planDuration;
-
-            $this->paymentLogRepository->create([
-                'payment_id' => $session->id,
-                'client_reference_id' => $session->client_reference_id,
-                'full_response' => json_encode($session->values()),
-                'plan_key' => $planKey,
-                'plan_name' => $planDescription,
-                'plan_duration' => $planDuration
-            ]);
-
-            $inventory = $this->inventoryService->show((int)$inventoryId);
-            $inventoryExpiry =
-                $inventory->tt_payment_expiration_date
-                    ? Carbon::parse($inventory->tt_payment_expiration_date)
-                    : Carbon::now()->startOfDay();
-
-            if ($inventoryExpiry->startOfDay()->isBefore(Carbon::now())) {
-                $inventoryExpiry = Carbon::now()->startOfDay();
-            }
-
-            $planDuration = intval($planDuration) ?: 30;
-
-            $inventoryExpiry = $inventoryExpiry
-                ->addDays($planDuration)
-                ->setTimezone(config('trailercentral.api_timezone'))
-                ->format(config('trailercentral.api_datetime_format'));
-
-            $this->inventoryService->update($userId, [
-                'inventory_id' => $inventoryId,
-                'show_on_website' => 1,
-                'tt_payment_expiration_date' => $inventoryExpiry
-            ]);
-
-            DB::commit();
-
-            return 200;
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            Logger::critical('Failed fulfilling order: ' . $e->getMessage());
-            return 500;
-        }
     }
 
     public function createCheckoutSession(string $planId, array $metadata = []): string
@@ -179,7 +85,7 @@ class StripePaymentService implements StripePaymentServiceInterface
             'client_reference_id' => 'tt' . Str::uuid(),
             'metadata' => $metadata,
             'mode' => 'payment',
-            'success_url' => $siteUrl .$successUrl,
+            'success_url' => $siteUrl . $successUrl,
             'cancel_url' => $siteUrl . $failUrl,
         ]);
 
@@ -191,28 +97,128 @@ class StripePaymentService implements StripePaymentServiceInterface
         $endpointSecret = config('services.stripe.webhook_secret_key');
         $payload = @file_get_contents('php://input');
         $sigHeader = request()->server('HTTP_STRIPE_SIGNATURE');
+
         try {
             $event = Webhook::constructEvent(
                 $payload, $sigHeader, $endpointSecret
             );
         } catch (UnexpectedValueException|SignatureVerificationException $e) {
             Logger::critical('Failed creating webhook: ' . $e->getMessage());
+
             return 400;
         }
         Logger::info('Event type: ' . $event->type);
         if ($event->type === self::CHECKOUT_SESSION_COMPLETED_EVENT) {
             $session = $event->data->object;
+
             return $this->completeOrder($session);
         }
+
         return 200;
     }
 
     public function paymentPlans(): array
     {
         $plans = [];
-        foreach(self::PLANS as $planId => $plan) {
+        foreach (self::PLANS as $planId => $plan) {
             $plans[] = array_merge(['id' => $planId], $plan);
         }
+
         return $plans;
+    }
+
+    /**
+     * Parses a number, then returns the same number but without decimals separator, just like Stripe requires it
+     * e.g. 123.44 -> 12344
+     *      120 -> 12000
+     *      120.0 -> 12000
+     *      5.0 -> 500.
+     *
+     * @param numeric $number
+     */
+    private function numberToStripeFormat($number): int
+    {
+        $numberWithTwoDecimals = number_format((float) $number, 2, '.', '');
+
+        return (int) str_replace('.', '', $numberWithTwoDecimals);
+    }
+
+    private function findOrCreatePlan(string $planId): StripeObject
+    {
+        $plan = self::PLANS[$planId];
+        $response = Product::search([
+            'query' => "name:'{$plan['name']}' and active:'true'",
+        ]);
+
+        if (count($response->data) > 0) {
+            return $response->data[0];
+        }
+
+        $product = Product::create([
+            'name' => $planId,
+            'description' => $plan['description'],
+            'default_price_data' => [
+                'currency' => 'usd',
+                'unit_amount' => $this->numberToStripeFormat($plan['price']),
+            ],
+        ]);
+
+        return $product;
+    }
+
+    private function completeOrder(Session $session): int
+    {
+        try {
+            DB::beginTransaction();
+
+            $inventoryId = $session->metadata->inventory_id;
+            $userId = $session->metadata->user_id;
+            $planKey = $session->metadata->planKey;
+            $planName = $session->metadata->planName;
+            $planDescription = $session->metadata->planDescription;
+            $planDuration = $session->metadata->planDuration;
+
+            $this->paymentLogRepository->create([
+                'payment_id' => $session->id,
+                'client_reference_id' => $session->client_reference_id,
+                'full_response' => json_encode($session->values()),
+                'plan_key' => $planKey,
+                'plan_name' => $planDescription,
+                'plan_duration' => $planDuration,
+            ]);
+
+            $inventory = $this->inventoryService->show((int) $inventoryId);
+            $inventoryExpiry =
+                $inventory->tt_payment_expiration_date
+                    ? Carbon::parse($inventory->tt_payment_expiration_date)
+                    : Carbon::now()->startOfDay();
+
+            if ($inventoryExpiry->startOfDay()->isBefore(Carbon::now())) {
+                $inventoryExpiry = Carbon::now()->startOfDay();
+            }
+
+            $planDuration = intval($planDuration) ?: 30;
+
+            $inventoryExpiry = $inventoryExpiry
+                ->addDays($planDuration)
+                ->setTimezone(config('trailercentral.api_timezone'))
+                ->format(config('trailercentral.api_datetime_format'));
+
+            $this->inventoryService->update($userId, [
+                'inventory_id' => $inventoryId,
+                'show_on_website' => 1,
+                'tt_payment_expiration_date' => $inventoryExpiry,
+            ]);
+
+            DB::commit();
+
+            return 200;
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            Logger::critical('Failed fulfilling order: ' . $e->getMessage());
+
+            return 500;
+        }
     }
 }
