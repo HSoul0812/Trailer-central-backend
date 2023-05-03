@@ -12,6 +12,7 @@ use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
+use App\Services\Dealers\DealerServiceInterface;
 use Dingo\Api\Routing\Helpers;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Collection;
@@ -74,7 +75,8 @@ class InventoryService implements InventoryServiceInterface
         private GuzzleHttpClient $httpClient,
         private SysConfigRepositoryInterface $sysConfigRepository,
         private ListingCategoryMappingsRepositoryInterface $listingCategoryMappingsRepository,
-        private AuthTokenRepositoryInterface $authTokenRepository
+        private AuthTokenRepositoryInterface $authTokenRepository,
+        private DealerServiceInterface $dealerService,
     )
     {}
 
@@ -582,10 +584,9 @@ class InventoryService implements InventoryServiceInterface
         $respObj->type_label = $newCategory['type_label'];
 
         $dealerName = $inventory['data']['dealer']['name'];
-        $url = config('services.trailercentral.api') . 'users-by-name?name=' . $dealerName;
-        $dealer = $this->handleHttpRequest('GET', $url);
-        $respObj->logo_url = $dealer['data'][0]['logo']['data']['url'] ?? '';
-        $respObj->benefit_statement = $dealer['data'][0]['logo']['data']['benefit_statement'] ?? '';
+        $dealer = $this->dealerService->listByName($dealerName);
+        $respObj->logo_url = $dealer[0]->logo['data']['url'] ?? '';
+        $respObj->benefit_statement = $dealer[0]->logo['data']['benefit_statement'] ?? '';
         
         return $respObj;
     }
