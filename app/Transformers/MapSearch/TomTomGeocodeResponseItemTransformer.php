@@ -10,23 +10,23 @@ use League\Fractal\TransformerAbstract;
 
 class TomTomGeocodeResponseItemTransformer extends TransformerAbstract
 {
-    #[ArrayShape(['address' => "array", 'position' => "array|null"])]
+    #[ArrayShape(['address' => 'array', 'position' => 'array|null'])]
     public function transform(TomTomGeocodeResponseItem $item): array
     {
         $address = $item->address;
 
         return [
             'address' => [
-                'label'       => $address->freeformAddress,
+                'label' => $address->freeformAddress,
                 'countryCode' => $address->countryCode,
                 'countryName' => $address->country,
-                'stateCode'   => $address->countrySubdivision,
-                'state'       => $address->countrySubdivisionName,
-                'county'      => $address->countrySecondarySubdivision,
-                'city'        => $address->municipality,
-                'district'    => $address->municipalitySubdivision,
-                'street'      => $address->streetName,
-                'postalCode'  => $address->postalCode,
+                'stateCode' => $address->countrySubdivision,
+                'state' => $address->countrySubdivisionName,
+                'county' => $address->countrySecondarySubdivision,
+                'city' => $address->municipality,
+                'district' => $address->municipalitySubdivision,
+                'street' => $address->streetName,
+                'postalCode' => $address->postalCode,
             ],
             'position' => isset($item->position)
                 ? [

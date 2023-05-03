@@ -5,7 +5,7 @@ use Illuminate\Database\Migrations\Migration;
 
 class AddSuffixToPageNameOnUserTrackingsTable extends Migration
 {
-    const NAME_MAPPINGS = [
+    public const NAME_MAPPINGS = [
         'TT_PLP' => 'TT_PLP_PAGE',
         'TT_PDP' => 'TT_PDP_PAGE',
         'TT_DEALER' => 'TT_DEALER_PAGE',
@@ -13,8 +13,6 @@ class AddSuffixToPageNameOnUserTrackingsTable extends Migration
 
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up()
     {
@@ -27,11 +25,8 @@ class AddSuffixToPageNameOnUserTrackingsTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {
-
     }
 }

@@ -29,13 +29,13 @@ class Request extends BaseRequest implements RequestInterface
         return true;
     }
 
-    protected function getRules(): array
-    {
-        return $this->rules;
-    }
-
     public function messages(): array
     {
         return [];
+    }
+
+    protected function getRules(): array
+    {
+        return $this->rules;
     }
 }

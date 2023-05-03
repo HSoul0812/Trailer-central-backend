@@ -11,9 +11,10 @@ use Throwable;
 
 class PopulateMissingWebsiteUserIdCommand extends Command
 {
-    use PrependsOutput, PrependsTimestamp;
+    use PrependsOutput;
+    use PrependsTimestamp;
 
-    const DATE_FORMAT = 'Y-m-d';
+    public const DATE_FORMAT = 'Y-m-d';
 
     /**
      * The name and signature of the console command.
@@ -31,8 +32,6 @@ class PopulateMissingWebsiteUserIdCommand extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
     public function __construct(private PopulateMissingWebsiteUserIdAction $action)
     {
@@ -41,17 +40,15 @@ class PopulateMissingWebsiteUserIdCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
-        $this->info(sprintf("%s command started...", $this->name));
+        $this->info(sprintf('%s command started...', $this->name));
 
         try {
             $from = Carbon::createFromFormat(self::DATE_FORMAT, $this->argument('date'))->startOfDay();
         } catch (Throwable) {
-            $this->error(sprintf("Invalid date format, accept only %s format.", self::DATE_FORMAT));
+            $this->error(sprintf('Invalid date format, accept only %s format.', self::DATE_FORMAT));
 
             return 1;
         }
@@ -69,7 +66,7 @@ class PopulateMissingWebsiteUserIdCommand extends Command
             return 2;
         }
 
-        $this->info(sprintf("%s command finished!", $this->name));
+        $this->info(sprintf('%s command finished!', $this->name));
 
         return 0;
     }

@@ -24,7 +24,7 @@ class CacheCrawlerIpAddressesCommandTest extends TestCase
     public function testItCanCacheCrawlerIpAddresses()
     {
         $providers = collect(config('crawlers.providers'))
-            ->filter(fn(array $config) => $config['strategy'] === CrawlerCheckStrategy::IP_CHECK);
+            ->filter(fn (array $config) => $config['strategy'] === CrawlerCheckStrategy::IP_CHECK);
 
         $providers->each(function (array $config) {
             $this->assertNull(Cache::get($config['ips_cache_key']));

@@ -6,8 +6,8 @@ namespace App\Http\Controllers\v1\SubscribeEmailSearch;
 
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
-use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\CreateRequestInterface;
+use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\SubscribeEmailSearch\CreateSubscribeEmailSearchRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\SubscribeEmailSearch\SubscribeEmailSearchServiceInterface;
@@ -19,10 +19,9 @@ class SubscribeEmailSearchController extends AbstractRestfulController
     /**
      * Create a new controller instance.
      *
-     * @param SubscribeEmailSearchServiceInterface  $subscribeEmailSearch
-     * @param SubscribeEmailSearchTransformer $transformer
+     * @param SubscribeEmailSearchServiceInterface $subscribeEmailSearch
      */
-    public function __construct(private SubscribeEmailSearchServiceInterface  $subscribeEmailSearchService, private SubscribeEmailSearchTransformer $transformer)
+    public function __construct(private SubscribeEmailSearchServiceInterface $subscribeEmailSearchService, private SubscribeEmailSearchTransformer $transformer)
     {
         parent::__construct();
     }
@@ -32,12 +31,11 @@ class SubscribeEmailSearchController extends AbstractRestfulController
      */
     public function create(CreateRequestInterface $request)
     {
-      if ($request->validate()) {
-          return $this->response->item($this->subscribeEmailSearchService->send($request->all()), $this->transformer);
-      }
+        if ($request->validate()) {
+            return $this->response->item($this->subscribeEmailSearchService->send($request->all()), $this->transformer);
+        }
 
-      return $this->response->errorBadRequest();
-
+        return $this->response->errorBadRequest();
     }
 
     /**

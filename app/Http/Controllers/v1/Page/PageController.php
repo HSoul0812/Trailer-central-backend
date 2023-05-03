@@ -6,8 +6,8 @@ namespace App\Http\Controllers\v1\Page;
 
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
-use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\CreateRequestInterface;
+use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\Page\IndexPageRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Repositories\Page\PageRepositoryInterface;
@@ -18,15 +18,11 @@ class PageController extends AbstractRestfulController
 {
     /**
      * Create a new controller instance.
-     *
-     * @param PageRepositoryInterface $pageRepo
-     * @param PageTransformer $pageTransformer
      */
     public function __construct(
         private PageRepositoryInterface $pageRepo,
         private PageTransformer $pageTransformer
-    )
-    {
+    ) {
         parent::__construct();
     }
 
@@ -74,9 +70,6 @@ class PageController extends AbstractRestfulController
         throw new NotImplementedException();
     }
 
-    /**
-     * @return void
-     */
     protected function constructRequestBindings(): void
     {
         app()->bind(IndexRequestInterface::class, function () {

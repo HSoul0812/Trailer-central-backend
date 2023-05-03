@@ -8,12 +8,10 @@ class AddTcUserIdToWebsiteUsersTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up()
     {
-        if(!Schema::hasColumn('website_users', 'tc_user_id')) {
+        if (!Schema::hasColumn('website_users', 'tc_user_id')) {
             Schema::table('website_users', function (Blueprint $table) {
                 $table->unsignedInteger('tc_user_id')->nullable();
             });
@@ -22,8 +20,6 @@ class AddTcUserIdToWebsiteUsersTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {

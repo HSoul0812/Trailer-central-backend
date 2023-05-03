@@ -22,7 +22,7 @@ class AddIndexEventStatusPerWeekOnInventoryLogs extends Migration
                                );
 
 SQL
-);
+        );
     }
 
     /**

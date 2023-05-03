@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             BannerSeeder::class,
             FilterSeeder::class,
             TestUserSeeder::class,
-            PageSeeder::class
+            PageSeeder::class,
         ]);
     }
 }

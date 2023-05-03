@@ -6,6 +6,8 @@ namespace App\Providers;
 
 use App\Repositories\Geolocation\GeolocationRepository;
 use App\Repositories\Geolocation\GeolocationRepositoryInterface;
+use App\Repositories\Glossary\GlossaryRepository;
+use App\Repositories\Glossary\GlossaryRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\AuthTokenRepository;
 use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepository;
@@ -20,8 +22,6 @@ use App\Repositories\Parts\ListingCategoryMappingsRepository;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\Parts\TypeRepository;
 use App\Repositories\Parts\TypeRepositoryInterface;
-use App\Repositories\Glossary\GlossaryRepository;
-use App\Repositories\Glossary\GlossaryRepositoryInterface;
 use App\Repositories\SubscribeEmailSearch\SubscribeEmailSearchRepository;
 use App\Repositories\SubscribeEmailSearch\SubscribeEmailSearchRepositoryInterface;
 use App\Repositories\SyncProcessRepository;
@@ -52,9 +52,9 @@ use App\Services\IpInfo\IpInfoService;
 use App\Services\IpInfo\IpInfoServiceInterface;
 use App\Services\Leads\LeadService;
 use App\Services\Leads\LeadServiceInterface;
+use App\Services\MapSearch\GoogleMapSearchService;
 use App\Services\SubscribeEmailSearch\SubscribeEmailSearchService;
 use App\Services\SubscribeEmailSearch\SubscribeEmailSearchServiceInterface;
-use App\Services\MapSearch\GoogleMapSearchService;
 use App\Services\SysConfig\SysConfigService;
 use App\Services\SysConfig\SysConfigServiceInterface;
 use Http;
@@ -110,7 +110,7 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Http::macro('tcApi', function() {
+        Http::macro('tcApi', function () {
             return Http::withHeaders([
                 'access-token' => config('trailercentral.integration.api.access_token'),
             ])->baseUrl(config('services.trailercentral.api'));

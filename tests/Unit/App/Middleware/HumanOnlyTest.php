@@ -36,7 +36,7 @@ class HumanOnlyTest extends TestCase
 
         $request->headers->set('User-Agent', 'trailertrader-testing');
 
-        $response = (new HumanOnly())->handle($request, fn() => true);
+        $response = (new HumanOnly())->handle($request, fn () => true);
 
         $this->assertTrue($response);
     }
@@ -47,7 +47,7 @@ class HumanOnlyTest extends TestCase
 
         $request->headers->set('User-Agent', config('crawlers.providers.yahoo.user_agents')[0]);
 
-        $response = (new HumanOnly())->handle($request, fn() => true);
+        $response = (new HumanOnly())->handle($request, fn () => true);
 
         $this->assertTrue($response);
     }
@@ -61,7 +61,7 @@ class HumanOnlyTest extends TestCase
         $request->server->add(['REMOTE_ADDR' => $allowedIpAddress]);
 
         // This test is to make sure that the allowed ip in the config works
-        $response = (new HumanOnly())->handle($request, fn() => true);
+        $response = (new HumanOnly())->handle($request, fn () => true);
 
         $this->assertTrue($response);
     }
@@ -108,7 +108,7 @@ class HumanOnlyTest extends TestCase
         config(['trailertrader.middlewares.human_only.allow_ips' => '']);
         $request->server->add(['REMOTE_ADDR' => $googleBotIpAddress]);
 
-        $response = (new HumanOnly())->handle($request, fn() => true);
+        $response = (new HumanOnly())->handle($request, fn () => true);
 
         $this->assertTrue($response);
     }

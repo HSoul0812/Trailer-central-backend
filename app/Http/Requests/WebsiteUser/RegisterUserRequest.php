@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\WebsiteUser;
 
-use App\Http\Requests\Request;
 use App\Http\Requests\CreateRequestInterface;
+use App\Http\Requests\Request;
 use Illuminate\Validation\Rules\Password;
 
 class RegisterUserRequest extends Request implements CreateRequestInterface
@@ -21,7 +21,7 @@ class RegisterUserRequest extends Request implements CreateRequestInterface
             'phone_number' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
             'mobile_number' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
             'password' => ['required', 'confirmed', Password::min(8)],
-            'captcha' => 'required|string'
+            'captcha' => 'required|string',
         ];
     }
 }

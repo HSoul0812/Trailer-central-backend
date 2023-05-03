@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Repositories\Glossary;
 
-use App\Http\Requests\Glossary\IndexGlossaryRequest;
 use App\Models\Glossary\Glossary;
 use Illuminate\Database\Eloquent\Collection;
 

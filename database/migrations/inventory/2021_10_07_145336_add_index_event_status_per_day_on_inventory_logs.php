@@ -16,7 +16,7 @@ class AddIndexEventStatusPerDayOnInventoryLogs extends Migration
             CREATE INDEX inventory_logs_i_manufacturer_event_status_day
                 ON inventory_logs (manufacturer, event, status, (created_at::date));
 SQL
-);
+        );
     }
 
     /**

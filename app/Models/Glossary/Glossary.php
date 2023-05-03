@@ -6,7 +6,6 @@ namespace App\Models\Glossary;
 
 use App\Support\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Glossary extends Model
 {
@@ -22,7 +21,7 @@ class Glossary extends Model
         'denomination',
         'short_description',
         'long_description',
-        'type'
+        'type',
     ];
 
     /**

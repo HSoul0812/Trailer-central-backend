@@ -16,22 +16,22 @@ use Tests\Common\UnitTestCase;
 abstract class SyncServiceTestCase extends UnitTestCase
 {
     #[ArrayShape([
-        'sourceRepository'  => '\App\Repositories\Integrations\TrailerCentral\SourceRepositoryInterface|\PHPUnit\Framework\MockObject\MockObject',
-        'targetRepository'  => '\App\Services\Integrations\TrailerCentral\Console\LogServiceInterface|\PHPUnit\Framework\MockObject\MockObject',
+        'sourceRepository' => '\App\Repositories\Integrations\TrailerCentral\SourceRepositoryInterface|\PHPUnit\Framework\MockObject\MockObject',
+        'targetRepository' => '\App\Services\Integrations\TrailerCentral\Console\LogServiceInterface|\PHPUnit\Framework\MockObject\MockObject',
         'processRepository' => '\App\Repositories\SyncProcessRepositoryInterface|\PHPUnit\Framework\MockObject\MockObject',
-        'app'               => '\Illuminate\Contracts\Foundation\Application|\PHPUnit\Framework\MockObject\MockObject',
-        'logger'            => '\App\Services\LoggerServiceInterface|\Mockery\LegacyMockInterface|\PHPUnit\Framework\MockObject\MockObject',
-        'connection'        => '\Illuminate\Database\ConnectionInterface|\Mockery\LegacyMockInterface|\PHPUnit\Framework\MockObject\MockObject',
+        'app' => '\Illuminate\Contracts\Foundation\Application|\PHPUnit\Framework\MockObject\MockObject',
+        'logger' => '\App\Services\LoggerServiceInterface|\Mockery\LegacyMockInterface|\PHPUnit\Framework\MockObject\MockObject',
+        'connection' => '\Illuminate\Database\ConnectionInterface|\Mockery\LegacyMockInterface|\PHPUnit\Framework\MockObject\MockObject',
     ])]
     protected function mockDependencies(): array
     {
         return [
-            'sourceRepository'  => $this->mockClassWithoutArguments(SourceRepositoryInterface::class),
-            'targetRepository'  => $this->mockClassWithoutArguments(LogServiceInterface::class),
+            'sourceRepository' => $this->mockClassWithoutArguments(SourceRepositoryInterface::class),
+            'targetRepository' => $this->mockClassWithoutArguments(LogServiceInterface::class),
             'processRepository' => $this->mockClassWithoutArguments(SyncProcessRepositoryInterface::class),
-            'app'               => $this->mockClassWithoutArguments(ApplicationContract::class),
-            'logger'            => $this->mockClassWithoutArguments(LoggerServiceInterface::class),
-            'connection'        => $this->mockClassWithoutArguments(ConnectionInterface::class),
+            'app' => $this->mockClassWithoutArguments(ApplicationContract::class),
+            'logger' => $this->mockClassWithoutArguments(LoggerServiceInterface::class),
+            'connection' => $this->mockClassWithoutArguments(ConnectionInterface::class),
         ];
     }
 }

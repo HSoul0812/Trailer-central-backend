@@ -24,6 +24,7 @@ class WebsiteUserRepository implements WebsiteUserRepositoryInterface
         $websiteUser->password = $attributes['password'] ?? '';
         $websiteUser->tc_user_id = $attributes['tc_user_id'];
         $websiteUser->save();
+
         return $websiteUser;
     }
 
@@ -31,9 +32,10 @@ class WebsiteUserRepository implements WebsiteUserRepositoryInterface
     {
         $websiteUser = WebsiteUser::find($id);
         $websiteUser->fill($newAttributes);
-        if(isset($newAttributes['tc_user_location_id'])) {
+        if (isset($newAttributes['tc_user_location_id'])) {
             $websiteUser->tc_user_location_id = $newAttributes['tc_user_location_id'];
         }
+
         return $websiteUser->save();
     }
 

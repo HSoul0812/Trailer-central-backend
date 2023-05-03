@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models\Parts;
 
-use App\Support\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CategoryMappings extends Model
 {
+    public $timestamps = false;
     protected $table = 'category_mappings';
 
     /**
@@ -21,14 +21,11 @@ class CategoryMappings extends Model
         'category_id',
         'map_from',
         'map_to',
-        'type'
+        'type',
     ];
-
-    public $timestamps = false;
 
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
-
 }

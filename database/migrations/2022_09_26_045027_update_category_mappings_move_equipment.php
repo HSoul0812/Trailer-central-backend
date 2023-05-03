@@ -3,28 +3,24 @@
 use App\Models\Parts\CategoryMappings;
 use App\Models\Parts\Type;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 class UpdateCategoryMappingsMoveEquipment extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    const CATEGORY_NEW_MAPPINGS = [
+    public const CATEGORY_NEW_MAPPINGS = [
         'General Trailers' => [
             ['map_from' => 'Equipment / Flatbed Trailers', 'map_to' => 'equipment;flatbed;deckover;landscape'],
-            ['map_from' => 'Utility Trailers', 'map_to' => 'utility;multisport']
-        ]
+            ['map_from' => 'Utility Trailers', 'map_to' => 'utility;multisport'],
+        ],
     ];
 
-    const CATEGORY_OLD_MAPPINGS = [
+    public const CATEGORY_OLD_MAPPINGS = [
         'General Trailers' => [
             ['map_from' => 'Equipment / Flatbed Trailers', 'map_to' => 'flatbed;deckover;landscape'],
-            ['map_from' => 'Utility Trailers', 'map_to' => 'utility;equipment;multisport']
-        ]
+            ['map_from' => 'Utility Trailers', 'map_to' => 'utility;equipment;multisport'],
+        ],
     ];
 
     public function up()
@@ -34,15 +30,13 @@ class UpdateCategoryMappingsMoveEquipment extends Migration
             foreach ($categories as $category) {
                 $current_category = $current_type->categories()->where('name', $category['map_from'])->first();
                 $category_mapping = CategoryMappings::where('map_from', $category['map_from'])->where('category_id', $current_category->id)->first();
-                $category_mapping->update(['map_to'=> $category['map_to']]);
+                $category_mapping->update(['map_to' => $category['map_to']]);
             }
         }
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {
@@ -51,7 +45,7 @@ class UpdateCategoryMappingsMoveEquipment extends Migration
             foreach ($categories as $category) {
                 $current_category = $current_type->categories()->where('name', $category['map_from'])->first();
                 $category_mapping = CategoryMappings::where('map_from', $category['map_from'])->where('category_id', $current_category->id)->first();
-                $category_mapping->update(['map_to'=> $category['map_to']]);
+                $category_mapping->update(['map_to' => $category['map_to']]);
             }
         }
     }

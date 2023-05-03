@@ -11,6 +11,7 @@ class CriteriaBuilder extends Collection
 {
     /**
      * @return mixed
+     *
      * @noinspection PhpMissingReturnTypeInspection
      */
     public function getOrFail(string $key)

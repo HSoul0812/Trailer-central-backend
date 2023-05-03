@@ -21,7 +21,7 @@ class Category extends Model
      */
     protected $fillable = [
         'name',
-        'description'
+        'description',
     ];
 
     /**
@@ -51,6 +51,6 @@ class Category extends Model
      */
     public function category_mappings(): HasOne
     {
-        return $this->hasOne(CategoryMappings ::class);
+        return $this->hasOne(CategoryMappings::class);
     }
 }

@@ -17,9 +17,10 @@ class CityTransformer extends TransformerAbstract
         'longitude' => 'float',
         'country' => 'string',
         'countryISO' => 'string',
-        'network' => 'string'
+        'network' => 'string',
     ])]
-    public function transform(City $city): array {
+    public function transform(City $city): array
+    {
         return $city->toArray();
     }
 }

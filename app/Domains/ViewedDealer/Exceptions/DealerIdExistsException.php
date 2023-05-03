@@ -10,7 +10,7 @@ class DealerIdExistsException extends Exception
     public static function make(int $dealerId): DealerIdExistsException
     {
         $message = sprintf(
-            "Dealer ID %d already exists in the database, operation aborted.",
+            'Dealer ID %d already exists in the database, operation aborted.',
             $dealerId,
         );
 

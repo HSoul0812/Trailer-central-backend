@@ -8,6 +8,8 @@ use App\Services\Integrations\TrailerCentral\Console\SyncServiceInterface;
 use App\Services\LoggerServiceInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Date;
+use JsonException;
+use PDOException;
 
 abstract class AbstractSyncCommand extends Command
 {
@@ -17,18 +19,18 @@ abstract class AbstractSyncCommand extends Command
     }
 
     /**
-     * @throws \PDOException  when some unknown PDO error has been thrown
-     * @throws \JsonException when the metadata were unable to be serialized
+     * @throws PDOException  when some unknown PDO error has been thrown
+     * @throws JsonException when the metadata were unable to be serialized
      */
     public function handle(): void
     {
         $this->logger->info("[TrailerCentral\AbstractSyncCommand] starting $this->signature ...");
 
         $this->line(sprintf(
-                '[TrailerCentral\AbstractSyncCommand][%s] starting %s ...',
-                Date::now()->format('Y-m-d H:i:s'),
-                $this->signature
-            )
+            '[TrailerCentral\AbstractSyncCommand][%s] starting %s ...',
+            Date::now()->format('Y-m-d H:i:s'),
+            $this->signature
+        )
         );
 
         $numberOfRecordsSynchronized = $this->service->sync();

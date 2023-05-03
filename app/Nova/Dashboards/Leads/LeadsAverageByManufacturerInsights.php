@@ -35,7 +35,7 @@ class LeadsAverageByManufacturerInsights extends AbstractAverageByManufacturerIn
             ->uriKey(static::uriKey())
             ->animations([
                 'enabled' => true,
-                'easing'  => 'easeinout',
+                'easing' => 'easeinout',
             ])
             ->series($data['series'])
             ->filters($data['filters'])

@@ -8,6 +8,6 @@ use App\Http\Requests\Request;
 class IndexViewedDealerRequest extends Request implements IndexRequestInterface
 {
     protected array $rules = [
-        'name' => 'required|string'
+        'name' => 'required|string',
     ];
 }

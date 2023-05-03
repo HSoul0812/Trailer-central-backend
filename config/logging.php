@@ -37,62 +37,62 @@ return [
 
     'channels' => [
         'stack' => [
-            'driver'            => 'stack',
-            'channels'          => ['daily', 'error'],
+            'driver' => 'stack',
+            'channels' => ['daily', 'error'],
             'ignore_exceptions' => false,
         ],
 
         'single' => [
             'driver' => 'single',
-            'path'   => storage_path('logs/laravel.log'),
-            'level'  => env('LOG_LEVEL', 'debug'),
+            'path' => storage_path('logs/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
             'permission' => 0664,
         ],
 
         'daily' => [
             'driver' => 'daily',
-            'path'   => storage_path('logs/laravel.log'),
-            'level'  => env('LOG_LEVEL', 'debug'),
+            'path' => storage_path('logs/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
             'permission' => 0666,
             'days' => 30,
         ],
 
         'error' => [
             'driver' => 'daily',
-            'path'   => storage_path('logs/error.log'),
-            'level'  => 'error',
+            'path' => storage_path('logs/error.log'),
+            'level' => 'error',
             'permission' => 0666,
             'days' => 30,
-		],
+        ],
 
         'custom' => [
             'driver' => 'daily',
-            'path'   => storage_path('logs/custom.log'),
-            'level'  => 'debug',
+            'path' => storage_path('logs/custom.log'),
+            'level' => 'debug',
             'permission' => 0666,
             'days' => 30,
-		],
+        ],
 
         'elasticsearch' => [
             'driver' => 'daily',
-            'path'   => storage_path('logs/elasticsearch.log'),
-            'level'  => env('LOG_LEVEL', 'debug'),
+            'path' => storage_path('logs/elasticsearch.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
             'permission' => 0664,
-            'days'   => 3,
+            'days' => 3,
         ],
 
         'slack' => [
-            'driver'   => 'slack',
-            'url'      => env('LOG_SLACK_WEBHOOK_URL'),
+            'driver' => 'slack',
+            'url' => env('LOG_SLACK_WEBHOOK_URL'),
             'username' => 'Laravel Log',
-            'emoji'    => ':boom:',
-            'level'    => env('LOG_LEVEL', 'critical'),
+            'emoji' => ':boom:',
+            'level' => env('LOG_LEVEL', 'critical'),
         ],
 
         'papertrail' => [
-            'driver'       => 'monolog',
-            'level'        => env('LOG_LEVEL', 'debug'),
-            'handler'      => SyslogUdpHandler::class,
+            'driver' => 'monolog',
+            'level' => env('LOG_LEVEL', 'debug'),
+            'handler' => SyslogUdpHandler::class,
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
                 'port' => env('PAPERTRAIL_PORT'),
@@ -100,27 +100,27 @@ return [
         ],
 
         'stderr' => [
-            'driver'    => 'monolog',
-            'level'     => env('LOG_LEVEL', 'debug'),
-            'handler'   => StreamHandler::class,
+            'driver' => 'monolog',
+            'level' => env('LOG_LEVEL', 'debug'),
+            'handler' => StreamHandler::class,
             'formatter' => env('LOG_STDERR_FORMATTER'),
-            'with'      => [
+            'with' => [
                 'stream' => 'php://stderr',
             ],
         ],
 
         'syslog' => [
             'driver' => 'syslog',
-            'level'  => env('LOG_LEVEL', 'debug'),
+            'level' => env('LOG_LEVEL', 'debug'),
         ],
 
         'errorlog' => [
             'driver' => 'errorlog',
-            'level'  => env('LOG_LEVEL', 'debug'),
+            'level' => env('LOG_LEVEL', 'debug'),
         ],
 
         'null' => [
-            'driver'  => 'monolog',
+            'driver' => 'monolog',
             'handler' => NullHandler::class,
         ],
 

@@ -8,14 +8,14 @@ use Illuminate\Queue\SerializesModels;
 
 class FailedToFetchBotIpEmail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public function __construct(
         public string $providerName,
         public string $url,
         public string $errorMessage,
-    )
-    {
+    ) {
     }
 
     /**

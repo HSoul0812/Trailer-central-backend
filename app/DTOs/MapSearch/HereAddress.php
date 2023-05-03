@@ -20,20 +20,20 @@ class HereAddress
     public ?string $postalCode;
 
     #[Pure]
- public static function fromData(array $data): self
- {
-     $obj = new self();
-     $obj->label = $data['label'];
-     $obj->countryCode = $data['countryCode'];
-     $obj->countryName = $data['countryName'];
-     $obj->stateCode = $data['stateCode'] ?? null;
-     $obj->state = $data['state'] ?? null;
-     $obj->county = $data['county'] ?? null;
-     $obj->city = $data['city'] ?? null;
-     $obj->district = $data['district'] ?? null;
-     $obj->street = $data['street'] ?? null;
-     $obj->postalCode = $data['postalCode'] ?? null;
+    public static function fromData(array $data): self
+    {
+        $obj = new self();
+        $obj->label = $data['label'];
+        $obj->countryCode = $data['countryCode'];
+        $obj->countryName = $data['countryName'];
+        $obj->stateCode = $data['stateCode'] ?? null;
+        $obj->state = $data['state'] ?? null;
+        $obj->county = $data['county'] ?? null;
+        $obj->city = $data['city'] ?? null;
+        $obj->district = $data['district'] ?? null;
+        $obj->street = $data['street'] ?? null;
+        $obj->postalCode = $data['postalCode'] ?? null;
 
-     return $obj;
- }
+        return $obj;
+    }
 }

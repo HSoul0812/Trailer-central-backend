@@ -14,9 +14,10 @@ use Throwable;
 
 class ReportInventoryViewAndImpressionCommand extends Command
 {
-    use PrependsOutput, PrependsTimestamp;
+    use PrependsOutput;
+    use PrependsTimestamp;
 
-    const DATE_FORMAT = 'Y-m-d';
+    public const DATE_FORMAT = 'Y-m-d';
 
     /**
      * The name and signature of the console command.
@@ -34,8 +35,6 @@ class ReportInventoryViewAndImpressionCommand extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
     public function __construct(private InventoryViewAndImpressionCsvExporter $exporter)
     {
@@ -44,19 +43,17 @@ class ReportInventoryViewAndImpressionCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
-        $this->info(sprintf("%s command started...", $this->name));
+        $this->info(sprintf('%s command started...', $this->name));
 
         $date = $this->argument('date');
 
         try {
             $from = Carbon::createFromFormat(self::DATE_FORMAT, $date)->startOfDay();
         } catch (Throwable) {
-            $this->error(sprintf("Invalid date format, accepting only %s format.", self::DATE_FORMAT));
+            $this->error(sprintf('Invalid date format, accepting only %s format.', self::DATE_FORMAT));
 
             return 1;
         }
@@ -78,7 +75,7 @@ class ReportInventoryViewAndImpressionCommand extends Command
             try {
                 Mail::to($mailTo)->send(new ReportInventoryViewAndImpressionEmail($filePath, $date));
 
-                $this->info("Inventory view and impression email sent successfully!");
+                $this->info('Inventory view and impression email sent successfully!');
             } catch (Swift_TransportException $exception) {
                 $this->error("Can't sent out email: {$exception->getMessage()}");
 
@@ -86,7 +83,7 @@ class ReportInventoryViewAndImpressionCommand extends Command
             }
         }
 
-        $this->info(sprintf("%s command finished!", $this->name));
+        $this->info(sprintf('%s command finished!', $this->name));
 
         return 0;
     }

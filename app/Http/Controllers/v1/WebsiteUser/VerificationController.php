@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\v1\WebsiteUser;
 
 use App\Http\Controllers\AbstractRestfulController;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
@@ -17,15 +16,16 @@ class VerificationController extends AbstractRestfulController
         parent::__construct();
     }
 
-    public function verify($userId, $hash, Request $request) {
-        if (!$request->hasValidSignature() ) {
-            $this->response->error("Invalid/Expired url provided", 401);
+    public function verify($userId, $hash, Request $request)
+    {
+        if (!$request->hasValidSignature()) {
+            $this->response->error('Invalid/Expired url provided', 401);
         }
 
         $user = $this->repository->findOrFail($userId);
 
         if (sha1($user->getEmailForVerification()) !== $hash) {
-            $this->response->error("Invalid email provided", 401);
+            $this->response->error('Invalid email provided', 401);
         }
         if (!$user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();
@@ -33,17 +33,19 @@ class VerificationController extends AbstractRestfulController
 
         $email = $user->email;
         $verifyUrl = config('auth.verify_url') . "?email=$email";
+
         return redirect($verifyUrl);
     }
 
-    public function resend() {
+    public function resend()
+    {
         if (auth()->user()->hasVerifiedEmail()) {
-            $this->response->error("Email already verified", 400);
+            $this->response->error('Email already verified', 400);
         }
 
         auth()->user()->sendEmailVerificationNotification();
 
-        $this->response->error("Email verification link sent on your email id", 200);
+        $this->response->error('Email verification link sent on your email id', 200);
     }
 
     public function index(IndexRequestInterface $request)

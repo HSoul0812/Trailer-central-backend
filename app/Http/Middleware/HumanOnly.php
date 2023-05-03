@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\IpUtils;
  * 1. IP address is in the config('trailertrader.middlewares.human_only.allow_ips') list OR
  * 2. User agent is GoogleBot or BingBot (we check by IP) OR
  * 3. User agent is in the $allowUserAgents list OR
- * 4. User agent is not a web crawler (check using the LaravelCrawlerDetect class)
+ * 4. User agent is not a web crawler (check using the LaravelCrawlerDetect class).
  *
  * If the incoming request failed all these checks, then the code will return empty array, so the bad bots can't tell
  * the different between success and error result
@@ -23,7 +23,7 @@ use Symfony\Component\HttpFoundation\IpUtils;
 class HumanOnly
 {
     /**
-     * List of user agent that we want to allow the request to go through
+     * List of user agent that we want to allow the request to go through.
      *
      * @var string[]
      */
@@ -160,7 +160,7 @@ class HumanOnly
             /** @var Collection $ipRanges */
             $ipRanges = Cache::get($config['ips_cache_key'], collect([]));
 
-            $ipRange = $ipRanges->first(fn(string $ipRange) => IpUtils::checkIp($ip, $ipRange));
+            $ipRange = $ipRanges->first(fn (string $ipRange) => IpUtils::checkIp($ip, $ipRange));
 
             if ($ipRange !== null) {
                 return true;

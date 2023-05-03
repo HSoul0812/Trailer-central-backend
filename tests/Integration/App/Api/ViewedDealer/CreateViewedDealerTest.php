@@ -9,13 +9,11 @@ use Tests\Common\IntegrationTestCase;
 
 class CreateViewedDealerTest extends IntegrationTestCase
 {
-    const CREATE_VIEWED_DEALERS_ENDPOINT = '/api/viewed-dealers';
+    public const CREATE_VIEWED_DEALERS_ENDPOINT = '/api/viewed-dealers';
 
     /**
      * Test that the system will return the validation error if we provide
-     * the wrong payload to the API endpoint
-     *
-     * @return void
+     * the wrong payload to the API endpoint.
      */
     public function testItReturnsValidationErrorWithInvalidRequestBody(): void
     {
@@ -36,9 +34,7 @@ class CreateViewedDealerTest extends IntegrationTestCase
 
     /**
      * Test that we get back the bad request error if we provide the dealer id that is
-     * already exists in the database
-     *
-     * @return void
+     * already exists in the database.
      */
     public function testItReturnsBadRequestErrorWhenProvideDuplicateDealerIdWithDb(): void
     {
@@ -59,9 +55,7 @@ class CreateViewedDealerTest extends IntegrationTestCase
 
     /**
      * Test that the system returns bad request error when we provide duplicate dealer id
-     * in the payload itself
-     *
-     * @return void
+     * in the payload itself.
      */
     public function testItReturnsBadRequestErrorWhenProvideDuplicateDealerIdInThePayload(): void
     {
@@ -89,9 +83,7 @@ class CreateViewedDealerTest extends IntegrationTestCase
 
     /**
      * Test that the system will remove the duplicated name from the payload automatically
-     * and keep only the first instance of that name
-     *
-     * @return void
+     * and keep only the first instance of that name.
      */
     public function testItCanRemoveDuplicateNameFromPayload(): void
     {
@@ -133,9 +125,7 @@ class CreateViewedDealerTest extends IntegrationTestCase
      * Test that the system can store the good payload just fine
      * a good payload means no duplicate of name and dealer id
      * and the dealer id it doesn't duplicate with dealer id stored
-     * in the database
-     *
-     * @return void
+     * in the database.
      */
     public function testItCanStoreGoodPayloadSuccessfully(): void
     {

@@ -8,6 +8,6 @@ use App\Http\Requests\Request;
 class IpInfoRequest extends Request implements IndexRequestInterface
 {
     protected array $rules = [
-        'ip' => 'ipv4'
+        'ip' => 'ipv4',
     ];
 }

@@ -1,11 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
+use App\Http\Controllers\v1\Image\ImageController;
 use App\Http\Controllers\v1\WebsiteUser\AuthController;
 use App\Http\Controllers\v1\WebsiteUser\PasswordResetController;
 use App\Http\Controllers\v1\WebsiteUser\TrackController;
 use App\Http\Controllers\v1\WebsiteUser\VerificationController;
-use App\Http\Controllers\v1\Image\ImageController;
 
 $api = app(Dingo\Api\Routing\Router::class);
 

@@ -2,13 +2,12 @@
 
 namespace Database\Seeders\SysConfig;
 
-use App\Models\SysConfig\SysConfig;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class FilterSeeder extends Seeder
 {
-    const FILTER_CONFIGS = [
+    public const FILTER_CONFIGS = [
         ['filter/size/length/min', '3'],
         ['filter/size/length/max', '100'],
         ['filter/size/width/min', '4'],
@@ -44,23 +43,23 @@ class FilterSeeder extends Seeder
         ['filter/payload_capacity/5/min', '0'],
         ['filter/payload_capacity/5/max', '10000'],
     ];
+
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
     public function run()
     {
         $this->cleanTable();
-        foreach(self::FILTER_CONFIGS as $config) {
+        foreach (self::FILTER_CONFIGS as $config) {
             DB::table('sys_configs')->insert([
                 'key' => $config[0],
-                'value' => $config[1]
+                'value' => $config[1],
             ]);
         }
     }
 
-    private function cleanTable() {
+    private function cleanTable()
+    {
         DB::table('sys_configs')->where('key', 'LIKE', 'filter/%')->delete();
     }
 }

@@ -16,8 +16,8 @@ return [
     */
 
     'mailgun' => [
-        'domain'   => env('MAILGUN_DOMAIN'),
-        'secret'   => env('MAILGUN_SECRET'),
+        'domain' => env('MAILGUN_DOMAIN'),
+        'secret' => env('MAILGUN_SECRET'),
         'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
     ],
 
@@ -26,7 +26,7 @@ return [
     ],
 
     'ses' => [
-        'key'    => env('AWS_ACCESS_KEY_ID'),
+        'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
@@ -36,7 +36,7 @@ return [
     ],
 
     'trailercentral' => [
-        'api'          => env('TC_API_URL', 'https://api.v1.staging.trailercentral.com/api/'),
+        'api' => env('TC_API_URL', 'https://api.v1.staging.trailercentral.com/api/'),
         'access_token' => env('TC_API_ACCESS_TOKEN', 'f3c74ad00f954cc698face16ff78d791'),
         'tt_website_id' => env('TC_API_TT_ID', '284'),
         'integration_access_token' => env('TC_INTEGRATION_ACCESS_TOKEN'),
@@ -48,18 +48,18 @@ return [
 
     'google' => [
         'map' => [
-            'key' => env('GOOGLE_MAP_API_KEY', '')
+            'key' => env('GOOGLE_MAP_API_KEY', ''),
         ],
         'captcha' => [
-            'key' => env('GOOGLE_CAPTCHA_API_KEY', '')
+            'key' => env('GOOGLE_CAPTCHA_API_KEY', ''),
         ],
         'client_id' => env('GOOGLE_AUTH_CLIENT_ID', ''),
         'client_secret' => env('GOOGLE_AUTH_CLIENT_SECRET', ''),
-        'redirect' => '/api/user/auth/google/callback'
+        'redirect' => '/api/user/auth/google/callback',
     ],
     'facebook' => [
         'client_id' => env('FACEBOOK_AUTH_CLIENT_ID', ''),
         'client_secret' => env('FACEBOOK_AUTH_CLIENT_SECRET', ''),
-        'redirect' => '/api/user/auth/facebook/callback'
+        'redirect' => '/api/user/auth/facebook/callback',
     ],
 ];

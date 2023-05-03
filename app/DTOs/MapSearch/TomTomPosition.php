@@ -12,12 +12,12 @@ class TomTomPosition
     public float $lon;
 
     #[Pure]
- public static function fromData(array $data): self
- {
-     $obj = new self();
-     $obj->lat = $data['lat'];
-     $obj->lon = $data['lon'];
+    public static function fromData(array $data): self
+    {
+        $obj = new self();
+        $obj->lat = $data['lat'];
+        $obj->lon = $data['lon'];
 
-     return $obj;
- }
+        return $obj;
+    }
 }

@@ -20,17 +20,8 @@ class SysConfigServiceTest extends TestCase
         $this->service = $this->getConcreteService();
     }
 
-    private function getConcreteService(): SysConfigService
+    public function testList()
     {
-        $this->sysConfigRepository = $this->mockSysConfigRepository();
-        return new SysConfigService($this->sysConfigRepository);
-    }
-
-    private function mockSysConfigRepository(): MockObject {
-        return $this->createMock(SysConfigRepositoryInterface::class);
-    }
-
-    public function testList() {
         $this->sysConfigRepository->expects($this->once())
             ->method('getAll')
             ->will($this->returnValue($this->sysConfigFixture()));
@@ -40,23 +31,36 @@ class SysConfigServiceTest extends TestCase
                 'size' => [
                     'length' => [
                         'min' => '3',
-                        'max' => '100'
-                    ]
-                ]
-            ]
+                        'max' => '100',
+                    ],
+                ],
+            ],
         ]);
     }
 
-    private function sysConfigFixture() {
+    private function getConcreteService(): SysConfigService
+    {
+        $this->sysConfigRepository = $this->mockSysConfigRepository();
+
+        return new SysConfigService($this->sysConfigRepository);
+    }
+
+    private function mockSysConfigRepository(): MockObject
+    {
+        return $this->createMock(SysConfigRepositoryInterface::class);
+    }
+
+    private function sysConfigFixture()
+    {
         return new Collection([
             new SysConfig([
                'key' => 'filter/size/length/min',
-               'value' => '3'
+               'value' => '3',
             ]),
             new SysConfig([
                 'key' => 'filter/size/length/max',
-                'value' => '100'
-            ])
+                'value' => '100',
+            ]),
         ]);
     }
 }

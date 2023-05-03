@@ -8,9 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class SysConfig extends Model
 {
-    use HasFactory, TableAware;
+    use HasFactory;
+    use TableAware;
     protected $fillable = [
         'key',
-        'value'
+        'value',
     ];
 }

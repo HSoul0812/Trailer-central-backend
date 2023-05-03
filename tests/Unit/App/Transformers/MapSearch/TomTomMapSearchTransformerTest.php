@@ -140,15 +140,14 @@ class TomTomMapSearchTransformerTest extends UnitTestCase
                 "position":"37.832844,-122.276688"
             }
         ]';
+
         return [
             [$reverseJson, $expectedReverseResponse],
         ];
     }
+
     /**
      * @dataProvider transformGeocodeDataProvider
-     *
-     * @param $json
-     * @param $expectedResponse
      */
     public function testGeocodeTransformer($json, $expectedResponse)
     {
@@ -160,9 +159,6 @@ class TomTomMapSearchTransformerTest extends UnitTestCase
 
     /**
      * @dataProvider transformReverseGeocodeDataProvider
-     *
-     * @param $json
-     * @param $expectedResponse
      */
     public function testReverseGeocodeTransformer($json, $expectedResponse)
     {

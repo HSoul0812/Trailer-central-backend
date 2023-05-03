@@ -6,7 +6,7 @@ use App\Domains\TrailerTrader\TrailerTraderDomain;
 
 class GetPageNameFromUrlAction
 {
-    const PAGE_NAMES = [
+    public const PAGE_NAMES = [
         'TT_PLP' => 'TT_PLP_PAGE',
         'TT_PDP' => 'TT_PDP_PAGE',
         'TT_DEALER' => 'TT_DEALER_PAGE',
@@ -69,6 +69,6 @@ class GetPageNameFromUrlAction
 
     private function trailerTraderFrontendDomainCheck(): callable
     {
-        return fn(string $url): bool => $this->trailerTraderDomain->isFrontendDomain($url);
+        return fn (string $url): bool => $this->trailerTraderDomain->isFrontendDomain($url);
     }
 }
