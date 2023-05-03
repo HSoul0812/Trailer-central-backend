@@ -9,6 +9,7 @@ use App\Models\User\NewUser;
 use App\Helpers\StringHelper;
 use App\Models\User\DealerClapp;
 use App\Models\User\NewDealerUser;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\User\DealerAdminSetting;
@@ -265,7 +266,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
 
             DB::commit();
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Dealer managing error. dealer_id - {$dealerId}", $e->getTrace());
             DB::rollback();
             throw new Exception($e->getMessage());
@@ -284,7 +285,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             $dealer = $this->userRepository->get(['dealer_id' => $dealerId]);
 
             if ($active && empty($sourceId)) {
-                throw new \Exception('Source Id is required when activating CDK.');
+                throw new Exception('Source Id is required when activating CDK.');
             }
 
             $sourceId = $active ? ($sourceId ?? '') : '';
@@ -458,13 +459,16 @@ class DealerOptionsService implements DealerOptionsServiceInterface
                 $dealer->delete();
             }
 
+            return true;
+        } catch (ModelNotFoundException $e) {
             if ($active && empty($dealer)) {
                 DealerClapp::create([
                     'dealer_id' => $dealerId
                 ]);
             }
+
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Marketing activation error. dealer_id - {$dealerId}", $e->getTrace());
             throw new Exception($e->getMessage());
         }
@@ -482,7 +486,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             $dealer = $this->userRepository->get(['dealer_id' => $dealerId]);
 
             if (is_null($dealer->website)) {
-                throw new \Exception('There\'s no website associated to this dealer.');
+                throw new Exception('There\'s no website associated to this dealer.');
             }
 
             $websiteConfigData = [
@@ -493,7 +497,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             $this->websiteConfigRepository->createOrUpdate($dealer->website->id, $websiteConfigData);
             $this->userRepository->commitTransaction();
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Mobile activation error. dealer_id - {$dealerId}", $e->getTrace());
             $this->userRepository->rollbackTransaction();
             throw new Exception($e->getMessage());
@@ -646,13 +650,13 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             $this->userRepository->beginTransaction();
 
             if (empty($status)) {
-                throw new \Exception('Status value is required to update dealer status.');
+                throw new Exception('Status value is required to update dealer status.');
             }
 
             $this->userRepository->changeStatus($dealerId, $status);
             $this->userRepository->commitTransaction();
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Change dealer status error. dealer_id - {$dealerId}", $e->getTrace());
             $this->userRepository->rollbackTransaction();
             throw new Exception($e->getMessage());
