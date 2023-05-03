@@ -119,10 +119,16 @@ interface InventoryServiceInterface
      *      2. ElasticSearch indexation by dealer location id
      *      3. Redis Cache invalidation by dealer id
      *
-     * @param  array  $dealerIds
+     * @param  int[]  $dealerIds
+     * @param array $context
+     * @param bool $waitForImageOverlays
      * @return void
      */
-    public function invalidateCacheReindexAndGenerateImageOverlaysByDealerIds(array $dealerIds): void;
+    public function invalidateCacheReindexAndGenerateImageOverlaysByDealerIds(
+        array $dealerIds,
+        array $context = [],
+        bool $waitForImageOverlays = false
+    ): void;
 
     /**
      * Method name say nothing about real process order, it is only to be consistent with legacy naming convention
