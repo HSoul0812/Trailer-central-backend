@@ -34,8 +34,8 @@ class SyncProcessRepository implements SyncProcessRepositoryInterface
     {
         return SyncProcess::query()->findOrFail($id)?->update([
             'finished_at' => Date::now(),
-            'status'      => SyncProcess::STATUS_FINISHED,
-            'meta'        => $meta,
+            'status' => SyncProcess::STATUS_FINISHED,
+            'meta' => $meta,
         ]);
     }
 
@@ -46,8 +46,8 @@ class SyncProcessRepository implements SyncProcessRepositoryInterface
     {
         return SyncProcess::query()->findOrFail($id)?->update([
             'finished_at' => Date::now(),
-            'status'      => SyncProcess::STATUS_FAILED,
-            'meta'        => $meta,
+            'status' => SyncProcess::STATUS_FAILED,
+            'meta' => $meta,
         ]);
     }
 

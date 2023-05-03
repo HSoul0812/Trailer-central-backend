@@ -54,7 +54,7 @@ class GzipResponseTest extends TestCase
         $value = 'some string';
 
         /** @var string $response */
-        $response = $middleware->handle($request, fn() => $value);
+        $response = $middleware->handle($request, fn () => $value);
 
         $this->assertEquals($value, $response);
     }
@@ -71,7 +71,7 @@ class GzipResponseTest extends TestCase
         $middleware = new GzipResponse();
 
         /** @var View $response */
-        $response = $middleware->handle($request, function() {
+        $response = $middleware->handle($request, function () {
             return view('stub.for-test');
         });
 

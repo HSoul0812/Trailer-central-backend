@@ -2,19 +2,19 @@
 
 namespace App\Services\Inventory\ESQuery;
 
-use JetBrains\PhpStorm\ArrayShape;
+use stdClass;
 
 class ESInventoryQueryBuilder
 {
-    const OCCUR_MUST = 'must';
-    const OCCUR_SHOULD = 'should';
-    const OCCUR_MUST_NOT = 'must_not';
+    public const OCCUR_MUST = 'must';
+    public const OCCUR_SHOULD = 'should';
+    public const OCCUR_MUST_NOT = 'must_not';
 
     private array $queries = [
         'must' => [],
         'should' => [],
         'must_not' => [],
-        'filter' => []
+        'filter' => [],
     ];
 
     private bool $willPaginate = false;
@@ -50,8 +50,8 @@ class ESInventoryQueryBuilder
         if ($min != null || $max != null) {
             $rangeQuery = [
                 'range' => [
-                    $fieldKey => []
-                ]
+                    $fieldKey => [],
+                ],
             ];
             if ($min != null) {
                 $rangeQuery['range'][$fieldKey]['gt'] = $min;
@@ -62,14 +62,17 @@ class ESInventoryQueryBuilder
 
             $this->queries[$context][] = $rangeQuery;
         }
+
         return $this;
     }
 
-    public function addExistsQuery(string $fieldKey, $context = self::OCCUR_MUST) {
+    public function addExistsQuery(string $fieldKey, $context = self::OCCUR_MUST)
+    {
         $query = $this->buildExistsQuery($fieldKey);
-        if($query != null) {
+        if ($query != null) {
             $this->queries[$context][] = $query;
         }
+
         return $this;
     }
 
@@ -79,6 +82,7 @@ class ESInventoryQueryBuilder
         if ($query != null) {
             $this->queries[$context][] = $query;
         }
+
         return $this;
     }
 
@@ -89,19 +93,23 @@ class ESInventoryQueryBuilder
 
             $this->queries[$context][] = [
                 'bool' => [
-                    'should' => $queries
-                ]
+                    'should' => $queries,
+                ],
             ];
         }
+
         return $this;
     }
 
-    public function addQueryToContext(array $query, $context = self::OCCUR_MUST) {
+    public function addQueryToContext(array $query, $context = self::OCCUR_MUST)
+    {
         $this->queries[$context][] = $query;
+
         return $this;
     }
 
-    public function setFilterScript(array $script) {
+    public function setFilterScript(array $script)
+    {
         $this->filterScript = $script;
     }
 
@@ -110,33 +118,38 @@ class ESInventoryQueryBuilder
         if ($valueString != null) {
             $valueArr = explode(';', $valueString);
             $queries = [];
-            foreach($valueArr as $value) {
+            foreach ($valueArr as $value) {
                 $queries[] = $this->buildTermQuery($fieldKey, $value);
             }
+
             return $queries;
         }
+
         return null;
     }
 
-    public function buildTermQuery(string $fieldKey, $value) {
+    public function buildTermQuery(string $fieldKey, $value)
+    {
         if ($value !== null) {
             return
                 [
                     'match_phrase' => [
                         $fieldKey => (is_bool($value) || is_numeric($value))
                             ? $value
-                            : str_replace("+", " ", $value)
-                    ]
+                            : str_replace('+', ' ', $value),
+                    ],
                 ];
         }
+
         return null;
     }
 
-    public function buildExistsQuery(string $fieldKey) {
+    public function buildExistsQuery(string $fieldKey)
+    {
         return [
             'exists' => [
-                'field' => $fieldKey
-            ]
+                'field' => $fieldKey,
+            ],
         ];
     }
 
@@ -144,18 +157,21 @@ class ESInventoryQueryBuilder
     {
         $this->location = $location;
         $this->distance = $distance;
+
         return $this;
     }
 
     public function setGlobalAggregate(array $aggregations)
     {
         $this->globalAggregations = $aggregations;
+
         return $this;
     }
 
     public function setFilterAggregate(array $aggregations)
     {
         $this->filterAggregations = $aggregations;
+
         return $this;
     }
 
@@ -166,11 +182,13 @@ class ESInventoryQueryBuilder
         $this->pageSize = $pageSize;
     }
 
-    public function orderRandom(bool $isRandom) {
+    public function orderRandom(bool $isRandom)
+    {
         $this->orderRandom = $isRandom;
     }
 
-    public function orderBy(string $field, string $direction) {
+    public function orderBy(string $field, string $direction)
+    {
         $this->orderField = $field;
         $this->orderDir = $direction;
     }
@@ -186,69 +204,68 @@ class ESInventoryQueryBuilder
 
         // Collect valid query context
         $queries = [];
-        foreach($this->queries as $context => $query) {
-            if(!empty($query)) {
+        foreach ($this->queries as $context => $query) {
+            if (!empty($query)) {
                 $queries[$context] = $query;
             }
         }
 
         if (!empty($queries)) {
             $query = [
-                'bool' => $queries
+                'bool' => $queries,
             ];
 
             // building filters
             $filters = [];
-            if($this->filterScript) {
+            if ($this->filterScript) {
                 $filters[] = [
                     'script' => [
-                        'script' => $this->filterScript
-                    ]
+                        'script' => $this->filterScript,
+                    ],
                 ];
             }
-            if($this->location && $this->distance) {
+            if ($this->location && $this->distance) {
                 $filters[] = [
                     'geo_distance' => [
                         'distance' => $this->distance,
-                        'location.geo' => $this->location
-                    ]
+                        'location.geo' => $this->location,
+                    ],
                 ];
             }
-            if(!empty($filters)) {
+            if (!empty($filters)) {
                 $query['bool']['filter'] = $filters;
             }
 
-            if($this->orderRandom) {
+            if ($this->orderRandom) {
                 $result['query'] = [
                     'function_score' => [
                         'query' => $query,
-                        "functions" => [
+                        'functions' => [
                             [
-                                "random_score" => new \stdClass(),
-                            ]
+                                'random_score' => new stdClass(),
+                            ],
                         ],
-                        "score_mode" => "sum",
-                        "boost_mode" => "replace",
-                    ]
+                        'score_mode' => 'sum',
+                        'boost_mode' => 'replace',
+                    ],
                 ];
             } else {
                 $result['query'] = $query;
             }
         }
 
-
         if ($this->orderField === 'distance') {
             $result['sort'] = [[
                 '_geo_distance' => [
                     'location.geo' => $this->location,
-                    'order' => $this->orderDir
-                ]
+                    'order' => $this->orderDir,
+                ],
             ]];
-        } else if($this->orderField === 'createdAt') {
+        } elseif ($this->orderField === 'createdAt') {
             $result['sort'] = [[
-                'createdAt' => $this->orderDir
+                'createdAt' => $this->orderDir,
             ]];
-        } else if($this->orderField === 'price') {
+        } elseif ($this->orderField === 'price') {
             $result['sort'] = [[
                 '_script' => [
                     'type' => 'number',
@@ -258,12 +275,12 @@ class ESInventoryQueryBuilder
                     if(doc[\'websitePrice\'] != null){ price = doc[\'websitePrice\'].value; }
                     if(0 < doc[\'salesPrice\'].value && doc[\'salesPrice\'].value < price) { price = doc[\'salesPrice\'].value; }
                     return price;
-                    '
+                    ',
                     ],
-                    'order' => $this->orderDir
-                ]
+                    'order' => $this->orderDir,
+                ],
             ]];
-        } else if($this->orderField === 'numFeatures') {
+        } elseif ($this->orderField === 'numFeatures') {
             $result['sort'] = [[
                 '_script' => [
                     'type' => 'number',
@@ -275,29 +292,30 @@ class ESInventoryQueryBuilder
                     if(doc[\'featureList.lq\'] != null){ numFeature += doc[\'featureList.lq\'].size(); }
                     if(doc[\'featureList.doorsWindowsRamps\'] != null){ numFeature += doc[\'featureList.doorsWindowsRamps\'].size(); }
                     return numFeature;
-                    '
+                    ',
                     ],
-                    'order' => $this->orderDir
-                ]
+                    'order' => $this->orderDir,
+                ],
             ]];
         }
-        if(!empty($result['sort'])) {
-            $result['sort'] = array_merge($result['sort'], ["_score"]);
+        if (!empty($result['sort'])) {
+            $result['sort'] = array_merge($result['sort'], ['_score']);
         }
 
         $aggregations = array_merge(
             [],
             $this->globalAggregations ? [
-                "all_inventories" => [
-                    "global" => new \stdClass(),
-                    "aggs" => $this->globalAggregations
-                ]
+                'all_inventories' => [
+                    'global' => new stdClass(),
+                    'aggs' => $this->globalAggregations,
+                ],
             ] : [],
             $this->filterAggregations ?? []
         );
-        if(!empty($aggregations)) {
+        if (!empty($aggregations)) {
             $result['aggregations'] = $aggregations;
         }
+
         return $result;
     }
 }

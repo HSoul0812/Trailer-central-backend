@@ -2,10 +2,8 @@
 
 namespace Database\Factories\WebsiteUser;
 
-use App\Models\User;
 use App\Models\WebsiteUser\WebsiteUser;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
 
 class WebsiteUserFactory extends Factory
 {

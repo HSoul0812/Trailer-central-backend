@@ -76,14 +76,15 @@ class AbstractAverageByManufacturerInsightsTest extends IntegrationTestCase
      * Examples of invalid query parameter with their respective expected exception and its message.
      *
      * @return array<string, array>
+     *
      * @noinspection PhpArrayShapeAttributeCanBeAddedInspection
      */
     public function invalidParametersProvider(): array
     {
         return [          // array $params, string $expectedException, string $expectedExceptionMessage, string|array $firstExpectedErrorMessage
             'wrong period' => [['period' => 'yearly'], ResourceException::class, 'Validation Failed', 'The selected period is invalid.'],
-            'wrong from'   => [['from' => '33-33-3333'], ResourceException::class, 'Validation Failed', 'The from does not match the format Y-m-d.'],
-            'wrong to'     => [['from' => '2021-09-09', 'to' => '2021-09-07'], ResourceException::class, 'Validation Failed', 'The from must be a date before or equal to 2021-09-07.'],
+            'wrong from' => [['from' => '33-33-3333'], ResourceException::class, 'Validation Failed', 'The from does not match the format Y-m-d.'],
+            'wrong to' => [['from' => '2021-09-09', 'to' => '2021-09-07'], ResourceException::class, 'Validation Failed', 'The from must be a date before or equal to 2021-09-07.'],
         ];
     }
 
@@ -91,6 +92,7 @@ class AbstractAverageByManufacturerInsightsTest extends IntegrationTestCase
      * Examples of invalid query parameter with their respective expected exception and its message.
      *
      * @return array<string, array>
+     *
      * @noinspection PhpArrayShapeAttributeCanBeAddedInspection
      */
     public function validParametersProvider(): array
@@ -99,9 +101,9 @@ class AbstractAverageByManufacturerInsightsTest extends IntegrationTestCase
 
         return [          // array $params
             'no parameters' => [[]],
-            'valid period'  => [['period' => InsightRequestInterface::PERIOD_PER_DAY]],
-            'valid from'    => [['from' => $now]],
-            'valid to'      => [['from' => Date::now()->startOf('year')->format('Y-m-d'), 'to' => $now]],
+            'valid period' => [['period' => InsightRequestInterface::PERIOD_PER_DAY]],
+            'valid from' => [['from' => $now]],
+            'valid to' => [['from' => Date::now()->startOf('year')->format('Y-m-d'), 'to' => $now]],
         ];
     }
 }

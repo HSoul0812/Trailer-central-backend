@@ -6,16 +6,16 @@ class PrivateDealerCheck
 {
     public const FROM_TT = 'trailertrader';
     public const FROM_TC = 'trailercentral';
-    const PRIVATE_DEALER_IDS = [
+    public const PRIVATE_DEALER_IDS = [
         8410,
         1004,
         12213,
-        10005
+        10005,
     ];
 
     public function checkArray(array $dealer): bool
     {
-        if(!isset($dealer)) {
+        if (!isset($dealer)) {
             return false;
         }
 

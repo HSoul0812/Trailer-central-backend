@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\v1\Inventory;
 
-use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
-use App\Http\Requests\Inventory\IndexInventoryRequest;
-use App\Http\Requests\Inventory\CreateInventoryRequest;
-use App\Http\Requests\Inventory\UpdateInventoryRequest;
-use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\IndexRequestInterface;
+use App\Http\Requests\Inventory\CreateInventoryRequest;
+use App\Http\Requests\Inventory\DeleteInventoryRequest;
+use App\Http\Requests\Inventory\IndexInventoryRequest;
+use App\Http\Requests\Inventory\UpdateInventoryRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\Inventory\InventorySDKServiceInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Transformers\Inventory\InventoryListResponseTransformer;
-use App\Transformers\Inventory\TcApiResponseInventoryTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryCreateTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryDeleteTransformer;
+use App\Transformers\Inventory\TcApiResponseInventoryTransformer;
+use Cache;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
@@ -26,14 +26,12 @@ class InventoryController extends AbstractRestfulController
 {
     /**
      * Create a new controller instance.
-     *
      */
     public function __construct(
-        private InventoryServiceInterface         $inventoryService,
-        private InventorySDKServiceInterface      $inventorySDKService,
+        private InventoryServiceInterface $inventoryService,
+        private InventorySDKServiceInterface $inventorySDKService,
         private TcApiResponseInventoryTransformer $transformer,
-    )
-    {
+    ) {
         parent::__construct();
     }
 
@@ -78,6 +76,7 @@ class InventoryController extends AbstractRestfulController
     {
         if ($request->validate()) {
             $result = $this->inventorySDKService->list($request->all());
+
             return $this->response->item($result, new InventoryListResponseTransformer());
         }
 
@@ -112,18 +111,21 @@ class InventoryController extends AbstractRestfulController
         return $this->response->errorBadRequest();
     }
 
-    public function saveProgress(Request $request) {
+    public function saveProgress(Request $request)
+    {
         $user = auth('api')->user();
         $progress = $request->all();
-        \Cache::forever($user->getAuthIdentifier() . '/trailer-progress', json_encode($progress));
+        Cache::forever($user->getAuthIdentifier() . '/trailer-progress', json_encode($progress));
+
         return $this->response->noContent();
     }
 
     public function getProgress(Request $request): Response
     {
         $user = auth('api')->user();
+
         return $this->response->array(
-            json_decode(\Cache::get($user->getAuthIdentifier() . '/trailer-progress', '{}'), true)
+            json_decode(Cache::get($user->getAuthIdentifier() . '/trailer-progress', '{}'), true)
         );
     }
 

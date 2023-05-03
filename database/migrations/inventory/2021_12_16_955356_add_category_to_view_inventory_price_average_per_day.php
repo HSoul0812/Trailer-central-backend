@@ -44,7 +44,7 @@ class AddCategoryToViewInventoryPriceAveragePerDay extends Migration
             -- averages per day and manufacturer
 
 SQL
-);
+        );
     }
 
     /**

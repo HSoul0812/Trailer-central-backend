@@ -209,6 +209,7 @@ class TomTomMapSearchServiceTest extends TestCase
     private function getConcreteService()
     {
         app()->bind(MapSearchServiceInterface::class, TomTomMapSearchService::class);
+
         return app()->make(MapSearchServiceInterface::class);
     }
 }

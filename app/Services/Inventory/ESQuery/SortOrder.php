@@ -4,17 +4,18 @@ namespace App\Services\Inventory\ESQuery;
 
 class SortOrder
 {
-    const ORDER_DESC = 'desc';
-    const ORDER_ASC = 'asc';
+    public const ORDER_DESC = 'desc';
+    public const ORDER_ASC = 'asc';
 
     private string $direction;
     private string $field;
+
     public function __construct(string $sort)
     {
-        if($sort[0] === '+') {
+        if ($sort[0] === '+') {
             $this->direction = self::ORDER_ASC;
             $this->field = substr($sort, 1);
-        } else if($sort[0] === '-') {
+        } elseif ($sort[0] === '-') {
             $this->direction = self::ORDER_DESC;
             $this->field = substr($sort, 1);
         } else {
@@ -23,7 +24,8 @@ class SortOrder
         }
     }
 
-    public function __get($property) {
+    public function __get($property)
+    {
         if (property_exists($this, $property)) {
             return $this->$property;
         }

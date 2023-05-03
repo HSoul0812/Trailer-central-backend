@@ -12,8 +12,9 @@ use League\Fractal\TransformerAbstract;
 
 class InventoryListResponseTransformer extends TransformerAbstract
 {
-    #[ArrayShape(['inventories' => "array", 'meta' => "array", 'aggregations' => "array"])]
-    public function transform(TcEsResponseInventoryList $response): array {
+    #[ArrayShape(['inventories' => 'array', 'meta' => 'array', 'aggregations' => 'array'])]
+    public function transform(TcEsResponseInventoryList $response): array
+    {
         $manager = new Manager();
         $manager->setSerializer(new ArraySerializer());
         $inventories = $response->inventories->getCollection();

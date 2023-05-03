@@ -6,21 +6,20 @@ declare(strict_types=1);
 
 namespace Database\Seeders\Page;
 
-use App\Models\Page\Page;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class PageSeeder extends Seeder
 {
     private const PAGES = [
-        ['name' => 'Home',            'url' => '/home'          ],
+        ['name' => 'Home',            'url' => '/home'],
         ['name' => 'Private Sellers', 'url' => '/privatesellers'],
-        ['name' => 'Dealers',         'url' => '/dealers'       ],
-        ['name' => 'FAQ',             'url' => '/faq'           ],
-        ['name' => 'About',           'url' => '/about'         ],
-        ['name' => 'Affiliates',      'url' => '/affiliates'    ],
-        ['name' => 'Privacy Policy',  'url' => '/privacypolicy' ],
-        ['name' => 'Terms of Use',    'url' => '/termsofuse'    ],
+        ['name' => 'Dealers',         'url' => '/dealers'],
+        ['name' => 'FAQ',             'url' => '/faq'],
+        ['name' => 'About',           'url' => '/about'],
+        ['name' => 'Affiliates',      'url' => '/affiliates'],
+        ['name' => 'Privacy Policy',  'url' => '/privacypolicy'],
+        ['name' => 'Terms of Use',    'url' => '/termsofuse'],
     ];
 
     /**
@@ -33,7 +32,7 @@ class PageSeeder extends Seeder
         foreach (self::PAGES as $page) {
             DB::table('pages')->insert([
                 'name' => $page['name'],
-                'url' => $page['url']
+                'url' => $page['url'],
             ]);
         }
     }

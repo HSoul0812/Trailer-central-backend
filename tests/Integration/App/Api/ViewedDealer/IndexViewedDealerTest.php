@@ -16,13 +16,11 @@ use Tests\Common\IntegrationTestCase;
 
 class IndexViewedDealerTest extends IntegrationTestCase
 {
-    const INDEX_VIEWED_DEALER_ENDPOINT = '/api/viewed-dealers';
+    public const INDEX_VIEWED_DEALER_ENDPOINT = '/api/viewed-dealers';
 
     /**
      * Test that the system returns validation error if we get the viewed-dealers
-     * without providing a name
-     *
-     * @return void
+     * without providing a name.
      */
     public function testItReturnsValidationErrorWhenFetchWithoutName(): void
     {
@@ -34,9 +32,7 @@ class IndexViewedDealerTest extends IntegrationTestCase
 
     /**
      * Test that the system returns the not found error when we fetch the name
-     * that doesn't exist in the database
-     *
-     * @return void
+     * that doesn't exist in the database.
      */
     public function testItReturnsNotFoundWhenFetchWithNonExistenceName(): void
     {
@@ -56,9 +52,7 @@ class IndexViewedDealerTest extends IntegrationTestCase
     }
 
     /**
-     * Test that the system can return the viewed dealer data when the name exists
-     *
-     * @return void
+     * Test that the system can return the viewed dealer data when the name exists.
      */
     public function testItReturnsTheViewedDealerDataWhenTheGivenNameExists(): void
     {

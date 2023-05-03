@@ -42,7 +42,7 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
                 ->uriKey(static::uriKey())
                 ->animations([
                     'enabled' => true,
-                    'easing'  => 'easeinout',
+                    'easing' => 'easeinout',
                 ])
                 ->series($data['series'])
                 ->filters($data['filters'])
@@ -64,22 +64,22 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
     {
         if ($request->validate()) {
             $criteriaBuilder = new CriteriaBuilder([
-                'period'       => $request->getPeriod(),
-                'from'         => $request->getFrom(),
-                'to'           => $request->getTo(),
+                'period' => $request->getPeriod(),
+                'from' => $request->getFrom(),
+                'to' => $request->getTo(),
                 'manufacturer' => $request->getSubset(),
-                'category'     => $request->getCategory(),
+                'category' => $request->getCategory(),
             ]);
 
             $insights = $this->service->collect($criteriaBuilder);
 
             $series = [
                 [
-                    'barPercentage'   => 0.5,
-                    'label'           => 'Industry Average',
-                    'borderColor'     => '#1FE074',
+                    'barPercentage' => 0.5,
+                    'label' => 'Industry Average',
+                    'borderColor' => '#1FE074',
                     'backgroundColor' => 'rgba(31, 224, 116, 0.2)',
-                    'data'            => $insights->complement,
+                    'data' => $insights->complement,
                 ],
             ];
 
@@ -93,11 +93,11 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
                     }
 
                     $series[] = [
-                        'barPercentage'   => 0.5,
-                        'label'           => $title,
-                        'borderColor'     => $colors[$colorIndex],
+                        'barPercentage' => 0.5,
+                        'label' => $title,
+                        'borderColor' => $colors[$colorIndex],
                         'backgroundColor' => $this->hex2rgb($colors[$colorIndex]),
-                        'data'            => $subset,
+                        'data' => $subset,
                     ];
 
                     ++$colorIndex;
@@ -119,28 +119,28 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
                 ->toArray();
 
             return [
-                'series'  => $series,
+                'series' => $series,
                 'legends' => $insights->legends,
                 'filters' => [
                     'subset' => [
-                        'show'        => true,
-                        'list'        => $manufacturerList,
-                        'selected'    => $request->getSubset(),
+                        'show' => true,
+                        'list' => $manufacturerList,
+                        'selected' => $request->getSubset(),
                         'placeholder' => 'Select a manufacturer',
                     ],
                     'category' => [
-                        'show'     => true,
-                        'list'     => $categoryList,
+                        'show' => true,
+                        'list' => $categoryList,
                         'selected' => $request->getCategory(),
                     ],
                     'period' => [
                         'selected' => $request->getPeriod(),
                     ],
                     'datePicker' => [
-                        'show'      => true,
+                        'show' => true,
                         'dateRange' => [
                             'startDate' => $request->getFrom(),
-                            'endDate'   => $request->getTo(),
+                            'endDate' => $request->getTo(),
                         ],
                     ],
                 ],

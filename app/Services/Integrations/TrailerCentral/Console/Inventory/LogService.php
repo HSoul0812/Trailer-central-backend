@@ -8,6 +8,8 @@ use App\Models\Inventory\InventoryLog;
 use App\Repositories\Inventory\InventoryLogRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Console\AbstractLogService;
 use Illuminate\Database\ConnectionInterface;
+use JsonException;
+use PDOException;
 use stdClass;
 
 class LogService extends AbstractLogService implements LogServiceInterface
@@ -18,7 +20,7 @@ class LogService extends AbstractLogService implements LogServiceInterface
     }
 
     /**
-     * @throws \PDOException when some unknown PDO error has been thrown
+     * @throws PDOException when some unknown PDO error has been thrown
      */
     public function execute(string $sql): int
     {
@@ -26,7 +28,7 @@ class LogService extends AbstractLogService implements LogServiceInterface
     }
 
     /**
-     * @throws \JsonException when the metadata were unable to be serialized
+     * @throws JsonException when the metadata were unable to be serialized
      *
      * @return string SQL insert values fragment
      */

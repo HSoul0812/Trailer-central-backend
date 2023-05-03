@@ -78,11 +78,11 @@ class SyncTest extends SyncServiceTestCase
         $dependencies['logger']->expects($this->once())
             ->method('error')
             ->with(sprintf(
-                    '[SyncService::%s] process %d has failed due %s',
-                    $processName,
-                    $processId,
-                    $exception->getMessage()
-                )
+                '[SyncService::%s] process %d has failed due %s',
+                $processName,
+                $processId,
+                $exception->getMessage()
+            )
             );
 
         $this->expectException($exception::class);

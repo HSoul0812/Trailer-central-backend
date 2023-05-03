@@ -11,8 +11,8 @@ class TypeTransformer extends TransformerAbstract
     public function transform($type): array
     {
         return [
-             'id'         => (int) $type->id,
-             'name'       => $type->name,
+             'id' => (int) $type->id,
+             'name' => $type->name,
              'categories' => $type->categories,
          ];
     }

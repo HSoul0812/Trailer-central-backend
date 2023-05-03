@@ -22,7 +22,7 @@ class TomTomMapSearchClient extends Client
                 $request->getUri(),
                 [
                     'key' => config('services.tomtom.key'),
-                    'language' => 'en-US'
+                    'language' => 'en-US',
                 ]
             ));
         }));

@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use Illuminate\Support\Collection;
+use JsonException;
 
 trait WithArtifacts
 {
     public static array $loadedFiles = [];
 
     /**
-     * @throws \JsonException when the json cannot be parsed
+     * @throws JsonException when the json cannot be parsed
      */
     public function fromJson(string $fileName): Collection
     {

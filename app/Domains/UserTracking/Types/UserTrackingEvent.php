@@ -4,7 +4,7 @@ namespace App\Domains\UserTracking\Types;
 
 class UserTrackingEvent
 {
-    const PAGE_VIEW = 'page_view';
+    public const PAGE_VIEW = 'page_view';
 
-    const IMPRESSION = 'impression';
+    public const IMPRESSION = 'impression';
 }

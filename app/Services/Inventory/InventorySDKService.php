@@ -2,7 +2,6 @@
 
 namespace App\Services\Inventory;
 
-use App\Domains\Http\Response\Header;
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\Models\Parts\CategoryMappings;
@@ -12,43 +11,34 @@ use Dingo\Api\Routing\Helpers;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
+use JsonException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use TrailerCentral\Sdk\Handlers\Search\Filters\Filter;
+use TrailerCentral\Sdk\Handlers\Search\Filters\FilterGroup;
 use TrailerCentral\Sdk\Handlers\Search\Filters\Operator;
 use TrailerCentral\Sdk\Handlers\Search\Geolocation\GeoCoordinates;
 use TrailerCentral\Sdk\Handlers\Search\Geolocation\Geolocation;
 use TrailerCentral\Sdk\Handlers\Search\Geolocation\GeolocationRange;
 use TrailerCentral\Sdk\Handlers\Search\Pagination;
 use TrailerCentral\Sdk\Handlers\Search\Request;
-use TrailerCentral\Sdk\Handlers\Search\Response;
-
 use TrailerCentral\Sdk\Handlers\Search\Sorting\Sorting;
 use TrailerCentral\Sdk\Handlers\Search\Sorting\SortingField;
 use TrailerCentral\Sdk\Handlers\Search\Terms\Collection;
 use TrailerCentral\Sdk\Handlers\Search\Terms\Range;
-use TrailerCentral\Sdk\Handlers\Search\Terms\Searchable;
-use TrailerCentral\Sdk\Handlers\Search\Terms\Term;
-use TrailerCentral\Sdk\Handlers\Search\Filters\FilterGroup;
-use TrailerCentral\Sdk\Handlers\Search\Filters\Filter;
 use TrailerCentral\Sdk\Resources\Search;
 use TrailerCentral\Sdk\Sdk;
 
 class InventorySDKService implements InventorySDKServiceInterface
 {
-    use Helpers, CategoryMappingHelpers;
+    use Helpers;
+    use CategoryMappingHelpers;
 
-    private Request $request;
-    private Search $search;
-    private FilterGroup $mainFilterGroup;
+    public const PAGE_SIZE = 10;
 
-    const PAGE_SIZE = 10;
-
-    private int $currentPage = 1;
-    private int $perPage = self::PAGE_SIZE;
-
-    const SALE_SCRIPT_ATTRIBUTE = 'sale';
-    const PRICE_SCRIPT_ATTRIBUTE = 'price';
-    const TILT_TRAILER_INVENTORY = 'Tilt Trailers';
-    const TERM_SEARCH_KEY_MAP = [
+    public const SALE_SCRIPT_ATTRIBUTE = 'sale';
+    public const PRICE_SCRIPT_ATTRIBUTE = 'price';
+    public const TILT_TRAILER_INVENTORY = 'Tilt Trailers';
+    public const TERM_SEARCH_KEY_MAP = [
         'dealer_location_id' => 'dealerLocationId',
         'stalls' => 'numStalls',
         'pull_type' => 'pullType',
@@ -60,9 +50,9 @@ class InventorySDKService implements InventorySDKServiceInterface
         'configuration' => 'loadType',
         'axles' => 'numAxles',
         'color' => 'color',
-        'availability' => 'availability'
+        'availability' => 'availability',
     ];
-    const RANGE_SEARCH_KEY_MAP = [
+    public const RANGE_SEARCH_KEY_MAP = [
         'price' => 'existingPrice',
         'length' => 'length',
         'width' => 'width',
@@ -71,22 +61,29 @@ class InventorySDKService implements InventorySDKServiceInterface
         'payload_capacity' => 'payloadCapacity',
     ];
 
-    const DEFAULT_CATEGORY = [
+    public const DEFAULT_CATEGORY = [
         'name' => 'Other',
         'type_id' => 1,
-        'type_label' => 'General Trailers'
+        'type_label' => 'General Trailers',
     ];
 
-    const INVENTORY_SOLD = 'sold';
-    const INVENTORY_AVAILABLE = 'available';
+    public const INVENTORY_SOLD = 'sold';
+    public const INVENTORY_AVAILABLE = 'available';
 
-    const DEFAULT_DISTANCE = 300;
-    const DEFAULT_SORT = '+distance';
-    const DEFAULT_NO_LOCATION_SORT = '-createdAt';
+    public const DEFAULT_DISTANCE = 300;
+    public const DEFAULT_SORT = '+distance';
+    public const DEFAULT_NO_LOCATION_SORT = '-createdAt';
 
     // location set by DW as default lat/lon
-    const DEFAULT_LAT_ON_DW = 39.8090;
-    const DEFAULT_LON_ON_DW = -98.5550;
+    public const DEFAULT_LAT_ON_DW = 39.8090;
+    public const DEFAULT_LON_ON_DW = -98.5550;
+
+    private Request $request;
+    private Search $search;
+    private FilterGroup $mainFilterGroup;
+
+    private int $currentPage = 1;
+    private int $perPage = self::PAGE_SIZE;
 
     public function __construct()
     {
@@ -98,19 +95,17 @@ class InventorySDKService implements InventorySDKServiceInterface
         $sdk = new Sdk(config('inventory-sdk.url'), [
             'headers' => [
                 'access-token' => '',
-                'sample_key' => ''
+                'sample_key' => '',
             ],
-            'verify' => false
+            'verify' => false,
         ]);
 
         $this->search = new Search($sdk);
     }
 
     /**
-     * @param array $params
-     * @return TcEsResponseInventoryList
      * @throws GuzzleException
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function list(array $params): TcEsResponseInventoryList
     {
@@ -136,8 +131,6 @@ class InventorySDKService implements InventorySDKServiceInterface
     }
 
     /**
-     * @param bool $debugEnabled
-     * @return TcEsResponseInventoryList
      * @throws GuzzleException
      */
     protected function responseFromSDKResponse(bool $debugEnabled = false): TcEsResponseInventoryList
@@ -172,10 +165,6 @@ class InventorySDKService implements InventorySDKServiceInterface
         return $response;
     }
 
-    /**
-     * @param array $params
-     * @return GeoCoordinates
-     */
     protected function addGeolocation(array $params): GeoCoordinates
     {
         $location = $this->getGeolocationInfo($params);
@@ -183,7 +172,7 @@ class InventorySDKService implements InventorySDKServiceInterface
         if (isset($params['country'])) {
             $this->request->add('location_country', strtoupper($params['country']));
         } elseif ($location->lat() !== self::DEFAULT_LAT_ON_DW && $location->lon() !== self::DEFAULT_LON_ON_DW) {
-            $distance = $params['distance'] ? (float)$params['distance'] : self::DEFAULT_DISTANCE;
+            $distance = $params['distance'] ? (float) $params['distance'] : self::DEFAULT_DISTANCE;
             $location = new GeolocationRange($location->lat(), $location->lon(), $distance, GeolocationRange::UNITS_MILES, true);
         }
 
@@ -192,11 +181,6 @@ class InventorySDKService implements InventorySDKServiceInterface
         return $location;
     }
 
-    /**
-     * @param array $params
-     * @param GeoCoordinates $location
-     * @return void
-     */
     protected function addSorting(array $params, GeoCoordinates $location)
     {
         if (isset($params['is_random']) && $params['is_random']) {
@@ -204,7 +188,7 @@ class InventorySDKService implements InventorySDKServiceInterface
         } else {
             if (isset($params['sort'])) {
                 $sort = $params['sort'];
-            } else if ($location->lat() !== self::DEFAULT_LAT_ON_DW && $location->lon() !== self::DEFAULT_LON_ON_DW) {
+            } elseif ($location->lat() !== self::DEFAULT_LAT_ON_DW && $location->lon() !== self::DEFAULT_LON_ON_DW) {
                 $sort = self::DEFAULT_SORT;
             } else {
                 $sort = self::DEFAULT_NO_LOCATION_SORT;
@@ -212,19 +196,16 @@ class InventorySDKService implements InventorySDKServiceInterface
 
             $order = new SortOrder($sort);
             $this->request->withSorting(new Sorting([
-                new SortingField($order->field, $order->direction)
+                new SortingField($order->field, $order->direction),
             ]));
         }
     }
 
-    /**
-     * @return void
-     */
     protected function addCommonFilters(array $params)
     {
         $attributes = [
             self::SALE_SCRIPT_ATTRIBUTE => boolval($params['sale'] ?? 0),
-            self::PRICE_SCRIPT_ATTRIBUTE => []
+            self::PRICE_SCRIPT_ATTRIBUTE => [],
         ];
 
         if ((!empty($params['price_min']) && $params['price_min'] > 0) || (!empty($params['price_max']) && $params['price_max'] > 0)) {
@@ -236,22 +217,19 @@ class InventorySDKService implements InventorySDKServiceInterface
         $this->mainFilterGroup->add(new Filter('classifieds_site', new Collection([true])));
         $this->mainFilterGroup->add(new Filter(
             'availability', new Collection([self::INVENTORY_SOLD], Operator::NOT_EQUAL
-        )));
+            )));
         $this->mainFilterGroup->add(new Filter('isRental', new Collection([false])));
     }
 
-    protected function addDealerFilter(array $params) {
-        if(!empty($params['dealer_id'])) {
+    protected function addDealerFilter(array $params)
+    {
+        if (!empty($params['dealer_id'])) {
             $this->request->withDealerIds(new Filter(
                 'dealer_id', new Collection([$params['dealer_id']])
             ));
         }
     }
 
-    /**
-     * @param array $params
-     * @return void
-     */
     protected function addSearchTerms(array $params)
     {
         foreach (self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
@@ -263,10 +241,6 @@ class InventorySDKService implements InventorySDKServiceInterface
         }
     }
 
-    /**
-     * @param array $params
-     * @return void
-     */
     protected function addRangeQueries(array $params)
     {
         foreach (self::RANGE_SEARCH_KEY_MAP as $field => $searchField) {
@@ -281,10 +255,6 @@ class InventorySDKService implements InventorySDKServiceInterface
         }
     }
 
-    /**
-     * @param array $params
-     * @return void
-     */
     protected function addPagination(array $params)
     {
         $this->currentPage = LengthAwarePaginator::resolveCurrentPage();
@@ -293,10 +263,6 @@ class InventorySDKService implements InventorySDKServiceInterface
         $this->request->withPagination(new Pagination($this->perPage, $this->currentPage));
     }
 
-    /**
-     * @param array $params
-     * @return void
-     */
     protected function addCategories(array $params)
     {
         $categories = $this->getMappedCategories(
@@ -333,11 +299,6 @@ class InventorySDKService implements InventorySDKServiceInterface
         }
     }
 
-    /**
-     * @param int|null $type_id
-     * @param string|null $categories_string
-     * @return array
-     */
     protected function getMappedCategories(?int $type_id, ?string $categories_string): array
     {
         $mapped_categories = [];
@@ -346,7 +307,6 @@ class InventorySDKService implements InventorySDKServiceInterface
             if ($categories_string) {
                 $categories_array = explode(';', $categories_string);
                 $categories = $type->categories()->whereIn('name', $categories_array)->get();
-
             } else {
                 $categories = $type->categories;
             }
@@ -365,28 +325,20 @@ class InventorySDKService implements InventorySDKServiceInterface
         return array_unique($mapped_categories);
     }
 
-    /**
-     * @param array $params
-     * @return GeoCoordinates
-     */
     protected function getGeolocationInfo(array $params): GeoCoordinates
     {
         if (isset($params['lat']) && isset($params['lon'])) {
-            return new Geolocation((float)$params['lat'], (float)$params['lon']);
-        } else if (
+            return new Geolocation((float) $params['lat'], (float) $params['lon']);
+        } elseif (
             isset($params['location']) &&
             $geolocation = $this->getGeolocationInfoFromLocation($params['location'])
         ) {
             return $geolocation;
         }
-        //use coordinates provided by DW as the center of the US
+        // use coordinates provided by DW as the center of the US
         return new Geolocation(self::DEFAULT_LAT_ON_DW, self::DEFAULT_LON_ON_DW);
     }
 
-    /**
-     * @param string $location
-     * @return GeoCoordinates|null
-     */
     protected function getGeolocationInfoFromLocation(string $location): ?GeoCoordinates
     {
         $response = json_decode(
@@ -395,8 +347,10 @@ class InventorySDKService implements InventorySDKServiceInterface
         );
         if (count($response['data']) > 0) {
             $position = $response['data'][0]['position'];
-            return new Geolocation((float)$position['lat'], (float)$position['lng']);
+
+            return new Geolocation((float) $position['lat'], (float) $position['lng']);
         }
+
         return null;
     }
 }

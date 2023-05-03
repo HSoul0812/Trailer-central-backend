@@ -18,8 +18,7 @@ class ViewedDealerController extends AbstractRestfulController
 {
     public function __construct(
         private ViewedDealerRepositoryInterface $repository,
-    )
-    {
+    ) {
         parent::__construct();
     }
 

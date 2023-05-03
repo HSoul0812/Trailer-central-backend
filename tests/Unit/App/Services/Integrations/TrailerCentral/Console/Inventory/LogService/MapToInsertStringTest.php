@@ -104,6 +104,7 @@ class MapToInsertStringTest extends LogServiceTestCase
      * Finally, the status should be assigned as expected
      *
      * @param array<string, string|int> $propertiesToBeChanged
+     *
      * @noinspection PhpDocMissingThrowsInspection
      */
     public function testWillBuildTheValuesForNotTheFirstTime(array $propertiesToBeChanged, string $expectedEventName): void
@@ -112,16 +113,16 @@ class MapToInsertStringTest extends LogServiceTestCase
         $info = $this->fromJson('trailer-central/inventory.json')->random();
         $info['status'] = 7; // available
         $inventory = $this->mockEloquent(InventoryLog::class, [
-            'id'                => $this->faker->randomNumber(),
+            'id' => $this->faker->randomNumber(),
             'trailercentral_id' => $info['inventory_id'],
-            'event'             => InventoryLog::EVENT_CREATED,
-            'status'            => InventoryLog::STATUS_AVAILABLE,
-            'vin'               => $info['vin'],
-            'brand'             => $info['brand'],
-            'manufacturer'      => $info['manufacturer'],
-            'price'             => $info['price'],
-            'meta'              => json_encode($info, JSON_THROW_ON_ERROR),
-            'created_at'        => now(),
+            'event' => InventoryLog::EVENT_CREATED,
+            'status' => InventoryLog::STATUS_AVAILABLE,
+            'vin' => $info['vin'],
+            'brand' => $info['brand'],
+            'manufacturer' => $info['manufacturer'],
+            'price' => $info['price'],
+            'meta' => json_encode($info, JSON_THROW_ON_ERROR),
+            'created_at' => now(),
         ]);
         $isNotTheFirstImport = true;
 
@@ -163,13 +164,14 @@ class MapToInsertStringTest extends LogServiceTestCase
      * Examples of all cases of changed for a single inventory.
      *
      * @return array<string, array<array, string>>
+     *
      * @noinspection PhpArrayShapeAttributeCanBeAddedInspection
      */
     public function changesProvider(): array
     {
         return [                          // array $propertiesToBeChanged, string $expectedEventName
-            'only name was changed'       => [['name' => 'Super boat'], InventoryLog::EVENT_UPDATED],
-            'only price was changed'      => [['price' => 676767.06], InventoryLog::EVENT_PRICE_CHANGED],
+            'only name was changed' => [['name' => 'Super boat'], InventoryLog::EVENT_UPDATED],
+            'only price was changed' => [['price' => 676767.06], InventoryLog::EVENT_PRICE_CHANGED],
             'price and name were changed' => [['price' => 676767.06, 'name' => 'Super boat'], InventoryLog::EVENT_PRICE_CHANGED],
         ];
     }

@@ -10,6 +10,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
 use League\Fractal\TransformerAbstract;
+use Log;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class HereMapSearchService implements MapSearchServiceInterface
@@ -57,37 +58,26 @@ class HereMapSearchService implements MapSearchServiceInterface
         );
     }
 
-    /**
-     * @param string $class
-     * @return TransformerAbstract
-     */
     #[Pure]
     public function getTransformer(string $class): TransformerAbstract
     {
         return new HereResponseTransformer();
     }
 
-    /**
-     * @param string $method
-     * @param string $url
-     * @param array  $options
-     *
-     * @return array
-     */
     #[ArrayShape([
         'items' => [[
-            'title'   => 'string',
+            'title' => 'string',
             'address' => [
-                'label'       => 'string',
+                'label' => 'string',
                 'countryCode' => 'string',
                 'countryName' => 'string',
-                'stateCode'   => 'string',
-                'state'       => 'string',
-                'county'      => 'string',
-                'city'        => 'string',
-                'district'    => 'string',
-                'street'      => 'string',
-                'postalCode'  => 'string',
+                'stateCode' => 'string',
+                'state' => 'string',
+                'county' => 'string',
+                'city' => 'string',
+                'district' => 'string',
+                'street' => 'string',
+                'postalCode' => 'string',
             ],
             'position' => [
                 'lat' => 'float',
@@ -102,8 +92,8 @@ class HereMapSearchService implements MapSearchServiceInterface
 
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
-            \Log::info('Exception was thrown while calling here API.');
-            \Log::info($e->getCode() . ': ' . $e->getMessage());
+            Log::info('Exception was thrown while calling here API.');
+            Log::info($e->getCode() . ': ' . $e->getMessage());
 
             throw new HttpException(500, $e->getMessage());
         }

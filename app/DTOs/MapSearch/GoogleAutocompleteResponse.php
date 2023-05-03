@@ -8,7 +8,8 @@ class GoogleAutocompleteResponse
 {
     public array $predictions;
 
-    #[Pure] public static function fromData(array $data): self
+    #[Pure]
+    public static function fromData(array $data): self
     {
         $obj = new self();
         $obj->predictions = [];

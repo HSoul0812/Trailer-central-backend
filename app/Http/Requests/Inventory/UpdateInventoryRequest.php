@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Inventory;
 
-use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\Request;
+use App\Http\Requests\UpdateRequestInterface;
 
 class UpdateInventoryRequest extends Request implements UpdateRequestInterface
 {

@@ -12,11 +12,11 @@ class UserTracking extends Model
     use HasFactory;
 
     /**
-     * We'll ignore location processing of these ip addresses
+     * We'll ignore location processing of these ip addresses.
      */
-    const IGNORE_LOCATION_PROCESSING_IP_ADDRESSES = [
+    public const IGNORE_LOCATION_PROCESSING_IP_ADDRESSES = [
         '127.0.0.1',
-        '0.0.0.0'
+        '0.0.0.0',
     ];
 
     protected $fillable = [

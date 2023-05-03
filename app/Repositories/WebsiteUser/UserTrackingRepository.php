@@ -52,7 +52,7 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
         // Try to get the user id from the request, if there is no token,
         // or it's invalidated, then we save website_user_id as null
         return rescue(
-            callback: fn() => auth('api')->user()?->id,
+            callback: fn () => auth('api')->user()?->id,
             report: false,
         );
     }
@@ -69,8 +69,6 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
      * This makes the actual user's IP address lives in the HTTP_X_FORWARDED_FOR
      * variable and the AWS load balancer IP address in the REMOTE_ADDR variable
      * which Laravel first read the IP from.
-     *
-     * @return string|null
      */
     private function getUserIpAddress(): ?string
     {

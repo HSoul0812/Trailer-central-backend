@@ -14,13 +14,14 @@ class WebsiteUserPasswordReset extends Notification
     public string $token;
     private static ?string $resetUrl;
 
-    public static function setResetUrl($resetUrl) {
-        self::$resetUrl = $resetUrl;
-    }
-
     public function __construct($token)
     {
         $this->token = $token;
+    }
+
+    public static function setResetUrl($resetUrl)
+    {
+        self::$resetUrl = $resetUrl;
     }
 
     public function via($notifiable): array
@@ -37,15 +38,15 @@ class WebsiteUserPasswordReset extends Notification
 
     protected function buildMailMessage($url)
     {
-        return (new MailMessage)
-            ->subject(Lang::get("TrailerTrader | Password Recovery"))
+        return (new MailMessage())
+            ->subject(Lang::get('TrailerTrader | Password Recovery'))
             ->line(Lang::get('We have received a request to reset your password on TrailerTrader.com.'))
             ->line(Lang::get('If you have not initiated this process, please erase this email.
             You can continue to access TrailerTrader.com with the email and password
             that you have initially set.'))
             ->line(Lang::get('If you have forgotten your password,click on the following link to create a new password: '))
             ->action(Lang::get('Reset Password'), $url)
-            ->line(Lang::get('This password reset link will expire in :count minutes.', ['count' => config('auth.passwords.'.config('auth.defaults.passwords').'.expire')]));
+            ->line(Lang::get('This password reset link will expire in :count minutes.', ['count' => config('auth.passwords.' . config('auth.defaults.passwords') . '.expire')]));
     }
 
     protected function resetUrl($notifiable)
@@ -53,7 +54,7 @@ class WebsiteUserPasswordReset extends Notification
         $resetPasswordUrl = self::$resetUrl ?? config('auth.reset_password_url');
         $token = $this->token;
         $email = $notifiable->getEmailForPasswordReset();
-        if($resetPasswordUrl) {
+        if ($resetPasswordUrl) {
             return "$resetPasswordUrl?token=$token&email=$email";
         } else {
             return url(route('password.reset', [

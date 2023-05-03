@@ -10,31 +10,30 @@ use App\Http\Requests\IpInfo\IpInfoRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\IpInfo\IpInfoServiceInterface;
 use App\Transformers\IpInfo\CityTransformer;
-use Illuminate\Http\Request;
 
 class IpInfoController extends AbstractRestfulController
 {
     public function __construct(
         private IpInfoServiceInterface $service,
         private CityTransformer $transformer
-    )
-    {
+    ) {
         parent::__construct();
     }
 
-
     public function index(IndexRequestInterface $request)
     {
-        if($request->validate()) {
+        if ($request->validate()) {
             $ip = $request->get(
                 'ip',
                 $this->service->getRemoteIPAddress() ?? request()->ip()
             );
-            if(!$ip) {
+            if (!$ip) {
                 $this->response->errorBadRequest('No IP was detected');
             }
+
             return $this->response->item($this->service->city($ip), $this->transformer);
         }
+
         return $this->response->errorBadRequest();
     }
 
@@ -60,7 +59,7 @@ class IpInfoController extends AbstractRestfulController
 
     protected function constructRequestBindings(): void
     {
-        app()->bind(IndexRequestInterface::class, function() {
+        app()->bind(IndexRequestInterface::class, function () {
             return inject_request_data(IpInfoRequest::class);
         });
     }

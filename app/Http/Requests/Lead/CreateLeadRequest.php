@@ -18,6 +18,6 @@ class CreateLeadRequest extends Request implements CreateRequestInterface
         'email_address' => 'email',
         'phone_number' => 'regex:/(0-9)?[0-9]{10}/',
         'comments' => 'string',
-        'captcha' => 'required|string'
+        'captcha' => 'required|string',
     ];
 }

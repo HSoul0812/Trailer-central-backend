@@ -8,8 +8,6 @@ class CreateViewedDealersTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up()
     {
@@ -29,8 +27,6 @@ class CreateViewedDealersTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {

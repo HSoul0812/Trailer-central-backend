@@ -8,7 +8,8 @@ use Illuminate\Support\ServiceProvider;
 
 class CaptchaServiceProvider extends ServiceProvider
 {
-    public function register() {
+    public function register()
+    {
         $this->app->bind(CaptchaServiceInterface::class, GoogleCaptchaService::class);
     }
 }

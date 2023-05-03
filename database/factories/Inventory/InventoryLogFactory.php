@@ -13,6 +13,7 @@ use Faker\Generator;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use JsonException;
 
 /**
  * @property Generator $faker
@@ -32,7 +33,7 @@ class InventoryLogFactory extends Factory
     /**
      * Define the model's default state.
      *
-     * @throws \JsonException when cannot load the json file
+     * @throws JsonException when cannot load the json file
      */
     public function definition(): array
     {
@@ -48,19 +49,19 @@ class InventoryLogFactory extends Factory
 
         return [
             'trailercentral_id' => $inventory_id,
-            'event'             => $this->faker->randomElement($events),
-            'status'            => $this->faker->randomElement($statuses),
-            'vin'               => Str::upper(Str::random('21')),
-            'manufacturer'      => $manufacturer['name'],
-            'brand'             => $this->faker->randomElement($manufacturer['brands']),
-            'price'             => $this->faker->numberBetween(500, 1000),
-            'meta'              => [],
-            'created_at'        => $this->faker->dateTimeBetween('-8 months'),
+            'event' => $this->faker->randomElement($events),
+            'status' => $this->faker->randomElement($statuses),
+            'vin' => Str::upper(Str::random('21')),
+            'manufacturer' => $manufacturer['name'],
+            'brand' => $this->faker->randomElement($manufacturer['brands']),
+            'price' => $this->faker->numberBetween(500, 1000),
+            'meta' => [],
+            'created_at' => $this->faker->dateTimeBetween('-8 months'),
         ];
     }
 
     /**
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function getManufacturers(): Collection
     {
