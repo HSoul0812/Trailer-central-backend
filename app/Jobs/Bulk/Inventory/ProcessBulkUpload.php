@@ -50,7 +50,10 @@ class ProcessBulkUpload extends Job
                 $importerService->run();
             });
 
-            $inventoryService->invalidateCacheReindexAndGenerateImageOverlaysByDealerIds([$bulk->dealer_id]);
+            $inventoryService->invalidateCacheReindexAndGenerateImageOverlaysByDealerIds(
+                [$bulk->dealer_id],
+                ['triggered_by' => __CLASS__]
+            );
 
             Log::info(sprintf('Inventory bulk upload %d was processed', $bulk->id));
         } catch (\Exception $ex) {

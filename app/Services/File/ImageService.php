@@ -28,11 +28,8 @@ class ImageService extends AbstractFileService
 {
     use S3Helper;
 
-    /** @var float three quarters of second (0.75  seconds) */
-    const WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS = 750 * 1000;
-
-    /** @var string */
-    const PRODUCTION_AWS_CDN_BASE_URL = 'https://dealer-cdn.com';
+    /** @var float three quarters of second (0.45  seconds) */
+    const WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS = 450 * 1000;
 
     /** @var ImageHelper */
     private $imageHelper;
@@ -209,7 +206,7 @@ class ImageService extends AbstractFileService
         // when the image has been imported from production it will not be available in the staging/dev bucket
         // so we need to check if the image exists, if not we gonna use the production S3 bucket base URL
         if (!App::environment('production') && !App::runningUnitTests() && !$this->exist($imagePath)) {
-            $imagePath = str_replace(config('services.aws.url'), self::PRODUCTION_AWS_CDN_BASE_URL, $imagePath);
+            $imagePath = str_replace(config('services.aws.url'), $this->getProductionS3BaseUrl(), $imagePath);
         }
 
         $originalImagePath = $imagePath;

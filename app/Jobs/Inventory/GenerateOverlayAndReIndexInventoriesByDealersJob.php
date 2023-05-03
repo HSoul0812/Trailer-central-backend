@@ -10,6 +10,7 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\Inventory\InventoryServiceInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @todo this job should be renamed to `InventoryBackGroundWorkFlowByDealerJob` when safe, it is is handling 3 processes
@@ -23,7 +24,7 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
     private const WAIT_TIME_FOR_INDEXATION_IN_SECONDS = 15;
 
     /** @var int time in seconds */
-    private const WAIT_TIME_FOR_GENERATION_IN_SECONDS = 2;
+    private const WAIT_TIME_FOR_GENERATION_IN_SECONDS = 20;
 
     /** @var string  */
     private const MONITORED_GROUP = 'inventory-generate-overlays-and-reindex-by-dealer';
@@ -40,10 +41,14 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
     /** @var int The number of times the job may be attempted. */
     public $tries = 1;
 
-    public function __construct(array $dealerIds, ?array $context = null)
+    /** @var bool */
+    public $waitForImageOverlays;
+
+    public function __construct(array $dealerIds, ?array $context = null, ?bool $waitForImageOverlays = null)
     {
         $this->dealerIds = $dealerIds;
         $this->context = $context ?? [];
+        $this->waitForImageOverlays = $waitForImageOverlays ?? false;
     }
 
     public function handle(
@@ -57,6 +62,7 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
         foreach ($this->dealerIds as $dealerId) {
             $this->context['dealer_id'] = $dealerId;
 
+            /** @var Collection|Inventory[] $inventories */
             $inventories = $repository->getAll(
                 ['dealer_id' => $dealerId, 'images_greater_than' => 1],
                 false,
@@ -70,17 +76,19 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
                     ['dealer_id' => $dealerId]
                 );
 
-                Job::batch(
-                    static function (BatchedJob $job) use ($inventories) {
-                        foreach ($inventories as $inventory) {
-                            dispatch(new GenerateOverlayImageJob($inventory->inventory_id, false));
-                        }
-                    },
-                    ['overlay-images'],
-                    self::MONITORED_GROUP.'-p1-'.$dealerId,
-                    self::WAIT_TIME_FOR_GENERATION_IN_SECONDS,
-                    array_merge($this->context, ['process' => 'image-overlay-generation'])
-                );
+                if ($this->waitForImageOverlays) {
+                    Job::batch(
+                        static function (BatchedJob $job) use ($inventories) {
+                            $this->dispatchOverlayGenerationJobs($inventories);
+                        },
+                        [GenerateOverlayImageJob::LOW_PRIORITY_QUEUE],
+                        self::MONITORED_GROUP.'-p1-'.$dealerId,
+                        self::WAIT_TIME_FOR_GENERATION_IN_SECONDS,
+                        array_merge($this->context, ['process' => 'image-overlay-generation'])
+                    );
+                } else {
+                    $this->dispatchOverlayGenerationJobs($inventories);
+                }
             }
 
             $logger->info('Enqueueing the job to reindex inventory by dealer id', ['dealer_id' => $dealerId]);
@@ -101,6 +109,17 @@ class GenerateOverlayAndReIndexInventoriesByDealersJob extends Job
                 $responseCacheKey->deleteByDealer($dealerId),
                 $responseCacheKey->deleteSingleByDealer($dealerId)
             ]);
+        }
+    }
+
+    /**
+     * @param  Collection|Inventory[]  $inventories
+     * @return void
+     */
+    function dispatchOverlayGenerationJobs(Collection $inventories): void
+    {
+        foreach ($inventories as $inventory) {
+            dispatch(new GenerateOverlayImageJob($inventory->inventory_id, false));
         }
     }
 }

@@ -718,43 +718,50 @@ class InventoryService implements InventoryServiceInterface
 
         $inventoryImages
             ->sortBy(InventoryHelper::singleton()->imageSorter())
-            ->each(function (InventoryImage $inventoryImage) use (&$imageIndex, $overlayConfig): bool {
-                $isOverlayDisabledOrImageShouldNotOverlay = $this->isOverlayDisabledOrImageShouldNotOverlay(
-                    $inventoryImage,
-                    $imageIndex,
-                    $overlayConfig['overlay_enabled']
-                );
+            ->each(function (InventoryImage $inventoryImage) use (&$imageIndex, $overlayConfig): void {
+                try {
+                    $isOverlayDisabledOrImageShouldNotOverlay = $this->isOverlayDisabledOrImageShouldNotOverlay(
+                        $inventoryImage,
+                        $imageIndex,
+                        $overlayConfig['overlay_enabled']
+                    );
 
-                if ($inventoryImage->hasBeenOverlay()) {
+                    if ($inventoryImage->hasBeenOverlay()) {
+                        // since the image was overlay previously, we need to determine and execute:
+                        //    1) when the overlay is disabled, and it is using the overlay, then it needs to restore original image
+                        //    2) when the overlay is enabled, and it is using the original image, then it needs to restore overlay image
+                        if ($isOverlayDisabledOrImageShouldNotOverlay) {
+                            $this->imageTableService->tryToRestoreOriginalImage($inventoryImage->image);
+
+                            $imageIndex++;
+
+                            return;
+                        }
+
+                        if ($this->shouldRestoreImageOverlay($inventoryImage, $overlayConfig['overlay_updated_at'])) {
+                            $this->imageTableService->tryToRestoreImageOverlay($inventoryImage->image);
+
+                            $imageIndex++;
+
+                            return;
+                        }
+                    }
+
                     if ($isOverlayDisabledOrImageShouldNotOverlay) {
-                        $this->imageTableService->tryToRestoreOriginalImage($inventoryImage->image);
-
+                        // it will do nothing when the overlay generation is disabled
                         $imageIndex++;
 
-                        return true;
+                        return;
                     }
 
-                    if ($this->shouldRestoreImageOverlay($inventoryImage, $overlayConfig['overlay_updated_at'])) {
-                        $this->imageTableService->tryToRestoreImageOverlay($inventoryImage->image);
+                    // finally, it needs to generate a new overlay when the image overlay is enabled
+                    // and the image has never had an overlay previously
+                    $this->applyOverlayToImage($inventoryImage, $overlayConfig);
 
-                        $imageIndex++;
-
-                        return true;
-                    }
-                }
-
-                if ($isOverlayDisabledOrImageShouldNotOverlay) {
-                    // do nothing
                     $imageIndex++;
-
-                    return true;
+                } catch (\Exception $e) {
+                    Log::channel('inventory-overlays')->error('image overlay error: '.$e->getMessage());
                 }
-
-                $this->applyOverlayToImage($inventoryImage, $overlayConfig);
-
-                $imageIndex++;
-
-                return true;
             });
 
         if ($overlayConfig['dealer_overlay_enabled'] > User::OVERLAY_ENABLED_NONE) {
@@ -779,9 +786,8 @@ class InventoryService implements InventoryServiceInterface
 
         if ($typeOfOverlay == Inventory::OVERLAY_ENABLED_PRIMARY) {
             return !(
-                $inventoryImage->position == 1 ||
-                $inventoryImage->is_default == 1 ||
-                ($inventoryImage->position === null && $index === 0)
+                $inventoryImage->is_default == InventoryImage::IS_DEFAULT ||
+                $index === InventoryImage::FIRST_IMAGE_POSITION
             );
         }
 
@@ -1408,11 +1414,17 @@ class InventoryService implements InventoryServiceInterface
      *      3. Redis Cache invalidation by dealer id
      *
      * @param  int[]  $dealerIds
+     * @param array $context
+     * @param bool $waitForImageOverlays
      * @return void
      */
-    public function invalidateCacheReindexAndGenerateImageOverlaysByDealerIds(array $dealerIds): void
+    public function invalidateCacheReindexAndGenerateImageOverlaysByDealerIds(
+        array $dealerIds,
+        array $context = [],
+        bool $waitForImageOverlays = false
+    ): void
     {
-        $this->dispatch(new GenerateOverlayAndReIndexInventoriesByDealersJob($dealerIds));
+        $this->dispatch(new GenerateOverlayAndReIndexInventoriesByDealersJob($dealerIds, $context, $waitForImageOverlays));
     }
 
     /**

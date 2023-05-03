@@ -50,6 +50,7 @@ return [
         'access_key' => env('AWS_ACCESS_KEY_ID'),
         'secret_key' => env('AWS_SECRET_ACCESS_KEY'),
         'default_region' => env('AWS_DEFAULT_REGION'),
+        'prod_url' => env('AWS_PROD_URL', 'https://dealer-cdn.com')
     ]
 
 ];
