@@ -54,19 +54,19 @@ class WithoutInvalidationAndSyncingToSearchTest extends TestCase
 
         $inventory = factory(Inventory::class)->create();
 
-        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 1);
+        Bus::assertNotDispatched(InvalidateCacheJob::class);
         Bus::assertDispatchedTimes(MakeSearchable::class, 1);
 
         Bus::fake();
         $inventory->update(['description' => $this->faker->sentence(4)]);
 
-        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 2);
+        Bus::assertNotDispatched(InvalidateCacheJob::class);
         Bus::assertDispatchedTimes(MakeSearchable::class, 1);
 
         Bus::fake();
         $inventory->delete(); // delete doesn't trigger jobs for scout
 
-        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 2);
+        Bus::assertNotDispatched(InvalidateCacheJob::class);
     }
 
     /**
