@@ -25,7 +25,7 @@ class ViewedDealerFactory extends Factory
             $fakeDealerId = $this->faker->randomNumber();
 
             $exists = ViewedDealer::where('dealer_id', $fakeDealerId)->exists();
-        } while($exists);
+        } while ($exists);
 
         return $fakeDealerId;
     }
@@ -38,7 +38,7 @@ class ViewedDealerFactory extends Factory
             $fakeName = Str::of($this->faker->company())->append(' - ' . Str::random(5));
 
             $exists = ViewedDealer::where('name', $fakeName)->exists();
-        } while($exists);
+        } while ($exists);
 
         return $fakeName;
     }

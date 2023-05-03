@@ -16,6 +16,7 @@ class TypeRepositoryTest extends IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
+     *
      * @note IntegrationTestCase
      */
     public function testIoCForTheRepositoryInterfaceIsWorking(): void

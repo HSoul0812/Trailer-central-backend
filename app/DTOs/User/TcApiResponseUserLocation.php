@@ -17,7 +17,8 @@ class TcApiResponseUserLocation
     public string $phone;
     public bool $is_default;
 
-    public static function fromData(array $data): self {
+    public static function fromData(array $data): self
+    {
         $obj = new self();
         $obj->id = $data['id'];
         $obj->identifier = $data['identifier'];
@@ -34,5 +35,4 @@ class TcApiResponseUserLocation
 
         return $obj;
     }
-
 }

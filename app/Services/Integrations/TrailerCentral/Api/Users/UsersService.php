@@ -8,7 +8,6 @@ use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\Exception\GuzzleException;
 use Log;
-use Str;
 
 class UsersService implements UsersServiceInterface
 {
@@ -31,9 +30,10 @@ class UsersService implements UsersServiceInterface
         $responseContent = $this->handleHttpRequest('POST', $this->usersUrl, [
             'json' => $attributes,
             'headers' => [
-                'access-token' => $this->integrationToken
-            ]
+                'access-token' => $this->integrationToken,
+            ],
         ]);
+
         return TcApiResponseUser::fromData($responseContent['data']);
     }
 
@@ -41,15 +41,16 @@ class UsersService implements UsersServiceInterface
     {
         $responseContent = $this->handleHttpRequest('GET', $this->usersUrl, [
             'query' => [
-                'email' => $email
-            ]
+                'email' => $email,
+            ],
         ]);
+
         return TcApiResponseUser::fromData($responseContent);
     }
 
     public function getLocations(int $userId): array
     {
-        if(!$accessToken = request()->header('access-token')) {
+        if (!$accessToken = request()->header('access-token')) {
             $authToken = $this->authTokenRepository->get(['user_id' => $userId]);
             $accessToken = $authToken->access_token;
         }
@@ -60,19 +61,21 @@ class UsersService implements UsersServiceInterface
             [
                 'json' => [],
                 'headers' => [
-                    'access-token' => $accessToken
-                ]
+                    'access-token' => $accessToken,
+                ],
             ]
         );
 
         $locations = [];
-        foreach($responseContent['data'] as $location) {
+        foreach ($responseContent['data'] as $location) {
             $locations[] = TcApiResponseUserLocation::fromData($location);
         }
+
         return $locations;
     }
 
-    public function createLocation(array $location): TcApiResponseUserLocation {
+    public function createLocation(array $location): TcApiResponseUserLocation
+    {
         $authToken = $this->authTokenRepository->get(['user_id' => $location['dealer_id']]);
         $accessToken = $authToken->access_token;
 
@@ -89,16 +92,17 @@ class UsersService implements UsersServiceInterface
             [
                 'json' => $location,
                 'headers' => [
-                    'access-token' => $accessToken
-                ]
+                    'access-token' => $accessToken,
+                ],
             ]
         );
 
         return TcApiResponseUserLocation::fromData($responseContent['data']);
     }
 
-    public function updateLocation(int $locationId, array $location): TcApiResponseUserLocation {
-        if(!$accessToken = request()->header('access-token')) {
+    public function updateLocation(int $locationId, array $location): TcApiResponseUserLocation
+    {
+        if (!$accessToken = request()->header('access-token')) {
             $authToken = $this->authTokenRepository->get(['user_id' => $location['dealer_id']]);
             $accessToken = $authToken->access_token;
         }
@@ -109,10 +113,11 @@ class UsersService implements UsersServiceInterface
             [
                 'json' => $location,
                 'headers' => [
-                    'access-token' => $accessToken
-                ]
+                    'access-token' => $accessToken,
+                ],
             ]
         );
+
         return TcApiResponseUserLocation::fromData($responseContent['data']);
     }
 

@@ -9,14 +9,14 @@ use JetBrains\PhpStorm\ArrayShape;
 
 trait CategoryMappingHelpers
 {
-    #[ArrayShape(["key" => "string", "type_id" => "int"])]
+    #[ArrayShape(['key' => 'string', 'type_id' => 'int'])]
     private function mapOldCategoryToNew($oldCategory): array
     {
         return Cache::remember('category/' . $oldCategory, 300, function () use ($oldCategory) {
             $defaultCategory = [
                 'name' => 'Other',
                 'type_id' => 1,
-                'type_label' => 'General Trailers'
+                'type_label' => 'General Trailers',
             ];
             $value = [];
             $mappedCategories = CategoryMappings::where('map_to', 'like', '%' . $oldCategory . '%')->get();
@@ -40,6 +40,7 @@ trait CategoryMappingHelpers
                 $value['type_id'] = $defaultCategory['type_id'];
                 $value['type_label'] = $defaultCategory['type_label'];
             }
+
             return $value;
         });
     }
@@ -48,11 +49,10 @@ trait CategoryMappingHelpers
     {
         if (isset($typeId)) {
             $type = Type::find($typeId);
-            $mappedCategories = "";
+            $mappedCategories = '';
             if ($categoriesString) {
                 $categoriesArray = explode(';', $categoriesString);
                 $categories = $type->categories()->whereIn('name', $categoriesArray)->get();
-
             } else {
                 $categories = $type->categories;
             }
@@ -63,12 +63,12 @@ trait CategoryMappingHelpers
                 }
             }
         } else {
-            $mappedCategories = "";
+            $mappedCategories = '';
             foreach (CategoryMappings::all() as $mapping) {
                 $mappedCategories = $mappedCategories . $mapping->map_to . ';';
             }
         }
 
-        return rtrim($mappedCategories, ";");
+        return rtrim($mappedCategories, ';');
     }
 }

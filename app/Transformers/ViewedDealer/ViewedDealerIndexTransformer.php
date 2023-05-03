@@ -5,7 +5,6 @@ namespace App\Transformers\ViewedDealer;
 use App\Models\Dealer\ViewedDealer;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Transformers\Inventory\TcApiResponseInventoryTransformer;
-use GuzzleHttp\Exception\ClientException;
 use League\Fractal\TransformerAbstract;
 use Str;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -15,8 +14,7 @@ class ViewedDealerIndexTransformer extends TransformerAbstract
     public function __construct(
         private InventoryServiceInterface $inventoryService,
         private TcApiResponseInventoryTransformer $transformer,
-    )
-    {
+    ) {
     }
 
     public function transform(ViewedDealer $viewedDealer): array

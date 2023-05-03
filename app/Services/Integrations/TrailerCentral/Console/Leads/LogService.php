@@ -6,12 +6,14 @@ namespace App\Services\Integrations\TrailerCentral\Console\Leads;
 
 use App\Models\Leads\LeadLog;
 use App\Services\Integrations\TrailerCentral\Console\AbstractLogService;
+use JsonException;
+use PDOException;
 use stdClass;
 
 class LogService extends AbstractLogService implements LogServiceInterface
 {
     /**
-     * @throws \PDOException when some unknown PDO error has been thrown
+     * @throws PDOException when some unknown PDO error has been thrown
      */
     public function execute(string $sql): int
     {
@@ -19,7 +21,7 @@ class LogService extends AbstractLogService implements LogServiceInterface
     }
 
     /**
-     * @throws \JsonException when some column was unable to be serialized
+     * @throws JsonException when some column was unable to be serialized
      *
      * @return string SQL insert values fragment
      */

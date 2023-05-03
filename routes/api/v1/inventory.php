@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\v1\Inventory\InventoryController;
 use App\Http\Controllers\v1\Inventory\AttributesController;
+use App\Http\Controllers\v1\Inventory\InventoryController;
 
 $api = app(Dingo\Api\Routing\Router::class);
 
@@ -21,7 +21,7 @@ $api->version('v1', function ($api) {
             ->where('id', '[0-9]+')
             ->middleware('auth:api');
 
-        $api->get('/{id}/pay/{planId}','App\Http\Controllers\v1\Inventory\InventoryController@pay')
+        $api->get('/{id}/pay/{planId}', 'App\Http\Controllers\v1\Inventory\InventoryController@pay')
             ->where('id', '[0-9]+')
             ->middleware('auth:api');
         $api->get('/progress', 'App\Http\Controllers\v1\Inventory\InventoryController@getProgress')

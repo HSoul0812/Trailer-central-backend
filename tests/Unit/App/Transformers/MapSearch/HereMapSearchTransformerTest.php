@@ -220,9 +220,6 @@ class HereMapSearchTransformerTest extends UnitTestCase
 
     /**
      * @dataProvider transformDataProvider
-     *
-     * @param $json
-     * @param $expectedResponse
      */
     public function testTransformer($json, $expectedResponse)
     {

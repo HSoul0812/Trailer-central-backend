@@ -8,7 +8,6 @@ namespace Database\Seeders\Glossary;
 
 use App\Models\Glossary\Glossary;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class GlossarySeeder extends Seeder
 {
@@ -27,9 +26,9 @@ class GlossarySeeder extends Seeder
       ['denomination' => 'Payload capacity', 'short_description' => 'The maximum amount of weight a trailer can safely carry.', 'long_description' => 'The payload capacity refers to the total weight that can be carried by a trailer. The maximum payload capacity is equal to the GVWR subtracted of the trailer weight.'],
       ['denomination' => 'Features (FLF)', 'short_description' => 'Features that have to be on the product.', 'long_description' => 'The sellers have the possibility of selecting multiple features present on their product. Select those features which you require.'],
       ['denomination' => 'Jack & Coupler', 'short_description' => 'How the jack operates and size of the coupler.', 'long_description' => 'Depending on the weight of the trailer and cargo it will carry, consider a jack that will be easier to operate. Note that there are different dimensions for the coupler. '],
-      ['denomination' => 'Wheels & Suspension', 'short_description' => 'Select # of wheel holes, type of braking and type of suspensions.', 
+      ['denomination' => 'Wheels & Suspension', 'short_description' => 'Select # of wheel holes, type of braking and type of suspensions.',
       'long_description' => 'With the type of cargo you’ll carry on the trailer, you’ll want to adjust your filtering of wheels, brake and suspensions.'],
-      ['denomination' => 'Structural Features', 'short_description' => 'The upright and crossmember structures of the trailers.', 
+      ['denomination' => 'Structural Features', 'short_description' => 'The upright and crossmember structures of the trailers.',
       'long_description' => 'The structural features will determine the possibilities flooring and wall attachments to the trailer.'],
     ];
 
@@ -45,7 +44,7 @@ class GlossarySeeder extends Seeder
               'denomination' => $glossary['denomination'],
               'short_description' => $glossary['short_description'],
               'long_description' => $glossary['long_description'],
-              'type' => 'filters'
+              'type' => 'filters',
           ]);
         }
     }

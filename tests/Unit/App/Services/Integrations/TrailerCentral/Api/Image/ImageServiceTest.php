@@ -29,15 +29,15 @@ class ImageServiceTest extends TestCase
 
     public function testUploadImage()
     {
-        $this->markTestSkipped("This test is skipped because it requires TC");
+        $this->markTestSkipped('This test is skipped because it requires TC');
 
         $response = $this->service->uploadImage(1001, Storage::path('koala.png'));
         $this->assertEquals($this->container[0]['request']->getMethod(), 'POST');
         $this->assertEquals($this->container[0]['request']->getUri()->getPath(), '/api/images/local');
         $this->assertEquals([
             'data' => [
-                "url" => "https://api-v1.zhao.dev.trailercentral.com/storage/tmp/media/eQNHLd/GGoOHI/7wQz0Sxumbsb.png"
-            ]
+                'url' => 'https://api-v1.zhao.dev.trailercentral.com/storage/tmp/media/eQNHLd/GGoOHI/7wQz0Sxumbsb.png',
+            ],
         ], $response);
     }
 

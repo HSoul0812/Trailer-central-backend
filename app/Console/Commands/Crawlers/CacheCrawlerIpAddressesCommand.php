@@ -12,14 +12,15 @@ use Illuminate\Console\Command;
 use Mail;
 use Throwable;
 
-class  CacheCrawlerIpAddressesCommand extends Command
+class CacheCrawlerIpAddressesCommand extends Command
 {
-    use PrependsOutput, PrependsTimestamp;
+    use PrependsOutput;
+    use PrependsTimestamp;
 
     /**
-     * The accept ip keys in the ip array
+     * The accept ip keys in the ip array.
      */
-    const ACCEPT_IP_KEYS = ['ipv6Prefix', 'ipv4Prefix'];
+    public const ACCEPT_IP_KEYS = ['ipv6Prefix', 'ipv4Prefix'];
 
     protected $signature = 'crawlers:cache-ip-addresses';
 
@@ -28,8 +29,8 @@ class  CacheCrawlerIpAddressesCommand extends Command
     public function handle()
     {
         collect(config('crawlers.providers'))
-            ->filter(fn(array $config) => $config['strategy'] === CrawlerCheckStrategy::IP_CHECK)
-            ->each(fn(array $config) => $this->createCacheFromConfig($config));
+            ->filter(fn (array $config) => $config['strategy'] === CrawlerCheckStrategy::IP_CHECK)
+            ->each(fn (array $config) => $this->createCacheFromConfig($config));
     }
 
     private function createCacheFromConfig(array $config): void

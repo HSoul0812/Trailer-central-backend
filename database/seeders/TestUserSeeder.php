@@ -15,8 +15,8 @@ class TestUserSeeder extends Seeder
     public function run(): void
     {
         User::factory()->create([
-            'name'     => 'trailercentral',
-            'email'    => 'tc@trailercentral.com',
+            'name' => 'trailercentral',
+            'email' => 'tc@trailercentral.com',
             'password' => '$2y$10$LzTxm7C1vAewCl5YmH/WTuNoNH.HdscRB3GplFDYjTsVPD9Cn3IZW',
         ]);
     }

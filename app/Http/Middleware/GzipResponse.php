@@ -11,11 +11,11 @@ use Str;
 
 class GzipResponse
 {
-    const HEADER_ACCEPT_ENCODING = 'Accept-Encoding';
+    public const HEADER_ACCEPT_ENCODING = 'Accept-Encoding';
 
-    const HEADER_CONTENT_ENCODING = 'Content-Encoding';
+    public const HEADER_CONTENT_ENCODING = 'Content-Encoding';
 
-    const COMPRESSION_LEVEL = 9;
+    public const COMPRESSION_LEVEL = 9;
 
     public function handle(Request $request, Closure $next): mixed
     {
@@ -54,7 +54,7 @@ class GzipResponse
         return response($data)->withHeaders([
             'Content-type' => 'application/json; charset=utf-8',
             'Content-Length' => strlen($data),
-            self::HEADER_CONTENT_ENCODING => 'gzip'
+            self::HEADER_CONTENT_ENCODING => 'gzip',
         ]);
     }
 

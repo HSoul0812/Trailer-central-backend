@@ -8,8 +8,6 @@ class CreateSysConfigs extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up()
     {
@@ -19,14 +17,10 @@ class CreateSysConfigs extends Migration
             $table->text('value');
             $table->timestamps();
         });
-
-
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {

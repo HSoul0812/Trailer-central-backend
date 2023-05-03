@@ -8,10 +8,11 @@ use App\Transformers\Inventory\InventoryListResponseTransformer;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\Common\UnitTestCase;
 
-require('app/Helpers/System/helper.php');
+require 'app/Helpers/System/helper.php';
 class InventoryListResponseTransformerTest extends UnitTestCase
 {
-    public function testTransform() {
+    public function testTransform()
+    {
         $inventoryJson = '{
           "id": "1000022125",
           "isActive": true,

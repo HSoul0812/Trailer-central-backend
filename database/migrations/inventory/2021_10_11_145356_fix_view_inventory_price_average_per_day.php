@@ -41,7 +41,7 @@ class FixViewInventoryPriceAveragePerDay extends Migration
             -- averages per day and manufacturer
 
 SQL
-);
+        );
     }
 
     /**

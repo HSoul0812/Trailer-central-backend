@@ -11,14 +11,14 @@ class HereResponse
     public array $items;
 
     #[Pure]
- public static function fromData(array $data): self
- {
-     $obj = new self();
-     $obj->items = [];
-     foreach ($data['items'] as $item) {
-         $obj->items[] = HereResponseItem::fromData($item);
-     }
+    public static function fromData(array $data): self
+    {
+        $obj = new self();
+        $obj->items = [];
+        foreach ($data['items'] as $item) {
+            $obj->items[] = HereResponseItem::fromData($item);
+        }
 
-     return $obj;
- }
+        return $obj;
+    }
 }

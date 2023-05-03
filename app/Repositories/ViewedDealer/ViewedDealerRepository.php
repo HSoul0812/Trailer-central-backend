@@ -4,14 +4,12 @@ namespace App\Repositories\ViewedDealer;
 
 use App\Domains\ViewedDealer\Actions\CreateViewedDealerAction;
 use App\Domains\ViewedDealer\Exceptions\DealerIdExistsException;
-use App\Domains\ViewedDealer\Exceptions\DuplicateDealerIdException;
 use App\DTOs\Dealer\TcApiResponseDealer;
 use App\DTOs\Inventory\TcEsInventory;
 use App\Models\Dealer\ViewedDealer;
 use App\Services\Dealers\DealerServiceInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Collection;
 use Throwable;
 
 class ViewedDealerRepository implements ViewedDealerRepositoryInterface
@@ -19,15 +17,12 @@ class ViewedDealerRepository implements ViewedDealerRepositoryInterface
     public function __construct(
         private DealerServiceInterface $dealerService,
         private InventoryServiceInterface $inventoryService,
-    )
-    {
+    ) {
     }
 
     /**
-     * Get the ViewedDealer model by name, returns null if it doesn't exist
+     * Get the ViewedDealer model by name, returns null if it doesn't exist.
      *
-     * @param string $name
-     * @return ViewedDealer
      * @throws ModelNotFoundException
      */
     public function findByName(string $name): ViewedDealer
@@ -42,10 +37,10 @@ class ViewedDealerRepository implements ViewedDealerRepositoryInterface
     }
 
     /**
-     * Create new viewed_dealer records (accepts multiple pairs)
+     * Create new viewed_dealer records (accepts multiple pairs).
      *
      * @param array<int, array{dealer_id: int, name: string}> $params
-     * @return array
+     *
      * @throws DealerIdExistsException
      * @throws Throwable
      */
@@ -55,8 +50,6 @@ class ViewedDealerRepository implements ViewedDealerRepositoryInterface
     }
 
     /**
-     * @param string $name
-     * @return ViewedDealer
      * @throws ModelNotFoundException
      */
     private function createViewedDealerFromTcApi(string $name): ViewedDealer

@@ -13,9 +13,9 @@ use Storage;
 
 class ImageService implements ImageServiceInterface
 {
-    const LOCAL_IMAGES_DISK = 'local_tmp';
+    public const LOCAL_IMAGES_DISK = 'local_tmp';
 
-    const LOCAL_IMAGES_DIRECTORY = 'images';
+    public const LOCAL_IMAGES_DIRECTORY = 'images';
 
     private string $endpointUrl;
 
@@ -33,22 +33,24 @@ class ImageService implements ImageServiceInterface
     public function uploadImage(int $dealerId, string $imagePath)
     {
         $tcAuthToken = $this->authTokenRepository->get(['user_id' => $dealerId]);
+
         try {
             $response = $this->httpClient->post($this->endpointUrl, [
                 'headers' => [
-                    'access-token' => $tcAuthToken->access_token
+                    'access-token' => $tcAuthToken->access_token,
                 ],
                 'multipart' => [
                     [
                         'name' => 'dealer_id',
-                        'contents' => $dealerId
+                        'contents' => $dealerId,
                     ],
                     [
                         'name' => 'file',
-                        'contents' => Utils::tryFopen($imagePath, 'r')
-                    ]
-                ]
+                        'contents' => Utils::tryFopen($imagePath, 'r'),
+                    ],
+                ],
             ]);
+
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
             Log::info('Exception was thrown while calling TrailerCentral API.');
@@ -56,7 +58,6 @@ class ImageService implements ImageServiceInterface
 
             throw $e;
         }
-
     }
 
     public function uploadLocalImage(UploadedFile $uploadedFile): string

@@ -12,6 +12,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
 use League\Fractal\TransformerAbstract;
+use Log;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class TomTomMapSearchService implements MapSearchServiceInterface
@@ -19,11 +20,12 @@ class TomTomMapSearchService implements MapSearchServiceInterface
     private const AUTOCOMPLETE_API_URL = 'https://api.tomtom.com/search/2/geocode/';
     private const REVERSE_API_URL = 'https://api.tomtom.com/search/2/reverseGeocode/';
     private array $transformers;
+
     public function __construct(private TomTomMapSearchClient $httpClient)
     {
         $this->transformers = [
             TomTomGeocodeResponse::class => TomTomGeocodeResponseTransformer::class,
-            TomTomReverseGeocodeResponse::class => TomTomReverseGeocodeResponseTransformer::class
+            TomTomReverseGeocodeResponse::class => TomTomReverseGeocodeResponseTransformer::class,
         ];
     }
 
@@ -37,13 +39,14 @@ class TomTomMapSearchService implements MapSearchServiceInterface
 
     public function autocomplete(string $searchText): TomTomGeocodeResponse
     {
-        $url = self::AUTOCOMPLETE_API_URL . $searchText . ".json";
+        $url = self::AUTOCOMPLETE_API_URL . $searchText . '.json';
+
         return TomTomGeocodeResponse::fromData(
             $this->handleHttpRequest('GET', $url, [
                 'query' => [
                     'countrySet' => 'US,CA',
-                    'typeahead' => 'true'
-                ]
+                    'typeahead' => 'true',
+                ],
             ])
         );
     }
@@ -55,44 +58,33 @@ class TomTomMapSearchService implements MapSearchServiceInterface
 
     public function reverse(float $lat, float $lng): TomTomReverseGeocodeResponse
     {
-        $url = self::REVERSE_API_URL . "$lat,$lng" . ".json";
+        $url = self::REVERSE_API_URL . "$lat,$lng" . '.json';
 
         return TomTomReverseGeocodeResponse::fromData(
             $this->handleHttpRequest('GET', $url, [])
         );
     }
 
-    /**
-     * @param string $class
-     * @return TransformerAbstract
-     */
     #[Pure]
     public function getTransformer(string $class): TransformerAbstract
     {
-        return new $this->transformers[$class];
+        return new $this->transformers[$class]();
     }
 
-    /**
-     * @param string $method
-     * @param string $url
-     * @param array  $options
-     *
-     * @return array
-     */
     #[ArrayShape([
         'items' => [[
-            'title'   => 'string',
+            'title' => 'string',
             'address' => [
-                'label'       => 'string',
+                'label' => 'string',
                 'countryCode' => 'string',
                 'countryName' => 'string',
-                'stateCode'   => 'string',
-                'state'       => 'string',
-                'county'      => 'string',
-                'city'        => 'string',
-                'district'    => 'string',
-                'street'      => 'string',
-                'postalCode'  => 'string',
+                'stateCode' => 'string',
+                'state' => 'string',
+                'county' => 'string',
+                'city' => 'string',
+                'district' => 'string',
+                'street' => 'string',
+                'postalCode' => 'string',
             ],
             'position' => [
                 'lat' => 'float',
@@ -107,8 +99,8 @@ class TomTomMapSearchService implements MapSearchServiceInterface
 
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
-            \Log::info('Exception was thrown while calling here API.');
-            \Log::info($e->getCode() . ': ' . $e->getMessage());
+            Log::info('Exception was thrown while calling here API.');
+            Log::info($e->getCode() . ': ' . $e->getMessage());
 
             throw new HttpException(500, $e->getMessage());
         }

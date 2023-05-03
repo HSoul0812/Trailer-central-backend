@@ -4,17 +4,16 @@ namespace App\Http\Controllers\v1\WebsiteUser;
 
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
+use App\Http\Requests\CreateRequestInterface;
+use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\WebsiteUser\ForgetPasswordRequest;
 use App\Http\Requests\WebsiteUser\ForgetPasswordRequestInterface;
 use App\Http\Requests\WebsiteUser\PasswordResetRequest;
-use App\Http\Requests\CreateRequestInterface;
-use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\WebsiteUser\PasswordResetRequestInterface;
 use App\Services\WebsiteUser\PasswordResetServiceInterface;
 use App\Transformers\WebsiteUser\WebsiteUserTransformer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
 
 class PasswordResetController extends AbstractRestfulController
 {
@@ -23,7 +22,6 @@ class PasswordResetController extends AbstractRestfulController
         parent::__construct();
     }
 
-    //
     public function index(IndexRequestInterface $request)
     {
         throw new NotImplementedException();
@@ -49,31 +47,36 @@ class PasswordResetController extends AbstractRestfulController
         throw new NotImplementedException();
     }
 
-    public function forgetPassword(ForgetPasswordRequestInterface $request) {
-        if($request->validate()) {
+    public function forgetPassword(ForgetPasswordRequestInterface $request)
+    {
+        if ($request->validate()) {
             $attributes = $request->all();
             $token = $this->passwordResetService->forgetPassword(
                 $attributes['email'],
                 $attributes['callback'] ?? null
             );
+
             return $this->response->array([
-                'token' => $token
+                'token' => $token,
             ]);
         }
 
         $this->response->errorBadRequest();
     }
 
-    public function resetPassword(PasswordResetRequestInterface $request) {
-        if($request->validate()) {
+    public function resetPassword(PasswordResetRequestInterface $request)
+    {
+        if ($request->validate()) {
             $user = $this->passwordResetService->resetPassword($request->all());
+
             return $this->response->item($user, new WebsiteUserTransformer());
         }
 
         $this->response->errorBadRequest();
     }
 
-    public function showReset(Request $request) {
+    public function showReset(Request $request)
+    {
         return view('auth.reset-password', ['token' => $request->get('token')]);
     }
 
@@ -84,7 +87,7 @@ class PasswordResetController extends AbstractRestfulController
         });
 
         app()->bind(PasswordResetRequestInterface::class, function () {
-           return inject_request_data(PasswordResetRequest::class);
+            return inject_request_data(PasswordResetRequest::class);
         });
     }
 }

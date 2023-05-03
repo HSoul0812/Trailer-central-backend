@@ -13,7 +13,7 @@ interface SubscribeEmailSearchServiceInterface
      * @param array
      */
     public function send(array $params): SubscribeEmailSearch;
-    
+
     /**
      * @param array
      */

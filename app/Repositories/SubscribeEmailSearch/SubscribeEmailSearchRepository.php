@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Repositories\SubscribeEmailSearch;
 
 use App\Models\SubscribeEmailSearch\SubscribeEmailSearch;
-use Illuminate\Database\Eloquent\Collection;
 
 class SubscribeEmailSearchRepository implements SubscribeEmailSearchRepositoryInterface
 {
@@ -23,5 +22,4 @@ class SubscribeEmailSearchRepository implements SubscribeEmailSearchRepositoryIn
     {
         return $this->model->create($params);
     }
-
 }

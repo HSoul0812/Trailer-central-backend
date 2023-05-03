@@ -3,19 +3,18 @@
 namespace App\Transformers\MapSearch;
 
 use App\DTOs\MapSearch\GoogleAutocompleteResponseItem;
-use App\DTOs\MapSearch\GoogleGeocodeResponseItem;
 use JetBrains\PhpStorm\ArrayShape;
 use League\Fractal\TransformerAbstract;
 
 class GoogleAutocompleteResponseItemTransformer extends TransformerAbstract
 {
-    #[ArrayShape(['address' => "array"])]
+    #[ArrayShape(['address' => 'array'])]
     public function transform(GoogleAutocompleteResponseItem $response): array
     {
         return [
             'address' => [
-                'label'       => $response->description,
-            ]
+                'label' => $response->description,
+            ],
         ];
     }
 }

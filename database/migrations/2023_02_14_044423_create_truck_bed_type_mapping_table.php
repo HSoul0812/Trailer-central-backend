@@ -1,36 +1,35 @@
 <?php
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+
 use App\Models\Parts\Category;
-use App\Models\Parts\CategoryMappings;
 use App\Models\Parts\CategoryImage;
-use App\Models\Parts\Type;
+use App\Models\Parts\CategoryMappings;
 use App\Models\Parts\ListingCategoryMappings;
+use App\Models\Parts\Type;
+use Illuminate\Database\Migrations\Migration;
+
 class CreateTruckBedTypeMappingTable extends Migration
 {
-    const NEW_CATEGORY = ['name' => 'Truck Bed Campers', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/truck-bed-campers', 'description' => 'Truck Bed Campers.'];
-    const TYPE_NAME = 'Truck Beds';
-    const CATEGORY_NEW_MAPPINGS = [
+    public const NEW_CATEGORY = ['name' => 'Truck Bed Campers', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/truck-bed-campers', 'description' => 'Truck Bed Campers.'];
+    public const TYPE_NAME = 'Truck Beds';
+    public const CATEGORY_NEW_MAPPINGS = [
         self::TYPE_NAME => [
             ['map_from' => 'Truck Beds', 'map_to' => 'bed_equipment'],
             ['map_from' => 'Truck Bed Campers', 'map_to' => 'rv.truck_camper'],
         ],
     ];
-    const OLD_CATEGORY_MAPPINGS = [
+    public const OLD_CATEGORY_MAPPINGS = [
         self::TYPE_NAME => [
             ['map_from' => 'Truck Beds', 'map_to' => 'bed_equipment'],
         ],
     ];
-    const LISTING_CATEGORY_MAPPINGS = [
+    public const LISTING_CATEGORY_MAPPINGS = [
         self::TYPE_NAME => [
             ['map_from' => 'Truck Bed Campers', 'map_to' => 'rv.truck_camper', 'entity_type_id' => 3],
         ],
     ];
+
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up()
     {
@@ -38,14 +37,14 @@ class CreateTruckBedTypeMappingTable extends Migration
         $type = Type::where('name', self::TYPE_NAME)->first();
         $new_category = Category::create([
             'name' => self::NEW_CATEGORY['name'],
-            'description' => self::NEW_CATEGORY['description']
+            'description' => self::NEW_CATEGORY['description'],
         ]);
         $new_image = CategoryImage::create([
-            'image_url'   =>  self::NEW_CATEGORY['image_url'],
+            'image_url' => self::NEW_CATEGORY['image_url'],
             'category_id' => $new_category->id,
         ]);
         $type->categories()->save($new_category);
-        // End - New category 
+        // End - New category
         foreach (self::CATEGORY_NEW_MAPPINGS as $type => $categories) {
             $current_type = Type::where('name', $type)->first();
             foreach ($categories as $category) {
@@ -57,8 +56,8 @@ class CreateTruckBedTypeMappingTable extends Migration
                     CategoryMappings::create([
                         'category_id' => $current_category->id,
                         'map_from' => $category['map_from'],
-                        'map_to'   => $category['map_to'],
-                        'type'     => 'Inventory'
+                        'map_to' => $category['map_to'],
+                        'type' => 'Inventory',
                     ]);
                 }
             }
@@ -69,17 +68,16 @@ class CreateTruckBedTypeMappingTable extends Migration
                 ListingCategoryMappings::create([
                     'type_id' => $current_type->id,
                     'map_from' => $category['map_from'],
-                    'map_to'   => $category['map_to'],
+                    'map_to' => $category['map_to'],
                     'entity_type_id' => $category['entity_type_id'],
-                    'type'     => 'Inventory'
+                    'type' => 'Inventory',
                 ]);
             }
         }
     }
+
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {

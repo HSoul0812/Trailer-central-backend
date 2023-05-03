@@ -22,8 +22,7 @@ class AuthController extends AbstractRestfulController
     public function __construct(
         private AuthServiceInterface $authService,
         private WebsiteUserTransformer $transformer
-    )
-    {
+    ) {
         parent::__construct();
     }
 
@@ -38,12 +37,15 @@ class AuthController extends AbstractRestfulController
         ]);
     }
 
-    public function social(string $social, Request $request) {
+    public function social(string $social, Request $request)
+    {
         $callback = $request->input('callback');
+
         return $this->authService->authenticateSocial($social, $callback);
     }
 
-    public function socialCallback(string $social, Request $request) {
+    public function socialCallback(string $social, Request $request)
+    {
         $params = [];
         parse_str($request->input('state'), $params);
         $callback = $params['callback'] ?? config('auth.login_url');
@@ -55,16 +57,19 @@ class AuthController extends AbstractRestfulController
 
     public function create(CreateRequestInterface $request)
     {
-        if($request->validate()) {
+        if ($request->validate()) {
             $user = $this->authService->register($request->all());
+
             return $this->response->item($user, $this->transformer);
         }
+
         return $this->response->errorBadRequest();
     }
 
     public function getProfile(IndexRequestInterface $request): Response
     {
         $user = auth('api')->user();
+
         return $this->response->item($user, $this->transformer);
     }
 
@@ -102,10 +107,6 @@ class AuthController extends AbstractRestfulController
 
     /**
      * Get the token array structure.
-     *
-     * @param string $token
-     * @param array $extras
-     * @return Response
      */
     protected function respondWithJwtToken(string $token, array $extras = []): Response
     {

@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace App\DTOs\Inventory;
 
-use App\Traits\TypedPropertyTrait;
 use App\DTOs\Dealer\PrivateDealerCheck;
-use Illuminate\Contracts\Support\Arrayable;
+use App\Traits\TypedPropertyTrait;
 use JetBrains\PhpStorm\Pure;
 
 class TcApiResponseInventory
 {
-    const statusToAvailabilityMap = [
+    use \App\DTOs\Arrayable;
+    use TypedPropertyTrait;
+    public const statusToAvailabilityMap = [
         1 => 'available',
         2 => 'sold',
         3 => 'on_order',
         4 => 'pending_sale',
         5 => 'special_order',
     ];
-
-    use \App\DTOs\Arrayable;
-    use TypedPropertyTrait;
 
     public int $id;
     public ?string $url;
@@ -84,7 +82,7 @@ class TcApiResponseInventory
         $obj->manufacturer = $data['manufacturer'];
         $obj->dealer = $data['dealer'];
 
-        if(!empty($obj->dealer)) {
+        if (!empty($obj->dealer)) {
             $obj->dealer['is_private'] = (new PrivateDealerCheck())->checkArray($obj->dealer);
         }
 
@@ -101,10 +99,10 @@ class TcApiResponseInventory
 
             $obj->basic_price = $data['price'];
         } else {
-            $obj->price = NULL;
-            $obj->sales_price = NULL;
-            $obj->website_price = NULL;
-            $obj->basic_price = NULL;
+            $obj->price = null;
+            $obj->sales_price = null;
+            $obj->website_price = null;
+            $obj->basic_price = null;
         }
 
         $obj->inventory_title = $data['title'];

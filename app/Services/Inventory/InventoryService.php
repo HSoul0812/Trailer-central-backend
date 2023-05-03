@@ -7,11 +7,16 @@ use App\DTOs\Inventory\TcApiResponseAttribute;
 use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
 use App\DTOs\Inventory\TcApiResponseInventoryDelete;
+use App\DTOs\Inventory\TcEsInventory;
+use App\DTOs\Inventory\TcEsInventory;
+use App\DTOs\Inventory\TcEsResponseInventoryList;
+use App\DTOs\Inventory\TcEsResponseInventoryList;
+use App\Models\Geolocation\Geolocation;
+use App\Models\Geolocation\Geolocation;
 use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepositoryInterface;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
-use App\Services\Integrations\TrailerCentral\Api\Image\ImageService;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
@@ -19,33 +24,31 @@ use Cache;
 use Carbon\Carbon;
 use Dingo\Api\Routing\Helpers;
 use Exception;
-use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Support\Collection;
-use Log;
-use Str;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use App\DTOs\Inventory\TcEsInventory;
-use App\DTOs\Inventory\TcEsResponseInventoryList;
-use App\Models\Geolocation\Geolocation;
-use App\Models\Parts\CategoryMappings;
-use App\Models\Parts\Type;
 use GuzzleHttp\Client as GuzzleHttpClient;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Collection;
 use JetBrains\PhpStorm\ArrayShape;
-use JetBrains\PhpStorm\Pure;
+use Log;
+use Log;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class InventoryService implements InventoryServiceInterface
 {
-    use Helpers, CategoryMappingHelpers;
+    use Helpers;
+    use CategoryMappingHelpers;
 
-    const ES_INDEX = 'inventoryclsf';
-    const HTTP_SUCCESS = 200;
-    const ES_CACHE_EXPIRY = 300;
-    const DEFAULT_SORT = '+distance';
-    const DEFAULT_NO_LOCATION_SORT = '-createdAt';
-    const DEFAULT_COUNTRY = 'USA';
-    const PAGE_SIZE = 10;
-    const TERM_SEARCH_KEY_MAP = [
+    public const ES_INDEX = 'inventoryclsf';
+    public const HTTP_SUCCESS = 200;
+    public const ES_CACHE_EXPIRY = 300;
+    public const DEFAULT_SORT = '+distance';
+    public const DEFAULT_NO_LOCATION_SORT = '-createdAt';
+    public const DEFAULT_COUNTRY = 'USA';
+    public const PAGE_SIZE = 10;
+    public const TERM_SEARCH_KEY_MAP = [
         'dealer_id' => 'dealerId',
         'stalls' => 'numStalls',
         'pull_type' => 'pullType',
@@ -57,20 +60,20 @@ class InventoryService implements InventoryServiceInterface
         'configuration' => 'loadType',
         'axles' => 'numAxles',
         'color' => 'color',
-        'availability' => 'availability'
+        'availability' => 'availability',
     ];
 
-    const RANGE_SEARCH_KEY_MAP = [
+    public const RANGE_SEARCH_KEY_MAP = [
         'price' => 'existingPrice',
         'length' => 'length',
         'width' => 'width',
         'height' => 'height',
         'gvwr' => 'gvwr',
-        'payload_capacity' => 'payloadCapacity'
+        'payload_capacity' => 'payloadCapacity',
     ];
 
-    const INVENTORY_SOLD = 'sold';
-    const INVENTORY_AVAILABLE = 'available';
+    public const INVENTORY_SOLD = 'sold';
+    public const INVENTORY_AVAILABLE = 'available';
 
     public function __construct(
         private GuzzleHttpClient $httpClient,
@@ -79,8 +82,7 @@ class InventoryService implements InventoryServiceInterface
         private AuthTokenRepositoryInterface $authTokenRepository,
         private InventoryRepositoryInterface $inventoryRepository,
         private DeleteLocalImagesFromNewImagesAction $deleteLocalImagesFromNewImagesAction,
-    )
-    {
+    ) {
     }
 
     /**
@@ -125,16 +127,11 @@ class InventoryService implements InventoryServiceInterface
                 $this->getTypedAggregations($params)
             );
             $response->inventories = $paginator;
+
             return $response;
         } else {
             throw new Exception('Elastic search API responded with http code: ' . $res->getStatusCode());
         }
-    }
-
-    private function esSearchUrl(): string
-    {
-        $esIndex = self::ES_INDEX;
-        return config('trailercentral.elasticsearch.url') . "/$esIndex/_search";
     }
 
     /**
@@ -150,7 +147,7 @@ class InventoryService implements InventoryServiceInterface
 
         $categoryMapping = $this->listingCategoryMappingsRepository->get([
             'type_id' => $params['type_id'],
-            'map_from' => $params['category']
+            'map_from' => $params['category'],
         ]);
         if ($categoryMapping === null) {
             throw new HttpException(400, 'Corresponding category mapping was not found');
@@ -201,7 +198,7 @@ class InventoryService implements InventoryServiceInterface
         if (isset($params['type_id'])) {
             $categoryMapping = $this->listingCategoryMappingsRepository->get([
                 'type_id' => $params['type_id'],
-                'map_from' => $params['category']
+                'map_from' => $params['category'],
             ]);
             if ($categoryMapping === null) {
                 throw new HttpException(400, 'Corresponding category mapping was not found');
@@ -223,6 +220,55 @@ class InventoryService implements InventoryServiceInterface
         $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
 
         return $respObj;
+    }
+
+    /**
+     * @param int $id the id of the inventory
+     */
+    public function show(int $id): TcApiResponseInventory
+    {
+        $url = config('services.trailercentral.api') . 'inventory/' . $id . '?include=features,attributes';
+        $inventory = $this->handleHttpRequest('GET', $url);
+
+        $respObj = TcApiResponseInventory::fromData($inventory['data']);
+        $newCategory = $this->mapOldCategoryToNew($respObj->category);
+        $respObj->category = $newCategory['key'];
+        $respObj->type_id = $newCategory['type_id'];
+        $respObj->type_label = $newCategory['type_label'];
+
+        return $respObj;
+    }
+
+    public function hideExpired()
+    {
+        $from = Carbon::today()->startOfDay();
+        $to = Carbon::today()->startOfDay()->addDay();
+        $this->inventoryRepository->hideExpiredItems($from, $to);
+    }
+
+    public function attributes(array $params): Collection
+    {
+        $mapping = $this->listingCategoryMappingsRepository->get([
+            'map_from' => $params['category'],
+            'type_id' => $params['type_id'],
+        ]);
+
+        $results = new Collection();
+        $url = config('services.trailercentral.api') . 'inventory/attributes' . "?entity_type_id=$mapping->entity_type_id";
+        $attributes = $this->handleHttpRequest('GET', $url);
+        foreach ($attributes['data'] as $attribute) {
+            $attributeObj = TcApiResponseAttribute::fromData($attribute);
+            $results->add($attributeObj);
+        }
+
+        return $results;
+    }
+
+    private function esSearchUrl(): string
+    {
+        $esIndex = self::ES_INDEX;
+
+        return config('trailercentral.elasticsearch.url') . "/$esIndex/_search";
     }
 
     private function mapCategoryBuckets(array $buckets): array
@@ -272,12 +318,13 @@ class InventoryService implements InventoryServiceInterface
 
         return Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use ($esSearchUrl, $query) {
             $res = $this->httpClient->post($esSearchUrl, [
-                'json' => $query
+                'json' => $query,
             ]);
             $resJson = json_decode($res->getBody()->getContents(), true);
             $resJson['aggregations']['category']['buckets'] = $this->mapCategoryBuckets(
                 $resJson['aggregations']['category']['buckets']
             );
+
             return $resJson['aggregations'];
         });
     }
@@ -300,14 +347,15 @@ class InventoryService implements InventoryServiceInterface
 
         return Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use ($esSearchUrl, $query) {
             $res = $this->httpClient->post($esSearchUrl, [
-                'json' => $query
+                'json' => $query,
             ]);
             $resJson = json_decode($res->getBody()->getContents(), true);
+
             return $resJson['aggregations'];
         });
     }
 
-    #[ArrayShape(['from' => "int", 'size' => "int", 'query' => "array[]", 'aggregations' => "array"])]
+    #[ArrayShape(['from' => 'int', 'size' => 'int', 'query' => 'array[]', 'aggregations' => 'array'])]
     private function buildSearchQuery(array $params): ESInventoryQueryBuilder
     {
         $queryBuilder = new ESInventoryQueryBuilder();
@@ -325,7 +373,7 @@ class InventoryService implements InventoryServiceInterface
         } else {
             if (isset($params['sort'])) {
                 $sort = $params['sort'];
-            } else if ($this->getGeolocation($params)) {
+            } elseif ($this->getGeolocation($params)) {
                 $sort = self::DEFAULT_SORT;
             } else {
                 $sort = self::DEFAULT_NO_LOCATION_SORT;
@@ -348,38 +396,37 @@ class InventoryService implements InventoryServiceInterface
         $filter = "doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
 
         if (!empty($params['sale'])) {
-            $filter .= " && salesPrice > 0.0 && salesPrice < websitePrice";
+            $filter .= ' && salesPrice > 0.0 && salesPrice < websitePrice';
         }
 
         if (!empty($params['price_min']) && $params['price_min'] > 0 && !empty($params['price_max'])) {
             $filter = $priceDef . $filter;
 
-            $filter .= " && price  > " . $params['price_min'] . "&& price < " . $params['price_max'];
+            $filter .= ' && price  > ' . $params['price_min'] . '&& price < ' . $params['price_max'];
         }
 
         if (!empty($params['price_min']) && $params['price_min'] > 0 && empty($params['price_max'])) {
             $filter = $priceDef . $filter;
 
-            $filter .= " && price  > " . $params['price_min'];
+            $filter .= ' && price  > ' . $params['price_min'];
         }
 
         if (!empty($params['price_max']) && $params['price_max'] > 0 && empty($params['price_min'])) {
             $filter = $priceDef . $filter;
 
-            $filter .= " && price  < " . $params['price_max'];
+            $filter .= ' && price  < ' . $params['price_max'];
         }
 
         $queryBuilder->setFilterScript([
             'source' => $filter,
-            'lang' => 'painless'
+            'lang' => 'painless',
         ]);
     }
 
     private function addGeoFiltering(
         ESInventoryQueryBuilder $queryBuilder,
         array $params,
-    )
-    {
+    ) {
         $distance = null;
         if (isset($params['country'])) {
             $queryBuilder->addTermQuery('location.country', strtoupper($params['country']));
@@ -391,7 +438,6 @@ class InventoryService implements InventoryServiceInterface
         if ($location !== null) {
             $queryBuilder->setGeoDistance(['lat' => $location->latitude, 'lon' => $location->longitude], $distance);
         }
-
     }
 
     private function addCategoryAggregationQuery(ESInventoryQueryBuilder $queryBuilder, array $params)
@@ -480,7 +526,7 @@ class InventoryService implements InventoryServiceInterface
         );
 
         $categoryQueries = $queryBuilder->buildTermInValuesQuery('category', $mappedCategories);
-        if ($categoryQueries === NULL) {
+        if ($categoryQueries === null) {
             throw new HttpException(400, 'No category was selected');
         }
 
@@ -491,8 +537,8 @@ class InventoryService implements InventoryServiceInterface
             );
 
             $tiltQuery = (new ESBoolQueryBuilder())
-                ->must($queryBuilder->buildTermQuery("tilt", 1))
-                ->should($queryBuilder->buildTermInValuesQuery("category", $mappedTypeCategories))
+                ->must($queryBuilder->buildTermQuery('tilt', 1))
+                ->should($queryBuilder->buildTermInValuesQuery('category', $mappedTypeCategories))
                 ->build();
             $categoryQueries[] = $tiltQuery;
         }
@@ -502,7 +548,6 @@ class InventoryService implements InventoryServiceInterface
                 (new ESBoolQueryBuilder())->should($categoryQueries)->build()
             );
     }
-
 
     private function addRangeQueries(ESInventoryQueryBuilder $queryBuilder, array $params)
     {
@@ -518,9 +563,9 @@ class InventoryService implements InventoryServiceInterface
         if (isset($params['lat']) && isset($params['lon'])) {
             return new Geolocation([
                 'latitude' => (float) $params['lat'],
-                'longitude' => (float) $params['lon']
+                'longitude' => (float) $params['lon'],
             ]);
-        } else if (isset($params['location'])) {
+        } elseif (isset($params['location'])) {
             $response = $this->api->get('map_search/geocode', ['q' => $params['location']]);
 
             if (gettype($response) === 'string') {
@@ -529,61 +574,17 @@ class InventoryService implements InventoryServiceInterface
 
             if (count($response['data']) > 0) {
                 $position = $response['data'][0]['position'];
+
                 return new Geolocation([
                     'latitude' => (float) $position['lat'],
-                    'longitude' => (float) $position['lng']
+                    'longitude' => (float) $position['lng'],
                 ]);
             }
         }
+
         return null;
     }
 
-    /**
-     * @param int $id the id of the inventory
-     */
-    public function show(int $id): TcApiResponseInventory
-    {
-        $url = config('services.trailercentral.api') . 'inventory/' . $id . '?include=features,attributes';
-        $inventory = $this->handleHttpRequest('GET', $url);
-
-        $respObj = TcApiResponseInventory::fromData($inventory['data']);
-        $newCategory = $this->mapOldCategoryToNew($respObj->category);
-        $respObj->category = $newCategory['key'];
-        $respObj->type_id = $newCategory['type_id'];
-        $respObj->type_label = $newCategory['type_label'];
-        return $respObj;
-    }
-
-    public function hideExpired()
-    {
-        $from = Carbon::today()->startOfDay();
-        $to = Carbon::today()->startOfDay()->addDay();
-        $this->inventoryRepository->hideExpiredItems($from, $to);
-    }
-
-    public function attributes(array $params): Collection
-    {
-        $mapping = $this->listingCategoryMappingsRepository->get([
-            'map_from' => $params['category'],
-            'type_id' => $params['type_id']
-        ]);
-
-        $results = new Collection();
-        $url = config('services.trailercentral.api') . 'inventory/attributes' . "?entity_type_id=$mapping->entity_type_id";
-        $attributes = $this->handleHttpRequest('GET', $url);
-        foreach ($attributes['data'] as $attribute) {
-            $attributeObj = TcApiResponseAttribute::fromData($attribute);
-            $results->add($attributeObj);
-        }
-        return $results;
-    }
-
-    /**
-     * @param string $method
-     * @param string $url
-     *
-     * @return array
-     */
     #[ArrayShape([
         'data' => [[
             'title' => 'string',
@@ -667,14 +668,14 @@ class InventoryService implements InventoryServiceInterface
 
         if (filter_var($logEnabled, FILTER_VALIDATE_BOOLEAN)) {
             $logMessage = sprintf(
-                "%s:%d => URL: %s, Body: %s",
+                '%s:%d => URL: %s, Body: %s',
                 $method,
                 $line,
                 $esSearchUrl,
                 $jsonBody,
             );
 
-            \Log::channel('elasticsearch')->debug($logMessage);
+            Log::channel('elasticsearch')->debug($logMessage);
         }
     }
 

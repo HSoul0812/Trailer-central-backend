@@ -39,7 +39,7 @@ class LeadRepository implements LeadRepositoryInterface
         return collect(Schema::connection('mysql')
             ->getColumnListing('website_lead'))
             ->filter(fn (string $columnName): bool => !in_array($columnName, self::SELECT_EXCEPT_COLUMNS))
-            ->map(fn ($column)                     => "l.$column")
+            ->map(fn ($column) => "l.$column")
             ->toArray();
     }
 }

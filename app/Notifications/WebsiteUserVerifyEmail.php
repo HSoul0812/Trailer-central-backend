@@ -2,7 +2,6 @@
 
 namespace App\Notifications;
 
-use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -28,6 +27,7 @@ class WebsiteUserVerifyEmail extends Notification
     public function toMail($notifiable): MailMessage
     {
         $verificationUrl = $this->verificationUrl($notifiable);
+
         return $this->buildMailMessage($verificationUrl);
     }
 
@@ -47,9 +47,9 @@ class WebsiteUserVerifyEmail extends Notification
     {
         $siteUrl = config('app.site_url');
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject(Lang::get('TrailerTrader | Confirm your registration to TrailerTrader'))
-            ->line(new HtmlString("Thank you for registering to TrailerTrader.com. We need you to confirm your email address in order to activate your account. Please click on the following link to complete the registration process."))
+            ->line(new HtmlString('Thank you for registering to TrailerTrader.com. We need you to confirm your email address in order to activate your account. Please click on the following link to complete the registration process.'))
             ->action('Verify Email Address', $url)
             ->line(new HtmlString("Please note that we are regularly adding features to improve your experience on the TrailerTrader platform. If you have remarks or recommendations, we’ll be happy to consider them. You can use <a href='$siteUrl/about#contact_trailertrader'>this form</a> to share them with us. "));
     }

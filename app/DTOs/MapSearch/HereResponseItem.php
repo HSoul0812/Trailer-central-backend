@@ -13,13 +13,13 @@ class HereResponseItem
     public ?HerePosition $position;
 
     #[Pure]
- public static function fromData(array $data): self
- {
-     $obj = new self();
-     $obj->title = $data['title'];
-     $obj->address = HereAddress::fromData($data['address']);
-     $obj->position = isset($data['position']) ? HerePosition::fromData($data['position']) : null;
+    public static function fromData(array $data): self
+    {
+        $obj = new self();
+        $obj->title = $data['title'];
+        $obj->address = HereAddress::fromData($data['address']);
+        $obj->position = isset($data['position']) ? HerePosition::fromData($data['position']) : null;
 
-     return $obj;
- }
+        return $obj;
+    }
 }

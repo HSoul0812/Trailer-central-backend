@@ -11,6 +11,6 @@ $api->version('v1', function ($api) {
     |--------------------------------------------------------------------------
     */
     $api->group(['prefix' => '/email_search'], function ($api) {
-      $api->put('subscribe', 'App\Http\Controllers\v1\SubscribeEmailSearch\SubscribeEmailSearchController@create');
+        $api->put('subscribe', 'App\Http\Controllers\v1\SubscribeEmailSearch\SubscribeEmailSearchController@create');
     });
 });

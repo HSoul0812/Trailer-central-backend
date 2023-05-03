@@ -5,9 +5,7 @@ namespace App\Domains\TrailerTrader;
 class TrailerTraderDomain
 {
     /**
-     * Check if the given url is the trailer trader frontend domain
-     * @param string $url
-     * @return bool
+     * Check if the given url is the trailer trader frontend domain.
      */
     public function isFrontendDomain(string $url): bool
     {
@@ -15,10 +13,7 @@ class TrailerTraderDomain
     }
 
     /**
-     * Check if the given url is the trailer trader backend url
-     *
-     * @param string $url
-     * @return bool
+     * Check if the given url is the trailer trader backend url.
      */
     public function isBackendDomain(string $url): bool
     {
@@ -26,10 +21,7 @@ class TrailerTraderDomain
     }
 
     /**
-     * Check if the given url is trailer trader domain
-     *
-     * @param string $url
-     * @return bool
+     * Check if the given url is trailer trader domain.
      */
     public function isTrailerTraderDomain(string $url): bool
     {
@@ -41,9 +33,6 @@ class TrailerTraderDomain
      * with only the hostname, or with everything (path, query string, etc).
      *
      * We only want to return the host from this method
-     *
-     * @param string $domain
-     * @return string|null
      */
     public function getHostFromDomainString(string $domain): ?string
     {
@@ -66,15 +55,11 @@ class TrailerTraderDomain
     }
 
     /**
-     * Check if the given url is in the domain array
-     *
-     * @param string $url
-     * @param array $domains
-     * @return bool
+     * Check if the given url is in the domain array.
      */
     private function isInDomainArray(string $url, array $domains): bool
     {
-       $host = $this->getHostFromDomainString($url);
+        $host = $this->getHostFromDomainString($url);
 
         if ($host === null) {
             return false;

@@ -47,7 +47,7 @@ abstract class AbstractAverageRequest extends Request implements InsightRequestI
                 self::PERIOD_PER_YEAR,
             ]),
             'from' => $this->validFromDate(),
-            'to'   => $this->validToDate(),
+            'to' => $this->validToDate(),
         ];
     }
 

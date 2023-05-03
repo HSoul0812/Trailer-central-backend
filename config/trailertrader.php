@@ -37,7 +37,7 @@ return [
         'backend' => [
             'localhost',
             'https://trailertrader-staging.trailercentral.com',
-            'https://backend.trailertrader.com'
+            'https://backend.trailertrader.com',
         ],
     ],
 

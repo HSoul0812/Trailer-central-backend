@@ -6,8 +6,6 @@ use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
-use App\Http\Requests\Parts\Type\IndexTypeRequest;
-use App\Http\Requests\Request;
 use App\Http\Requests\SysConfig\IndexSysConfigRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\SysConfig\SysConfigServiceInterface;
@@ -23,6 +21,7 @@ class SysConfigController extends AbstractRestfulController
     public function index(IndexRequestInterface $request): Response
     {
         $config = $this->service->list();
+
         return $this->response->array($config);
     }
 

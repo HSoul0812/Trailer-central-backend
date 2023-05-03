@@ -7,23 +7,19 @@ use App\Notifications\WebsiteUserPasswordReset;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use Illuminate\Auth\Passwords\DatabaseTokenRepository;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PasswordResetService implements PasswordResetServiceInterface
 {
-    private DatabaseTokenRepository $tokenRepository;
-
-    const EXCLUDE_THROTTLE_MAILS = [
+    public const EXCLUDE_THROTTLE_MAILS = [
         'qa-team@trailercentral.com',
     ];
+    private DatabaseTokenRepository $tokenRepository;
 
     public function __construct(
         private WebsiteUserRepositoryInterface $userRepository
-    )
-    {
+    ) {
         $key = config('app.key');
         $config = config('auth.passwords.website_users');
         if (Str::startsWith($key, 'base64:')) {
@@ -39,17 +35,17 @@ class PasswordResetService implements PasswordResetServiceInterface
         );
     }
 
-    public function forgetPassword(string $email, ?string $callback): string {
-
+    public function forgetPassword(string $email, ?string $callback): string
+    {
         $users = $this->userRepository->get(['email' => $email]);
-        if($users->isEmpty()) {
+        if ($users->isEmpty()) {
             throw new NotFoundHttpException("User doesn't exist");
         }
         $user = $users->first();
 
         if (!in_array($email, self::EXCLUDE_THROTTLE_MAILS)) {
             if ($this->tokenRepository->recentlyCreatedToken($user)) {
-                throw new ThrottleRequestsException("Too many requests");
+                throw new ThrottleRequestsException('Too many requests');
             }
         }
 
@@ -60,19 +56,21 @@ class PasswordResetService implements PasswordResetServiceInterface
         return $token;
     }
 
-    public function resetPassword(array $credentials): WebsiteUser {
+    public function resetPassword(array $credentials): WebsiteUser
+    {
         $users = $this->userRepository->get(['email' => $credentials['email']]);
-        if($users->isEmpty()) {
+        if ($users->isEmpty()) {
             throw new NotFoundHttpException("User doesn't exist");
         }
 
         $user = $users->first();
-        if(!$this->tokenRepository->exists($user, $credentials['token'])) {
-            throw new NotFoundHttpException("Token not found");
+        if (!$this->tokenRepository->exists($user, $credentials['token'])) {
+            throw new NotFoundHttpException('Token not found');
         }
         $user->password = $credentials['password'];
         $user->save();
         $this->tokenRepository->delete($user);
+
         return $user;
     }
 }
