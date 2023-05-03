@@ -172,9 +172,8 @@ class Website extends Resource
               gte (is greater than or equal)<br>
               lte (is less than or equal)<br>"
             ),
-
             Textarea::make('Head Scripts', 'HeadScripts')->hideWhenCreating()->hideFromIndex(),
-
+            Textarea::make('Body Scripts', 'BodyScripts')->hideWhenCreating()->hideFromIndex(),
         ];
     }
 
@@ -221,7 +220,7 @@ class Website extends Resource
             $website = $model;
 
             $has_config = false;
-            foreach ( $website->websiteConfigs()->get() as $config ) {
+            foreach ($website->websiteConfigs()->get() as $config) {
                 if ($config->key == 'inventory/source') {
                     $config->value = $request->input('inventory_source');
                     $config->save();
@@ -229,7 +228,7 @@ class Website extends Resource
                 }
             }
 
-            if ( $has_config == false ) {
+            if (!$has_config) {
                 $new_conf = new WebsiteConfig();
                 $new_conf->website_id = $website->id;
                 $new_conf->key = 'inventory/source';
