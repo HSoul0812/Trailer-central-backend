@@ -57,16 +57,20 @@ class IDS extends Command
      */
     public function handle()
     {
+        // Log Start
         $idsExportStartDate = Carbon::now()->subDays(1)->toDateTimeString();
-
-        $this->info("Starting leads export...");
+        $this->info("{$this->command} sarting leads export on {$idsExportStartDate}...");
 
         $this->idsLeadRepository->getAllNotExportedChunked(function($leads) {
             foreach($leads as $lead) {
-                $this->info("Processing lead {$lead->identifier}");
+                $this->info("{$this->command} processing lead {$lead->identifier}");
                 $this->idsService->export($lead);                
             }
         }, $idsExportStartDate);
+
+        // Log End
+        $idsExportEndDate = Carbon::now()->subDays(1)->toDateTimeString();
+        $this->info("{$this->command} finished on {$idsExportEndDate}");
     }
     
 }
