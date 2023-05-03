@@ -8,10 +8,7 @@ use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
 use App\DTOs\Inventory\TcApiResponseInventoryDelete;
 use App\DTOs\Inventory\TcEsInventory;
-use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
-use App\DTOs\Inventory\TcEsResponseInventoryList;
-use App\Models\Geolocation\Geolocation;
 use App\Models\Geolocation\Geolocation;
 use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepositoryInterface;
@@ -26,14 +23,10 @@ use Dingo\Api\Routing\Helpers;
 use Exception;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Collection;
 use JetBrains\PhpStorm\ArrayShape;
 use Log;
-use Log;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class InventoryService implements InventoryServiceInterface

@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\v1\Image\ImageController;
-use App\Http\Controllers\v1\Image\ImageController;
 use App\Http\Controllers\v1\WebsiteUser\AuthController;
 use App\Http\Controllers\v1\WebsiteUser\LocationController;
 use App\Http\Controllers\v1\WebsiteUser\PasswordResetController;
