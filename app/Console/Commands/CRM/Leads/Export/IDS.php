@@ -59,7 +59,7 @@ class IDS extends Command
     {
         // Log Start
         $idsExportStartDate = Carbon::now()->subDays(1)->toDateTimeString();
-        $this->info("{$this->command} sarting leads export on {$idsExportStartDate}...");
+        $this->info("{$this->command} starting leads export on {$idsExportStartDate}...");
 
         $this->idsLeadRepository->getAllNotExportedChunked(function($leads) {
             foreach($leads as $lead) {
