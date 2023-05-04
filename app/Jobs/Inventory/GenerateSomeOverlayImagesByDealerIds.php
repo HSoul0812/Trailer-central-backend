@@ -116,7 +116,8 @@ class GenerateSomeOverlayImagesByDealerIds extends Job
     private function dispatchImageOverlayJobs(LazyCollection $inventories)
     {
         foreach ($inventories as $inventory) {
-            dispatch(new GenerateOverlayImageJob($inventory->inventory_id, false));
+            dispatch(new GenerateOverlayImageJob($inventory->inventory_id, false))
+                ->onQueue(GenerateOverlayImageJob::LOW_PRIORITY_QUEUE);
         }
     }
 }
