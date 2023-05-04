@@ -1348,7 +1348,7 @@ SQL;
                     AND filename_with_overlay IS NULL
 SQL;
 
-        // This query is a good enough approximation, we it is not accurate, it will try to generate overlay any-case
+        // This query is a good enough approximation, it is not accurate, it will try to generate overlay any-case
         // but the job will figure out the image should not have an overlay
         // @todo we will need to ensure all primary images has is_default as 1 (Bulk uploader is setting it wrongly up)
 
