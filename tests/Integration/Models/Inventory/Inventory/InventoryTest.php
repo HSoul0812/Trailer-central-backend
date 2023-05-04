@@ -92,8 +92,8 @@ class InventoryTest extends TestCase
 
         $inventoryGeolocation = $inventory->geolocationPoint();
 
-        $this->assertSame(1234, $inventoryGeolocation->latitude());
-        $this->assertSame(1234, $inventoryGeolocation->longitude());
+        $this->assertSame(1234, $inventoryGeolocation->latitude);
+        $this->assertSame(1234, $inventoryGeolocation->longitude);
 
         $inventory->delete();
         $geolocation->delete();
