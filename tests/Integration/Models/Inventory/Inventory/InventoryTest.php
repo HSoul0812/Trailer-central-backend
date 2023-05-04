@@ -5,6 +5,7 @@ namespace Tests\Integration\Models\Inventory\Inventory;
 use App\Models\Inventory\Attribute;
 use App\Models\Inventory\AttributeValue;
 use App\Models\Inventory\Inventory;
+use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 /**
@@ -17,6 +18,8 @@ use Tests\TestCase;
  */
 class InventoryTest extends TestCase
 {
+    use WithFaker;
+
     /**
      * @covers ::getAttributeById
      *
@@ -29,7 +32,7 @@ class InventoryTest extends TestCase
         $inventory = factory(Inventory::class)->create();
         $attribute = Attribute::create([
             'type' => 'select',
-            'code' => 'testattr',
+            'code' => 'testattr_'.$this->faker->word(),
             'name' => 'Test Attribute',
             'values' => 'slant:Slant,straight:Straight,head_head:Head to Head,reverse_slant:Reverse Slant',
         ]);
