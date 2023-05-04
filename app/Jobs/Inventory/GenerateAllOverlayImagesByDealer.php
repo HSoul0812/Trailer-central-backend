@@ -8,7 +8,7 @@ use App\Models\Inventory\Inventory;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 
-class GenerateOverlayImageJobByDealer extends Job
+class GenerateAllOverlayImagesByDealer extends Job
 {
     /** @var int time in seconds */
     private const WAIT_TIME_IN_SECONDS = 20;
@@ -17,7 +17,7 @@ class GenerateOverlayImageJobByDealer extends Job
     private const MONITORED_QUEUES = [GenerateOverlayImageJob::LOW_PRIORITY_QUEUE];
 
     /** @var string  */
-    private const MONITORED_GROUP = 'inventory-generate-overlays-by-dealer';
+    private const MONITORED_GROUP = 'inventory-generate-all-overlays-by-dealer';
 
     /** @var int The number of times the job may be attempted. */
     public $tries = 1;

@@ -72,7 +72,7 @@ class GenerateOverlayImageJob extends Job
                 'inventory_id' => $inventory->inventory_id, 'dealer_id' => $inventory->dealer_id
             ]);
 
-            $service->tryToIndexAndInvalidateInventory($inventory);
+            $service->tryToIndexAndInvalidateCacheByInventory($inventory);
         }
     }
 }
