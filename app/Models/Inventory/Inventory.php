@@ -17,6 +17,7 @@ use App\Models\Inventory\Geolocation\Point as GeolocationPoint;
 use App\Models\Parts\Vendor;
 use App\Models\Traits\TableAware;
 use App\Models\User\DealerLocation;
+use App\Models\User\Location\Geolocation;
 use App\Models\User\User;
 use App\Traits\CompactHelper;
 use App\Traits\GeospatialHelper;
@@ -809,7 +810,15 @@ class Inventory extends Model
             return new GeolocationPoint((float)$this->latitude, (float)$this->longitude);
         }
 
-        return new GeolocationPoint((float)$this->dealerLocation->latitude, (float)$this->dealerLocation->longitude);
+        if ($this->dealerLocation->latitude && $this->dealerLocation->longitude) {
+            return new GeolocationPoint((float)$this->dealerLocation->latitude, (float)$this->dealerLocation->longitude);
+        }
+
+        if ($geolocation = Geolocation::whereZip($this->dealerLocation->postalcode)->first()) {
+            return new GeolocationPoint((float)$geolocation->latitude, (float)$geolocation->longitude);
+        }
+
+        return new GeolocationPoint(0, 0);
     }
 
     /**
