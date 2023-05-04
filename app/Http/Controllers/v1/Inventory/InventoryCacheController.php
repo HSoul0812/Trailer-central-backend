@@ -9,8 +9,6 @@ use Dingo\Api\Http\Request;
 
 class InventoryCacheController extends RestfulControllerV2
 {
-    private const WAIT_FOR_OVERLAY_GENERATION = true;
-
     /**
      * @var InventoryServiceInterface
      */
@@ -34,10 +32,9 @@ class InventoryCacheController extends RestfulControllerV2
         $request = new InvalidateByDealerRequest($request->all());
 
         if ($request->validate()) {
-            $this->inventoryService->invalidateCacheReindexAndGenerateImageOverlaysByDealerIds(
+            $this->inventoryService->invalidateCacheAndReindexByDealerIds(
                 $request->dealerIds(),
-                ['triggered_by' => $request->header('access-token')],
-                self::WAIT_FOR_OVERLAY_GENERATION
+                ['triggered_by' => $request->header('access-token')]
             );
 
             return $this->acceptedResponse();

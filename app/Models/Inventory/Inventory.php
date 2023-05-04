@@ -188,7 +188,9 @@ class Inventory extends Model
 {
     use TableAware, SpatialTrait, GeospatialHelper, Searchable, CustomSearch;
 
-    /** @var Collection|Category[] */
+    /** @var Collection|Category[] basically this to avoid n+1 query issue when payment calculator is used,
+     *                             there is not way to avoid with eager loading
+     */
     private static $memoizedCategories;
 
     /** @var InventoryElasticSearchConfigurator */
@@ -977,5 +979,10 @@ class Inventory extends Model
                 $query->whereNull('status')
                     ->orWhere('status', '<>', self::STATUS_QUOTE);
             });
+    }
+
+    public static function unMemoizeCategories()
+    {
+        self::$memoizedCategories = null;
     }
 }

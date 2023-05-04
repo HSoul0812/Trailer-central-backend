@@ -107,28 +107,22 @@ interface InventoryServiceInterface
      *      2. Redis Cache invalidation by dealer id
      *
      * @param  array  $dealerIds
+     * @param array $context
      * @return void
      */
-    public function invalidateCacheAndReindexByDealerIds(array $dealerIds): void;
+    public function invalidateCacheAndReindexByDealerIds(array $dealerIds, array $context = []): void;
 
     /**
-     * Method name say nothing about real process order, it is only to be consistent with legacy naming convention
-     *
-     *  Real processing order:
+     * Real processing order:
      *      1. Image overlays generation by dealer id
      *      2. ElasticSearch indexation by dealer location id
      *      3. Redis Cache invalidation by dealer id
      *
      * @param  int[]  $dealerIds
      * @param array $context
-     * @param bool $waitForImageOverlays
      * @return void
      */
-    public function invalidateCacheReindexAndGenerateImageOverlaysByDealerIds(
-        array $dealerIds,
-        array $context = [],
-        bool $waitForImageOverlays = false
-    ): void;
+    public function generateSomeImageOverlaysByDealerIds(array $dealerIds, array $context = []): void;
 
     /**
      * Method name say nothing about real process order, it is only to be consistent with legacy naming convention
@@ -149,12 +143,12 @@ interface InventoryServiceInterface
      * @param  Inventory  $inventory
      * @return void
      */
-    public function tryToIndexAndInvalidateInventory(Inventory $inventory): void;
+    public function tryToIndexAndInvalidateCacheByInventory(Inventory $inventory): void;
 
     /**
      * Will try to generate image overlay only when it is enabled in the application
      */
-    public function tryToGenerateImageOverlays(Inventory $inventory): void;
+    public function tryToGenerateImageOverlaysByInventory(Inventory $inventory): void;
 
     /**
      * Applies overlays to inventory images by inventory id,

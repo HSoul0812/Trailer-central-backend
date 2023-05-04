@@ -2,7 +2,7 @@
 
 namespace App\Services\Inventory;
 
-use App\Jobs\Inventory\GenerateOverlayImageJobByDealer;
+use App\Jobs\Inventory\GenerateAllOverlayImagesByDealer;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Exceptions\File\MissingS3FileException;
 use Illuminate\Support\Facades\Storage;
@@ -179,7 +179,7 @@ class ImageService implements ImageServiceInterface
             // @todo we should implement some mechanism to avoid to dispatch many times
             //      `GenerateOverlayImageJobByDealer` successively because that job will spawn as many
             //      `GenerateOverlayImageJob` jobs as many inventory units has the dealer
-            $this->dispatch((new GenerateOverlayImageJobByDealer($dealer->dealer_id))->delay(2));
+            $this->dispatch((new GenerateAllOverlayImagesByDealer($dealer->dealer_id))->delay(2));
         }
 
         return $dealer;

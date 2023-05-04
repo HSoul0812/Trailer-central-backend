@@ -9,7 +9,7 @@ use App\Exceptions\File\ImageUploadException;
 use App\Exceptions\Inventory\InventoryException;
 use App\Helpers\Inventory\InventoryHelper;
 use App\Jobs\Files\DeleteS3FilesJob;
-use App\Jobs\Inventory\GenerateOverlayAndReIndexInventoriesByDealersJob;
+use App\Jobs\Inventory\GenerateSomeOverlayImagesByDealerIds;
 use App\Jobs\Inventory\ReIndexInventoriesByDealerLocationJob;
 use App\Jobs\Inventory\ReIndexInventoriesByDealersJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
@@ -316,7 +316,7 @@ class InventoryService implements InventoryServiceInterface
 
                 $this->inventoryRepository->commitTransaction();
 
-                $this->tryToGenerateImageOverlays($inventory);
+                $this->tryToGenerateImageOverlaysByInventory($inventory);
 
                 Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
 
@@ -422,7 +422,7 @@ class InventoryService implements InventoryServiceInterface
 
                 $this->inventoryRepository->commitTransaction();
 
-                $this->tryToGenerateImageOverlays($inventory);
+                $this->tryToGenerateImageOverlaysByInventory($inventory);
 
                 Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
 
@@ -763,12 +763,6 @@ class InventoryService implements InventoryServiceInterface
                     Log::channel('inventory-overlays')->error('image overlay error: '.$e->getMessage());
                 }
             });
-
-        if ($overlayConfig['dealer_overlay_enabled'] > User::OVERLAY_ENABLED_NONE) {
-            // to avoid AWS rate limiting
-            // todo: in the future we need to implement a back-off strategy
-            usleep(ImageService::WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS);
-        }
     }
 
     /**
@@ -1396,17 +1390,17 @@ class InventoryService implements InventoryServiceInterface
      *      2. Redis Cache invalidation by dealer id
      *
      * @param  int[]  $dealerIds
+     * @param array $context
      * @return void
      */
-    public function invalidateCacheAndReindexByDealerIds(array $dealerIds): void
+    public function invalidateCacheAndReindexByDealerIds(array $dealerIds, array $context = []): void
     {
-        $this->dispatch(new ReIndexInventoriesByDealersJob($dealerIds));
+        $this->dispatch(new ReIndexInventoriesByDealersJob($dealerIds, $context));
     }
 
     /**
-     * Generate images overlays by dealer id, then reindex the inventory by dealer ids, finally it will invalidate cache by dealer ids
-     *
-     * Method name say nothing about real process order, it is only to be consistent with legacy naming convention
+     * Generate some images overlays by dealer id, then reindex the inventory by dealer ids,
+     * finally it will invalidate cache by dealer ids
      *
      * Real processing order:
      *      1. Image overlays generation by dealer id
@@ -1415,16 +1409,11 @@ class InventoryService implements InventoryServiceInterface
      *
      * @param  int[]  $dealerIds
      * @param array $context
-     * @param bool $waitForImageOverlays
      * @return void
      */
-    public function invalidateCacheReindexAndGenerateImageOverlaysByDealerIds(
-        array $dealerIds,
-        array $context = [],
-        bool $waitForImageOverlays = false
-    ): void
+    public function generateSomeImageOverlaysByDealerIds(array $dealerIds, array $context = []): void
     {
-        $this->dispatch(new GenerateOverlayAndReIndexInventoriesByDealersJob($dealerIds, $context, $waitForImageOverlays));
+        $this->dispatch(new GenerateSomeOverlayImagesByDealerIds($dealerIds, $context));
     }
 
     /**
@@ -1449,7 +1438,7 @@ class InventoryService implements InventoryServiceInterface
      * @param  Inventory  $inventory
      * @return void
      */
-    public function tryToIndexAndInvalidateInventory(Inventory $inventory): void
+    public function tryToIndexAndInvalidateCacheByInventory(Inventory $inventory): void
     {
         if (Inventory::isSearchSyncingEnabled()) {
             $inventory->searchable();
@@ -1469,7 +1458,7 @@ class InventoryService implements InventoryServiceInterface
     /**
      * Will try to generate image overlay only when it is enabled in the application
      */
-    public function tryToGenerateImageOverlays(Inventory $inventory): void
+    public function tryToGenerateImageOverlaysByInventory(Inventory $inventory): void
     {
         if (Inventory::isOverlayGenerationEnabled()) {
 
