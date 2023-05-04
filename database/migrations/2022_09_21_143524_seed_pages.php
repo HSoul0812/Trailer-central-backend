@@ -7,14 +7,12 @@ class SeedPages extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up(): void
     {
         $seed = [
             '--force' => true,
-            '--class' => PageSeeder::class
+            '--class' => PageSeeder::class,
         ];
 
         \Artisan::call('db:seed', $seed);

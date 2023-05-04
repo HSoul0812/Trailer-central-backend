@@ -11,9 +11,9 @@ class PageTransformer extends TransformerAbstract
     public function transform($page): array
     {
         return [
-             'id'          => (int) $page->id,
-             'name'        => $page->name,
-             'url'         => $page->url
+             'id' => (int) $page->id,
+             'name' => $page->name,
+             'url' => $page->url,
          ];
     }
 }

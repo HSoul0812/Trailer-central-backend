@@ -14,6 +14,7 @@ use Database\Factories\Inventory\InventoryLogFactory;
 use Database\Seeders\WithArtifacts;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use JsonException;
 
 /**
  * This seeder will be run under demand by the tests itself, so please do not add to the main DataSeeder.
@@ -26,7 +27,7 @@ class AveragePriceSeeder extends Seeder
      * Seeds the inventory price flow for 4 manufactures (2 brands per manufacturer), which 3 of them will keep
      * their inventories 5 days and KZ manufacturer will keep their stock 15 days.
      *
-     * @throws \JsonException when the json cannot be parsed
+     * @throws JsonException when the json cannot be parsed
      */
     public function run(): void
     {
@@ -101,25 +102,25 @@ class AveragePriceSeeder extends Seeder
         foreach ($manufacturer['brands'] as $index => $brand) { // 2 brands
             /** @var InventoryLog[] $inventories */
             $inventories = $factory->count($inventoriesPerBrand[$index])->create([
-                'brand'        => $brand,
+                'brand' => $brand,
                 'manufacturer' => $manufacturer['name'],
-                'price'        => $pricesPerBrand[$index],
-                'event'        => InventoryLog::EVENT_CREATED,
-                'status'       => InventoryLog::STATUS_AVAILABLE,
-                'created_at'   => $date->toDateTimeString(),
+                'price' => $pricesPerBrand[$index],
+                'event' => InventoryLog::EVENT_CREATED,
+                'status' => InventoryLog::STATUS_AVAILABLE,
+                'created_at' => $date->toDateTimeString(),
             ]);
 
             foreach ($inventories as $inventory) {
                 // suddenly that inventory suffered a price down 'X' days after its creation
                 $factory->create([
                     'trailercentral_id' => $inventory->trailercentral_id,
-                    'event'             => InventoryLog::EVENT_PRICE_CHANGED,
-                    'status'            => $inventory->status,
-                    'vin'               => $inventory->vin,
-                    'brand'             => $inventory->brand,
-                    'manufacturer'      => $inventory->manufacturer,
-                    'price'             => $inventory->price - 100,
-                    'created_at'        => $date->addDays($daysWithSamePrice)->toDateTimeString(),
+                    'event' => InventoryLog::EVENT_PRICE_CHANGED,
+                    'status' => $inventory->status,
+                    'vin' => $inventory->vin,
+                    'brand' => $inventory->brand,
+                    'manufacturer' => $inventory->manufacturer,
+                    'price' => $inventory->price - 100,
+                    'created_at' => $date->addDays($daysWithSamePrice)->toDateTimeString(),
                 ]
                 );
             }

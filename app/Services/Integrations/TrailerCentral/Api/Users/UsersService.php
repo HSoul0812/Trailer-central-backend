@@ -6,6 +6,7 @@ use App\DTOs\User\TcApiResponseUser;
 use App\DTOs\User\TcApiResponseUserLocation;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\Exception\GuzzleException;
+use Log;
 
 class UsersService implements UsersServiceInterface
 {
@@ -20,8 +21,9 @@ class UsersService implements UsersServiceInterface
     public function create(array $attributes): TcApiResponseUser
     {
         $responseContent = $this->handleHttpRequest('POST', $this->endpointUrl, [
-            'json' => $attributes
+            'json' => $attributes,
         ]);
+
         return TcApiResponseUser::fromData($responseContent['data']);
     }
 
@@ -29,31 +31,36 @@ class UsersService implements UsersServiceInterface
     {
         $responseContent = $this->handleHttpRequest('GET', $this->endpointUrl, [
             'query' => [
-                'email' => $email
-            ]
+                'email' => $email,
+            ],
         ]);
+
         return TcApiResponseUser::fromData($responseContent);
     }
 
-    public function createLocation(array $location): TcApiResponseUserLocation {
+    public function createLocation(array $location): TcApiResponseUserLocation
+    {
         $responseContent = $this->handleHttpRequest(
             'PUT',
-            config('services.trailercentral.api') . 'user' . "/dealer-location",
+            config('services.trailercentral.api') . 'user/dealer-location',
             [
-                'json' => $location
+                'json' => $location,
             ]
         );
+
         return TcApiResponseUserLocation::fromData($responseContent);
     }
 
-    public function updateLocation(int $locationId, array $location): TcApiResponseUserLocation {
+    public function updateLocation(int $locationId, array $location): TcApiResponseUserLocation
+    {
         $responseContent = $this->handleHttpRequest(
             'POST',
             config('services.trailercentral.api') . 'user' . "/dealer-location/$locationId",
             [
-                'json' => $location
+                'json' => $location,
             ]
         );
+
         return TcApiResponseUserLocation::fromData($responseContent);
     }
 
@@ -61,7 +68,7 @@ class UsersService implements UsersServiceInterface
     {
         $accessToken = request()->header('access-token');
         $options['headers'] = [
-            'access-token' => $accessToken
+            'access-token' => $accessToken,
         ];
 
         try {
@@ -69,8 +76,8 @@ class UsersService implements UsersServiceInterface
 
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
-            \Log::info('Exception was thrown while calling TrailerCentral API.');
-            \Log::info($e->getCode() . ': ' . $e->getMessage());
+            Log::info('Exception was thrown while calling TrailerCentral API.');
+            Log::info($e->getCode() . ': ' . $e->getMessage());
 
             throw $e;
         }

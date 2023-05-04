@@ -10,7 +10,8 @@ use League\Fractal\TransformerAbstract;
 
 class TomTomGeocodeResponseTransformer extends TransformerAbstract
 {
-    #[Pure] public function transform(TomTomGeocodeResponse $response): array
+    #[Pure]
+    public function transform(TomTomGeocodeResponse $response): array
     {
         $itemTransformer = new TomTomGeocodeResponseItemTransformer();
         $data = [];

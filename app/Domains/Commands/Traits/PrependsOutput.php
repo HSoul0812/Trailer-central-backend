@@ -18,4 +18,3 @@ trait PrependsOutput
         return $string;
     }
 }
-

@@ -38,18 +38,11 @@ class PopulateMissingWebsiteUserIdAction
         });
     }
 
-    /**
-     * @return Carbon
-     */
     public function getFrom(): Carbon
     {
         return $this->from;
     }
 
-    /**
-     * @param Carbon $from
-     * @return PopulateMissingWebsiteUserIdAction
-     */
     public function setFrom(Carbon $from): PopulateMissingWebsiteUserIdAction
     {
         $this->from = $from;
@@ -57,18 +50,11 @@ class PopulateMissingWebsiteUserIdAction
         return $this;
     }
 
-    /**
-     * @return Carbon
-     */
     public function getTo(): Carbon
     {
         return $this->to;
     }
 
-    /**
-     * @param Carbon $to
-     * @return PopulateMissingWebsiteUserIdAction
-     */
     public function setTo(Carbon $to): PopulateMissingWebsiteUserIdAction
     {
         $this->to = $to;

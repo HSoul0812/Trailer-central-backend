@@ -18,7 +18,8 @@ class City implements Arrayable
     public string $countryISO;
     public string $network;
 
-    public static function fromGeoIP2City(\GeoIp2\Model\City $city) {
+    public static function fromGeoIP2City(\GeoIp2\Model\City $city)
+    {
         $cityData = new self();
         $cityData->city = $city->city->name;
         $cityData->postalcode = $city->postal->code;
@@ -29,6 +30,7 @@ class City implements Arrayable
         $cityData->country = $city->country->name;
         $cityData->countryISO = $city->country->isoCode;
         $cityData->network = $city->traits->network;
+
         return $cityData;
     }
 }

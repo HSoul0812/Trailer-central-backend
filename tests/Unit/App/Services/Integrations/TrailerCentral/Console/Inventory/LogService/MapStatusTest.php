@@ -51,18 +51,19 @@ class MapStatusTest extends LogServiceTestCase
      * Examples of all available status which can be mapped.
      *
      * @return array<string, array<?int, string>>
+     *
      * @noinspection PhpArrayShapeAttributeCanBeAddedInspection
      */
     public function statusesProvider(): array
     {
         return [             // ?int $statusToMap, string $expectedStatus
-            'null'         => [null, InventoryLog::STATUS_AVAILABLE],
+            'null' => [null, InventoryLog::STATUS_AVAILABLE],
             'out of range' => [10, InventoryLog::STATUS_AVAILABLE],
-            'when 2'       => [2, InventoryLog::STATUS_SOLD],
-            'when 3'       => [3, InventoryLog::STATUS_SOLD],
-            'when 4'       => [4, InventoryLog::STATUS_SOLD],
-            'when 5'       => [5, InventoryLog::STATUS_SOLD],
-            'when 6'       => [6, InventoryLog::STATUS_SOLD],
+            'when 2' => [2, InventoryLog::STATUS_SOLD],
+            'when 3' => [3, InventoryLog::STATUS_SOLD],
+            'when 4' => [4, InventoryLog::STATUS_SOLD],
+            'when 5' => [5, InventoryLog::STATUS_SOLD],
+            'when 6' => [6, InventoryLog::STATUS_SOLD],
         ];
     }
 }

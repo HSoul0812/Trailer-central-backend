@@ -4,6 +4,7 @@ namespace App\Models\WebsiteUser;
 
 use App\Notifications\WebsiteUserPasswordReset;
 use App\Notifications\WebsiteUserVerifyEmail;
+use Hash;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
@@ -14,10 +15,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class WebsiteUser extends Model implements
-    CanResetPasswordContract, MustVerifyEmailContract, JWTSubject, AuthenticatableContract
+class WebsiteUser extends Model implements CanResetPasswordContract, MustVerifyEmailContract, JWTSubject, AuthenticatableContract
 {
-    use HasFactory, Notifiable, MustVerifyEmail, Authenticatable;
+    use HasFactory;
+    use Notifiable;
+    use MustVerifyEmail;
+    use Authenticatable;
     protected $fillable = [
         'first_name',
         'last_name',
@@ -43,7 +46,6 @@ class WebsiteUser extends Model implements
         return $this->email;
     }
 
-
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new WebsiteUserPasswordReset($token));
@@ -64,7 +66,8 @@ class WebsiteUser extends Model implements
         return [];
     }
 
-    public function setPasswordAttribute(string $password) {
-        $this->attributes['password'] = \Hash::make($password);
+    public function setPasswordAttribute(string $password)
+    {
+        $this->attributes['password'] = Hash::make($password);
     }
 }

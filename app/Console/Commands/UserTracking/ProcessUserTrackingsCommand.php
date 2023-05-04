@@ -13,7 +13,7 @@ class ProcessUserTrackingsCommand extends Command
 
     public function handle(): int
     {
-        /**
+        /*
          * The order of command to run is very important, we need to make sure that we populate
          * any missing information (like user location) before we start processing the reports
          */

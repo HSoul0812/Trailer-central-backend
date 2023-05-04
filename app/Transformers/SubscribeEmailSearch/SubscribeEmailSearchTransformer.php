@@ -11,11 +11,11 @@ class SubscribeEmailSearchTransformer extends TransformerAbstract
     public function transform($subscribeEmail): array
     {
         return [
-             'id'                     => (int) $subscribeEmail->id,
-             'email'                  => $subscribeEmail->email,
-             'url'                    => $subscribeEmail->url,
-             'subscribe_email_sent'   => $subscribeEmail->subscribe_email_sent,
-             'created_at'             => $subscribeEmail->created_at,
+             'id' => (int) $subscribeEmail->id,
+             'email' => $subscribeEmail->email,
+             'url' => $subscribeEmail->url,
+             'subscribe_email_sent' => $subscribeEmail->subscribe_email_sent,
+             'created_at' => $subscribeEmail->created_at,
          ];
     }
 }

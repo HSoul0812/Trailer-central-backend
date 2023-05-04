@@ -2,15 +2,15 @@
 
 namespace App\Traits;
 
-use ReflectionClass;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use ReflectionClass;
 
-trait FieldTypeTrait {
-
-    protected function getType(String $field, ReflectionClass $reflectedClass = null)
+trait FieldTypeTrait
+{
+    protected function getType(string $field, ReflectionClass $reflectedClass = null)
     {
-        if(is_null($reflectedClass)) {
+        if (is_null($reflectedClass)) {
             $reflectedClass = new ReflectionClass($this);
         }
 
@@ -21,8 +21,9 @@ trait FieldTypeTrait {
         return null;
     }
 
-    protected function enumValue(String $field) {
-        if($this->isEnum($field)) {
+    protected function enumValue(string $field)
+    {
+        if ($this->isEnum($field)) {
             throw new InvalidArgumentException("'$field' is not an enum");
         }
 
@@ -32,11 +33,11 @@ trait FieldTypeTrait {
         return new $enumClass($this->{$field});
     }
 
-    protected function isEnum(String $field)
+    protected function isEnum(string $field)
     {
         $type = $this->getType($field);
 
-        if(!is_object($type)) {
+        if (!is_object($type)) {
             return false;
         }
 
@@ -61,19 +62,19 @@ trait FieldTypeTrait {
         foreach ($matches[1] as $index => $value) {
             $results[] = [
                 'namespace' => $value,
-                'alias' => isset($matches[2][$index]) ? str_replace(' as ', '', $matches[2][$index]) : null
+                'alias' => isset($matches[2][$index]) ? str_replace(' as ', '', $matches[2][$index]) : null,
             ];
         }
 
         return $results;
     }
 
-    private function getFieldType(String $field, ReflectionClass $reflectedClass)
+    private function getFieldType(string $field, ReflectionClass $reflectedClass)
     {
         return $reflectedClass->getProperty($field)->getType()->getName();
     }
 
-    private function getFieldTypeFromDoc(String $field, ReflectionClass $reflectedClass)
+    private function getFieldTypeFromDoc(string $field, ReflectionClass $reflectedClass)
     {
         $docComment = $reflectedClass->getProperty($field)->getDocComment();
         $type = $this->getFieldTypeByFieldDocComment($docComment);
@@ -81,7 +82,7 @@ trait FieldTypeTrait {
         if (!is_object($type)) {
             $fromClass = $this->getTypeByClassDocComment($field, $reflectedClass->getDocComment());
 
-            if(is_object($fromClass)) {
+            if (is_object($fromClass)) {
                 return $fromClass;
             }
         }
@@ -89,12 +90,11 @@ trait FieldTypeTrait {
         return $type;
     }
 
-    private function getFieldTypeByFieldDocComment(String $docComment)
+    private function getFieldTypeByFieldDocComment(string $docComment)
     {
         $matches = [];
 
         if (preg_match("/\@var (\w+)(\[\])*/", $docComment, $matches) === 1) {
-
             if (count($matches) > 0) {
                 $type = $matches[1];
                 $isArray = isset($matches[2]);
@@ -103,7 +103,7 @@ trait FieldTypeTrait {
                 if (class_exists($fullyQualifiedName)) {
                     return (object) [
                         'name' => $fullyQualifiedName,
-                        'array' => $isArray
+                        'array' => $isArray,
                     ];
                 }
             }
@@ -112,7 +112,7 @@ trait FieldTypeTrait {
         }
     }
 
-    private function getTypeByClassDocComment(String $field, String $docComment)
+    private function getTypeByClassDocComment(string $field, string $docComment)
     {
         $matches = [];
 
@@ -121,7 +121,7 @@ trait FieldTypeTrait {
             $isArray = false;
 
             foreach ($matches[2] as $index => $value) {
-                if($value == $field) {
+                if ($value == $field) {
                     $type = $matches[1][$index];
                     $isArray = Str::endsWith($type, '[]');
                     $type = str_replace('[]', '', $type);
@@ -134,7 +134,7 @@ trait FieldTypeTrait {
                 if (class_exists($fullyQualifiedName)) {
                     return (object) [
                         'name' => $fullyQualifiedName,
-                        'array' => $isArray
+                        'array' => $isArray,
                     ];
                 }
             }

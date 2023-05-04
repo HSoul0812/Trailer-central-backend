@@ -12,7 +12,7 @@ use Storage;
 
 class InventoryViewAndImpressionCsvExporter
 {
-    const HEADERS = [
+    public const HEADERS = [
         'Dealer Id',
         'Inventory Id',
         'Domain',
@@ -20,7 +20,7 @@ class InventoryViewAndImpressionCsvExporter
         'Displayed On',
     ];
 
-    const PAGE_NAME_MAPPINGS = [
+    public const PAGE_NAME_MAPPINGS = [
         GetPageNameFromUrlAction::PAGE_NAMES['TT_PLP'] => 'PLP',
         GetPageNameFromUrlAction::PAGE_NAMES['TT_PDP'] => 'PDP',
         GetPageNameFromUrlAction::PAGE_NAMES['TT_DEALER'] => 'DEALER',
@@ -49,7 +49,7 @@ class InventoryViewAndImpressionCsvExporter
         // Create a file using Laravel filesystem, so we don't
         // need to deal with creating missing folders
         $dateString = $this->from->format('Y-m-d');
-        $filename = $this->filename ?: "inventory-view-and-impression-" . $dateString . '.csv';
+        $filename = $this->filename ?: 'inventory-view-and-impression-' . $dateString . '.csv';
         $this->disk->put($filename, '');
 
         // Open the file resource
@@ -78,18 +78,11 @@ class InventoryViewAndImpressionCsvExporter
         return $filePath;
     }
 
-    /**
-     * @return int
-     */
     public function getChunkSize(): int
     {
         return $this->chunkSize;
     }
 
-    /**
-     * @param int $chunkSize
-     * @return InventoryViewAndImpressionCsvExporter
-     */
     public function setChunkSize(int $chunkSize): InventoryViewAndImpressionCsvExporter
     {
         $this->chunkSize = $chunkSize;
@@ -97,18 +90,11 @@ class InventoryViewAndImpressionCsvExporter
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getFilename(): string
     {
         return $this->filename;
     }
 
-    /**
-     * @param string $filename
-     * @return InventoryViewAndImpressionCsvExporter
-     */
     public function setFilename(string $filename): InventoryViewAndImpressionCsvExporter
     {
         $this->filename = $filename;
@@ -116,18 +102,11 @@ class InventoryViewAndImpressionCsvExporter
         return $this;
     }
 
-    /**
-     * @return Carbon
-     */
     public function getFrom(): Carbon
     {
         return $this->from;
     }
 
-    /**
-     * @param Carbon $from
-     * @return InventoryViewAndImpressionCsvExporter
-     */
     public function setFrom(Carbon $from): InventoryViewAndImpressionCsvExporter
     {
         $this->from = $from;
@@ -135,18 +114,11 @@ class InventoryViewAndImpressionCsvExporter
         return $this;
     }
 
-    /**
-     * @return Carbon
-     */
     public function getTo(): Carbon
     {
         return $this->to;
     }
 
-    /**
-     * @param Carbon $to
-     * @return InventoryViewAndImpressionCsvExporter
-     */
     public function setTo(Carbon $to): InventoryViewAndImpressionCsvExporter
     {
         $this->to = $to;
@@ -154,18 +126,11 @@ class InventoryViewAndImpressionCsvExporter
         return $this;
     }
 
-    /**
-     * @return FilesystemAdapter
-     */
     public function getDisk(): FilesystemAdapter
     {
         return $this->disk;
     }
 
-    /**
-     * @param FilesystemAdapter $disk
-     * @return InventoryViewAndImpressionCsvExporter
-     */
     public function setDisk(FilesystemAdapter $disk): InventoryViewAndImpressionCsvExporter
     {
         $this->disk = $disk;

@@ -10,7 +10,7 @@ use Tests\Common\IntegrationTestCase;
 
 class UserTrackingTest extends IntegrationTestCase
 {
-    const USER_TRACK_ENDPOINT = '/api/user/track';
+    public const USER_TRACK_ENDPOINT = '/api/user/track';
 
     public function testItThrowsValidationErrorWithBadRequest()
     {
@@ -72,7 +72,7 @@ class UserTrackingTest extends IntegrationTestCase
                     'visitor_id',
                     'event',
                     'url',
-                    'meta'
+                    'meta',
                 ]),
                 headers: [
                     'REMOTE_ADDR' => $ipAddress,

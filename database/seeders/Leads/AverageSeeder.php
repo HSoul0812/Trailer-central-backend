@@ -14,13 +14,14 @@ use Database\Factories\Leads\LeadLogFactory;
 use Database\Seeders\WithArtifacts;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use JsonException;
 
 class AverageSeeder extends Seeder
 {
     use WithArtifacts;
 
     /**
-     * @throws \JsonException when the json cannot be parsed
+     * @throws JsonException when the json cannot be parsed
      */
     public function run(): void
     {
@@ -72,9 +73,9 @@ class AverageSeeder extends Seeder
         foreach ($manufacturer['brands'] as $index => $brand) { // 2 brands
             /* @var LeadLog[] $leads */
             $factory->count($inventoriesPerBrand[$index])->create([
-                'brand'        => $brand,
+                'brand' => $brand,
                 'manufacturer' => $manufacturer['name'],
-                'created_at'   => $date->toDateTimeString(),
+                'created_at' => $date->toDateTimeString(),
                 'submitted_at' => $date->toDateTimeString(),
             ]);
         }

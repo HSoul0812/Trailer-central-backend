@@ -1,19 +1,21 @@
 <?php
+
 namespace App\DTOs\Inventory;
 
 use App\Traits\TypedPropertyTrait;
 use Illuminate\Contracts\Support\Arrayable;
 
-class TcEsInventory implements Arrayable {
+class TcEsInventory implements Arrayable
+{
     use \App\DTOs\Arrayable;
     use TypedPropertyTrait;
 
-    const IMAGE_BASE_URL = 'https://dealer-cdn.com';
-    const FEATURE_LIST_MAP = [
+    public const IMAGE_BASE_URL = 'https://dealer-cdn.com';
+    public const FEATURE_LIST_MAP = [
         'floor_plan' => ['feature_name' => 'Floor Plans', 'feature_list_id' => 10],
         'stall_tack' => ['feature_name' => 'Stall & Tack Features', 'feature_list_id' => 9],
         'lq' => ['feature_name' => 'LQ Features', 'feature_list_id' => 8],
-        'doors_windows_ramps' => ['feature_name' => 'Doors, Windows and Ramps', 'feature_list_id' => 7]
+        'doors_windows_ramps' => ['feature_name' => 'Doors, Windows and Ramps', 'feature_list_id' => 7],
     ];
 
     public string $id;
@@ -88,34 +90,35 @@ class TcEsInventory implements Arrayable {
     public ?array $images_secondary;
     public ?float $gvwr;
 
-
-    public static function imageToAbsoluteUrl($image) {
-        if(str_starts_with($image, '/')) {
+    public static function imageToAbsoluteUrl($image)
+    {
+        if (str_starts_with($image, '/')) {
             return self::IMAGE_BASE_URL . $image;
         } else {
             return $image;
         }
     }
 
-    public static function fromData(array $data):self {
+    public static function fromData(array $data): self
+    {
         $obj = new self();
         $dealerData = [];
         $locationData = [];
-        $featureList = [];;
-        foreach($data as $key => $value) {
+        $featureList = [];
+        foreach ($data as $key => $value) {
             $uKey = camel_case_2_underscore($key);
-            if(str_starts_with($uKey, 'dealer.')) {
+            if (str_starts_with($uKey, 'dealer.')) {
                 $dealerData[substr($uKey, 7)] = $value;
-            } else if(str_starts_with($uKey, 'feature_list.')) {
+            } elseif (str_starts_with($uKey, 'feature_list.')) {
                 $featureList[substr($uKey, 13)] = $value;
-            } else if(str_starts_with($uKey, 'location.')) {
+            } elseif (str_starts_with($uKey, 'location.')) {
                 $locationData[substr($uKey, 9)] = $value;
-            } else if($uKey === 'image') {
+            } elseif ($uKey === 'image') {
                 $obj->image = self::imageToAbsoluteUrl($value);
-            } else if($uKey === 'images' || $uKey === 'images_secondary') {
+            } elseif ($uKey === 'images' || $uKey === 'images_secondary') {
                 $obj->$uKey = [];
                 foreach ($value as $image) {
-                    ($obj->$uKey)[] = self::imageToAbsoluteUrl($image);
+                    $obj->$uKey[] = self::imageToAbsoluteUrl($image);
                 }
             } else {
                 $obj->setTypedProperty($uKey, $value);
@@ -124,15 +127,17 @@ class TcEsInventory implements Arrayable {
         $obj->feature_list = self::expandCategorizedFeatureList($featureList);
         $obj->dealer = TcEsInventoryDealer::fromData($dealerData);
         $obj->location = TcEsInventoryLocation::fromData($locationData);
+
         return $obj;
     }
 
     private static function expandCategorizedFeatureList(array $featureList): array
     {
         $result = [];
-        foreach($featureList as $sub) {
+        foreach ($featureList as $sub) {
             $result = array_merge($result, $sub);
         }
+
         return $result;
     }
 }

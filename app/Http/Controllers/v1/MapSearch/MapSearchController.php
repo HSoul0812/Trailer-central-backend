@@ -19,10 +19,8 @@ use Str;
 
 class MapSearchController extends AbstractRestfulController
 {
-    const MAP_SEARCH_CACHE_EXPIRY = 86400;
-    /**
-     * @param MapSearchServiceInterface $mapSearchService
-     */
+    public const MAP_SEARCH_CACHE_EXPIRY = 86400;
+
     public function __construct(private MapSearchServiceInterface $mapSearchService)
     {
         parent::__construct();
@@ -36,12 +34,13 @@ class MapSearchController extends AbstractRestfulController
 
         $queryText = $request->input('q');
         $json = Cache::rememberWithNewTTL("mapsearch/autocomplete/$queryText", self::MAP_SEARCH_CACHE_EXPIRY,
-            function () use ($queryText){
+            function () use ($queryText) {
                 $data = $this->mapSearchService->autocomplete($queryText);
                 $transformer = $this->mapSearchService->getTransformer(get_class($data));
 
                 return $this->response->item($data, $transformer)->morph()->getContent();
             });
+
         return new Response($json);
     }
 
@@ -63,6 +62,7 @@ class MapSearchController extends AbstractRestfulController
             function () use ($queryText) {
                 $data = $this->mapSearchService->geocode($queryText);
                 $transformer = $this->mapSearchService->getTransformer(get_class($data));
+
                 return $this->response->item($data, $transformer)->morph()->getContent();
             });
 
@@ -81,8 +81,10 @@ class MapSearchController extends AbstractRestfulController
             function () use ($lat, $lng) {
                 $data = $this->mapSearchService->reverse($lat, $lng);
                 $transformer = $this->mapSearchService->getTransformer(get_class($data));
+
                 return $this->response->item($data, $transformer)->morph()->getContent();
             });
+
         return new Response($json);
     }
 

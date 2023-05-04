@@ -24,7 +24,7 @@ class WebsiteUserTransformer extends TransformerAbstract
             'registration_source' => $user->registration_source,
             'tc_user_location_id' => $user->tc_user_location_id,
             'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at
+            'updated_at' => $user->updated_at,
         ];
     }
 }

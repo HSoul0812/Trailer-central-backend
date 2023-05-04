@@ -2,8 +2,6 @@
 
 namespace App\DTOs\MapSearch;
 
-use JetBrains\PhpStorm\Pure;
-
 class GoogleGeocodeResponse
 {
     public array $results;

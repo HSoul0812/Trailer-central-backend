@@ -52,11 +52,11 @@ class ApplyToChunkTest extends SyncServiceTestCase
         $dependencies['logger']->expects($this->once())
             ->method('info')
             ->with(sprintf(
-                    '[SyncService::%s] %d records imported on process %d',
-                    $processName,
-                    $collection->count(),
-                    $processId
-                )
+                '[SyncService::%s] %d records imported on process %d',
+                $processName,
+                $collection->count(),
+                $processId
+            )
             );
 
         $serviceMock = $this->getMockForAbstractClass(AbstractSyncService::class, $dependencies);

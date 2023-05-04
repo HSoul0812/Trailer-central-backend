@@ -8,12 +8,10 @@ class AddTcUserLocationIdToWebsiteUsersTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up()
     {
-        if(!Schema::hasColumn('website_users', 'tc_user_location_id')) {
+        if (!Schema::hasColumn('website_users', 'tc_user_location_id')) {
             Schema::table('website_users', function (Blueprint $table) {
                 $table->unsignedInteger('tc_user_location_id')->nullable();
             });
@@ -22,8 +20,6 @@ class AddTcUserLocationIdToWebsiteUsersTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {

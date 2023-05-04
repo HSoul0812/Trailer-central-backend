@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class BannerSeeder extends Seeder
 {
-    const BANNER_CONFIGS = [
+    public const BANNER_CONFIGS = [
         ['banner/lamar trailers/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-LamarBanners-v1_Desktop-20220505-113050.png'],
         ['banner/lamar trailers/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-LamarBanners-v1_Mobile-20220505-113050.png'],
         ['banner/carry-on/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-CarryOnBanners-v1_Desktop-20220505-113414.png'],
@@ -54,21 +54,20 @@ class BannerSeeder extends Seeder
 
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
     public function run()
     {
         $this->cleanTable();
-        foreach(self::BANNER_CONFIGS as $config) {
+        foreach (self::BANNER_CONFIGS as $config) {
             DB::table('sys_configs')->insert([
                 'key' => $config[0],
-                'value' => $config[1]
+                'value' => $config[1],
             ]);
         }
     }
 
-    private function cleanTable() {
+    private function cleanTable()
+    {
         DB::table('sys_configs')->where('key', 'LIKE', 'banner/%')->delete();
     }
 }

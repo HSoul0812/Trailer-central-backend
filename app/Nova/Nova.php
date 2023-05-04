@@ -18,7 +18,7 @@ class Nova extends \Laravel\Nova\Nova
     {
         return collect(static::$dashboards)
             ->filter->authorize($request)
-            ->filter(fn ($dash)       => $dash->uriKey() === $dashboard)
+            ->filter(fn ($dash) => $dash->uriKey() === $dashboard)
             ->flatMap(fn ($dashboard) => app()->call([$dashboard, 'cards']))
             ->filter->authorize($request)
             ->values();

@@ -19,8 +19,7 @@ class TypeController extends AbstractRestfulController
     /**
      * Create a new controller instance.
      *
-     * @param TypeRepositoryInterface   $type
-     * @param TypeTransformer $typesTransformer
+     * @param TypeRepositoryInterface $type
      */
     public function __construct(TypeRepositoryInterface $types, TypeTransformer $typesTransformer)
     {

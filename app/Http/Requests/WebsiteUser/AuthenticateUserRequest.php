@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\WebsiteUser;
 
-use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\Request;
 
 class AuthenticateUserRequest extends Request implements AuthenticateRequestInterface
@@ -10,6 +9,6 @@ class AuthenticateUserRequest extends Request implements AuthenticateRequestInte
     protected array $rules = [
         'email' => 'required|email',
         'password' => 'required|string',
-        'captcha' => 'required|string'
+        'captcha' => 'required|string',
     ];
 }

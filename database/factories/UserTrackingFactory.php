@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Domains\UserTracking\Types\UserTrackingEvent;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Str;
 
 class UserTrackingFactory extends Factory
 {
@@ -33,16 +32,16 @@ class UserTrackingFactory extends Factory
 
     public function hasUSIpAddress(): Factory
     {
-        return $this->state(function(array $attributes) {
-           return [
-               'ip_address' => '194.59.12.191',
-           ];
+        return $this->state(function (array $attributes) {
+            return [
+                'ip_address' => '194.59.12.191',
+            ];
         });
     }
 
     public function locationUnprocessed(): Factory
     {
-        return $this->state(function(array $attributes) {
+        return $this->state(function (array $attributes) {
             return [
                 'location_processed' => false,
             ];
@@ -51,21 +50,21 @@ class UserTrackingFactory extends Factory
 
     public function locationProcessed(): Factory
     {
-        return $this->state(function(array $attributes) {
-           return [
-               'location_processed' => true,
-           ];
+        return $this->state(function (array $attributes) {
+            return [
+                'location_processed' => true,
+            ];
         });
     }
 
     public function noLocationData(): Factory
     {
-        return $this->state(function(array $attributes) {
-           return [
-               'city' => null,
-               'state' => null,
-               'country' => null,
-           ];
+        return $this->state(function (array $attributes) {
+            return [
+                'city' => null,
+                'state' => null,
+                'country' => null,
+            ];
         });
     }
 }

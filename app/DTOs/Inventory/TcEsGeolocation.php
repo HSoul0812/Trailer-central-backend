@@ -14,11 +14,13 @@ class TcEsGeolocation implements Arrayable
     public float $lat;
     public float $lon;
 
-    #[Pure] public static function fromData(array $geo): self
+    #[Pure]
+    public static function fromData(array $geo): self
     {
         $obj = new self();
         $obj->setTypedProperty('lat', $geo['lat']);
         $obj->setTypedProperty('lon', $geo['lon']);
+
         return $obj;
     }
 }

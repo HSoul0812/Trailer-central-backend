@@ -42,7 +42,7 @@ class FixViewInventoryStockAveragePerDay extends Migration
             GROUP BY s.day, m.manufacturer
             ORDER BY s.day, m.manufacturer;
 SQL
-);
+        );
     }
 
     /**

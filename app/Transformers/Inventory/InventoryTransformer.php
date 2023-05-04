@@ -34,7 +34,7 @@ class InventoryTransformer extends TransformerAbstract
         'height' => 'string',
         'show_on_ksl' => 'bool',
         'show_on_racingjunk' => 'bool',
-        'show_on_website'=> 'bool',
+        'show_on_website' => 'bool',
         'dealer' => ['name' => 'string', 'email' => 'string', 'is_private' => 'bool'],
         'location' => [
             'name' => 'string',
@@ -47,7 +47,7 @@ class InventoryTransformer extends TransformerAbstract
             'region' => 'string',
             'postal_code' => 'string',
             'country' => 'string',
-            'geo' => ['lat' => 'string', 'lon' => 'string']
+            'geo' => ['lat' => 'string', 'lon' => 'string'],
         ],
         'width_inches' => 'string',
         'height_inches' => 'string',
@@ -90,9 +90,10 @@ class InventoryTransformer extends TransformerAbstract
         'feature_list' => 'array',
         'image' => 'string',
         'images' => 'array',
-        'images_secondary' => 'array'
+        'images_secondary' => 'array',
     ])]
-    public function transform(TcEsInventory $inventory): array {
+    public function transform(TcEsInventory $inventory): array
+    {
         return $inventory->toArray();
     }
 }

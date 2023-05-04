@@ -15,8 +15,7 @@ class TrackController extends AbstractRestfulController
 {
     public function __construct(
         private UserTrackingRepositoryInterface $userTrackingRepository
-    )
-    {
+    ) {
         parent::__construct();
     }
 

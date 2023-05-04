@@ -226,6 +226,7 @@ class HereMapSearchServiceTest extends TestCase
     private function getConcreteService()
     {
         app()->bind(MapSearchServiceInterface::class, HereMapSearchService::class);
+
         return app()->make(MapSearchServiceInterface::class);
     }
 }

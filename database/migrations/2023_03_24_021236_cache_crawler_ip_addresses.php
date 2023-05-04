@@ -7,8 +7,6 @@ class CacheCrawlerIpAddresses extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up()
     {
@@ -17,11 +15,8 @@ class CacheCrawlerIpAddresses extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {
-        //
     }
 }

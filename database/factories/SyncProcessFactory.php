@@ -25,11 +25,11 @@ class SyncProcessFactory extends Factory
     public function definition(): array
     {
         return [
-            'name'        => Str::random('10'),
-            'status'      => SyncProcess::STATUS_WORKING,
-            'meta'        => [],
-            'created_at'  => now(),
-            'updated_at'  => now(),
+            'name' => Str::random('10'),
+            'status' => SyncProcess::STATUS_WORKING,
+            'meta' => [],
+            'created_at' => now(),
+            'updated_at' => now(),
             'finished_at' => now(),
         ];
     }

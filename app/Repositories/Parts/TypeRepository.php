@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Repositories\Parts;
 
-use App\Http\Requests\Parts\Type\IndexTypeRequest;
 use App\Models\Parts\Type;
 use Illuminate\Database\Eloquent\Collection;
 

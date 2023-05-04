@@ -13,7 +13,8 @@ use MaxMind\Db\Reader\InvalidDatabaseException;
 
 class PopulateUserLocationCommand extends Command
 {
-    use PrependsOutput, PrependsTimestamp;
+    use PrependsOutput;
+    use PrependsTimestamp;
 
     protected $signature = 'user-tracking:populate-location';
 
@@ -26,7 +27,7 @@ class PopulateUserLocationCommand extends Command
      */
     public function handle(): int
     {
-        $this->info(sprintf("%s command started...", $this->name));
+        $this->info(sprintf('%s command started...', $this->name));
 
         $this->reader = new Reader(storage_path('app/maxmind/GeoLite2-City.mmdb'));
 
@@ -35,9 +36,9 @@ class PopulateUserLocationCommand extends Command
             ->where('location_processed', false)
             ->get(['ip_address'])
             ->pluck('ip_address')
-            ->each(fn(string $ipAddress) => $this->populateLocationForIpAddress($ipAddress));
+            ->each(fn (string $ipAddress) => $this->populateLocationForIpAddress($ipAddress));
 
-        $this->info(sprintf("%s command finished!", $this->name));
+        $this->info(sprintf('%s command finished!', $this->name));
 
         return 0;
     }

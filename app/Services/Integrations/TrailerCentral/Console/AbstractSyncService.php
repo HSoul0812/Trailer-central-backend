@@ -13,6 +13,8 @@ use Exception;
 use Illuminate\Contracts\Foundation\Application as ApplicationContract;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Collection;
+use JsonException;
+use PDOException;
 use Throwable;
 
 abstract class AbstractSyncService
@@ -33,9 +35,9 @@ abstract class AbstractSyncService
     }
 
     /**
-     * @throws \PDOException         when some unknown PDO error has been thrown
-     * @throws \JsonException        when the metadata were unable to be serialized
-     * @throws \Exception|\Throwable when some unknown exception has been thrown
+     * @throws PDOException        when some unknown PDO error has been thrown
+     * @throws JsonException       when the metadata were unable to be serialized
+     * @throws Exception|Throwable when some unknown exception has been thrown
      */
     public function sync(): int
     {
@@ -62,11 +64,11 @@ abstract class AbstractSyncService
             $this->processRepository->failById($this->currentProcess->id, ['errorMessage' => $exception->getMessage()]);
 
             $this->logger->error(sprintf(
-                    '[SyncService::%s] process %d has failed due %s',
-                    $this->getProcessName(),
-                    $this->currentProcess->id,
-                    $exception->getMessage()
-                )
+                '[SyncService::%s] process %d has failed due %s',
+                $this->getProcessName(),
+                $this->currentProcess->id,
+                $exception->getMessage()
+            )
             );
 
             throw $exception;
@@ -80,9 +82,9 @@ abstract class AbstractSyncService
     abstract protected function getMemoryLimit(): string;
 
     /**
-     * @throws \PDOException  when some unknown PDO error has been thrown
-     * @throws \JsonException when the metadata were unable to be serialized
-     * @throws \Exception     when some unknown exception has been thrown
+     * @throws PDOException  when some unknown PDO error has been thrown
+     * @throws JsonException when the metadata were unable to be serialized
+     * @throws Exception     when some unknown exception has been thrown
      */
     protected function applyToTransaction(): void
     {
@@ -97,9 +99,9 @@ abstract class AbstractSyncService
     }
 
     /**
-     * @throws \PDOException  when some unknown PDO error has been thrown
-     * @throws \JsonException when the metadata were unable to be serialized
-     * @throws \Exception     when some unknown exception has been thrown
+     * @throws PDOException  when some unknown PDO error has been thrown
+     * @throws JsonException when the metadata were unable to be serialized
+     * @throws Exception     when some unknown exception has been thrown
      */
     protected function applyToChuck(Collection $records): void
     {
@@ -114,11 +116,11 @@ abstract class AbstractSyncService
         $this->targetRepository->execute($insertValues);
 
         $this->logger->info(sprintf(
-                '[SyncService::%s] %d records imported on process %d',
-                $this->getProcessName(),
-                $this->numberOfRecordsImported,
-                $this->currentProcess->id
-            )
+            '[SyncService::%s] %d records imported on process %d',
+            $this->getProcessName(),
+            $this->numberOfRecordsImported,
+            $this->currentProcess->id
+        )
         );
     }
 }

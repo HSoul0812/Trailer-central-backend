@@ -6,9 +6,9 @@ namespace App\Http\Controllers\v1\Glossary;
 
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
-use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\Glossary\IndexGlossaryRequest;
+use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Repositories\Glossary\GlossaryRepositoryInterface;
 use App\Transformers\Glossary\GlossaryTransformer;
@@ -18,9 +18,6 @@ class GlossaryController extends AbstractRestfulController
 {
     /**
      * Create a new controller instance.
-     *
-     * @param GlossaryRepositoryInterface   $glossary
-     * @param GlossaryTransformer $glossaryTransformer
      */
     public function __construct(GlossaryRepositoryInterface $glossary, GlossaryTransformer $glossaryTransformer)
     {

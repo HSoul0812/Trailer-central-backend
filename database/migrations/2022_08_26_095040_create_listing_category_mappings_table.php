@@ -3,12 +3,12 @@
 use App\Models\Parts\Type;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class CreateListingCategoryMappingsTable extends Migration
 {
-    const LISTING_CATEGORY_MAPPINGS = [
+    public const LISTING_CATEGORY_MAPPINGS = [
         'Equipment Trailers' => [
             ['map_from' => 'Cargo (Enclosed)', 'map_to' => 'cargo_enclosed'],
             ['map_from' => 'Flatbed', 'map_to' => 'flatbed'],
@@ -21,17 +21,17 @@ class CreateListingCategoryMappingsTable extends Migration
             ['map_from' => 'Dump', 'map_to' => 'dump'],
             ['map_from' => 'Vending / Concession', 'map_to' => 'vending_concession'],
             ['map_from' => 'Office / Fiber Optic', 'map_to' => 'office'],
-            ['map_from' => 'Other', 'map_to' => 'other']
+            ['map_from' => 'Other', 'map_to' => 'other'],
         ],
         'Horse & Livestock' => [
             ['map_from' => 'Horse Trailers', 'map_to' => 'horse'],
-            ['map_from' => 'Stock / Stock Combo', 'map_to' => 'stock_stock-combo']
+            ['map_from' => 'Stock / Stock Combo', 'map_to' => 'stock_stock-combo'],
         ],
         'Travel Trailers' => [
             ['map_from' => 'Travel', 'map_to' => 'camping_rv'],
             ['map_from' => 'Fifth Wheels', 'map_to' => 'fifth_wheel_campers'],
             ['map_from' => 'Toy Haulers', 'map_to' => 'toy'],
-            ['map_from' => 'Camper / RV', 'map_to' => 'class_a']
+            ['map_from' => 'Camper / RV', 'map_to' => 'class_a'],
         ],
         'Truck Beds' => [
             ['map_from' => 'Truck Beds', 'map_to' => 'bed_equipment'],
@@ -45,13 +45,12 @@ class CreateListingCategoryMappingsTable extends Migration
             ['map_from' => 'Tank / Bulk', 'map_to' => 'tank_trailer'],
             ['map_from' => 'Dump', 'map_to' => 'semi_dump'],
             ['map_from' => 'Other', 'map_to' => 'semi_other'],
-            ['map_from' => 'Other Trucks', 'map_to' => 'vehicle_truck']
-        ]
+            ['map_from' => 'Other Trucks', 'map_to' => 'vehicle_truck'],
+        ],
     ];
+
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up()
     {
@@ -71,18 +70,15 @@ class CreateListingCategoryMappingsTable extends Migration
                 DB::table('listing_category_mappings')->insert([
                     'category_id' => $current_category->id,
                     'map_from' => $category['map_from'],
-                    'map_to'   => $category['map_to'],
-                    'type'     => 'Inventory'
+                    'map_to' => $category['map_to'],
+                    'type' => 'Inventory',
                 ]);
-
             }
         }
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {

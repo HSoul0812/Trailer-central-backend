@@ -10,11 +10,11 @@ class ListingCategoryMappingsRepository implements ListingCategoryMappingsReposi
     public function get(array $params)
     {
         $query = ListingCategoryMappings::query();
-        if(isset($params['map_from']) && isset($params['type_id'])) {
+        if (isset($params['map_from']) && isset($params['type_id'])) {
             $query->where('map_from', $params['map_from'])
                 ->where('type_id', $params['type_id']);
         } else {
-            throw new InvalidArgumentException("Required parameters are missing");
+            throw new InvalidArgumentException('Required parameters are missing');
         }
 
         return $query->first();

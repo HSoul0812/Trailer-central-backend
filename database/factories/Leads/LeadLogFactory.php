@@ -13,6 +13,7 @@ use Faker\Generator;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use JsonException;
 
 /**
  * @property Generator $faker
@@ -32,7 +33,7 @@ class LeadLogFactory extends Factory
     /**
      * Define the model's default state.
      *
-     * @throws \JsonException when cannot load the json file
+     * @throws JsonException when cannot load the json file
      */
     public function definition(): array
     {
@@ -40,20 +41,20 @@ class LeadLogFactory extends Factory
 
         return [
             'trailercentral_id' => $this->faker->randomDigitNotZero(),
-            'vin'               => Str::upper(Str::random('21')),
-            'first_name'        => $this->faker->firstName(),
-            'last_name'         => $this->faker->lastName(),
-            'email_address'     => $this->faker->email(),
-            'manufacturer'      => $manufacturer['name'],
-            'brand'             => $this->faker->randomElement($manufacturer['brands']),
-            'meta'              => [],
-            'submitted_at'      => $this->faker->dateTimeBetween('-8 months'),
-            'created_at'        => $this->faker->dateTimeBetween('-8 months'),
+            'vin' => Str::upper(Str::random('21')),
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'email_address' => $this->faker->email(),
+            'manufacturer' => $manufacturer['name'],
+            'brand' => $this->faker->randomElement($manufacturer['brands']),
+            'meta' => [],
+            'submitted_at' => $this->faker->dateTimeBetween('-8 months'),
+            'created_at' => $this->faker->dateTimeBetween('-8 months'),
         ];
     }
 
     /**
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function getManufacturers(): Collection
     {
