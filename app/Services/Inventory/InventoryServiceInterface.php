@@ -114,15 +114,16 @@ interface InventoryServiceInterface
 
     /**
      * Real processing order:
-     *      1. Image overlays generation by dealer id
+     *      1. Image overlays generation by dealer id (it will wait for this when $waitForOverlays is true)
      *      2. ElasticSearch indexation by dealer location id
      *      3. Redis Cache invalidation by dealer id
      *
      * @param  int[]  $dealerIds
+     * @param bool $waitForOverlays
      * @param array $context
      * @return void
      */
-    public function generateSomeImageOverlaysByDealerIds(array $dealerIds, array $context = []): void;
+    public function generateSomeImageOverlaysByDealerIds(array $dealerIds, bool $waitForOverlays, array $context = []): void;
 
     /**
      * Method name say nothing about real process order, it is only to be consistent with legacy naming convention
@@ -146,9 +147,11 @@ interface InventoryServiceInterface
     public function tryToIndexAndInvalidateCacheByInventory(Inventory $inventory): void;
 
     /**
-     * Will try to generate image overlay only when it is enabled in the application
+     * It should dispatch the job which will orchestrate all needed jobs to process an inventory update/creation
+     *
+     * So far, the first job should be the image overlay generation
      */
-    public function tryToGenerateImageOverlaysByInventory(Inventory $inventory): void;
+    public function dispatchOrchestrationJobByInventory(Inventory $inventory): void;
 
     /**
      * Applies overlays to inventory images by inventory id,
