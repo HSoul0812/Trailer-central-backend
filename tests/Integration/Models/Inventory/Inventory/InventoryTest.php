@@ -60,6 +60,13 @@ class InventoryTest extends TestCase
         $attributeValue->delete();
     }
 
+    /**
+     * @covers ::geolocationPoint
+     *
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
+     */
     public function testItUsesTheLocationFromGeolocationIfInventoryHasNoLocationAndDealerLocationHasNoCoords()
     {
         $dealerLocation = factory(DealerLocation::class)->create([
