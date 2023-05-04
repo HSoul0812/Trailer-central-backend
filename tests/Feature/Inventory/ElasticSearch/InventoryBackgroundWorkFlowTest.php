@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Inventory\ElasticSearch;
 
-use App\Jobs\Inventory\ReIndexInventoriesByDealersJob;
+use App\Jobs\Inventory\GenerateSomeOverlayImagesByDealerIds;
 use App\Jobs\Inventory\GenerateOverlayImageJob;
 use App\Models\Inventory\Inventory;
 use App\Models\User\AuthToken;
@@ -120,7 +120,7 @@ class InventoryBackgroundWorkFlowTest extends TestCase
 
         $response->assertStatus(202);
 
-        Bus::assertDispatchedTimes(ReIndexInventoriesByDealersJob::class, 1);
+        Bus::assertDispatchedTimes(GenerateSomeOverlayImagesByDealerIds::class, 1);
     }
 
     public function setUp(): void
