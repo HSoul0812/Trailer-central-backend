@@ -12,10 +12,16 @@ $api->version('v1', function ($api) {
         $api->get('/', [InventoryController::class, 'index'])->middleware(['human-only', 'gzip']);
         $api->put('/', 'App\Http\Controllers\v1\Inventory\InventoryController@create')
             ->middleware('auth:api');
+
+        $api->get('/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@show')->where('id', '[0-9]+')->middleware(['gzip']);
         $api->post('/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@update')
             ->where('id', '[0-9]+')
             ->middleware('auth:api');
         $api->delete('/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')
+            ->where('id', '[0-9]+')
+            ->middleware('auth:api');
+
+        $api->get('/{id}/pay/{planId}', 'App\Http\Controllers\v1\Inventory\InventoryController@pay')
             ->where('id', '[0-9]+')
             ->middleware('auth:api');
         $api->get('/progress', 'App\Http\Controllers\v1\Inventory\InventoryController@getProgress')
@@ -23,7 +29,6 @@ $api->version('v1', function ($api) {
         $api->post('/progress', 'App\Http\Controllers\v1\Inventory\InventoryController@saveProgress')
             ->middleware('auth:api');
 
-        $api->get('/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@show')->where('id', '[0-9]+');
         $api->get('/attributes', [AttributesController::class, 'index']);
     });
 });

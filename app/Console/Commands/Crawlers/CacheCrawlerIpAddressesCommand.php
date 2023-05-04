@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands\Crawlers;
 
+use App\Domains\Commands\Traits\PrependsOutput;
+use App\Domains\Commands\Traits\PrependsTimestamp;
 use App\Domains\Crawlers\Strategies\CrawlerCheckStrategy;
 use App\Mail\FailedToFetchBotIpEmail;
 use Cache;
@@ -12,6 +14,9 @@ use Throwable;
 
 class CacheCrawlerIpAddressesCommand extends Command
 {
+    use PrependsOutput;
+    use PrependsTimestamp;
+
     /**
      * The accept ip keys in the ip array.
      */

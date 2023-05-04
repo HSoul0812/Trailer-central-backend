@@ -33,4 +33,7 @@ return [
     'elasticsearch' => [
         'url' => env('TC_ES_URL', 'http://localhost:9200'),
     ],
+
+    'api_timezone' => 'America/Indiana/Indianapolis',
+    'api_datetime_format' => 'Y-m-d H:i:s',
 ];

@@ -28,17 +28,13 @@ class AuthController extends AbstractRestfulController
 
     public function authenticate(AuthenticateRequestInterface $request)
     {
-        if ($request->validate()) {
-            $token = $this->authService->authenticate($request->all());
-            $user = auth('api')->user();
+        $request->validate();
 
-            return $this->response->array([
-                'token' => $token,
-                'user' => $this->transformer->transform($user),
-            ]);
-        }
+        $token = $this->authService->authenticate($request->all());
 
-        return $this->response->errorBadRequest();
+        return $this->respondWithJwtToken($token, [
+            'user' => $this->transformer->transform(auth('api')->user()),
+        ]);
     }
 
     public function social(string $social, Request $request)
@@ -77,20 +73,6 @@ class AuthController extends AbstractRestfulController
         return $this->response->item($user, $this->transformer);
     }
 
-    public function updateProfile(UpdateRequestInterface $request)
-    {
-        $user = auth('api')->user();
-        if ($request->validate()) {
-            $this->authService->update($user->tc_user_id, $request->all());
-
-            return $this->response->array(
-                ['success' => true]
-            );
-        }
-
-        return $this->response->errorBadRequest();
-    }
-
     public function index(IndexRequestInterface $request)
     {
         // TODO: Implement index() method.
@@ -109,6 +91,32 @@ class AuthController extends AbstractRestfulController
     public function destroy(int $id)
     {
         throw new NotImplementedException();
+    }
+
+    public function jwtRefreshToken(): Response
+    {
+        return $this->respondWithJwtToken(auth('api')->refresh());
+    }
+
+    public function jwtLogout(): Response
+    {
+        auth('api')->logout();
+
+        return $this->response->array(['message' => 'Token invalidated!']);
+    }
+
+    /**
+     * Get the token array structure.
+     */
+    protected function respondWithJwtToken(string $token, array $extras = []): Response
+    {
+        $response = array_merge([
+            'token' => $token,
+                'token_type' => 'bearer',
+                'expires_in' => auth('api')->factory()->getTTL() * 60,
+        ], $extras);
+
+        return $this->response->array($response);
     }
 
     protected function constructRequestBindings(): void

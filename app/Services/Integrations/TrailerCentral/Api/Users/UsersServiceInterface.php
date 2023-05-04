@@ -11,6 +11,8 @@ interface UsersServiceInterface
 
     public function get(string $email): TcApiResponseUser;
 
+    public function getLocations(int $userId): array;
+
     public function createLocation(array $location): TcApiResponseUserLocation;
 
     public function updateLocation(int $locationId, array $location): TcApiResponseUserLocation;

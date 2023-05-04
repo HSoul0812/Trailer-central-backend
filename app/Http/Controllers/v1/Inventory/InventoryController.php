@@ -14,6 +14,7 @@ use App\Http\Requests\Inventory\UpdateInventoryRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\Inventory\InventorySDKServiceInterface;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Services\Stripe\StripePaymentServiceInterface;
 use App\Transformers\Inventory\InventoryListResponseTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryCreateTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryDeleteTransformer;
@@ -21,6 +22,7 @@ use App\Transformers\Inventory\TcApiResponseInventoryTransformer;
 use Cache;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class InventoryController extends AbstractRestfulController
 {
@@ -31,6 +33,7 @@ class InventoryController extends AbstractRestfulController
         private InventoryServiceInterface $inventoryService,
         private InventorySDKServiceInterface $inventorySDKService,
         private TcApiResponseInventoryTransformer $transformer,
+        private StripePaymentServiceInterface $paymentService
     ) {
         parent::__construct();
     }
@@ -127,6 +130,23 @@ class InventoryController extends AbstractRestfulController
         return $this->response->array(
             json_decode(Cache::get($user->getAuthIdentifier() . '/trailer-progress', '{}'), true)
         );
+    }
+
+    public function pay(Request $request, $inventoryId, $planId): Response
+    {
+        $inventory = $this->inventoryService->show((int) $inventoryId);
+        $user = auth('api')->user();
+        if ($inventory->dealer['id'] != $user->tc_user_id) {
+            throw new HttpException(422, 'User should be owner of inventory');
+        }
+
+        $url = $this->paymentService->createCheckoutSession($planId, [
+            'inventory_title' => $inventory->inventory_title,
+            'inventory_id' => $inventory->id,
+            'user_id' => $user->tc_user_id,
+        ]);
+
+        return new Response(['url' => $url]);
     }
 
     protected function constructRequestBindings(): void

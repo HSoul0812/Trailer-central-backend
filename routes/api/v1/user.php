@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\v1\Image\ImageController;
 use App\Http\Controllers\v1\WebsiteUser\AuthController;
+use App\Http\Controllers\v1\WebsiteUser\LocationController;
 use App\Http\Controllers\v1\WebsiteUser\PasswordResetController;
 use App\Http\Controllers\v1\WebsiteUser\TrackController;
 use App\Http\Controllers\v1\WebsiteUser\VerificationController;
@@ -29,7 +30,9 @@ $api->version('v1', function ($api) {
         $api->get('/reset-password', [PasswordResetController::class, 'showReset'])
             ->name('password.reset');
         $api->post('/reset-password', [PasswordResetController::class, 'resetPassword']);
-
+        $api->get('/locations', [LocationController::class, 'all']);
+        $api->post('/location', [LocationController::class, 'create']);
+        $api->post('/jwt/refresh', [AuthController::class, 'jwtRefreshToken']);
         /*
         |--------------------------------------------------------------------------
         | Email verification
@@ -50,7 +53,7 @@ $api->version('v1', function ($api) {
 
     $api->group(['prefix' => '/user', 'middleware' => 'auth:api'], function ($api) {
         $api->get('', [AuthController::class, 'getProfile']);
-        $api->put('', [AuthController::class, 'updateProfile']);
+        $api->post('/jwt/logout', [AuthController::class, 'jwtLogout']);
         $api->post('/images', [ImageController::class, 'create']);
     });
 });

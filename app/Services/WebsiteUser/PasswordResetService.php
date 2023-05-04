@@ -12,6 +12,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PasswordResetService implements PasswordResetServiceInterface
 {
+    public const EXCLUDE_THROTTLE_MAILS = [
+        'qa-team@trailercentral.com',
+    ];
     private DatabaseTokenRepository $tokenRepository;
 
     public function __construct(
@@ -39,8 +42,11 @@ class PasswordResetService implements PasswordResetServiceInterface
             throw new NotFoundHttpException("User doesn't exist");
         }
         $user = $users->first();
-        if ($this->tokenRepository->recentlyCreatedToken($user)) {
-            throw new ThrottleRequestsException('Too many requests');
+
+        if (!in_array($email, self::EXCLUDE_THROTTLE_MAILS)) {
+            if ($this->tokenRepository->recentlyCreatedToken($user)) {
+                throw new ThrottleRequestsException('Too many requests');
+            }
         }
 
         $token = $this->tokenRepository->create($user);

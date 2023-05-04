@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console;
 
 use App\Console\Commands\Crawlers\CacheCrawlerIpAddressesCommand;
+use App\Console\Commands\Images\DeleteOldLocalImagesCommand;
 use App\Console\Commands\UserTracking\ProcessUserTrackingsCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -29,6 +30,11 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->runInBackground();
 
+        $schedule->command('inventory:hide-expired')
+            ->daily()
+            ->withoutOverlapping()
+            ->runInBackground();
+
         $schedule->command('sync:leads')
             ->daily()
             ->withoutOverlapping()
@@ -40,19 +46,28 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule
+            ->command(ProcessUserTrackingsCommand::class)
+            ->daily()
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/commands/user-trackings.log'));
+
+        $schedule
+            ->command(DeleteOldLocalImagesCommand::class)
+            ->daily()
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/commands/delete-old-local-images.log'));
+
+        $schedule
             ->command(CacheCrawlerIpAddressesCommand::class)
             ->daily()
             ->withoutOverlapping()
             ->onOneServer()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/commands/cache-crawler-ip-addresses.log'));
-
-        $schedule
-            ->command(ProcessUserTrackingsCommand::class)
-            ->daily()
-            ->withoutOverlapping()
-            ->onOneServer()
-            ->runInBackground();
     }
 
     /**

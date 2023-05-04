@@ -45,7 +45,7 @@ class WebsiteUserVerifyEmail extends Notification
 
     protected function buildMailMessage($url): MailMessage
     {
-        $siteUrl = config('auth.site_url');
+        $siteUrl = config('app.site_url');
 
         return (new MailMessage())
             ->subject(Lang::get('TrailerTrader | Confirm your registration to TrailerTrader'))

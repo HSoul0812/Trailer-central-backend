@@ -23,6 +23,7 @@ class WebsiteUserTransformer extends TransformerAbstract
             'email_verified_at' => $user->email_verified_at,
             'registration_source' => $user->registration_source,
             'tc_user_location_id' => $user->tc_user_location_id,
+            'tc_user_id' => $user->tc_user_id,
             'created_at' => $user->created_at,
             'updated_at' => $user->updated_at,
         ];

@@ -21,4 +21,6 @@ interface InventoryServiceInterface
     public function update(int $userId, array $params): TcApiResponseInventoryCreate;
 
     public function delete(int $userId, int $id): TcApiResponseInventoryDelete;
+
+    public function hideExpired();
 }

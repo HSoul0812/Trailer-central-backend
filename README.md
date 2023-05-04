@@ -134,7 +134,7 @@ php artisan db:seed --class=Database\\Seeders\\Inventory\\AverageStockSeeder
 php artisan db:seed --class=Database\\Seeders\\Inventory\\AveragePriceSeeder
 ```
 ```bash
-php artisan db:seed --class=Database\\Seeders\\Leads\\LeadsAverageSeeder
+php artisan db:seed --class=Database\\Seeders\\Leads\\AverageSeeder
 ```
 
 How data logs works

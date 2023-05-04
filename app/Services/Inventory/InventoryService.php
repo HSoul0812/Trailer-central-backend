@@ -2,6 +2,7 @@
 
 namespace App\Services\Inventory;
 
+use App\Domains\Inventory\Actions\DeleteLocalImagesFromNewImagesAction;
 use App\DTOs\Inventory\TcApiResponseAttribute;
 use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
@@ -10,6 +11,7 @@ use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\Models\Geolocation\Geolocation;
 use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
+use App\Repositories\Integrations\TrailerCentral\InventoryRepositoryInterface;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
@@ -17,6 +19,7 @@ use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
 use App\Services\Dealers\DealerServiceInterface;
 use Cache;
+use Carbon\Carbon;
 use Dingo\Api\Routing\Helpers;
 use Exception;
 use GuzzleHttp\Client as GuzzleHttpClient;
@@ -72,11 +75,13 @@ class InventoryService implements InventoryServiceInterface
         private ListingCategoryMappingsRepositoryInterface $listingCategoryMappingsRepository,
         private AuthTokenRepositoryInterface $authTokenRepository,
         private DealerServiceInterface $dealerService,
+        private InventoryRepositoryInterface $inventoryRepository,
+        private DeleteLocalImagesFromNewImagesAction $deleteLocalImagesFromNewImagesAction,
     ) {
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      * @throws Exception
      */
     public function list(array $params): TcEsResponseInventoryList
@@ -125,7 +130,7 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      * @throws Exception
      */
     public function create(int $userId, array $params): TcApiResponseInventoryCreate
@@ -151,11 +156,13 @@ class InventoryService implements InventoryServiceInterface
             ['query' => $params, 'headers' => ['access-token' => $authToken->access_token]]
         );
 
+        $this->deleteLocalImagesFromNewImagesAction->execute(collect(data_get($params, 'new_images', [])));
+
         return TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      * @throws Exception
      */
     public function delete(int $userId, int $id): TcApiResponseInventoryDelete
@@ -175,7 +182,7 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      * @throws Exception
      */
     public function update(int $userId, array $params): TcApiResponseInventoryCreate
@@ -198,8 +205,13 @@ class InventoryService implements InventoryServiceInterface
         $inventory = $this->handleHttpRequest(
             'POST',
             $url,
-            ['query' => $params, 'headers' => ['access-token' => $authToken->access_token]]
+            ['json' => $params, 'headers' => ['access-token' => $authToken->access_token]]
         );
+
+        $this->deleteLocalImagesFromNewImagesAction->execute(collect(data_get($params, 'new_images', [])));
+
+        Log::info('inventory update', $params);
+
         $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
 
         return $respObj;
@@ -225,6 +237,13 @@ class InventoryService implements InventoryServiceInterface
         $respObj->dealer['benefit_statement'] = $dealer[0]->logo['data']['benefit_statement'] ?? '';
 
         return $respObj;
+    }
+
+    public function hideExpired()
+    {
+        $from = Carbon::today()->startOfDay();
+        $to = Carbon::today()->startOfDay()->addDay();
+        $this->inventoryRepository->hideExpiredItems($from, $to);
     }
 
     public function attributes(array $params): Collection

@@ -62,4 +62,9 @@ return [
         'client_secret' => env('FACEBOOK_AUTH_CLIENT_SECRET', ''),
         'redirect' => '/api/user/auth/facebook/callback',
     ],
+    'stripe' => [
+        'public_key' => env('STRIPE_PUBLIC_KEY', ''),
+        'secret_key' => env('STRIPE_SECRET_KEY', ''),
+        'webhook_secret_key' => env('STRIPE_WEBHOOK_SECRET_KEY', ''),
+    ],
 ];
