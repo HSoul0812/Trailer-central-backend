@@ -28,8 +28,11 @@ class ImageService extends AbstractFileService
 {
     use S3Helper;
 
-    /** @var float three quarters of second (0.45  seconds) */
-    const WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS = 450 * 1000;
+    /**
+     * @var float 0.2 seconds, it means it may send up to five S3 request per second
+     *                (we need to consider multiply by the number of queue workers)
+     */
+    const WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS = 200 * 1000;
 
     /** @var ImageHelper */
     private $imageHelper;
@@ -319,13 +322,7 @@ class ImageService extends AbstractFileService
         }
 
         try {
-            // we will retry to upload the object 3 times using a timeout of 0.75 seconds, it is a mitigation measure
-            // to avoid potentials issues due latency or slowdown errors and AWS rate limiting
-            // @see https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance-design-patterns.html
-            // todo: in the future we need to implement a back-off strategy
-            $filename = retry(3, function () use ($localNewImagePath, $overlayFilename, $overlayConfig): string {
-                return $this->uploadToS3($localNewImagePath, $overlayFilename, $overlayConfig['dealer_id']);
-            }, self::WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS);
+            $filename = $this->uploadToS3($localNewImagePath, $overlayFilename, $overlayConfig['dealer_id']);
 
             unlink($localNewImagePath);
         } catch (\Exception $exception) {
