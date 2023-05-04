@@ -85,15 +85,15 @@ class InventoryTest extends TestCase
 
         $geolocation = Geolocation::create([
             'zip' => 'testzip',
-            'latitude' => 1234,
-            'longitude' => 1234,
+            'latitude' => 1234.0,
+            'longitude' => 1234.0,
             'country' => 'USA'
         ]);
 
         $inventoryGeolocation = $inventory->geolocationPoint();
 
-        $this->assertSame(1234, $inventoryGeolocation->latitude);
-        $this->assertSame(1234, $inventoryGeolocation->longitude);
+        $this->assertSame(1234.0, $inventoryGeolocation->latitude);
+        $this->assertSame(1234.0, $inventoryGeolocation->longitude);
 
         $inventory->delete();
         $geolocation->delete();
