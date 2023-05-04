@@ -34,7 +34,7 @@ class InventoryTest extends TestCase
         $inventory = factory(Inventory::class)->create();
         $attribute = Attribute::create([
             'type' => 'select',
-            'code' => 'testattr_'.$this->faker->word(),
+            'code' => 'testattr_' . $this->faker->word(),
             'name' => 'Test Attribute',
             'values' => 'slant:Slant,straight:Straight,head_head:Head to Head,reverse_slant:Reverse Slant',
         ]);
@@ -92,10 +92,11 @@ class InventoryTest extends TestCase
 
         $inventoryGeolocation = $inventory->geolocationPoint();
 
-        $this->assertSame(1234, $inventoryGeolocation->getLatitude());
-        $this->assertSame(1234, $inventoryGeolocation->getLongitude());
+        $this->assertSame(1234, $inventoryGeolocation->latitude());
+        $this->assertSame(1234, $inventoryGeolocation->longitude());
 
         $inventory->delete();
         $geolocation->delete();
+        $dealerLocation->delete();
     }
 }
