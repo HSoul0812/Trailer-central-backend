@@ -50,7 +50,7 @@ class ProcessBulkUpload extends Job
                 $importerService->run();
             });
 
-            $inventoryService->invalidateCacheReindexAndGenerateImageOverlaysByDealerIds(
+            $inventoryService->invalidateCacheAndReindexByDealerIds(
                 [$bulk->dealer_id],
                 ['triggered_by' => __CLASS__]
             );
