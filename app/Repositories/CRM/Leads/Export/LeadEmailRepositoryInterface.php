@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Collection;
 use App\DTO\CRM\Leads\Export\LeadEmail as LeadEmailDTO;
 
 interface LeadEmailRepositoryInterface extends Repository {
-
+    
     /**
-     * Return Valid Lead Email From Lead
+     * Gets a lead email object by dealer location id
      * 
-     * @param Lead $lead
-     * @return null|LeadEmail
+     * @param int $dealerLocationId chunk size ot use
+     * @return App\Models\CRM\Leads\LeadEmail
      */
-    public function getLeadEmailByLead(Lead $lead) : ?LeadEmail;
+    public function getLeadEmailByLead(Lead $lead) : LeadEmail;
     
     /**
      * 
