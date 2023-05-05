@@ -60,7 +60,6 @@ class GenerateSomeOverlayImagesByDealerIds extends Job
         InventoryServiceInterface $service,
         LoggerServiceInterface $logger
     ): void {
-        sleep(2);
         foreach ($this->dealerIds as $dealerId) {
             $this->context['dealer_id'] = $dealerId;
 
