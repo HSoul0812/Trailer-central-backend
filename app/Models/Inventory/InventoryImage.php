@@ -36,6 +36,9 @@ class InventoryImage extends Model
     /** @var int  */
     public const IS_DEFAULT = 1;
 
+    /** @var int  */
+    public const IS_NOT_DEFAULT = 0;
+
     /**
      * The table associated with the model.
      *

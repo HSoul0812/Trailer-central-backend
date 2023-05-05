@@ -11,7 +11,7 @@ use App\Jobs\Job;
 
 class ProcessBulkUpload extends Job
 {
-    private const WAIT_FOR_OVERLAYS = true;
+    private const DO_NOT_WAIT_FOR_OVERLAYS = false;
 
     /** @var int  */
     public $timeout = 0;
@@ -53,7 +53,7 @@ class ProcessBulkUpload extends Job
 
             $inventoryService->generateSomeImageOverlaysByDealerIds(
                 [$bulk->dealer_id],
-                self::WAIT_FOR_OVERLAYS,
+                self::DO_NOT_WAIT_FOR_OVERLAYS,
                 ['triggered_by' => __CLASS__]
             );
 
