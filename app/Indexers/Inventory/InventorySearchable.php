@@ -169,7 +169,7 @@ trait InventorySearchable
         $isSearchSyncingEnabled = self::isSearchSyncingEnabled();
         $isImageOverlayGenerationEnabled = self::isOverlayGenerationEnabled();
 
-        self::disableCacheInvalidationAndSearchSyncing();
+        self::disableImageOverlayGenerationCacheInvalidationAndSearchSyncing();
 
         try {
             return $callback();

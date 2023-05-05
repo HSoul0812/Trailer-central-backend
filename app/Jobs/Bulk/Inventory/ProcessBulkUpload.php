@@ -7,11 +7,12 @@ use App\Models\Inventory\Inventory;
 use App\Services\Import\Inventory\CsvImportServiceInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Support\Facades\Log;
-
 use App\Jobs\Job;
 
 class ProcessBulkUpload extends Job
 {
+    private const WAIT_FOR_OVERLAYS = true;
+
     /** @var int  */
     public $timeout = 0;
 
@@ -50,8 +51,9 @@ class ProcessBulkUpload extends Job
                 $importerService->run();
             });
 
-            $inventoryService->invalidateCacheAndReindexByDealerIds(
+            $inventoryService->generateSomeImageOverlaysByDealerIds(
                 [$bulk->dealer_id],
+                self::WAIT_FOR_OVERLAYS,
                 ['triggered_by' => __CLASS__]
             );
 

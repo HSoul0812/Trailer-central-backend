@@ -249,7 +249,7 @@ class InventoryService implements InventoryServiceInterface
     public function create(array $params): Inventory
     {
         try {
-            $inventory = Inventory::withoutImageOverlayGenerationSearchSyncingAndCacheInvalidation(function () use ($params) {
+            $inventory = Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($params) {
                 $this->inventoryRepository->beginTransaction();
 
                 $newImages = $params['new_images'] ?? [];
@@ -316,7 +316,7 @@ class InventoryService implements InventoryServiceInterface
 
                 $this->inventoryRepository->commitTransaction();
 
-                $this->tryToGenerateImageOverlaysByInventory($inventory);
+                $this->dispatchOrchestrationJobByInventory($inventory);
 
                 Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
 
@@ -341,7 +341,7 @@ class InventoryService implements InventoryServiceInterface
     public function update(array $params): Inventory
     {
         try {
-            $inventory = Inventory::withoutImageOverlayGenerationSearchSyncingAndCacheInvalidation(function () use ($params) {
+            $inventory = Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($params) {
                 $this->inventoryRepository->beginTransaction();
 
                 $newImages = $params['new_images'] ?? [];
@@ -422,7 +422,7 @@ class InventoryService implements InventoryServiceInterface
 
                 $this->inventoryRepository->commitTransaction();
 
-                $this->tryToGenerateImageOverlaysByInventory($inventory);
+                $this->dispatchOrchestrationJobByInventory($inventory);
 
                 Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
 
@@ -1399,21 +1399,19 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
-     * Generate some images overlays by dealer id, then reindex the inventory by dealer ids,
-     * finally it will invalidate cache by dealer ids
-     *
      * Real processing order:
-     *      1. Image overlays generation by dealer id
+     *      1. Image overlays generation by dealer id (it will wait for this when $waitForOverlays is true)
      *      2. ElasticSearch indexation by dealer location id
      *      3. Redis Cache invalidation by dealer id
      *
      * @param  int[]  $dealerIds
+     * @param bool $waitForOverlays
      * @param array $context
      * @return void
      */
-    public function generateSomeImageOverlaysByDealerIds(array $dealerIds, array $context = []): void
+    public function generateSomeImageOverlaysByDealerIds(array $dealerIds, bool $waitForOverlays, array $context = []): void
     {
-        $this->dispatch(new GenerateSomeOverlayImagesByDealerIds($dealerIds, $context));
+        $this->dispatch(new GenerateSomeOverlayImagesByDealerIds($dealerIds, $waitForOverlays, $context));
     }
 
     /**
@@ -1456,16 +1454,18 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
-     * Will try to generate image overlay only when it is enabled in the application
+     * It should dispatch the job which will orchestrate all needed jobs to process an inventory update/creation
+     *
+     * So far, the first job should be the image overlay generation
      */
-    public function tryToGenerateImageOverlaysByInventory(Inventory $inventory): void
+    public function dispatchOrchestrationJobByInventory(Inventory $inventory): void
     {
         if (Inventory::isOverlayGenerationEnabled()) {
 
             Log::channel('inventory-overlays')
                 ->info('Queue regenerating overlays just for Inventory ID #'.$inventory->inventory_id);
 
-            // 1 second delay assuming there might be a race condition when transaction commit is taking longer
+            // 2 second delay assuming there might be a race condition when transaction commit is taking longer
             // to process when adding/updating new inventory
             $job = (new GenerateOverlayImageJob($inventory->inventory_id))->delay(2);
 

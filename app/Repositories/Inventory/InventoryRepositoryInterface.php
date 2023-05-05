@@ -141,4 +141,6 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
      * @return bool true when it changed desired image, false when it di not
      */
     public function markImageAsOverlayGenerated(int $imageId): bool;
+
+    public function getInventoryByDealerIdWhichShouldHaveImageOverlayButTheyDoesNot(int $dealerId): LazyCollection;
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Integration\Jobs\Bulk\Inventory;
 
+use App\Jobs\Inventory\GenerateSomeOverlayImagesByDealerIds;
 use App\Jobs\Inventory\ReIndexInventoriesByDealersJob;
 use App\Services\Import\Inventory\CsvImportServiceInterface;
 use App\Services\Inventory\InventoryServiceInterface;
@@ -101,7 +102,7 @@ class ProcessBulkUploadTest extends TestCase
 
         $job->handle($this->importerService, $this->inventoryService);
 
-        Bus::assertDispatchedTimes(ReIndexInventoriesByDealersJob::class, 1);
+        Bus::assertDispatchedTimes(GenerateSomeOverlayImagesByDealerIds::class, 1);
     }
 
     public function setUp(): void
