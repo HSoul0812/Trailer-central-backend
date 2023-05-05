@@ -13,7 +13,7 @@ use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Support\LazyCollection;
 
 /**
- * @todo this job is a work in progress, it is handling 3 processes
+ * this job is handling 3 processes
  *       a) Generate overlay
  *            a.1) It only will consider inventories which should have overlays but they dont have
  *            a.2) It will wait for this process when $waitForOverlays is true
