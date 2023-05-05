@@ -8,6 +8,7 @@ use Laravel\Cashier\Billable;
 use App\Traits\CompactHelper;
 use App\Models\CRM\Leads\Lead;
 use App\Models\User\AuthToken;
+use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
 use App\Models\CRM\Leads\LeadType;
 use App\Services\User\UserService;
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\User\Interfaces\PermissionsInterface;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class User
@@ -54,6 +56,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property int $auto_import_hide
  * @property int $overlay_enabled 0 -> disabled, 1 -> only primary image, 2 -> all images
  * @property bool $overlay_default
+ * @property Collection<DealerLocation> $locations
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */

@@ -287,6 +287,14 @@ class UserRepository implements UserRepositoryInterface {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function getClsfActiveUsers(): Collection
+    {
+        return User::where('clsf_active', 1)->get();
+    }
+
+    /**
      * @param string $expectedPassword
      * @param string $password
      * @param string $salt
