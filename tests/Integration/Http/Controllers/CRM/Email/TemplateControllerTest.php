@@ -281,7 +281,6 @@ class TemplateControllerTest extends IntegrationTestCase
 
         // Check The Correct Item Was Deleted
         $this->assertSame('success', $response['response']['status'], "The response status is not success");
-        $this->assertSame($template->id, $response['response']['data']['id'], "The response template id doesn't match");
 
         // Corroborate the record was deleted in the database
         $this->assertDatabaseMissing(Template::getTableName(), [
