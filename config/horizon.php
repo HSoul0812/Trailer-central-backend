@@ -228,13 +228,22 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'overlay-images-low', 'inventory-cache'],
+                'queue' => ['inventory-cache'],
                 'balance' => 'simple',
-                'processes' => 10,
+                'processes' => 5,
                 'tries' => 3,
                 'timeout' => 900,
             ],
             'supervisor-3' => [
+                'connection' => 'redis',
+                'queue' => ['overlay-images', 'overlay-images-low'],
+                'balance' => 'auto',
+                'minProcesses' => 4,
+                'maxProcesses' => 30,
+                'tries' => 3,
+                'timeout' => 3600,
+            ],
+            'supervisor-4' => [
                 'connection' => 'redis',
                 'queue' => ['scout'],
                 'balance' => 'auto',
@@ -243,7 +252,7 @@ return [
                 'tries' => 3,
                 'timeout' => 3600,
             ],
-            'supervisor-4' => [
+            'supervisor-5' => [
                 'connection' => 'redis',
                 'queue' => ['batched-jobs'],
                 'balance' => 'auto',
@@ -278,7 +287,7 @@ return [
                 'connection' => 'redis',
                 'queue' => ['scout'],
                 'minProcesses' => 3,
-                'maxProcesses' => 14,
+                'maxProcesses' => 24,
                 'balance' => 'auto',
                 'tries' => 3,
                 'timeout' => 900,
@@ -340,7 +349,7 @@ return [
                 'queue' => ['overlay-images'],
                 'balance' => 'auto',
                 'minProcesses' => 5,
-                'maxProcesses' => 15,
+                'maxProcesses' => 10,
                 'tries' => 3,
                 'timeout' => 14400
             ],
@@ -349,7 +358,7 @@ return [
                 'queue' => ['overlay-images-low'],
                 'balance' => 'auto',
                 'minProcesses' => 5,
-                'maxProcesses' => 15,
+                'maxProcesses' => 20,
                 'tries' => 3,
                 'timeout' => 14400
             ],
