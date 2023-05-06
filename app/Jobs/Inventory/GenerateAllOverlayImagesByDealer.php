@@ -17,7 +17,7 @@ class GenerateAllOverlayImagesByDealer extends Job
     private const MONITORED_QUEUES = [GenerateOverlayImageJob::LOW_PRIORITY_QUEUE];
 
     /** @var string  */
-    private const MONITORED_GROUP = 'inventory-generate-all-overlays-by-dealer';
+    public const MONITORED_GROUP = 'inventory-generate-all-overlays-by-dealer';
 
     /** @var int The number of times the job may be attempted. */
     public $tries = 1;
