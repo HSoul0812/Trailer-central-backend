@@ -67,6 +67,7 @@ class IDSServiceTest extends TestCase
         $lead->dealer_id = 1;
         $lead->website_id = 1;
         
+        $leadEmail->id = 1;
         $leadEmail->dealer_location_id = 1;
         $leadEmail->dealer_id = 1;
         $leadEmail->export_format = LeadEmail::EXPORT_FORMAT_IDS;     
