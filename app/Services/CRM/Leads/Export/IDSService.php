@@ -5,11 +5,11 @@ namespace App\Services\CRM\Leads\Export;
 use App\Services\CRM\Leads\Export\IDSServiceInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Jobs\CRM\Leads\Export\IDSJob;
-use Illuminate\Support\Facades\Log;
 use App\Models\CRM\Leads\Export\LeadEmail;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Support\Facades\Log;
 
 class IDSService implements IDSServiceInterface
 {    
@@ -84,6 +84,13 @@ class IDSService implements IDSServiceInterface
             $lead->ids_exported = 1;
             $lead->save();
             $this->log->error('IDS Lead Export Failed: ' . $ex->getMessage());
+            return false;
+        }
+
+        // No Lead Email?
+        if (empty($leadEmail->id)) {
+            $this->log->error('IDS Lead Export Failed: Export Not Enabled for ' .
+                                ' Dealer #' . $lead->dealer);
             return false;
         }
 

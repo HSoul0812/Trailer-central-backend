@@ -31,6 +31,11 @@ class IDSServiceTest extends TestCase
      * @var App\Repositories\CRM\Leads\Export\LeadEmailRepository
      */
     private $leadEmailRepository;
+
+    /**
+     * @var LoggerInterface|LegacyMockInterface
+     */
+    protected $logMock;
     
     public function setUp(): void
     {
@@ -93,6 +98,12 @@ class IDSServiceTest extends TestCase
                 $this->assertContains('Some string', $msg->getBody());
             });
         
+        Log::shouldReceive('channel')
+            ->once();
+
+        Log::shouldReceive('error')
+            ->never();
+
         Log::shouldReceive('info')
             ->with('Mailing IDS Lead', ['lead' => $lead->identifier]);
         
