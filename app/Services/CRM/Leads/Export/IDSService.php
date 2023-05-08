@@ -50,14 +50,14 @@ class IDSService implements IDSServiceInterface
         // No Lead Email?
         if (empty($leadEmail->id)) {
             $this->log->error('IDS Lead Export Failed: Export Not Enabled for ' .
-                                ' Dealer #' . $lead->dealer);
+                                ' Dealer #' . $lead->dealer_id);
             return false;
         }
 
         // Export Format is Not IDS?
         if ($leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_IDS) {
             $this->log->error('IDS Lead Export Failed: IDS Export Not Enabled for ' .
-                                ' Dealer #' . $lead->dealer . ' and ' .
+                                ' Dealer #' . $lead->dealer_id . ' and ' .
                                 ' Dealer Location #' . $lead->dealer_location_id);
             return false;
         }
@@ -90,14 +90,15 @@ class IDSService implements IDSServiceInterface
         // No Lead Email?
         if (empty($leadEmail->id)) {
             $this->log->error('IDS Lead Export Failed: Export Not Enabled for ' .
-                                ' Dealer #' . $lead->dealer);
+                                ' Dealer #' . $lead->dealer_id);
             return false;
         }
 
         // Export Format is Not IDS?
         if ($leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_IDS) {
-            $this->log->error('IDS Lead Export Failed: Lead #' . $lead->identifier .
-                                ' Is Not an IDS Lead');
+            $this->log->error('IDS Lead Export Failed: IDS Export Not Enabled for ' .
+                                ' Dealer #' . $lead->dealer_id . ' and ' .
+                                ' Dealer Location #' . $lead->dealer_location_id);
             return false;
         }
 
