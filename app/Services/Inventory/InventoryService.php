@@ -29,6 +29,7 @@ use Illuminate\Support\Collection;
 use JetBrains\PhpStorm\ArrayShape;
 use Log;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class InventoryService implements InventoryServiceInterface
 {
@@ -252,7 +253,10 @@ class InventoryService implements InventoryServiceInterface
             'map_from' => $params['category'],
             'type_id' => $params['type_id'],
         ]);
-
+        if(!$mapping) {
+            throw new NotFoundHttpException("Mapped entity type was not found. "
+            . "Please check category and type_id is correct");
+        }
         $results = new Collection();
         $url = config('services.trailercentral.api') . 'inventory/attributes' . "?entity_type_id=$mapping->entity_type_id";
         $attributes = $this->handleHttpRequest('GET', $url);
