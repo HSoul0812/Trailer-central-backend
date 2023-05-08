@@ -157,14 +157,12 @@ class IDSServiceTest extends TestCase
                 ->shouldReceive('getLeadEmailByLead')
                 ->once()
                 ->with($lead);
-        
+
         $leadEmail->shouldReceive('getToEmailsAttribute')
-                ->once()
-                ->andReturn([]);
-        
+                ->never();
+
         $leadEmail->shouldReceive('getCopiedEmailsAttribute')
-                ->once()
-                ->andReturn([]);           
+                ->never();
         
         $mail->shouldReceive('send')
             ->never();
@@ -227,12 +225,10 @@ class IDSServiceTest extends TestCase
                 ->andReturn($leadEmail);
 
         $leadEmail->shouldReceive('getToEmailsAttribute')
-                ->once()
-                ->andReturn([]);
+                ->never();
 
         $leadEmail->shouldReceive('getCopiedEmailsAttribute')
-                ->once()
-                ->andReturn([]);           
+                ->never();
 
         $mail->shouldReceive('send')
             ->never();
@@ -367,14 +363,12 @@ class IDSServiceTest extends TestCase
                 ->shouldReceive('getLeadEmailByLead')
                 ->once()
                 ->with($lead);
-        
+
         $leadEmail->shouldReceive('getToEmailsAttribute')
-                ->once()
-                ->andReturn([]);
-        
+                ->never();
+
         $leadEmail->shouldReceive('getCopiedEmailsAttribute')
-                ->once()
-                ->andReturn([]);           
+                ->never();
         
         $mail->shouldReceive('send')
             ->never();
@@ -437,12 +431,10 @@ class IDSServiceTest extends TestCase
                 ->andReturn($leadEmail);
 
         $leadEmail->shouldReceive('getToEmailsAttribute')
-                ->once()
-                ->andReturn([]);
+                ->never();
 
         $leadEmail->shouldReceive('getCopiedEmailsAttribute')
-                ->once()
-                ->andReturn([]);           
+                ->never();
 
         $mail->shouldReceive('send')
             ->never();
