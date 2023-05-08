@@ -17,6 +17,7 @@ use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
+use App\Services\Dealers\DealerServiceInterface;
 use Cache;
 use Carbon\Carbon;
 use Dingo\Api\Routing\Helpers;
@@ -73,6 +74,7 @@ class InventoryService implements InventoryServiceInterface
         private SysConfigRepositoryInterface $sysConfigRepository,
         private ListingCategoryMappingsRepositoryInterface $listingCategoryMappingsRepository,
         private AuthTokenRepositoryInterface $authTokenRepository,
+        private DealerServiceInterface $dealerService,
         private InventoryRepositoryInterface $inventoryRepository,
         private DeleteLocalImagesFromNewImagesAction $deleteLocalImagesFromNewImagesAction,
     ) {
@@ -228,6 +230,11 @@ class InventoryService implements InventoryServiceInterface
         $respObj->category = $newCategory['key'];
         $respObj->type_id = $newCategory['type_id'];
         $respObj->type_label = $newCategory['type_label'];
+
+        $dealerName = $inventory['data']['dealer']['name'];
+        $dealer = $this->dealerService->listByName($dealerName);
+        $respObj->dealer['logo_url'] = $dealer[0]->logo['data']['url'] ?? '';
+        $respObj->dealer['benefit_statement'] = $dealer[0]->logo['data']['benefit_statement'] ?? '';
 
         return $respObj;
     }

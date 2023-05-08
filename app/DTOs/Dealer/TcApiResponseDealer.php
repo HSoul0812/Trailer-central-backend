@@ -19,6 +19,7 @@ class TcApiResponseDealer
     public ?array $website;
     public ?string $from;
     public array $permissions;
+    public array $logo;
 
     public static function fromData(array $data): self
     {
@@ -39,6 +40,7 @@ class TcApiResponseDealer
         $dto->website = $data['website'];
         $dto->from = $data['from'];
         $dto->permissions = $data['permissions'];
+        $dto->logo = $data['logo'];
 
         return $dto;
     }
