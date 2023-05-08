@@ -93,6 +93,11 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
         return $query->get();
     }
 
+    public function getEmailSignature(int $salesPersonId)
+    {
+        return $this->get(['sales_person_id' => $salesPersonId])->signature;
+    }
+
     /**
      * Get All Salespeople
      *
