@@ -16,7 +16,6 @@ class TemplateTransformer extends TransformerAbstract
             'html' => $template->html,
             'custom' => $template->custom_template_name,
             'key' => $template->template_key,
-            'name' => $template->name ?? $template->custom_template_name,
             'template_metadata' => $template->template_metadata,
             'template_json' => $template->template_json,
             'template' => [
