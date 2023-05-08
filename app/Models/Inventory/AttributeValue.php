@@ -21,12 +21,14 @@ class AttributeValue extends Model
 {
     use CompositePrimaryKeys;
 
+    public const TABLE_NAME = 'eav_attribute_value';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'eav_attribute_value';
+    protected $table = self::TABLE_NAME;
 
     protected $primaryKey = ['attribute_id', 'inventory_id'];
 
@@ -52,5 +54,10 @@ class AttributeValue extends Model
     public function inventory(): BelongsTo
     {
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
+    }
+
+    public static function getTableName(): string
+    {
+        return self::TABLE_NAME;
     }
 }

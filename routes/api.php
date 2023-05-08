@@ -1452,6 +1452,22 @@ $api->version('v1', function ($route) {
         $route->post('reports/custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@customReport');
         $route->post('reports/export-custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@exportCustomReport');
         $route->get('reports/service-monthly-hours', 'App\Http\Controllers\v1\Dms\ServiceOrder\ReportsController@monthly');
+
+        /**
+         * CRM Reports
+         */
+        $route->group([
+            'prefix' => 'reports/crm',
+            'middleware' => 'report.validate'
+        ], function($route) {
+
+            $route->get('/', 'App\Http\Controllers\v1\CRM\ReportsController@index');
+            $route->put('/', 'App\Http\Controllers\v1\CRM\ReportsController@create');
+            $route->delete('/{reportId}', 'App\Http\Controllers\v1\CRM\ReportsController@destroy');
+            $route->get('/filtered', 'App\Http\Controllers\v1\CRM\ReportsController@getFilteredLeads');
+            $route->get('/filtered-inventory', 'App\Http\Controllers\v1\CRM\ReportsController@getFilteredInventories');
+        });
+        
         /*
         |--------------------------------------------------------------------------
         | Parts related
