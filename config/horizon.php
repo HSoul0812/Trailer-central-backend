@@ -173,9 +173,9 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'inventory-cache'],
+                'queue' => ['overlay-images', 'overlay-images-low', 'inventory-cache'],
                 'balance' => 'simple',
-                'processes' => 3,
+                'processes' => 10,
                 'tries' => 3,
                 'timeout' => 3600,
             ],
@@ -228,13 +228,22 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'inventory-cache'],
+                'queue' => ['inventory-cache'],
                 'balance' => 'simple',
-                'processes' => 3,
+                'processes' => 5,
                 'tries' => 3,
                 'timeout' => 900,
             ],
             'supervisor-3' => [
+                'connection' => 'redis',
+                'queue' => ['overlay-images', 'overlay-images-low'],
+                'balance' => 'auto',
+                'minProcesses' => 4,
+                'maxProcesses' => 30,
+                'tries' => 3,
+                'timeout' => 3600,
+            ],
+            'supervisor-4' => [
                 'connection' => 'redis',
                 'queue' => ['scout'],
                 'balance' => 'auto',
@@ -243,7 +252,7 @@ return [
                 'tries' => 3,
                 'timeout' => 3600,
             ],
-            'supervisor-4' => [
+            'supervisor-5' => [
                 'connection' => 'redis',
                 'queue' => ['batched-jobs'],
                 'balance' => 'auto',
@@ -276,9 +285,9 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout', 'inventory-cache'],
+                'queue' => ['scout'],
                 'minProcesses' => 3,
-                'maxProcesses' => 14,
+                'maxProcesses' => 24,
                 'balance' => 'auto',
                 'tries' => 3,
                 'timeout' => 900,
@@ -334,7 +343,34 @@ return [
                 'maxProcesses' => 6,
                 'tries' => 1,
                 'timeout' => 21600,
-            ]
+            ],
+            'supervisor-9' => [
+                'connection' => 'redis',
+                'queue' => ['overlay-images'],
+                'balance' => 'auto',
+                'minProcesses' => 5,
+                'maxProcesses' => 10,
+                'tries' => 3,
+                'timeout' => 14400
+            ],
+            'supervisor-10' => [
+                'connection' => 'redis',
+                'queue' => ['overlay-images-low'],
+                'balance' => 'auto',
+                'minProcesses' => 5,
+                'maxProcesses' => 20,
+                'tries' => 3,
+                'timeout' => 14400
+            ],
+            'supervisor-11' => [
+                'connection' => 'redis',
+                'queue' => ['inventory-cache'],
+                'minProcesses' => 2,
+                'maxProcesses' => 6,
+                'balance' => 'auto',
+                'tries' => 3,
+                'timeout' => 900,
+            ],
         ],
 
         'production' => [
@@ -362,7 +398,7 @@ return [
                 'queue' => ['inventory-cache'],
                 'balance' => 'auto',
                 'minProcesses' => 3,
-                'maxProcesses' => 15,
+                'maxProcesses' => 25,
                 'tries' => 3,
                 'timeout' => 900
             ],
@@ -370,8 +406,8 @@ return [
                 'connection' => 'redis',
                 'queue' => ['scout'],
                 'balance' => 'auto',
-                'minProcesses' => 5,
-                'maxProcesses' => 45,
+                'minProcesses' => 20,
+                'maxProcesses' => 100,
                 'tries' => 3,
                 'timeout' => 900,
             ],
@@ -422,17 +458,26 @@ return [
                 'connection' => 'redis',
                 'queue' => ['overlay-images'],
                 'balance' => 'auto',
-                'minProcesses' => 3,
-                'maxProcesses' => 30,
+                'minProcesses' => 5,
+                'maxProcesses' => 60,
                 'tries' => 3,
                 'timeout' => 14400
             ],
             'supervisor-10' => [
                 'connection' => 'redis',
+                'queue' => ['overlay-images-low'],
+                'balance' => 'auto',
+                'minProcesses' => 5,
+                'maxProcesses' => 60,
+                'tries' => 3,
+                'timeout' => 14400
+            ],
+            'supervisor-11' => [
+                'connection' => 'redis',
                 'queue' => ['batched-jobs'],
                 'balance' => 'auto',
                 'minProcesses' => 3,
-                'maxProcesses' => 10,
+                'maxProcesses' => 30,
                 'tries' => 1,
                 'timeout' => 21600,
             ]

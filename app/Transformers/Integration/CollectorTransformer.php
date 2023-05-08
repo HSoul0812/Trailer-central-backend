@@ -92,6 +92,17 @@ class CollectorTransformer extends TransformerAbstract
             'override_descriptions' => $collector->override_descriptions,
             'last_run' => $collector->last_run,
             'scheduled_for' => $collector->scheduled_for,
+            'third_party_provider' => $collector->third_party_provider,
+            'use_partial_update' => $collector->use_partial_update,
+            'last_full_run' => $collector->last_full_run,
+            'days_till_full_run' => $collector->days_till_full_run,
+            'mark_sold_manually_added_items' => $collector->mark_sold_manually_added_items,
+            'not_save_unmapped_on_factory_units' => $collector->not_save_unmapped_on_factory_units,
+            'conditional_title_format' => $collector->conditional_title_format,
+            'use_brands_for_factory_mapping' => $collector->use_brands_for_factory_mapping,
+            'check_images_for_bdv_matching' => $collector->check_images_for_bdv_matching,
+            'factory_mapping_filter_year_from' => $collector->factory_mapping_filter_year_from,
+            'factory_mapping_filter_skip_units' => $collector->factory_mapping_filter_skip_units,
         ];
     }
 }

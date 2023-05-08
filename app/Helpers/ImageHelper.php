@@ -435,6 +435,8 @@ class ImageHelper
      * @param string $logoPath
      * @param array $config
      * @return string local path of new image
+     *
+     * @throws MissingOverlayLogoParametersException when logo overlay is enabled and its configurations were not provided
      */
     public function addLogoOverlay(string $imagePath, string $logoPath, array $config)
     {
@@ -454,7 +456,7 @@ class ImageHelper
         $logoHeight = preg_replace("/[^0-9.]/", "", $config['overlay_logo_height']);
 
         // Check for PX/% on Width
-        if (strpos($config['overlay_logo_width'], "%") !== FALSE) {
+        if (strpos($config['overlay_logo_width'], "%") !== false) {
             $percentageWidth = $logoWidth * 0.01;
 
             if (!$logoHeight) {
@@ -469,7 +471,7 @@ class ImageHelper
         }
 
         // Check for PX/% on Height
-        if (strpos($config['overlay_logo_height'], "%") !== FALSE) {
+        if (strpos($config['overlay_logo_height'], "%") !== false) {
             $percentageHeight = $logoHeight * 0.01;
             $logoHeight = $percentageHeight * $imageHeight;
         }

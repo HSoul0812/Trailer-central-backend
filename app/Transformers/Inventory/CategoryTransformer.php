@@ -12,6 +12,7 @@ class CategoryTransformer extends TransformerAbstract
     {
 	    return [
             'id' => $category->inventory_category_id,
+            'entity_type_id' => $category->entity_type_id,
             'entity_type' => $category->entityType,
             'category' => $category->category,
             'label' => $category->label,

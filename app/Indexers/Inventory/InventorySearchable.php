@@ -47,9 +47,23 @@ trait InventorySearchable
      */
     public function newQueryForRestoration($ids)
     {
-        return is_array($ids)
-            ? $this->newQueryWithoutScopes()->with('user', 'user.website', 'dealerLocation')->whereIn($this->getQualifiedKeyName(), $ids)
-            : $this->newQueryWithoutScopes()->with('user', 'user.website', 'dealerLocation')->whereKey($ids);
+        $with = [
+            'user',
+            'user.website',
+            'dealerLocation',
+            'inventoryImages',
+            'inventoryImages.image',
+            'attributeValues',
+            'attributeValues.attribute',
+            'inventoryFeatures',
+            'inventoryFeatures.featureList'
+        ];
+
+        if(is_array($ids)){
+            return $this->newQueryWithoutScopes()->with($with)->whereIn($this->getQualifiedKeyName(), $ids);
+        }
+
+        return $this->newQueryWithoutScopes()->with($with)->whereKey($ids);
     }
 
     /**
@@ -143,6 +157,44 @@ trait InventorySearchable
         }
     }
 
+    /**
+     * To avoid to dispatch jobs for image overlay generation, ElasticSearch indexation and invalidation cache
+     *
+     * @param  callable  $callback
+     * @return mixed
+     */
+    public static function withoutImageOverlayGenerationSearchSyncingAndCacheInvalidation(callable $callback)
+    {
+        $isCacheInvalidationEnabled = self::isCacheInvalidationEnabled();
+        $isSearchSyncingEnabled = self::isSearchSyncingEnabled();
+        $isImageOverlayGenerationEnabled = self::isOverlayGenerationEnabled();
+
+        self::disableImageOverlayGenerationCacheInvalidationAndSearchSyncing();
+
+        try {
+            return $callback();
+        } finally {
+            if ($isImageOverlayGenerationEnabled) {
+                self::enableOverlayGeneration();
+            }
+
+            if ($isCacheInvalidationEnabled) {
+                self::enableCacheInvalidation();
+            }
+
+            if ($isSearchSyncingEnabled) {
+                self::enableSearchSyncing();
+            }
+        }
+    }
+
+    public static function disableImageOverlayGenerationCacheInvalidationAndSearchSyncing(): void
+    {
+        self::disableSearchSyncing();
+        InventoryObserver::disableCacheInvalidation();
+        self::disableOverlayGeneration();
+    }
+
     public static function disableCacheInvalidationAndSearchSyncing(): void
     {
         self::disableSearchSyncing();
@@ -189,6 +241,21 @@ trait InventorySearchable
     public static function isCacheInvalidationEnabled(): bool
     {
         return InventoryObserver::isCacheInvalidationEnabled();
+    }
+
+    public static function enableOverlayGeneration(): void
+    {
+        self::$isOverlayGenerationEnabled = true;
+    }
+
+    public static function disableOverlayGeneration():void
+    {
+        self::$isOverlayGenerationEnabled = false;
+    }
+
+    public static function isOverlayGenerationEnabled(): bool
+    {
+        return self::$isOverlayGenerationEnabled;
     }
 
     public static function isCacheEnabledByFeatureFlag(): bool

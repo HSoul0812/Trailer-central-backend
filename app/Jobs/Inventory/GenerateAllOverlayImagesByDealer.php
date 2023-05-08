@@ -8,29 +8,24 @@ use App\Models\Inventory\Inventory;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 
-class GenerateOverlayImageJobByDealer extends Job
+class GenerateAllOverlayImagesByDealer extends Job
 {
     /** @var int time in seconds */
-    private const WAIT_TIME_IN_SECONDS = 2;
+    private const WAIT_TIME_IN_SECONDS = 20;
 
     /** @var string[] list of queues which are monitored */
-    private const MONITORED_QUEUES = ['overlay-images'];
+    private const MONITORED_QUEUES = [GenerateOverlayImageJob::LOW_PRIORITY_QUEUE];
 
     /** @var string  */
-    private const MONITORED_GROUP = 'inventory-generate-overlays-by-dealer';
+    public const MONITORED_GROUP = 'inventory-generate-all-overlays-by-dealer';
 
-    /**
-     * The number of times the job may be attempted.
-     *
-     * @var int
-     */
-    public $tries = 5;
+    /** @var int The number of times the job may be attempted. */
+    public $tries = 1;
 
-    /**
-     * @var int
-     */
+    /** @var int */
     public $dealerId;
 
+    /** @var string */
     public $queue = 'batched-jobs';
 
     public function __construct(int $dealerId)
@@ -43,7 +38,7 @@ class GenerateOverlayImageJobByDealer extends Job
         $inventories = $repo->getAll(
             [
                 'dealer_id' => $this->dealerId,
-                'images_greater_than' => 1
+                'images_greater_than' => Inventory::OVERLAY_ENABLED_PRIMARY
             ],
             false,
             false,
@@ -54,7 +49,9 @@ class GenerateOverlayImageJobByDealer extends Job
             Job::batch(
                 static function (BatchedJob $job) use ($inventories) {
                     foreach ($inventories as $inventory) {
-                        dispatch(new GenerateOverlayImageJob($inventory->inventory_id, false));
+                        dispatch(
+                            new GenerateOverlayImageJob($inventory->inventory_id, false)
+                        )->onQueue(GenerateOverlayImageJob::LOW_PRIORITY_QUEUE);
                     }
                 },
                 self::MONITORED_QUEUES,

@@ -2,6 +2,8 @@
 
 namespace App\Repositories\User;
 
+use App\Jobs\Inventory\GenerateAllOverlayImagesByDealer;
+use App\Models\BatchedJob;
 use Carbon\Carbon;
 use App\Models\User\User;
 use App\Models\User\DealerUser;
@@ -202,6 +204,7 @@ class UserRepository implements UserRepositoryInterface {
      */
     public function updateOverlaySettings(int $dealerId, array $params): array
     {
+        /** @var User $dealer */
         $dealer = User::findOrFail($dealerId);
 
         $overlaySettingFields = [
@@ -235,7 +238,15 @@ class UserRepository implements UserRepositoryInterface {
 
         $dealer->save();
 
-        return $dealer->getChanges();
+        $changes = $dealer->getChanges();
+        unset($changes['updated_at']);
+
+        if (collect($changes)->except('overlay_enabled')->count() > 0) {
+            $dealer->overlay_updated_at = now();
+            $dealer->save();
+        }
+
+        return $changes;
     }
 
     /**
@@ -300,5 +311,16 @@ class UserRepository implements UserRepositoryInterface {
     private function passwordMatch(string $expectedPassword, string $password, string $salt): bool
     {
         return $expectedPassword === $this->encrypterService->encryptBySalt($password, $salt);
+    }
+
+    public function hasRunningOverlayBatch(int $dealerId): bool
+    {
+        $like = sprintf('%%%s-%d%%', GenerateAllOverlayImagesByDealer::MONITORED_GROUP, $dealerId);
+
+        return BatchedJob::query()
+            ->where('batch_id', 'LIKE', $like)
+            ->where('total_jobs', '>', 0)
+            ->whereNull('finished_at')
+            ->exists();
     }
 }

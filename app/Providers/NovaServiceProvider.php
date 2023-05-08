@@ -26,6 +26,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
         Nova::userTimezone(function () {
             return config('app.db_timezone');
         });
+
+        Nova::style('tc', public_path('css/tc.css'));
+        Nova::script('fontawesome', 'https://kit.fontawesome.com/f9ae06e4af.js');
     }
 
     /**

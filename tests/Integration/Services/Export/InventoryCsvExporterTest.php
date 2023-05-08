@@ -7,6 +7,10 @@ use App\Services\Export\Favorites\InventoryCsvExporterInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Tests\TestCase;
 
+/**
+ * @group DW
+ * @group DW_INVENTORY
+ */
 class InventoryCsvExporterTest extends TestCase
 {
     /**

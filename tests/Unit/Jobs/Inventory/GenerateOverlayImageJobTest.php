@@ -2,27 +2,39 @@
 
 namespace Tests\Unit\Jobs\Inventory;
 
-use Tests\TestCase;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Jobs\Inventory\GenerateOverlayImageJob;
-use Mockery;
+use Illuminate\Foundation\Testing\WithFaker;
+use App\Models\Inventory\Inventory;
 use Mockery\LegacyMockInterface;
 use Illuminate\Support\Facades\Log;
 use Psr\Log\LoggerInterface;
+use Tests\TestCase;
 use Exception;
+use Mockery;
 
-class GenerateOverlayImageJobTest extends TestCase {
+/**
+ * @group DW
+ * @group DW_INVENTORY
+ * @group DW_ELASTICSEARCH
+ *
+ * @covers \App\Jobs\Inventory\GenerateOverlayImageJob
+ */
+class GenerateOverlayImageJobTest extends TestCase
+{
+    use WithFaker;
 
+    /** @var int  */
     const INVENTORY_ID = PHP_INT_MAX;
 
-    /**
-     * @var LegacyMockInterface|InventoryServiceInterface
-     */
+    /** @var LegacyMockInterface|InventoryServiceInterface */
     private $inventoryServiceMock;
 
-    /**
-     * @var LoggerInterface|LegacyMockInterface
-     */
+    /** @var LegacyMockInterface|InventoryRepositoryInterface */
+    private $inventoryRepositoryMock;
+
+    /** @var LoggerInterface|LegacyMockInterface */
     protected $logMock;
 
     public function setUp(): void
@@ -32,115 +44,95 @@ class GenerateOverlayImageJobTest extends TestCase {
         $this->inventoryServiceMock = Mockery::mock(InventoryServiceInterface::class);
         $this->app->instance(InventoryServiceInterface::class, $this->inventoryServiceMock);
 
-        $this->instanceMock('logMock', LoggerInterface::class);
+        $this->inventoryRepositoryMock = Mockery::mock(InventoryRepositoryInterface::class);
+        $this->app->instance(InventoryRepositoryInterface::class, $this->inventoryServiceMock);
+
+        $this->logMock = Mockery::mock(LoggerInterface::class);
     }
 
     /**
+     * Test that SUT will go through sad path by catching an exception, logging it and finally, given
+     * the job was instantiated to do not index in ElasticSearch and invalidate cache, then it will not spawn
+     * jobs to handle those processes
+     *
      * @group Marketing
      * @group Marketing_Overlays
+     * @covers ::handle
      */
-    public function testHandle()
+    public function testHandleWillCatchExceptionAndLogWithoutIndexingAndInvalidatingCache()
     {
+        $inventoryId = $this->faker->numberBetween(600, 50000);
+        $shouldIndexAndInvalidateCache = false;
+
         $this->inventoryServiceMock
-            ->shouldReceive('generateOverlays')
-            ->with(self::INVENTORY_ID)
-            ->once();
-
-        Log::shouldReceive('channel')
-            ->once()
-            ->andReturn($this->logMock);
-
-        $this->logMock
-            ->shouldReceive('error')
-            ->never();
-
-        $this->logMock
-            ->shouldReceive('info')
-            ->once();
-
-        $job = $this->getMockBuilder(GenerateOverlayImageJob::class)
-            ->setConstructorArgs([
-                self::INVENTORY_ID
-            ])
-            ->onlyMethods(['release'])
-            ->getMock();
-
-        $job->expects($this->never())->method('release');
-
-        $job->handle($this->inventoryServiceMock);
-    }
-
-    /**
-     * ps: assuming there's a race condition when transaction commit is taking longer to process when adding new inventory
-     * 
-     * @group Marketing
-     * @group Marketing_Overlays
-     */
-    public function testHandleMissingInventoryException()
-    {
-        $this->inventoryServiceMock
-            ->shouldReceive('generateOverlays')
-            ->with(self::INVENTORY_ID)
-            ->once()
-            ->andThrow(new Exception(GenerateOverlayImageJob::MISSING_INVENTORY_ERROR_MESSAGE));
-
-        Log::shouldReceive('channel')
-            ->once()
-            ->andReturn($this->logMock);
-
-        $this->logMock
-            ->shouldReceive('error')
-            ->times(2);
-
-        $this->logMock
-            ->shouldReceive('info')
-            ->never();
-
-        $job = $this->getMockBuilder(GenerateOverlayImageJob::class)
-            ->setConstructorArgs([
-                self::INVENTORY_ID
-            ])
-            ->onlyMethods(['release'])
-            ->getMock();
-
-        $job->expects($this->once())->method('release');
-
-        $job->handle($this->inventoryServiceMock);
-    }
-
-    /**
-     * @group Marketing
-     * @group Marketing_Overlays
-     */
-    public function testHandleException()
-    {
-        $this->inventoryServiceMock
-            ->shouldReceive('generateOverlays')
-            ->with(self::INVENTORY_ID)
-            ->once()
+            ->allows('generateOverlaysByInventoryId')
+            ->with($inventoryId)
             ->andThrow(Exception::class);
 
+        $this->logMock
+            ->expects('error')
+            ->twice();
+
         Log::shouldReceive('channel')
             ->once()
             ->andReturn($this->logMock);
 
-        $this->logMock
-            ->shouldReceive('error')
-            ->times(2);
+        $job = new GenerateOverlayImageJob($inventoryId, $shouldIndexAndInvalidateCache);
+
+        $job->handle($this->inventoryServiceMock, $this->inventoryRepositoryMock);
+    }
+
+    /**
+     * Test that SUT will go through sad path by catching an exception, logging it and finally, given
+     * the job was instantiated to do index in ElasticSearch and invalidate cache, then it will spawn
+     * jobs to handle those processes
+     *
+     * @group Marketing
+     * @group Marketing_Overlays
+     * @covers ::handle
+     */
+    public function testHandleWillCatchExceptionAndLogIndexingAndInvalidatingCache()
+    {
+        $inventoryId = $this->faker->numberBetween(600, 50000);
+        $dealerId = $this->faker->numberBetween(50000, 80000);
+        $shouldIndexAndInvalidateCache = true;
+
+        /** @var Inventory|LegacyMockInterface $inventoryMock */
+        $inventoryMock = $this->getEloquentMock(Inventory::class);
+        $inventoryMock->inventory_id = $inventoryId;
+        $inventoryMock->dealer_id = $dealerId;
+
+        $this->inventoryServiceMock
+            ->allows('generateOverlaysByInventoryId')
+            ->with($inventoryId)
+            ->andThrow(Exception::class);
+
+        $this->inventoryServiceMock
+            ->allows('tryToIndexAndInvalidateCacheByInventory')
+            ->with($inventoryMock);
+
+        $this->inventoryRepositoryMock
+            ->allows('get')
+            ->with(['id' => $inventoryId])
+            ->andReturn($inventoryMock);
 
         $this->logMock
-            ->shouldReceive('info')
-            ->never();
+            ->expects('error')
+            ->twice();
 
-        $job = $this->getMockBuilder(GenerateOverlayImageJob::class)
-            ->setConstructorArgs([
-                self::INVENTORY_ID
+        $this->logMock
+            ->expects('info')
+            ->with('it will dispatch jobs for sync to index and invalidate cache',[
+                'inventory_id' => $inventoryId, 'dealer_id' => $inventoryMock->dealer_id
             ])
-            ->onlyMethods(['release'])
-            ->getMock();
+            ->once();
 
-        $job->expects($this->never())->method('release');
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
 
-        $job->handle($this->inventoryServiceMock);
+        $job = new GenerateOverlayImageJob($inventoryId, $shouldIndexAndInvalidateCache);
+
+        $job->handle($this->inventoryServiceMock, $this->inventoryRepositoryMock);
     }
 }

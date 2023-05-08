@@ -19,6 +19,7 @@ class UpdatePasswordRequest extends Request
             'dealer_user_id' => 'integer|min:1|exists:dealer_users,dealer_user_id',
             'password' => [
                 'required',
+                'max:8',
                 new IsPasswordValid(),
             ],
             'current_password' => [
@@ -31,6 +32,7 @@ class UpdatePasswordRequest extends Request
     {
         return [
             'password.min' => 'The :attribute should be at least :min characters.',
+            'password.max' => 'The :attribute should not be greater than :max characters.',
         ];
     }
 }

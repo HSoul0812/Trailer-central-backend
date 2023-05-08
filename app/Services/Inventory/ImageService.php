@@ -2,7 +2,7 @@
 
 namespace App\Services\Inventory;
 
-use App\Jobs\Inventory\GenerateOverlayImageJobByDealer;
+use App\Jobs\Inventory\GenerateAllOverlayImagesByDealer;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Exceptions\File\MissingS3FileException;
 use Illuminate\Support\Facades\Storage;
@@ -13,24 +13,19 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Models\User\User;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Models\Inventory\Inventory;
+use App;
 
 class ImageService implements ImageServiceInterface
 {
     use S3Helper, DispatchesJobs;
 
-    /**
-     * @var ImageRepositoryInterface
-     */
+    /** @var ImageRepositoryInterface */
     private $imageRepository;
 
-    /**
-     * @var UserRepositoryInterface
-     */
+    /** @var UserRepositoryInterface */
     private $userRepository;
 
-    /**
-     * @var InventoryRepositoryInterface
-     */
+    /** @var InventoryRepositoryInterface */
     private $inventoryRepository;
 
     public function __construct(
@@ -39,103 +34,152 @@ class ImageService implements ImageServiceInterface
         InventoryRepositoryInterface $inventoryRepository
     ) {
         $this->imageRepository = $imageRepository;
-
         $this->userRepository = $userRepository;
-
         $this->inventoryRepository = $inventoryRepository;
     }
 
     /**
-     * @param Image $image
-     * @param string $filename
-     * @return void
+     * @throws MissingS3FileException
      */
     public function saveOverlay(Image $image, string $filename): void
     {
-        if (Storage::disk('s3')->missing($filename))
-            throw new MissingS3FileException;
-
-        $params['filename'] = $filename;
-        $params['filename_noverlay'] = $image->filename_noverlay;
-
-        if (empty($params['filename_noverlay'])) {
-
-            // keep original filename to other field
-            $params['filename_noverlay'] = $image->filename;
-
-        } else {
-
-            // delete old s3 file
-            // We can not drop the S3 object because maybe there is another indexing job which is using `filename` as it is
-            // Storage::disk('s3')->delete($image->filename);
-            // @todo we need to investigate how to drop images already removed from DB and remove them from S3 buckets
+        if (Storage::disk('s3')->missing($filename)) {
+            throw new MissingS3FileException(sprintf("S3 object '%s' is missing", $filename));
         }
 
-        $params['hash'] = $this->getFileHash($params['filename']);
-        $params['id'] = $image->image_id;
+        $objectUrlToBeDropped = $image->filename;
 
-        $this->imageRepository->update($params);
+        $this->imageRepository->update([
+            'id' => $image->image_id,
+            'hash' =>  $this->getFileHash($filename),
+            'filename' => $filename,
+            'filename_with_overlay' => $filename,
+            // we're forced to always store `filename_without_overlay` to avoid data inconsistency due previous versions
+            'filename_without_overlay' => $image->getFilenameOfOriginalImage()
+        ]);
+
+        $this->inventoryRepository->markImageAsOverlayGenerated($image->image_id);
+        $this->imageRepository->scheduleObjectToBeDroppedByURL($objectUrlToBeDropped);
     }
 
     /**
-     * @param Image $image
-     * @param array $params
-     * @return void
-     */
-    public function resetOverlay(Image $image): void
-    {
-        if (empty($image->filename_noverlay)) return;
-
-        $params['filename'] = $image->filename_noverlay;
-        $params['hash'] = $this->getFileHash($params['filename']);
-        $params['filename_noverlay'] = '';
-        $params['id'] = $image->image_id;
-
-        // delete old s3 file
-        // We can not drop the S3 object because maybe there is another indexing job which is using `filename` as it is
-        // Storage::disk('s3')->delete($image->filename);
-        // @todo we need to investigate how to drop images already removed from DB and remove them from S3 buckets
-
-        $this->imageRepository->update($params);
-    }
-
-    /**
-     * Get Hash
+     * Will do nothing when image `filename_with_overlay` is empty which means it has never had an overlay
      *
-     * @param string $filename
-     * @return string
+     * @throws MissingS3FileException
+     */
+    public function tryToRestoreOriginalImage(Image $image): void
+    {
+        if (empty($image->filename_with_overlay)) {
+            return;
+        }
+
+        // swap the overlay filename to the filename without overlay
+        $this->imageRepository->update([
+            'id' => $image->image_id,
+            // @todo investigate what the purpose of `hash` value
+            'hash' => $this->getFileHash($image->getFilenameOfOriginalImage()),
+            'filename' => $image->getFilenameOfOriginalImage()
+        ]);
+    }
+
+    /**
+     * Will do nothing when image `filename_with_overlay` is empty which means it has never had an overlay
+     *
+     * @throws MissingS3FileException
+     */
+    public function tryToRestoreImageOverlay(Image $image): void
+    {
+        if (empty($image->filename_with_overlay)) {
+            return;
+        }
+
+        // swap the overlay filename to the filename without overlay
+        $this->imageRepository->update([
+            'id' => $image->image_id,
+            // @todo investigate what the purpose of `hash` value
+            'hash' => $this->getFileHash($image->filename_with_overlay),
+            'filename' => $image->filename_with_overlay
+        ]);
+    }
+
+    /**
+     * @throws MissingS3FileException
      */
     public function getFileHash(string $filename): string
     {
-        if (Storage::disk('s3')->missing($filename))
-            throw new MissingS3FileException;
+        if (Storage::disk('s3')->missing($filename)) {
+            $productionUrl = $this->getProductionS3BaseUrl().$filename;
+
+            if (!App::environment('production') && !App::runningUnitTests() && $this->exist($productionUrl)) {
+                return sha1_file($productionUrl);
+            }
+
+            throw new MissingS3FileException(sprintf("S3 object '%s' is missing", $filename));
+        }
 
         return sha1_file($this->getS3BaseUrl() . $filename);
     }
 
     /**
-     * Update Overlay Settings
+     *  Will update overlay settings only when they were really changed
+     *
+     * @param  array{
+     *     dealer_id:int,
+     *     inventory_id: int,
+     *     overlay_logo: string,
+     *     overlay_logo_position: string,
+     *     overlay_logo_width: int,
+     *     overlay_upper: string,
+     *     overlay_upper_bg: string,
+     *     overlay_upper_alpha: string,
+     *     overlay_upper_text: string,
+     *     overlay_upper_size: int,
+     *     overlay_upper_margin: string,
+     *     overlay_lower: string,
+     *     overlay_lower_bg: string,
+     *     overlay_lower_alpha: string,
+     *     overlay_lower_text: string,
+     *     overlay_lower_size: int,
+     *     overlay_lower_margin: string,
+     *     overlay_default: int,
+     *     overlay_enabled: int,
+     *     dealer_overlay_enabled: int,
+     *     overlay_text_dealer: string,
+     *     overlay_text_phone: string,
+     *     country: string,
+     *     overlay_text_location: string,
+     *     overlay_updated_at: string
+     *     }  $params
+     * @return User
      */
     public function updateOverlaySettings(array $params): User
     {
         $changes = $this->userRepository->updateOverlaySettings($params['dealer_id'], $params);
         $dealer = $this->userRepository->get(['dealer_id' => $params['dealer_id']]);
-        $wasChanged = !empty($changes);
-        $isOverlayenabledChanged = isset($changes['overlay_enabled']);
+        $isOverlayEnabledChanged = isset($changes['overlay_enabled']);
 
         // update overlay_enabled on all inventories
-        if ($isOverlayenabledChanged) {
-            Inventory::withoutCacheInvalidationAndSearchSyncing(function () use($params, $changes){
-                $this->inventoryRepository->massUpdate([
-                    'dealer_id' => $params['dealer_id'],
-                    'overlay_enabled' => $changes['overlay_enabled']
-                ]);
+        if ($isOverlayEnabledChanged) {
+            Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($params, $changes) {
+                $this->inventoryRepository->massUpdate(
+                    [
+                        'dealer_id' => $params['dealer_id'],
+                        'overlay_enabled' => $changes['overlay_enabled']
+                    ],
+                    [
+                        // to avoid override those inventories which are overlay locked
+                        'overlay_is_locked' => Inventory::IS_NOT_OVERLAY_LOCKED
+                    ]
+                );
             });
         }
 
         // Generate Overlay Inventory Images if necessary
-        if ($wasChanged) {
-            $this->dispatch(new GenerateOverlayImageJobByDealer($dealer->dealer_id));
+        if (!empty($changes)) {
+            // @todo we should implement some mechanism to avoid to dispatch many times
+            //      `GenerateOverlayImageJobByDealer` successively because that job will spawn as many
+            //      `GenerateOverlayImageJob` jobs as many inventory units has the dealer
+            $this->dispatch((new GenerateAllOverlayImagesByDealer($dealer->dealer_id))->delay(2));
         }
 
         return $dealer;

@@ -32,6 +32,9 @@ class ReIndexInventoriesByDealerLocationJob extends Job
 
     public $queue = 'batched-jobs';
 
+    /** @var int The number of times the job may be attempted. */
+    public $tries = 1;
+
     public function __construct(int $locationId, ?array $context = null)
     {
         $this->locationId = $locationId;

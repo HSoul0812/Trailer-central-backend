@@ -5,10 +5,14 @@ namespace Tests\Integration\Models\Inventory\Inventory;
 use App\Models\Inventory\Attribute;
 use App\Models\Inventory\AttributeValue;
 use App\Models\Inventory\Inventory;
+use App\Models\User\DealerLocation;
+use App\Models\User\Location\Geolocation;
+use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 /**
- * Class InventoryTest
+ * @group DW
+ * @group DW_INVENTORY
  *
  * @package Tests\Integration\Models\Inventory\Inventory
  *
@@ -16,6 +20,8 @@ use Tests\TestCase;
  */
 class InventoryTest extends TestCase
 {
+    use WithFaker;
+
     /**
      * @covers ::getAttributeById
      *
@@ -28,7 +34,7 @@ class InventoryTest extends TestCase
         $inventory = factory(Inventory::class)->create();
         $attribute = Attribute::create([
             'type' => 'select',
-            'code' => 'testattr',
+            'code' => 'testattr_' . $this->faker->word(),
             'name' => 'Test Attribute',
             'values' => 'slant:Slant,straight:Straight,head_head:Head to Head,reverse_slant:Reverse Slant',
         ]);
@@ -52,5 +58,45 @@ class InventoryTest extends TestCase
         $inventory->delete();
         $attribute->delete();
         $attributeValue->delete();
+    }
+
+    /**
+     * @covers ::geolocationPoint
+     *
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
+     */
+    public function testItUsesTheLocationFromGeolocationIfInventoryHasNoLocationAndDealerLocationHasNoCoords()
+    {
+        $dealerLocation = factory(DealerLocation::class)->create([
+            'postalcode' => 'testzip'
+        ]);
+
+        //updating because the factory would use faker if the lat/lng is null
+        $dealerLocation->update([
+            'latitude' => null,
+            'longitude' => null
+        ]);
+
+        $inventory = factory(Inventory::class)->create([
+            'dealer_location_id' => $dealerLocation->dealer_location_id
+        ]);
+
+        $geolocation = Geolocation::create([
+            'zip' => 'testzip',
+            'latitude' => 1234.0,
+            'longitude' => 1234.0,
+            'country' => 'USA'
+        ]);
+
+        $inventoryGeolocation = $inventory->geolocationPoint();
+
+        $this->assertSame(1234.0, $inventoryGeolocation->latitude);
+        $this->assertSame(1234.0, $inventoryGeolocation->longitude);
+
+        $inventory->delete();
+        $geolocation->delete();
+        $dealerLocation->delete();
     }
 }

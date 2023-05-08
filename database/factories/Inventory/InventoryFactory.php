@@ -49,7 +49,10 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
     if(!empty($showroom->msrp)) {
         $msrp = $showroom->msrp;
     }
-    $price = $faker->randomFloat(2, $msrp * 0.8, $msrp);
+    $msrp = $attributes['msrp'] ?? $msrp;
+    $price = $attributes['price'] ?? $faker->randomFloat(2, $msrp * 0.8, $msrp);
+    $salesPrice = $attributes['sales_price'] ?? $faker->randomFloat(2, $msrp * 0.8, $msrp);
+    $condition = $attributes['condition'] ?? $faker->randomElement(['new', 'used']);
 
     // Get Created Date
     $createdAt = $faker->dateTimeThisMonth;
@@ -74,10 +77,11 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
         'vin' => $attributes['vin'] ?? Str::random(17),
         'geolocation' => DB::raw('POINT(' . $faker->longitude() . ', ' . $faker->latitude() . ')'),
         'msrp' => $msrp,
+        'sales_price' => $salesPrice,
         'price' => $price,
         'cost_of_unit' => $price / 2,
         'year' => $faker->year,
-        'condition' => $faker->randomElement(['new', 'used']),
+        'condition' => $condition,
         'notes' => $faker->realText(),
         'is_archived' => 0,
         'showroom_id' => !empty($showroom->id) ? $showroom->id : null

@@ -17,6 +17,7 @@ use App\Models\Inventory\Geolocation\Point as GeolocationPoint;
 use App\Models\Parts\Vendor;
 use App\Models\Traits\TableAware;
 use App\Models\User\DealerLocation;
+use App\Models\User\Location\Geolocation;
 use App\Models\User\User;
 use App\Traits\CompactHelper;
 use App\Traits\GeospatialHelper;
@@ -92,7 +93,8 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property bool $show_on_racingjunk
  * @property bool $show_on_website
  * @property \DateTimeInterface|Carbon $tt_payment_expiration_date
- * @property bool $overlay_enabled 0 -> disabled, 1 -> only primary image, 2 -> all images
+ * @property int $overlay_enabled 0 -> disabled, 1 -> only primary image, 2 -> all images
+ * @property boolean $overlay_is_locked by default it is false
  * @property bool $is_special
  * @property bool $is_featured
  * @property double $latitude
@@ -150,7 +152,8 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property bool $show_on_auction123
  * @property bool $show_on_rvt
  *
- * @property string $category_label
+ * @property string|null $category_label
+ * @property int|null $inventory_category_id
  * @property string $status_label
  * @property string $color
  * @property double $interest_paid
@@ -163,9 +166,9 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property Collection<mixed> $attributes_indexed_by_id A collection of attribute values indexed by the attribute id
  * @property DealerLocation $dealerLocation
  * @property Collection<Payment> $floorplanPayments
- * @property Collection<InventoryImage> $inventoryImages
- * @property Collection<InventoryImage> $orderedImages
- * @property Collection<Image> $images
+ * @property Collection<InventoryImage>|InventoryImage[] $inventoryImages
+ * @property Collection<InventoryImage>|InventoryImage[] $orderedImages
+ * @property Collection<Image>|Image[] $images
  * @property Collection<InventoryFile> $inventoryFiles
  * @property Collection<File> $files
  * @property Collection<InventoryFeature> $inventoryFeatures
@@ -186,11 +189,19 @@ class Inventory extends Model
 {
     use TableAware, SpatialTrait, GeospatialHelper, Searchable, CustomSearch;
 
+    /** @var Collection|Category[] basically this to avoid n+1 query issue when payment calculator is used,
+     *                             there is not way to avoid with eager loading
+     */
+    private static $memoizedCategories;
+
     /** @var InventoryElasticSearchConfigurator */
     private static $indexConfigurator;
 
     /** @var null|string */
     public static $searchableAs = null;
+
+    /** @var bool to determines when the image overlay generation jobs should be dispatched */
+    private static $isOverlayGenerationEnabled = true;
 
     const TABLE_NAME = 'inventory';
 
@@ -225,7 +236,7 @@ class Inventory extends Model
 
     const IS_ACTIVE = 1;
     const IS_NOT_ACTIVE = 0;
-    
+
     const SHOW_IN_WEBSITE = 1;
 
     const ATTRIBUTE_ZERO_VALUE = 0;
@@ -249,6 +260,7 @@ class Inventory extends Model
         self::CONDITION_RE_MFG => 'Re-manufactured',
     ];
 
+    const OVERLAY_ENABLED_NONE = User::OVERLAY_ENABLED_NONE;
     const OVERLAY_ENABLED_PRIMARY = User::OVERLAY_ENABLED_PRIMARY;
     const OVERLAY_ENABLED_ALL = User::OVERLAY_ENABLED_ALL;
 
@@ -262,6 +274,9 @@ class Inventory extends Model
 
     const PAC_TYPE_PERCENT = 'percent';
     const PAC_TYPE_AMOUNT = 'amount';
+
+    const IS_OVERLAY_LOCKED = 1;
+    const IS_NOT_OVERLAY_LOCKED = 0;
 
     /**
      * The table associated with the model.
@@ -328,6 +343,7 @@ class Inventory extends Model
         'show_on_website',
         'tt_payment_expiration_date',
         'overlay_enabled',
+        'overlay_is_locked',
         'is_special',
         'is_featured',
         'latitude',
@@ -397,6 +413,7 @@ class Inventory extends Model
         'fp_balance' => 'float',
         'qb_sync_processed' => 'boolean',
         'is_floorplan_bill' => 'boolean',
+        'overlay_is_locked' => 'boolean',
         'sold_at' => 'datetime',
         'changed_fields_in_dashboard' => 'array',
         'tt_payment_expiration_date' => 'date'
@@ -617,15 +634,36 @@ class Inventory extends Model
         return $this->orderedImages()->first();
     }
 
-    public function getCategoryLabelAttribute()
+    /**
+     * This method uses memoization instead of Eloquent belongs relations to be able improve the ES indexation
+     *
+     * @return string|null
+     */
+    public function getCategoryLabelAttribute(): ?string
     {
-        $category = Category::where('legacy_category', $this->category)->first();
-
-        if (empty($category)) {
-            return null;
+        if (!self::$memoizedCategories) {
+            self::$memoizedCategories = Category::query()->get();
         }
 
-        return $category->label;
+        $category = self::$memoizedCategories->firstWhere('legacy_category', '=', $this->category);
+
+        return $category ? $category->label : null;
+    }
+
+    /**
+     * This method uses memoization instead of Eloquent belongs relations to be able improve the ES indexation
+     *
+     * @return int|null
+     */
+    public function getInventoryCategoryIdAttribute(): ?int
+    {
+        if (!self::$memoizedCategories) {
+            self::$memoizedCategories = Category::query()->get();
+        }
+
+        $category = self::$memoizedCategories->firstWhere('legacy_category', '=', $this->category);
+
+        return $category ? $category->inventory_category_id : null;
     }
 
     public function getColorAttribute()
@@ -772,7 +810,15 @@ class Inventory extends Model
             return new GeolocationPoint((float)$this->latitude, (float)$this->longitude);
         }
 
-        return new GeolocationPoint((float)$this->dealerLocation->latitude, (float)$this->dealerLocation->longitude);
+        if ($this->dealerLocation->latitude && $this->dealerLocation->longitude) {
+            return new GeolocationPoint((float)$this->dealerLocation->latitude, (float)$this->dealerLocation->longitude);
+        }
+
+        if ($geolocation = Geolocation::whereZip($this->dealerLocation->postalcode)->first()) {
+            return new GeolocationPoint((float)$geolocation->latitude, (float)$geolocation->longitude);
+        }
+
+        return new GeolocationPoint(0, 0);
     }
 
     /**
@@ -925,6 +971,7 @@ class Inventory extends Model
             'inventory_price' => count($potentialsPrices) ? min($potentialsPrices) : 0,
             'entity_type_id' => $this->entity_type_id,
             'inventory_condition' => $this->condition,
+            'inventory_category_id_or_null' => $this->inventory_category_id,
         ];
     }
 
@@ -941,5 +988,10 @@ class Inventory extends Model
                 $query->whereNull('status')
                     ->orWhere('status', '<>', self::STATUS_QUOTE);
             });
+    }
+
+    public static function unMemoizeCategories()
+    {
+        self::$memoizedCategories = null;
     }
 }

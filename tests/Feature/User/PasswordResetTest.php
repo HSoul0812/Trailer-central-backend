@@ -22,7 +22,14 @@ class PasswordResetTest extends TestCase
 
     private const NON_EXISTENT_EMAIL = 'bestdeveverinthehistoryofdev@bestdev.com';
 
+    /** @var User */
     protected $dealer;
+
+    /** @var string */
+    protected $password;
+
+    /** @var string */
+    protected $salt;
 
     /**
      * App\Repositories\User\DealerPasswordResetRepositoryInterface
@@ -33,7 +40,13 @@ class PasswordResetTest extends TestCase
     {
         parent::setUp();
 
-        $this->dealer = factory(User::class)->create();
+        $this->password = $this->faker->password(6, 8);
+        $this->salt = uniqid();
+
+        $this->dealer = factory(User::class)->create([
+            'password' => $this->password,
+            'salt' => $this->salt,
+        ]);
 
         factory(AuthToken::class)->create([
             'user_id' => $this->dealer->dealer_id,
@@ -109,7 +122,7 @@ class PasswordResetTest extends TestCase
 
         $password = $this->faker->password(6, 8);
 
-        $response = $this->json('POST', '/api/user/password-reset/finish', ['code' => $passwordReset->code, 'password' => $password]);
+        $response = $this->json('POST', '/api/user/password-reset/finish', ['code' => $passwordReset->code, 'password' => $password, 'current_password' => $this->password]);
         $response->assertStatus(201);
 
         $response = $this->json('POST', '/api/user/login', ['email' => $this->dealer->email, 'password' => $password]);
@@ -130,7 +143,7 @@ class PasswordResetTest extends TestCase
 
         $password = $this->faker->password(9);
 
-        $response = $this->json('POST', '/api/user/password-reset/finish', ['code' => $passwordReset->code, 'password' => $password]);
+        $response = $this->json('POST', '/api/user/password-reset/finish', ['code' => $passwordReset->code, 'password' => $password, 'current_password' => $this->password]);
         $response->assertStatus(422);
 
         $json = json_decode($response->getContent(), true);
@@ -149,13 +162,31 @@ class PasswordResetTest extends TestCase
      *
      * @return void
      */
+    public function testFinishPasswordResetNoCurrentPassword()
+    {
+        $this->dealer = $this->dealer->fresh();
+
+        $passwordReset = $this->assertResetPasswordWasSent();
+
+        $password = $this->faker->password(9);
+
+        $response = $this->json('POST', '/api/user/password-reset/finish', ['code' => $passwordReset->code, 'password' => $password]);
+        $response->assertStatus(422);
+    }
+
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testFinishPasswordResetNoPassword()
     {
         $this->dealer = $this->dealer->fresh();
 
         $passwordReset = $this->assertResetPasswordWasSent();
 
-        $response = $this->json('POST', '/api/user/password-reset/finish', ['code' => $passwordReset->code]);
+        $response = $this->json('POST', '/api/user/password-reset/finish', ['code' => $passwordReset->code, 'current_password' => $this->password]);
         $response->assertStatus(422);
     }
 
@@ -173,7 +204,7 @@ class PasswordResetTest extends TestCase
 
         $password = $this->faker->password(6, 8);
 
-        $response = $this->json('POST', '/api/user/password-reset/finish', ['password' => $password]);
+        $response = $this->json('POST', '/api/user/password-reset/finish', ['password' => $password, 'current_password' => $this->password]);
         $response->assertStatus(422);
     }
 
