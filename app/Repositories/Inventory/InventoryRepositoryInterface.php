@@ -7,6 +7,7 @@ use App\Models\Inventory\InventoryFile;
 use App\Models\Inventory\InventoryImage;
 use App\Repositories\Repository;
 use App\Repositories\TransactionalRepository;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\LazyCollection;
 
 interface InventoryRepositoryInterface extends Repository, TransactionalRepository
@@ -95,4 +96,51 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
      * @return InventoryFile[]
      */
     public function createInventoryFiles(Inventory $inventory, array $newFiles): array;
+
+    /**
+     * Get necessary configuration to generate overlays
+     *
+     * @param  int  $inventoryId
+     * @return array{
+     *     dealer_id:int,
+     *     inventory_id: int,
+     *     overlay_logo: string,
+     *     overlay_logo_position: string,
+     *     overlay_logo_width: int,
+     *     overlay_upper: string,
+     *     overlay_upper_bg: string,
+     *     overlay_upper_alpha: string,
+     *     overlay_upper_text: string,
+     *     overlay_upper_size: int,
+     *     overlay_upper_margin: string,
+     *     overlay_lower: string,
+     *     overlay_lower_bg: string,
+     *     overlay_lower_alpha: string,
+     *     overlay_lower_text: string,
+     *     overlay_lower_size: int,
+     *     overlay_lower_margin: string,
+     *     overlay_default: int,
+     *     overlay_enabled: int,
+     *     dealer_overlay_enabled: int,
+     *     overlay_text_dealer: string,
+     *     overlay_text_phone: string,
+     *     country: string,
+     *     overlay_text_location: string,
+     *     overlay_updated_at: string
+     *     }
+     */
+    public function getOverlayParams(int $inventoryId): array;
+
+    /**
+     * @param  int  $inventoryId
+     * @return Collection<InventoryImage>|InventoryImage[] all images related to the inventory
+     */
+    public function getInventoryImages(int $inventoryId): Collection;
+
+    /**
+     * @return bool true when it changed desired image, false when it di not
+     */
+    public function markImageAsOverlayGenerated(int $imageId): bool;
+
+    public function getInventoryByDealerIdWhichShouldHaveImageOverlayButTheyDoesNot(int $dealerId): LazyCollection;
 }

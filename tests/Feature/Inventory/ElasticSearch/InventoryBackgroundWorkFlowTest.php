@@ -2,15 +2,14 @@
 
 namespace Tests\Feature\Inventory\ElasticSearch;
 
-use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
-use App\Jobs\Inventory\GenerateOverlayAndReIndexInventoriesByDealersJob;
+use App\Jobs\Inventory\GenerateSomeOverlayImagesByDealerIds;
+use App\Jobs\Inventory\GenerateOverlayImageJob;
 use App\Models\Inventory\Inventory;
 use App\Models\User\AuthToken;
 use App\Models\User\User;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
-use App\Jobs\Scout\MakeSearchable;
 use Tests\TestCase;
 
 /**
@@ -18,7 +17,7 @@ use Tests\TestCase;
  * @group DW_INVENTORY
  * @group DW_ELASTICSEARCH
  */
-class CacheInvalidationSearchSyncingTest extends TestCase
+class InventoryBackgroundWorkFlowTest extends TestCase
 {
     private const  INTEGRATIONS_ACCESS_TOKEN = '123';
 
@@ -59,8 +58,7 @@ class CacheInvalidationSearchSyncingTest extends TestCase
             ]);
         }
 
-        Bus::assertNotDispatched(InvalidateCacheJob::class);
-        Bus::assertNotDispatched(MakeSearchable::class);
+        Bus::assertNotDispatched(GenerateOverlayImageJob::class);
     }
 
     public function test_it_doesnt_invalidate_cache_when_cache_is_disabled(): void
@@ -81,8 +79,7 @@ class CacheInvalidationSearchSyncingTest extends TestCase
             'title' => $newTitle
         ]);
 
-        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 2); // this should be fixed to only dispatch it once
-        Bus::assertDispatchedTimes(MakeSearchable::class, 1); // it should still being indexing
+        Bus::assertDispatchedTimes(GenerateOverlayImageJob::class, 1);
     }
 
     public function test_it_dispatch_jobs_when_requests_not_from_integrations(): void
@@ -103,8 +100,7 @@ class CacheInvalidationSearchSyncingTest extends TestCase
             'title' => $newTitle
         ]);
 
-        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 2); // this should be fixed to only dispatch it once
-        Bus::assertDispatchedTimes(MakeSearchable::class, 1);
+        Bus::assertDispatchedTimes(GenerateOverlayImageJob::class, 1);
     }
 
     public function test_it_dispatch_jobs_by_dealer_when_direct_endpoint_is_use(): void
@@ -124,7 +120,7 @@ class CacheInvalidationSearchSyncingTest extends TestCase
 
         $response->assertStatus(202);
 
-        Bus::assertDispatchedTimes(GenerateOverlayAndReIndexInventoriesByDealersJob::class, 1);
+        Bus::assertDispatchedTimes(GenerateSomeOverlayImagesByDealerIds::class, 1);
     }
 
     public function setUp(): void

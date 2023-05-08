@@ -613,6 +613,9 @@ $api->version('v1', function ($route) {
         $route->get('user/overlay/settings', 'App\Http\Controllers\v1\User\OverlaySettingsController@index');
         $route->post('user/overlay/settings', 'App\Http\Controllers\v1\User\OverlaySettingsController@updateSettings');
 
+        $route->get('user/crm/settings', 'App\Http\Controllers\v1\CRM\User\SettingsController@index');
+        $route->post('user/crm/settings', 'App\Http\Controllers\v1\CRM\User\SettingsController@updateSettings');
+
         $route->put('user/newsletter', 'App\Http\Controllers\v1\User\SettingsController@updateNewsletter');
         $route->get('user/newsletter', 'App\Http\Controllers\v1\User\SettingsController@getNewsletter');
 
@@ -642,12 +645,29 @@ $api->version('v1', function ($route) {
     $route->post('leads/status/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@update');
     $route->get('leads/types', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@index');
     $route->get('leads/types/public', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@publicTypes');
-    $route->get('leads/sources', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@index');
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
     $route->get('leads/sort-fields/crm', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFieldsCrm');
     $route->get('leads/unique-full-names', 'App\Http\Controllers\v1\CRM\Leads\LeadController@uniqueFullNames');
     $route->get('leads/filters', 'App\Http\Controllers\v1\CRM\Leads\LeadController@filters');
     $route->get('crm/states', 'App\Http\Controllers\v1\CRM\StatesController@index');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Lead Sources
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->group([
+        'prefix' => 'leads/sources',
+        'middleware' => 'leads.source.validate'
+    ], function($route) {
+
+        $route->get('/', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@index');
+        $route->put('/', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@create');
+        $route->delete('/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@destroy');
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -668,7 +688,7 @@ $api->version('v1', function ($route) {
     |
     */
     $route->get('users', 'App\Http\Controllers\v1\User\UserController@index');
-    $route->post('users', 'App\Http\Controllers\v1\User\UserController@create');
+    $route->post('users', 'App\Http\Controllers\v1\User\UserController@create')->middleware('integration-permission:create_user,can_see_and_change');;
 
     $route->get('users-by-name', 'App\Http\Controllers\v1\User\UserController@listByName')->middleware('integration-permission:get_dealers_by_name,can_see');
 

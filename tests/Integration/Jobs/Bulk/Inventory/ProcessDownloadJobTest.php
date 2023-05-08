@@ -22,6 +22,9 @@ use Tests\Integration\AbstractMonitoredJobsTest;
 use Throwable;
 
 /**
+ * @group DW
+ * @group DW_INVENTORY
+ *
  * @covers \App\Jobs\Bulk\Inventory\ProcessDownloadJob::handle
  * @group MonitoredJobs
  */

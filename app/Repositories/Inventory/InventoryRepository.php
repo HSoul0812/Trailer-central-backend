@@ -377,6 +377,9 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
+     * @fix this method has been source of mess because it is too general, it aims the developer to do not create
+     *      another one specific for the new desired task
+     *
      * @param array $params
      * @param array $queryParams
      * @return bool
@@ -388,13 +391,15 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         $dealerId = $params['dealer_id'];
-        unset($params['dealer_id']);
+        unset($params['dealer_id']); // to avoid update it
 
-        $queryParams += ['dealer_id', $dealerId];
-
-        Inventory::query()->where(
-            $queryParams
-        )->update($params);
+        Inventory::query()
+            ->where('dealer_id', $dealerId)
+            ->when(!empty($queryParams), function ($builder) use ($queryParams): void {
+                /** @var GrimzyBuilder|EloquentBuilder $builder */
+                $builder->where($queryParams);
+            })
+            ->update($params);
 
         return true;
     }
@@ -1212,27 +1217,80 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
-     * Get necessary parameters to generate overlays
+     * Get necessary configuration to generate overlays
      *
-     * @param int $inventoryId
-     * @return array
+     * @param  int  $inventoryId
+     * @return array{
+     *     dealer_id:int,
+     *     inventory_id: int,
+     *     overlay_logo: string,
+     *     overlay_logo_position: string,
+     *     overlay_logo_width: int,
+     *     overlay_upper: string,
+     *     overlay_upper_bg: string,
+     *     overlay_upper_alpha: string,
+     *     overlay_upper_text: string,
+     *     overlay_upper_size: int,
+     *     overlay_upper_margin: string,
+     *     overlay_lower: string,
+     *     overlay_lower_bg: string,
+     *     overlay_lower_alpha: string,
+     *     overlay_lower_text: string,
+     *     overlay_lower_size: int,
+     *     overlay_lower_margin: string,
+     *     overlay_default: int,
+     *     overlay_enabled: int,
+     *     dealer_overlay_enabled: int,
+     *     overlay_text_dealer: string,
+     *     overlay_text_phone: string,
+     *     country: string,
+     *     overlay_text_location: string,
+     *     overlay_updated_at: string
+     *     }
      */
-    public function getOverlayParams(int $inventoryId)
+    public function getOverlayParams(int $inventoryId): array
     {
-        $query = Inventory::select(User::getTableName() .'.dealer_id', 'inventory_id', 'overlay_logo', 'overlay_logo_position', 'overlay_logo_width', 'overlay_logo_height',
-            'overlay_upper', 'overlay_upper_bg', 'overlay_upper_alpha', 'overlay_upper_text', 'overlay_upper_size', 'overlay_upper_margin',
-            'overlay_lower', 'overlay_lower_bg', 'overlay_lower_alpha', 'overlay_lower_text', 'overlay_lower_size', 'overlay_lower_margin',
-            'overlay_default', Inventory::getTableName() .'.overlay_enabled', User::getTableName() .'.overlay_enabled AS dealer_overlay_enabled',
-            User::getTableName() .'.name AS overlay_text_dealer', DealerLocation::getTableName() .'.phone AS overlay_text_phone',
-            DealerLocation::getTableName() .'.country',
-            \DB::raw("CONCAT(".DealerLocation::getTableName() .".city, ', ',".DealerLocation::getTableName() .".region) AS overlay_text_location"))
-        ->leftJoin(User::getTableName(), Inventory::getTableName() .'.dealer_id', '=', User::getTableName() .'.dealer_id')
-        ->leftJoin(DealerLocation::getTableName(), Inventory::getTableName() .'.dealer_location_id', '=', DealerLocation::getTableName() .'.dealer_location_id')
-        ->where(Inventory::getTableName() .'.inventory_id', $inventoryId);
+        $userTableName = User::getTableName();
+        $dealerLocationTable = DealerLocation::getTableName();
+        $inventoryTable = Inventory::getTableName();
+
+        $columns = [
+            $userTableName.'.dealer_id',
+            'inventory_id',
+            'overlay_logo',
+            'overlay_logo_position',
+            'overlay_logo_width',
+            'overlay_logo_height',
+            'overlay_upper',
+            'overlay_upper_bg',
+            'overlay_upper_alpha',
+            'overlay_upper_text',
+            'overlay_upper_size',
+            'overlay_upper_margin',
+            'overlay_lower',
+            'overlay_lower_bg',
+            'overlay_lower_alpha',
+            'overlay_lower_text',
+            'overlay_lower_size',
+            'overlay_lower_margin',
+            'overlay_default',
+            $inventoryTable.'.overlay_enabled',
+            $userTableName.'.overlay_enabled AS dealer_overlay_enabled',
+            $userTableName.'.name AS overlay_text_dealer',
+            $dealerLocationTable.'.phone AS overlay_text_phone',
+            $dealerLocationTable.'.country',
+            $userTableName.'.overlay_updated_at',
+            DB::raw(sprintf("CONCAT(%s.city,', ',%s.region) AS overlay_text_location", $dealerLocationTable, $dealerLocationTable))
+        ];
+
+        $query = Inventory::select($columns)
+                        ->leftJoin($userTableName, $inventoryTable .'.dealer_id', '=', $userTableName .'.dealer_id')
+                        ->leftJoin($dealerLocationTable, $inventoryTable .'.dealer_location_id', '=', $dealerLocationTable .'.dealer_location_id')
+                        ->where($inventoryTable .'.inventory_id', $inventoryId);
 
         $overlayParams = $query->first()->toArray();
 
-        if(isset($overlayParams['overlay_text_phone'])){
+        if (isset($overlayParams['overlay_text_phone'])) {
             $overlayParams['overlay_text_phone'] = DealerLocation::phoneWithNationalFormat(
                 $overlayParams['overlay_text_phone'],
                 $overlayParams['country']
@@ -1245,13 +1303,74 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
-     * @param int $inventoryId
-     * @return Collection
+     * @param  int  $inventoryId
+     * @return \Illuminate\Database\Eloquent\Collection<InventoryImage>|InventoryImage[] all images related to the inventory
      */
-    public function getInventoryImages(int $inventoryId)
+    public function getInventoryImages(int $inventoryId): \Illuminate\Database\Eloquent\Collection
     {
         $inventory = $this->get(['id' => $inventoryId]);
 
         return $inventory->inventoryImages()->get();
+    }
+
+    /**
+     * @return bool true when it changed desired image, false when it di not
+     */
+    public function markImageAsOverlayGenerated(int $imageId): bool
+    {
+        return (bool) InventoryImage::query()
+            ->where('image_id', $imageId)
+            ->update(['overlay_updated_at' => now()]);
+    }
+
+    public function getInventoryByDealerIdWhichShouldHaveImageOverlayButTheyDoesNot(int $dealerId): LazyCollection
+    {
+        $IS_DEFAULT_IMAGE = InventoryImage::IS_DEFAULT;
+        $IS_NOT_DEFAULT_IMAGE = InventoryImage::IS_NOT_DEFAULT;
+        $OVERLAY_FOR_ALL_IMAGES = Inventory::OVERLAY_ENABLED_ALL;
+        $OVERLAY_FOR_PRIMARY_IMAGE = Inventory::OVERLAY_ENABLED_PRIMARY;
+
+        $subQueryAllImages = <<<SQL
+                    SELECT count(image.image_id)
+                    FROM image
+                          JOIN inventory_image ON inventory_image.image_id = image.image_id
+                    WHERE inventory_image.inventory_id = inventory.inventory_id
+                    AND inventory.overlay_enabled = {$OVERLAY_FOR_ALL_IMAGES}
+                    AND filename_with_overlay IS NULL
+SQL;
+
+        $subQueryPrimaryImage = <<<SQL
+                    SELECT count(image.image_id)
+                    FROM image
+                           JOIN inventory_image ON inventory_image.image_id = image.image_id
+                    WHERE inventory_image.inventory_id = inventory.inventory_id AND
+                          (
+                            inventory_image.is_default = {$IS_DEFAULT_IMAGE} OR
+                            (
+                                -- this workaround criteria is to mitigate bulk upload bug, it never setup is_default as 1
+                                inventory_image.is_default = {$IS_NOT_DEFAULT_IMAGE} AND
+                                (inventory_image.position IS NULL OR inventory_image.position = 0)
+                            )
+                          )
+                    AND inventory.overlay_enabled = {$OVERLAY_FOR_PRIMARY_IMAGE}
+                    AND filename_with_overlay IS NULL
+SQL;
+
+        // This query is a good enough approximation, it is not accurate, it will try to pull all inventories
+        // which need to generate overlay, it is not critical due the job will realize in processing time which images
+        // should have an overlay but they do not have an overlay
+        // @todo we will need to ensure all primary images has is_default as 1 (bulk uploader is setting it wrongly up)
+        //       when it happens we need to fix $subQueryPrimaryImage to avoid the workaround criteria
+
+        return Inventory::query()
+            ->select('inventory.*')
+            ->join('dealer', 'dealer.dealer_id', '=', 'inventory.dealer_id')
+            ->join('inventory_image', 'inventory_image.inventory_id', '=', 'inventory.inventory_id')
+            ->join('image', 'image.image_id', '=', 'inventory_image.image_id')
+            ->where('dealer.dealer_id', $dealerId)
+            ->where('inventory.overlay_enabled', '>=', Inventory::OVERLAY_ENABLED_PRIMARY)
+            ->whereRaw("(({$subQueryAllImages}) > 0 OR ({$subQueryPrimaryImage}) > 0)")
+            ->groupBy('inventory.inventory_id')
+            ->cursor();
     }
 }

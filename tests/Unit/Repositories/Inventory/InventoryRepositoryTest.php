@@ -13,7 +13,10 @@ use Mockery;
 use Tests\TestCase;
 
 /**
- * @coversDefaultClass App\Repositories\Inventory\InventoryRepository
+ * @group DW
+ * @group DW_INVENTORY
+ *
+ * @coversDefaultClass \App\Repositories\Inventory\InventoryRepository
  */
 class InventoryRepositoryTest extends TestCase
 {
