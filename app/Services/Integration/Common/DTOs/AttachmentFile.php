@@ -95,15 +95,11 @@ class AttachmentFile
         // Get File Name
         $parts = explode("/", $file);
         $filename = end($parts);
-        $ext = explode(".", $filename);
 
-        // Get Mime From Extension
-        $ext[1] = !empty($ext[1]) ? $ext[1] : 'jpeg';
-        if(in_array($ext[1], self::IMAGE_TYPES)) {
-            $mime = 'image/' . $ext[1];
-        } else {
-            $mime = 'text/' . $ext[1];
-        }
+        // Get Mime From Content
+        $buffer = file_get_contents($file);
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->buffer($buffer);
 
         // Get Headers if Possible
         $attachment = new self();

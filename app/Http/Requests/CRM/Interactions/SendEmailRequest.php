@@ -20,9 +20,8 @@ class SendEmailRequest extends Request {
         'sales_person_id' => 'integer',
         'subject' => 'required|string',
         'body' => 'required|string',
-        'files' => 'array',
-        'files.*' => 'string',
-        // 'files.*' => 'file',
+        'attachments' => 'array',
+        'attachments.*' => 'file',
 
         'existing_attachments' => 'array',
         'existing_attachments.*.filename' => 'string',

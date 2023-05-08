@@ -6,7 +6,6 @@ use Tests\Integration\IntegrationTestCase;
 use Laravel\Lumen\Testing\DatabaseTransactions;
 use Tests\database\seeds\CRM\Interactions\InteractionSeeder;
 use Faker\Factory as Faker;
-use App\Helpers\ImageHelper;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
@@ -22,8 +21,6 @@ class DraftControllerTest extends IntegrationTestCase {
         parent::setUp();
 
         $this->faker = Faker::create();
-        
-        $this->instanceMock('imageHelper', ImageHelper::class);
     }
 
     /**
@@ -80,13 +77,11 @@ class DraftControllerTest extends IntegrationTestCase {
         $emailBody = $this->faker->md5();
         $fileName = $this->faker->md5() .'.pdf';
 
-        // mock getRandomString()
-        $randomString = $this->faker->md5();
-        $this->imageHelper
-            ->shouldAllowMockingProtectedMethods()
-            ->shouldReceive('getRandomString')
-            ->once()
-            ->andReturn($randomString);
+        /**
+         * Using UploadedFile::fake()->create($fileName) will throw "Can't get file contents" error
+         * so have to use UploadedFile::fake()->createWithContent($fileName, $fileContent) instead
+         */
+        $fileContent = file_get_contents(Storage::disk('test_resources')->path('document.pdf'));
 
         $response = $this->json(
             'POST',
@@ -95,7 +90,7 @@ class DraftControllerTest extends IntegrationTestCase {
                 'subject' => $emailSubject,
                 'body' => $emailBody,
                 'files' => [
-                    UploadedFile::fake()->create($fileName)->size(1000)
+                    UploadedFile::fake()->createWithContent($fileName, $fileContent)
                 ]
             ],
             ['access-token' => $seeder->authToken->access_token]
@@ -133,17 +128,9 @@ class DraftControllerTest extends IntegrationTestCase {
             'original_filename' => $fileName
         ]);
 
-        Storage::disk('s3')->assertExists($randomString);
+        Storage::disk('s3')->assertExists('lead/'. $lead->getKey() .'/email-draft/'. $fileName);
 
         // test Update Attachments
-
-        // mock getRandomString()
-        $randomString2 = $this->faker->md5();
-        $this->imageHelper
-            ->shouldAllowMockingProtectedMethods()
-            ->shouldReceive('getRandomString')
-            ->once()
-            ->andReturn($randomString2);
 
         $anotherFileName = $this->faker->md5() .'.pdf';
 
@@ -154,7 +141,7 @@ class DraftControllerTest extends IntegrationTestCase {
                 'subject' => $emailSubject,
                 'body' => $emailBody,
                 'files' => [
-                    UploadedFile::fake()->create($anotherFileName)->size(1000)
+                    UploadedFile::fake()->createWithContent($anotherFileName, $fileContent)
                 ],
                 'existing_attachments' => $content['attachments']
             ],
@@ -168,8 +155,8 @@ class DraftControllerTest extends IntegrationTestCase {
         // confirm that new & existing attachments still there
         
         Storage::disk('s3')->assertExists([
-            $randomString, 
-            $randomString2
+            'lead/'. $lead->getKey() .'/email-draft/'. $fileName, 
+            'lead/'. $lead->getKey() .'/email-draft/'. $anotherFileName
         ]);
 
         $this->assertDatabaseHas('crm_email_attachments', [
@@ -184,15 +171,7 @@ class DraftControllerTest extends IntegrationTestCase {
 
         Mail::fake();
 
-        // // mock getRandomString()
-        // $randomString3 = $this->faker->md5();
-        // $this->imageHelper
-        //     ->shouldAllowMockingProtectedMethods()
-        //     ->shouldReceive('getRandomString')
-        //     ->once()
-        //     ->andReturn($randomString2);
-
-        // $anotherFileName2 = $this->faker->md5() .'.pdf';
+        $anotherFileName2 = $this->faker->md5() .'.pdf';
 
         $response = $this->json(
             'POST',
@@ -201,9 +180,9 @@ class DraftControllerTest extends IntegrationTestCase {
                 'lead_id' => $lead->getKey(),
                 'subject' => $emailSubject,
                 'body' => $emailBody,
-                // 'files' => [
-                //     UploadedFile::fake()->create($anotherFileName2)->size(1000)
-                // ],
+                'attachments' => [
+                    UploadedFile::fake()->createWithContent($anotherFileName2, $fileContent)
+                ],
                 'existing_attachments' => $content['attachments']
             ],
             ['access-token' => $seeder->authToken->access_token]
@@ -211,11 +190,11 @@ class DraftControllerTest extends IntegrationTestCase {
         
         $response->assertStatus(200);
 
-        // Mail::assertSent(InteractionEmail::class, function($mail) {
+        Mail::assertSent(InteractionEmail::class, function($mail) {
 
-        //     return count($mail->attachments) > 0;
-        // });
-        Mail::assertSent(InteractionEmail::class);
+            $mail = $mail->build();        
+            return count($mail->attachments) == 3;
+        });
 
         $content = json_decode($response->getContent(), true)['data'];
 
@@ -247,6 +226,13 @@ class DraftControllerTest extends IntegrationTestCase {
         $content = json_decode($response->getContent(), true)['data'];
 
         $this->assertEquals($content['subject'], 'RE: '.$emailSubject);
+
+        // delete s3 files after testing
+        Storage::disk('s3')->delete([
+            'lead/'. $lead->getKey() .'/email-draft/'. $fileName, 
+            'lead/'. $lead->getKey() .'/email-draft/'. $anotherFileName,
+            'lead/'. $lead->getKey() .'/email-draft/'. $anotherFileName2
+        ]);
 
         $seeder->cleanup();
     }
