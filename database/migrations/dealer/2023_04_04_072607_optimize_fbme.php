@@ -25,8 +25,6 @@ class OptimizeFbme extends Migration
         $conn->executeStatement($this->createView2());
         $conn->executeStatement($this->createView3());
 
-        $conn->executeStatement($this->addIndexFbListings());
-        $conn->executeStatement($this->addIndexFbAppErrors());
         $conn->close();
     }
 
@@ -38,8 +36,6 @@ class OptimizeFbme extends Migration
     public function down()
     {
         $conn = DB::connection()->getDoctrineConnection();
-        $conn->executeStatement($this->dropIndexFbListings());
-        $conn->executeStatement($this->dropIndexFbAppErrors());
         $conn->executeStatement($this->dropView1());
         $conn->executeStatement($this->dropView3());
         $conn->executeStatement($this->dropView4());
@@ -209,23 +205,4 @@ class OptimizeFbme extends Migration
             last_attempt_ts DESC;   ";
     }
 
-    private function addIndexFbListings()
-    {
-        return "ALTER TABLE fbapp_listings ADD INDEX idx_inventory_id(inventory_id), ADD INDEX idx_marketplace_id(marketplace_id), ADD INDEX idx_created_at(created_at), ADD INDEX idx_marketplace_id_created_at(marketplace_id, created_at);";
-    }
-
-    private function dropIndexFbListings()
-    {
-        return "ALTER TABLE fbapp_listings DROP INDEX idx_inventory_id, DROP INDEX idx_marketplace_id, DROP INDEX idx_created_at, DROP INDEX idx_marketplace_id_created_at;";
-    }
-
-    private function addIndexFbAppErrors()
-    {
-        return "ALTER TABLE fbapp_errors ADD INDEX idx_created_at(created_at), ADD INDEX idx_marketplace_id_created_at(marketplace_id, created_at);";
-    }
-
-    private function dropIndexFbAppErrors()
-    {
-        return "ALTER TABLE fbapp_errors DROP INDEX idx_created_at, DROP INDEX idx_marketplace_id_created_at;";
-    }
 }

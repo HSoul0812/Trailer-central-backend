@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Class CRM Settings
  * @package App\Models\CRM\User
  *
- * @property $settings_id
+ * @property $setting_id
  * @property $user_id
  * @property $type
  * @property $key
@@ -36,7 +36,7 @@ class Settings extends Model
      *
      * @var string
      */
-    protected $primaryKey = 'settings_id';
+    protected $primaryKey = 'setting_id';
 
     /**
      * Disable Timestamps
@@ -52,7 +52,6 @@ class Settings extends Model
      */
     protected $fillable = [
         'user_id',
-        'type',
         'key',
         'value'
     ];

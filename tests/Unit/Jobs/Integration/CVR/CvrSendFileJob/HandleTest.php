@@ -21,6 +21,9 @@ use Ramsey\Uuid\Uuid;
 use Tests\TestCase;
 
 /**
+ * @group DW
+ * @group DW_INVENTORY
+ *
  * @covers \App\Jobs\Integration\CVR\CvrSendFileJob::handle
  * @group MonitoredJobs
  */

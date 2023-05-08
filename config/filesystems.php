@@ -79,6 +79,7 @@ return [
             'bucket' => env('AWS_BUCKET'),
             'url' => env('AWS_URL'),
             'visibility' => env('AWS_ACL', 'private'),
+            'retries' => (int) env('AWS_RETRIES', 3),
         ],
 
         's3email' => [

@@ -20,7 +20,6 @@ use App\Models\CRM\Dms\Printer\Settings;
 use App\Traits\Models\HasPermissionsStub;
 use App\Models\CRM\Dms\Quote\QuoteSetting;
 use App\Models\Website\Config\WebsiteConfig;
-use App\Models\Integration\IntegrationDealer;
 use App\Models\Marketing\Facebook\Marketplace;
 use Illuminate\Contracts\Auth\Authenticatable;
 use App\Models\Integration\Collector\Collector;
@@ -42,6 +41,8 @@ use Illuminate\Database\Eloquent\Collection;
  * @property int $dealer_id
  * @property string $name
  * @property string $email
+ * @property string $password
+ * @property string $salt
  *
  * @property bool $clsf_active;
  * @property bool $isCrmActive
@@ -57,6 +58,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @property int $overlay_enabled 0 -> disabled, 1 -> only primary image, 2 -> all images
  * @property bool $overlay_default
  * @property Collection<DealerLocation> $locations
+ * @property \DateTimeInterface $overlay_updated_at
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */
@@ -160,18 +162,33 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public const DONT_USE_AUTO_MSRP = 0;
 
     /**
-     * @var string
+     * @var int
      */
     public const OVERLAY_ENABLED_NONE = 0;
 
+    /**
+     * @var int
+     */
     public const OVERLAY_ENABLED_PRIMARY = 1;
 
+    /**
+     * @var int
+     */
     public const OVERLAY_ENABLED_ALL = 2;
 
+    /**
+     * @var int
+     */
     public const OVERLAY_DISABLED_BY_DEFAULT = 0;
 
+    /**
+     * @var int
+     */
     public const OVERLAY_ENABLED_BY_DEFAULT = 1;
 
+    /**
+     * @var int[]
+     */
     const OVERLAY_CODES = [
         self::OVERLAY_ENABLED_PRIMARY,
         self::OVERLAY_ENABLED_ALL,
@@ -330,7 +347,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
         'is_dms_active',
         'is_scheduler_active',
         'is_quote_manager_active',
-        'google_feed_active'
+        'google_feed_active',
+        'overlay_updated_at'
     ];
 
     /**
@@ -342,7 +360,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
         'is_scheduler_active' => 'boolean',
         'clsf_active' => 'boolean',
         'is_quote_manager_active' => 'boolean',
-        'google_feed_active' => 'boolean'
+        'google_feed_active' => 'boolean',
+        'overlay_updated_at' => 'datetime'
     ];
 
     /**

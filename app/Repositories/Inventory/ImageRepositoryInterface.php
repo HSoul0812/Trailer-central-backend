@@ -11,4 +11,6 @@ use App\Repositories\Repository;
 interface ImageRepositoryInterface extends Repository
 {
     public function getAllByInventoryId(int $inventoryId, $params = []);
+
+    public function scheduleObjectToBeDroppedByURL(string $url): void;
 }

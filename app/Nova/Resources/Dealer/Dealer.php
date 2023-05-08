@@ -118,17 +118,29 @@ class Dealer extends Resource
                        $locations . ' locations';
             })->asHtml()->exceptOnForms(),
 
+            new Panel('Collector', [
+                Boolean::make('Active', function () {
+                    return $this->collector ? $this->collector->active : false;
+                })->onlyOnDetail(),
+
+                BelongsTo::make('Process Name', 'collector', 'App\Nova\Resources\Integration\Collector')->exceptOnForms(),
+            ]),
+
             new Panel('Subscriptions', $this->subscriptions()),
 
             new Panel('Integrations', $this->hiddenIntegrations()),
 
             Text::make('Status', 'state')->exceptOnForms(),
 
+            Boolean::make('OEM', function () {
+                return boolval(optional($this->website)->is_oem);
+            })->sortable(),
+
             Boolean::make('Active', function () {
                 return !$this->deleted;
             })->exceptOnForms(),
 
-            BelongsTo::make('Collector', 'collector', 'App\Nova\Resources\Integration\Collector')->exceptOnForms(),
+            BelongsTo::make('Collector', 'collector', 'App\Nova\Resources\Integration\Collector')->onlyOnIndex(),
 
             Password::make('Password')
                 ->onlyOnForms()

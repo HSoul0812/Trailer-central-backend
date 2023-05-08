@@ -1,10 +1,10 @@
 <?php
 
+use App\Logging\CloudWatchPusher;
+use App\Logging\DailyLogWithUsername;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
-
-use App\Logging\CloudWatchLoggerFactory;
 
 return [
 
@@ -39,7 +39,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single', 'slack', 'sentry', 'cloudwatch'],
+            'channels' => ['single', 'slack', 'sentry'],
             'ignore_exceptions' => false,
         ],
 
@@ -48,7 +48,9 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'error'),
             'permission' => 0664,
-            'tap' => [\App\Logging\DailyLogWithUsername::class],
+            'tap' => [
+                DailyLogWithUsername::class
+            ]
         ],
 
         'daily' => [
@@ -57,7 +59,10 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 7,
             'permission' => 0664,
-            'tap' => [\App\Logging\DailyLogWithUsername::class],
+            'tap' => [
+                DailyLogWithUsername::class,
+                CloudWatchPusher::class
+            ]
         ],
 
         'inquiry' => [
@@ -66,6 +71,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'interaction' => [
@@ -74,6 +82,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'autoassign' => [
@@ -82,6 +93,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'hotpotato' => [
@@ -90,6 +104,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'scraperepliesjob' => [
@@ -98,6 +115,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'scrapereplies' => [
@@ -106,6 +126,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'textcampaign' => [
@@ -114,6 +137,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'import' => [
@@ -122,6 +148,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'leads-export' => [
@@ -130,6 +159,7 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [CloudWatchPusher::class]
         ],
 
         'inventory-overlays' => [
@@ -138,6 +168,7 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [CloudWatchPusher::class]
         ],
 
         'images' => [
@@ -154,6 +185,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'imap' => [
@@ -162,6 +196,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'google' => [
@@ -170,6 +207,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 7,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'facebook' => [
@@ -178,6 +218,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'fb-catalog' => [
@@ -186,6 +229,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'leads' => [
@@ -194,6 +240,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'emailbuilder' => [
@@ -202,6 +251,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'inventory' => [
@@ -210,6 +262,9 @@ return [
             'level' => env('INVENTORY_LOG_LEVEL', 'debug'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'texts' => [
@@ -218,6 +273,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'marketplace' => [
@@ -226,6 +284,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'dispatch-fb' => [
@@ -234,6 +295,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 7,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'dispatch-cl' => [
@@ -242,6 +306,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 7,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'cl-client' => [
@@ -250,6 +317,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'azure' => [
@@ -258,6 +328,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'tunnels' => [
@@ -266,6 +339,9 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
 
         'slack' => [
@@ -331,7 +407,10 @@ return [
             'path' => storage_path('logs/emergency.log'),
             'days' => 7,
             'permission' => 0664,
-            'tap' => [\App\Logging\DailyLogWithUsername::class],
+            'tap' => [
+                DailyLogWithUsername::class,
+                CloudWatchPusher::class
+            ]
         ],
 
         'showroom-imports' => [
@@ -339,6 +418,9 @@ return [
             'path' => storage_path('logs/showroom-imports.log'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
         'blog' => [
             'driver' => 'daily',
@@ -346,30 +428,25 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
+            'tap' => [
+                CloudWatchPusher::class
+            ]
         ],
         'sentry' => [
             'driver' => 'sentry',
             'level' => env('SENTRY_LOG_LEVEL', 'error')
-        ],
+        ]
+    ],
 
-        'dealer-export' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/commands/dealer-export.log'),
-            'level' => env('LOG_LEVEL', 'error'),
-            'days' => 3,
-            'permission' => 0664,
-        ],
-        'cloudwatch' => [
-            'stream_name' => env('CLOUDWATCH_STREAM_NAME','laravel.log'),
-            'driver' => 'custom',
-            'via' => CloudWatchLoggerFactory::class,
-            'sdk' => [
-                'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
-                'version' => 'latest'
-            ],
-            'retention' => env('CLOUDWATCH_LOG_RETENTION',7),
-            'level' => env('CLOUDWATCH_LOG_LEVEL','error')
-        ],
+    'dealer-export' => [
+        'driver' => 'daily',
+        'path' => storage_path('logs/commands/dealer-export.log'),
+        'level' => env('LOG_LEVEL', 'error'),
+        'days' => 3,
+        'permission' => 0664,
+        'tap' => [
+            CloudWatchPusher::class
+        ]
     ],
 
 ];
