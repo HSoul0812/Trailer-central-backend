@@ -105,13 +105,13 @@ class IDSServiceTest extends TestCase
             ->once()
             ->andReturn($this->logMock);
 
-        $logMock->shouldReceive('error')
+        $this->logMock->shouldReceive('error')
             ->never();
 
-        $logMock->shouldReceive('info')
+        $this->logMock->shouldReceive('info')
             ->with('Mailing IDS Lead', ['lead' => $lead->identifier]);
         
-        $logMock->shouldReceive('info')
+        $this->logMock->shouldReceive('info')
             ->with('IDS Lead Mailed Successfully', ['lead' => $lead->identifier]);
         
     
@@ -173,7 +173,7 @@ class IDSServiceTest extends TestCase
             ->once()
             ->andReturn($this->logMock);
 
-        $logMock->shouldReceive('error')
+        $this->logMock->shouldReceive('error')
             ->once()
             ->with('IDS Lead Export Failed: Export Not Enabled for ' .
                                 ' Dealer #' . $lead->dealer_id);
@@ -241,7 +241,7 @@ class IDSServiceTest extends TestCase
             ->once()
             ->andReturn($this->logMock);
 
-        $logMock->shouldReceive('error')
+        $this->logMock->shouldReceive('error')
             ->once()
             ->with('IDS Lead Export Failed: IDS Export Not Enabled for ' .
                                 ' Dealer #' . $lead->dealer_id . ' and ' .
@@ -315,13 +315,13 @@ class IDSServiceTest extends TestCase
             ->once()
             ->andReturn($this->logMock);
 
-        $logMock->shouldReceive('error')
+        $this->logMock->shouldReceive('error')
             ->never();
 
-        $logMock->shouldReceive('info')
+        $this->logMock->shouldReceive('info')
             ->with('Mailing IDS Lead', ['lead' => $lead->identifier]);
         
-        $logMock->shouldReceive('info')
+        $this->logMock->shouldReceive('info')
             ->with('IDS Lead Mailed Successfully', ['lead' => $lead->identifier]);
         
     
@@ -383,7 +383,7 @@ class IDSServiceTest extends TestCase
             ->once()
             ->andReturn($this->logMock);
 
-        $logMock->shouldReceive('error')
+        $this->logMock->shouldReceive('error')
             ->once()
             ->with('IDS Lead Export Failed: Export Not Enabled for ' .
                                 ' Dealer #' . $lead->dealer_id);
@@ -451,7 +451,7 @@ class IDSServiceTest extends TestCase
             ->once()
             ->andReturn($this->logMock);
 
-        $logMock->shouldReceive('error')
+        $this->logMock->shouldReceive('error')
             ->once()
             ->with('IDS Lead Export Failed: IDS Export Not Enabled for ' .
                                 ' Dealer #' . $lead->dealer_id . ' and ' .
