@@ -24,10 +24,6 @@ class PutExtraWebsiteConfigRequest extends WithDealerRequest
             'website_id' => 'integer|min:1|required|exists:website,id,dealer_id,' . $this->dealer_id,
             'include_showroom' => 'boolean',
             'showroom_dealers' => 'array',
-            'showroom_dealers.*' => [
-                'string',
-                Rule::in($this->dealerList())
-            ],
             'global_filter'=> ['nullable', 'string'] // too complex to be validated, maybe in the near future this could be validated
         ]);
     }
