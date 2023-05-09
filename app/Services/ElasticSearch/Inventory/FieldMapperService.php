@@ -30,6 +30,7 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
         'availability', // handle availability
         'isArchived',  // to be able handle some especial OEM like `Mill Trailers` and MO Great Dane
         'showOnWebsite', // to be able handle some especial OEM like `Mill Trailers` and MO Great Dane
+        "excludeIds",   // handle exclusion of ids
     ];
 
     /**
