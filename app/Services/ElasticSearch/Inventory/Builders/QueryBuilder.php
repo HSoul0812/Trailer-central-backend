@@ -347,11 +347,15 @@ class QueryBuilder implements InventoryQueryBuilderInterface
             unset($sort['numFeatures']);
         }
 
+        if(isset($sort['hasImage'])) {
+            $this->addHasImageSortScript($sort['hasImage']);
+            unset($sort['hasImage']);
+        }
+
         if (isset($sort['tt_sort'])) {
             $this->inRandomOrder();
             unset($sort['tt_sort']);
         }
-
         return $sort;
     }
 
@@ -521,6 +525,26 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                     if(doc[\'featureList.doorsWindowsRamps\'] != null){ numFeature += doc[\'featureList.doorsWindowsRamps\'].size(); }
                     return numFeature;
                     '
+                ],
+                'order' => $order
+            ]
+        ];
+    }
+
+    private function addHasImageSortScript(string $order): void
+    {
+        $this->query['sort'][] = [
+            '_script' => [
+                'type' => 'number',
+                'script' => [
+                    'lang' => 'painless',
+                    'source' => "
+                    if(doc['image'].size() > 0 && doc['image'].value != ''){
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                    "
                 ],
                 'order' => $order
             ]
