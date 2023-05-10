@@ -47,9 +47,23 @@ trait InventorySearchable
      */
     public function newQueryForRestoration($ids)
     {
-        return is_array($ids)
-            ? $this->newQueryWithoutScopes()->with('user', 'user.website', 'dealerLocation')->whereIn($this->getQualifiedKeyName(), $ids)
-            : $this->newQueryWithoutScopes()->with('user', 'user.website', 'dealerLocation')->whereKey($ids);
+        $with = [
+            'user',
+            'user.website',
+            'dealerLocation',
+            'inventoryImages',
+            'inventoryImages.image',
+            'attributeValues',
+            'attributeValues.attribute',
+            'inventoryFeatures',
+            'inventoryFeatures.featureList'
+        ];
+
+        if(is_array($ids)){
+            return $this->newQueryWithoutScopes()->with($with)->whereIn($this->getQualifiedKeyName(), $ids);
+        }
+
+        return $this->newQueryWithoutScopes()->with($with)->whereKey($ids);
     }
 
     /**
@@ -155,7 +169,7 @@ trait InventorySearchable
         $isSearchSyncingEnabled = self::isSearchSyncingEnabled();
         $isImageOverlayGenerationEnabled = self::isOverlayGenerationEnabled();
 
-        self::disableCacheInvalidationAndSearchSyncing();
+        self::disableImageOverlayGenerationCacheInvalidationAndSearchSyncing();
 
         try {
             return $callback();

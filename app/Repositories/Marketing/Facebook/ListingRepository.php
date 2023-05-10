@@ -182,7 +182,7 @@ class ListingRepository implements ListingRepositoryInterface {
             $statusExpired = Listings::STATUS_EXPIRED;
 
             $identifyInventoryId = "fbapp_listings.inventory_id = inventory.inventory_id";
-            $identifyTitle = "(fbapp_listings.year = inventory.year AND fbapp_listings.make = inventory.make AND fbapp_listings.model = inventory.model)";
+            $identifyTitle = "(fbapp_listings.year = inventory.year AND fbapp_listings.make = inventory.manufacturer AND fbapp_listings.model = inventory.model)";
 
             $join->on(DB::raw("($identifyInventoryId OR $identifyTitle)"), '=', DB::raw("1"));
             $join->on("$listingsTableName.marketplace_id", '=', DB::raw($integration->id));

@@ -73,6 +73,10 @@ use App\Services\CRM\Leads\LeadTradeService;
 use App\Services\CRM\Leads\LeadTradeServiceInterface;
 use App\Services\CRM\User\SettingsService;
 use App\Services\CRM\User\SettingsServiceInterface;
+use App\Services\CRM\Email\MosaicoService;
+use App\Services\CRM\Email\MosaicoServiceInterface;
+use App\Repositories\CRM\Report\ReportRepositoryInterface;
+use App\Repositories\CRM\Report\ReportRepository;
 
 class CrmServiceProvider extends ServiceProvider
 {
@@ -99,6 +103,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(DealerDocumentsServiceInterface::class, DealerDocumentsService::class);
         $this->app->bind(LeadTradeServiceInterface::class, LeadTradeService::class);
         $this->app->bind(SettingsServiceInterface::class, SettingsService::class);
+        $this->app->bind(MosaicoServiceInterface::class, MosaicoService::class);
 
         // Repositories
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
@@ -117,6 +122,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(DealerDocumentsRepositoryInterface::class, DealerDocumentsRepository::class);
         $this->app->bind(LeadTradeRepositoryInterface::class, LeadTradeRepository::class);
         $this->app->bind(LeadStatusServiceInterface::class, LeadStatusService::class);
+        $this->app->bind(ReportRepositoryInterface::class, ReportRepository::class);
 
         // Bind Refund Repository
         $this->app->bind(RefundRepositoryInterface::class, function () {
@@ -146,6 +152,7 @@ class CrmServiceProvider extends ServiceProvider
         \Validator::extend('unique_email_blast_name', 'App\Rules\CRM\Email\UniqueEmailBlastName@passes');
         \Validator::extend('valid_timezone', 'App\Rules\CRM\User\ValidTimezone@passes');
         \Validator::extend('valid_sort_orders_crm', 'App\Rules\CRM\Leads\ValidSortOrderCrm@passes');
+        \Validator::extend('valid_email_interaction', 'App\Rules\CRM\Interactions\ValidEmailInteraction@passes');
 
         LeadStatus::observe(LeadStatusObserver::class);
         Lead::observe(LeadObserver::class);

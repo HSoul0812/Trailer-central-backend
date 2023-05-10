@@ -31,6 +31,7 @@ abstract class TestCase extends BaseTestCase
         Inventory::enableCacheInvalidation();
         Inventory::enableSearchSyncing();
         Inventory::enableOverlayGeneration();
+        Inventory::unMemoizeCategories();
     }
 
     protected function tearDown(): void

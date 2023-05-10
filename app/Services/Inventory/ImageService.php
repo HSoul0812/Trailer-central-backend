@@ -2,7 +2,7 @@
 
 namespace App\Services\Inventory;
 
-use App\Jobs\Inventory\GenerateOverlayImageJobByDealer;
+use App\Jobs\Inventory\GenerateAllOverlayImagesByDealer;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Exceptions\File\MissingS3FileException;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +13,7 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Models\User\User;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Models\Inventory\Inventory;
+use App;
 
 class ImageService implements ImageServiceInterface
 {
@@ -107,7 +108,13 @@ class ImageService implements ImageServiceInterface
     public function getFileHash(string $filename): string
     {
         if (Storage::disk('s3')->missing($filename)) {
-            throw new MissingS3FileException;
+            $productionUrl = $this->getProductionS3BaseUrl().$filename;
+
+            if (!App::environment('production') && !App::runningUnitTests() && $this->exist($productionUrl)) {
+                return sha1_file($productionUrl);
+            }
+
+            throw new MissingS3FileException(sprintf("S3 object '%s' is missing", $filename));
         }
 
         return sha1_file($this->getS3BaseUrl() . $filename);
@@ -172,7 +179,7 @@ class ImageService implements ImageServiceInterface
             // @todo we should implement some mechanism to avoid to dispatch many times
             //      `GenerateOverlayImageJobByDealer` successively because that job will spawn as many
             //      `GenerateOverlayImageJob` jobs as many inventory units has the dealer
-            $this->dispatch((new GenerateOverlayImageJobByDealer($dealer->dealer_id))->delay(2));
+            $this->dispatch((new GenerateAllOverlayImagesByDealer($dealer->dealer_id))->delay(2));
         }
 
         return $dealer;

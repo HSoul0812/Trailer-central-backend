@@ -22,6 +22,12 @@ class GenerateOverlayImageJob extends Job
 {
     use Dispatchable, SerializesModels, WithTags;
 
+    /** @var string this queue is used to process any job dispatched on any inventory dashboard event */
+    public const HIGH_PRIORITY_QUEUE = 'overlay-images';
+
+    /** @var string when the jobs is using this queue it will not delay any operation performed through dashboard */
+    public const LOW_PRIORITY_QUEUE = 'overlay-images-low';
+
     /** @var int The number of times the job may be attempted. */
     public $tries = 2;
 
@@ -32,7 +38,7 @@ class GenerateOverlayImageJob extends Job
     private $reindexAndInvalidateCache;
 
     /** @var string */
-    public $queue = 'overlay-images';
+    public $queue = self::HIGH_PRIORITY_QUEUE;
 
     public function __construct(int $inventoryId, ?bool $reindexAndInvalidateCache = null)
     {
@@ -66,7 +72,7 @@ class GenerateOverlayImageJob extends Job
                 'inventory_id' => $inventory->inventory_id, 'dealer_id' => $inventory->dealer_id
             ]);
 
-            $service->tryToIndexAndInvalidateInventory($inventory);
+            $service->tryToIndexAndInvalidateCacheByInventory($inventory);
         }
     }
 }

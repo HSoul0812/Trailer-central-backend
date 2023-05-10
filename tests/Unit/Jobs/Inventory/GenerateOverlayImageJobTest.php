@@ -108,7 +108,7 @@ class GenerateOverlayImageJobTest extends TestCase
             ->andThrow(Exception::class);
 
         $this->inventoryServiceMock
-            ->allows('tryToIndexAndInvalidateInventory')
+            ->allows('tryToIndexAndInvalidateCacheByInventory')
             ->with($inventoryMock);
 
         $this->inventoryRepositoryMock

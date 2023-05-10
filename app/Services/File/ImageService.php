@@ -28,11 +28,11 @@ class ImageService extends AbstractFileService
 {
     use S3Helper;
 
-    /** @var float three quarters of second (0.75  seconds) */
-    const WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS = 750 * 1000;
-
-    /** @var string */
-    const PRODUCTION_AWS_CDN_BASE_URL = 'https://dealer-cdn.com';
+    /**
+     * @var float 0.2 seconds, it means it may send up to five S3 request per second
+     *                (we need to consider multiply by the number of queue workers)
+     */
+    const WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS = 200 * 1000;
 
     /** @var ImageHelper */
     private $imageHelper;
@@ -209,7 +209,7 @@ class ImageService extends AbstractFileService
         // when the image has been imported from production it will not be available in the staging/dev bucket
         // so we need to check if the image exists, if not we gonna use the production S3 bucket base URL
         if (!App::environment('production') && !App::runningUnitTests() && !$this->exist($imagePath)) {
-            $imagePath = str_replace(config('services.aws.url'), self::PRODUCTION_AWS_CDN_BASE_URL, $imagePath);
+            $imagePath = str_replace(config('services.aws.url'), $this->getProductionS3BaseUrl(), $imagePath);
         }
 
         $originalImagePath = $imagePath;
@@ -322,13 +322,7 @@ class ImageService extends AbstractFileService
         }
 
         try {
-            // we will retry to upload the object 3 times using a timeout of 0.75 seconds, it is a mitigation measure
-            // to avoid potentials issues due latency or slowdown errors and AWS rate limiting
-            // @see https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance-design-patterns.html
-            // todo: in the future we need to implement a back-off strategy
-            $filename = retry(3, function () use ($localNewImagePath, $overlayFilename, $overlayConfig): string {
-                return $this->uploadToS3($localNewImagePath, $overlayFilename, $overlayConfig['dealer_id']);
-            }, self::WAIT_FOR_INVENTORY_IMAGE_GENERATION_IN_MICROSECONDS);
+            $filename = $this->uploadToS3($localNewImagePath, $overlayFilename, $overlayConfig['dealer_id']);
 
             unlink($localNewImagePath);
         } catch (\Exception $exception) {

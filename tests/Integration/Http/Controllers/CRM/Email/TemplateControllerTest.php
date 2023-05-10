@@ -52,7 +52,10 @@ class TemplateControllerTest extends IntegrationTestCase
             'user_id',
             'key',
             'name',
-            'created_at'
+            'created_at',
+            'html',
+            'template_metadata',
+            'template_json'
         ]
     ];
 
@@ -66,7 +69,10 @@ class TemplateControllerTest extends IntegrationTestCase
                 'user_id',
                 'key',
                 'name',
-                'created_at'
+                'created_at',
+                'html',
+                'template_metadata',
+                'template_json'
             ]
         ],
         'meta' => [
@@ -277,7 +283,10 @@ class TemplateControllerTest extends IntegrationTestCase
         );
 
         // Check that the response is a no content response.
-        $response->assertStatus(204);
+        $response->assertStatus(200);
+
+        // Check The Correct Item Was Deleted
+        $this->assertSame('success', $response['response']['status'], "The response status is not success");
 
         // Corroborate the record was deleted in the database
         $this->assertDatabaseMissing(Template::getTableName(), [
@@ -294,9 +303,19 @@ class TemplateControllerTest extends IntegrationTestCase
         return [
             'id' => (int)$template->id,
             'user_id' => (int)$template->user_id,
-            'name' => $template->name ?? $template->custom_template_name,
+            'name' => $template->name,
             'key' => $template->template_key,
+            'custom' => $template->custom_template_name,
+            'template' => [
+               'key' => $template->template,
+               'name' => $template->name,
+               'metadata' => $template->template_metadata,
+               'json' => $template->template_json,
+            ], 
             'created_at' => (string)$template->date,
+            'html' => $template->html,
+            'template_metadata' => $template->template_metadata,
+            'template_json' => $template->template_json
         ];
     }
 

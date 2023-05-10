@@ -31,10 +31,13 @@ class InventoryImage extends Model
     public const FIRST_IMAGE_POSITION_EDGE_CASE = -1;
 
     /** @var int  */
-    public const FIRST_IMAGE_POSITION = 1;
+    public const FIRST_IMAGE_POSITION = 0;
 
     /** @var int  */
     public const IS_DEFAULT = 1;
+
+    /** @var int  */
+    public const IS_NOT_DEFAULT = 0;
 
     /**
      * The table associated with the model.
@@ -82,13 +85,19 @@ class InventoryImage extends Model
         return (bool)$this->is_secondary;
     }
 
+    /**
+     * This requieres the images are sorted by `InventoryHelper::imageSorter`
+     *
+     * @param  int|null  $typeOfOverlay
+     * @return string
+     */
     public function originalFilenameRegardingInventoryOverlayConfig(?int $typeOfOverlay): string
     {
         // @todo fix the way it determines it is the primary image
         if ($typeOfOverlay == Inventory::OVERLAY_ENABLED_ALL) {
             return $this->image->getFilenameOfOriginalImage();
         } elseif ($typeOfOverlay == Inventory::OVERLAY_ENABLED_PRIMARY &&
-            ($this->position == self::FIRST_IMAGE_POSITION || $this->isDefault())
+            ($this->isDefault() || $this->position == self::FIRST_IMAGE_POSITION)
         ) {
             return $this->image->getFilenameOfOriginalImage();
         }

@@ -17,6 +17,7 @@ use App\Models\Inventory\Geolocation\Point as GeolocationPoint;
 use App\Models\Parts\Vendor;
 use App\Models\Traits\TableAware;
 use App\Models\User\DealerLocation;
+use App\Models\User\Location\Geolocation;
 use App\Models\User\User;
 use App\Traits\CompactHelper;
 use App\Traits\GeospatialHelper;
@@ -179,7 +180,6 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property Collection<CustomerInventory> $customerInventory
  * @property DealerInventory $lotVantageInventory
  * @property Vendor $floorplanVendor
- * @property Category $categoryObj
  *
  * @method static Builder select($columns = ['*'])
  * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
@@ -188,6 +188,11 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
 class Inventory extends Model
 {
     use TableAware, SpatialTrait, GeospatialHelper, Searchable, CustomSearch;
+
+    /** @var Collection|Category[] basically this to avoid n+1 query issue when payment calculator is used,
+     *                             there is not way to avoid with eager loading
+     */
+    private static $memoizedCategories;
 
     /** @var InventoryElasticSearchConfigurator */
     private static $indexConfigurator;
@@ -231,7 +236,7 @@ class Inventory extends Model
 
     const IS_ACTIVE = 1;
     const IS_NOT_ACTIVE = 0;
-    
+
     const SHOW_IN_WEBSITE = 1;
 
     const ATTRIBUTE_ZERO_VALUE = 0;
@@ -630,41 +635,35 @@ class Inventory extends Model
     }
 
     /**
-     * @return BelongsTo
-     */
-    public function categoryObj(): BelongsTo
-    {
-        return $this->belongsTo(Category::class,'category', 'legacy_category');
-    }
-
-    /**
+     * This method uses memoization instead of Eloquent belongs relations to be able improve the ES indexation
+     *
      * @return string|null
      */
     public function getCategoryLabelAttribute(): ?string
     {
-        /** @var Category|null $categoryObj */
-        $categoryObj = $this->categoryObj;
-
-        if (empty($categoryObj)) {
-            return null;
+        if (!self::$memoizedCategories) {
+            self::$memoizedCategories = Category::query()->get();
         }
 
-        return $categoryObj->label;
+        $category = self::$memoizedCategories->firstWhere('legacy_category', '=', $this->category);
+
+        return $category ? $category->label : null;
     }
 
     /**
+     * This method uses memoization instead of Eloquent belongs relations to be able improve the ES indexation
+     *
      * @return int|null
      */
     public function getInventoryCategoryIdAttribute(): ?int
     {
-        /** @var Category|null $categoryObj */
-        $categoryObj = $this->categoryObj;
-
-        if (empty($categoryObj)) {
-            return null;
+        if (!self::$memoizedCategories) {
+            self::$memoizedCategories = Category::query()->get();
         }
 
-        return $categoryObj->inventory_category_id;
+        $category = self::$memoizedCategories->firstWhere('legacy_category', '=', $this->category);
+
+        return $category ? $category->inventory_category_id : null;
     }
 
     public function getColorAttribute()
@@ -811,7 +810,15 @@ class Inventory extends Model
             return new GeolocationPoint((float)$this->latitude, (float)$this->longitude);
         }
 
-        return new GeolocationPoint((float)$this->dealerLocation->latitude, (float)$this->dealerLocation->longitude);
+        if ($this->dealerLocation->latitude && $this->dealerLocation->longitude) {
+            return new GeolocationPoint((float)$this->dealerLocation->latitude, (float)$this->dealerLocation->longitude);
+        }
+
+        if ($geolocation = Geolocation::whereZip($this->dealerLocation->postalcode)->first()) {
+            return new GeolocationPoint((float)$geolocation->latitude, (float)$geolocation->longitude);
+        }
+
+        return new GeolocationPoint(0, 0);
     }
 
     /**
@@ -981,5 +988,10 @@ class Inventory extends Model
                 $query->whereNull('status')
                     ->orWhere('status', '<>', self::STATUS_QUOTE);
             });
+    }
+
+    public static function unMemoizeCategories()
+    {
+        self::$memoizedCategories = null;
     }
 }

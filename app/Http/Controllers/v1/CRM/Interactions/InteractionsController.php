@@ -13,7 +13,6 @@ use App\Http\Requests\CRM\Interactions\SendEmailRequest;
 use App\Services\CRM\Interactions\InteractionServiceInterface;
 use Dingo\Api\Http\Request;
 
-
 class InteractionsController extends RestfulControllerV2
 {
     protected $interactions;
@@ -32,6 +31,7 @@ class InteractionsController extends RestfulControllerV2
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['sendEmail']);
         $this->middleware('setSalesPersonIdOnRequest')->only(['sendEmail']);
+        $this->middleware('setUserIdOnRequest')->only(['sendEmail']);
         $this->interactions = $interactions;
         $this->service = $service;
         $this->interactionTransformer = $interactionTransformer;

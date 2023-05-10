@@ -3,7 +3,7 @@
 namespace Tests\Unit\Services\Inventory;
 
 use App\Exceptions\File\MissingS3FileException;
-use App\Jobs\Inventory\GenerateOverlayImageJobByDealer;
+use App\Jobs\Inventory\GenerateAllOverlayImagesByDealer;
 use App\Jobs\Inventory\ReIndexInventoriesByDealersJob;
 use App\Models\Inventory\Inventory;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -289,7 +289,7 @@ class ImageServiceTest extends TestCase
 
         Queue::assertNotPushed(GenerateOverlayImageJob::class);
         Queue::assertNotPushed(ReIndexInventoriesByDealersJob::class);
-        Queue::assertPushed(GenerateOverlayImageJobByDealer::class, self::ONCE);
+        Queue::assertPushed(GenerateAllOverlayImagesByDealer::class, self::ONCE);
     }
 
     /**
@@ -341,7 +341,7 @@ class ImageServiceTest extends TestCase
 
         Queue::assertNotPushed(GenerateOverlayImageJob::class);
         Queue::assertNotPushed(ReIndexInventoriesByDealersJob::class);
-        Queue::assertPushed(GenerateOverlayImageJobByDealer::class, self::ONCE);
+        Queue::assertPushed(GenerateAllOverlayImagesByDealer::class, self::ONCE);
     }
 
     /**
@@ -418,6 +418,6 @@ class ImageServiceTest extends TestCase
 
         Queue::assertNotPushed(GenerateOverlayImageJob::class);
         Queue::assertNotPushed(ReIndexInventoriesByDealersJob::class);
-        Queue::assertPushed(GenerateOverlayImageJobByDealer::class, self::ONCE);
+        Queue::assertPushed(GenerateAllOverlayImagesByDealer::class, self::ONCE);
     }
 }

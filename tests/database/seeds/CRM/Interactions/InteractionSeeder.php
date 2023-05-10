@@ -16,6 +16,11 @@ use App\Models\User\NewUser;
 use App\Models\User\NewDealerUser;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Models\User\Interfaces\PermissionsInterface;
+use App\Models\CRM\Interactions\InteractionEmail;
+use App\Models\CRM\Interactions\EmailHistory;
+use App\Models\CRM\Email\Attachment;
+use Illuminate\Support\Facades\Storage;
+use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 
 class InteractionSeeder extends Seeder
 {
@@ -62,7 +67,9 @@ class InteractionSeeder extends Seeder
 
         $this->user = factory(NewUser::class)->create();
 
-        // 
+        /**
+         * necessary data for CRM user
+         */
         $newDealerUserRepo = app(NewDealerUserRepositoryInterface::class);
 
         $newDealerUser = $newDealerUserRepo->create([
@@ -73,6 +80,18 @@ class InteractionSeeder extends Seeder
         ]);
 
         $this->dealer->newDealerUser()->save($newDealerUser);
+        $crmUserRepo = app(CrmUserRepositoryInterface::class);
+        $crmUserRepo->create([
+            'user_id' => $this->user->user_id,
+            'logo' => '',
+            'first_name' => '',
+            'last_name' => '',
+            'display_name' => '',
+            'dealer_name' => $this->dealer->name,
+            'active' => 1,
+            'email_signature' => 'DEALER_EMAIL_SIGNATURE'
+        ]);
+        // END
 
         $this->authToken = factory(AuthToken::class)->create([
             'user_id' => $this->dealer->dealer_id,
@@ -110,9 +129,10 @@ class InteractionSeeder extends Seeder
         $this->salesPersonLeads = factory(Lead::class, 5)->create(['dealer_id' => $this->dealer->dealer_id])
             ->each(function($lead) use (&$salesPersonInteractions, $salesPerson) {
 
-            factory(LeadStatus::class)->create([
-                'contact_type' => LeadStatus::TYPE_CONTACT,
+            LeadStatus::updateOrCreate([
                 'tc_lead_identifier' => $lead->getKey(),
+            ], [
+                'contact_type' => LeadStatus::TYPE_CONTACT,
                 'sales_person_id' => $salesPerson->getKey()
             ]);
 
@@ -131,9 +151,10 @@ class InteractionSeeder extends Seeder
         $this->leads = factory(Lead::class, 5)->create(['dealer_id' => $this->dealer->dealer_id])
             ->each(function($lead) use (&$dealerInteractions, $salesPerson) {
 
-            factory(LeadStatus::class)->create([
-                'contact_type' => LeadStatus::TYPE_CONTACT,
+            LeadStatus::updateOrCreate([
                 'tc_lead_identifier' => $lead->getKey(),
+            ], [
+                'contact_type' => LeadStatus::TYPE_CONTACT,
                 'sales_person_id' => NULL
             ]);
 
@@ -149,7 +170,28 @@ class InteractionSeeder extends Seeder
 
     public function cleanUp(): void
     {
-        Interaction::where('user_id', $this->user->user_id)->delete();
+        // delete Interaction and anything related
+        Interaction::where('user_id', $this->user->user_id)->get()
+            ->each(function($interaction) {
+
+                $interaction->emailHistory()->each(function($email) {
+
+                    $email->attachments()->each(function($file) {
+
+                        $filePath = parse_url($file->filename, PHP_URL_PATH);
+                        Storage::disk('s3')->delete($filePath);
+                        $file->delete();
+                    });
+                });
+
+                InteractionEmail::where('interaction_id', $interaction->interaction_id)->delete();
+
+                $interaction->emailHistory()->delete();
+
+                $interaction->delete();
+
+        });
+
         $this->leads->each(function($lead) {
                 $lead->leadStatus()->delete();
                 $lead->delete();

@@ -2,6 +2,8 @@
 
 namespace App\Repositories\User;
 
+use App\Jobs\Inventory\GenerateAllOverlayImagesByDealer;
+use App\Models\BatchedJob;
 use Carbon\Carbon;
 use App\Models\User\User;
 use App\Models\User\DealerUser;
@@ -84,6 +86,11 @@ class UserRepository implements UserRepositoryInterface {
     {
         $dealer = User::findOrFail($params['dealer_id']);
         return $dealer->update($params);
+    }
+
+    public function getEmailSignature(int $dealerId)
+    {
+        return $this->get(['dealer_id' => $dealerId])->crmUser->email_signature;
     }
 
     /**
@@ -304,5 +311,16 @@ class UserRepository implements UserRepositoryInterface {
     private function passwordMatch(string $expectedPassword, string $password, string $salt): bool
     {
         return $expectedPassword === $this->encrypterService->encryptBySalt($password, $salt);
+    }
+
+    public function hasRunningOverlayBatch(int $dealerId): bool
+    {
+        $like = sprintf('%%%s-%d%%', GenerateAllOverlayImagesByDealer::MONITORED_GROUP, $dealerId);
+
+        return BatchedJob::query()
+            ->where('batch_id', 'LIKE', $like)
+            ->where('total_jobs', '>', 0)
+            ->whereNull('finished_at')
+            ->exists();
     }
 }

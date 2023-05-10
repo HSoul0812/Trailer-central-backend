@@ -19,7 +19,7 @@ use Dingo\Api\Http\Response;
 class TemplateController extends RestfulControllerV2
 {
     /**
-     * @var EmailBuilderServiceInterface
+     * @var TemplateRepositoryInterface
      */
     protected $templates;
 

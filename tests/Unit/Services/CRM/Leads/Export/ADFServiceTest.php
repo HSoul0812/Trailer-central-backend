@@ -42,6 +42,7 @@ class ADFServiceTest extends TestCase
     public const TEST_INVALID_EMAIL_01 = ' ';
     public const TEST_INVALID_EMAIL_02 = 'notevenanemail?';
     public const TEST_LEAD_TYPE = 'general';
+    public const TEST_WEBSITE_NAME = 'Trailer Trader';
     public const ADF_REQUIRED_BODY_STRING = 'You received a new unit inquiry from your website. The details of the request are below';
 
     /**
@@ -105,6 +106,7 @@ class ADFServiceTest extends TestCase
         $dealerLocation->dealer_location_id = $dealerLocationId;
 
         $website->id = $websiteId;
+        $website->name = self::TEST_WEBSITE_NAME;
         $inventory->inventory_id = $inventoryId;
 
         $lead->identifier = $leadId;
@@ -113,6 +115,8 @@ class ADFServiceTest extends TestCase
         $lead->website_id = $websiteId;
         $lead->inventory = $inventory;
         $lead->lead_type = self::TEST_LEAD_TYPE;
+        $lead->website = $website;
+        $subject = $this->getLeadSubject($lead);
 
         $leadEmail->dealer_location_id = $dealerLocationId;
         $leadEmail->dealer_id = $dealerId;
@@ -164,9 +168,9 @@ class ADFServiceTest extends TestCase
             return $this->getFromPrivateProperty($job, 'toEmails') == $expectedEmails
             && $this->getFromPrivateProperty($job, 'copiedEmails') == $expectedEmails;
         });
-        Mail::assertSent(ADFEmail::class, function($mail) {
+        Mail::assertSent(ADFEmail::class, function($mail) use($subject) {
             $mail->build();
-            return $mail->subject == self::TEST_LEAD_TYPE && $mail->hasTo(self::TEST_EXPECTED_EMAIL);
+            return $mail->subject == $subject && $mail->hasTo(self::TEST_EXPECTED_EMAIL);
         });
 
         $this->assertTrue($result);
@@ -294,6 +298,43 @@ class ADFServiceTest extends TestCase
                 'emails' => [ self::TEST_INVALID_EMAIL_02 ]
             ],
         ];
+    }
+
+    /**
+     * @param Lead $lead
+     * @return string
+     */
+    private function getLeadSubject(Lead $lead): string
+    {
+        switch($lead->lead_type) {
+            case 'call':
+                $subject = "You Just Received a Click to Call From %s";
+                return sprintf($subject, $lead->full_name);
+            case 'inventory':
+                $subject = 'Inventory Information Request on %s';
+                break;
+            case 'part':
+                $subject = "Inventory Part Information Request on %s";
+                break;
+            case 'showroom':
+                $subject = "Showroom Model Information Request on %s";
+                break;
+            case 'cta':
+                $subject = "New CTA Response on %s";
+                break;
+            case 'sms':
+                $subject = "New SMS Sent on %s";
+                break;
+            case 'bestprice':
+                $subject = 'New Get Best Price Information Request on %s';
+                break;
+            default:
+                $subject = 'New General Submission on %s';
+                break;
+        }
+
+        // Generate subject depending on type
+        return sprintf($subject, $lead->website->domain);
     }
 
     public function tearDown(): void

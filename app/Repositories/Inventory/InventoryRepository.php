@@ -1322,4 +1322,55 @@ class InventoryRepository implements InventoryRepositoryInterface
             ->where('image_id', $imageId)
             ->update(['overlay_updated_at' => now()]);
     }
+
+    public function getInventoryByDealerIdWhichShouldHaveImageOverlayButTheyDoesNot(int $dealerId): LazyCollection
+    {
+        $IS_DEFAULT_IMAGE = InventoryImage::IS_DEFAULT;
+        $IS_NOT_DEFAULT_IMAGE = InventoryImage::IS_NOT_DEFAULT;
+        $OVERLAY_FOR_ALL_IMAGES = Inventory::OVERLAY_ENABLED_ALL;
+        $OVERLAY_FOR_PRIMARY_IMAGE = Inventory::OVERLAY_ENABLED_PRIMARY;
+
+        $subQueryAllImages = <<<SQL
+                    SELECT count(image.image_id)
+                    FROM image
+                          JOIN inventory_image ON inventory_image.image_id = image.image_id
+                    WHERE inventory_image.inventory_id = inventory.inventory_id
+                    AND inventory.overlay_enabled = {$OVERLAY_FOR_ALL_IMAGES}
+                    AND filename_with_overlay IS NULL
+SQL;
+
+        $subQueryPrimaryImage = <<<SQL
+                    SELECT count(image.image_id)
+                    FROM image
+                           JOIN inventory_image ON inventory_image.image_id = image.image_id
+                    WHERE inventory_image.inventory_id = inventory.inventory_id AND
+                          (
+                            inventory_image.is_default = {$IS_DEFAULT_IMAGE} OR
+                            (
+                                -- this workaround criteria is to mitigate bulk upload bug, it never setup is_default as 1
+                                inventory_image.is_default = {$IS_NOT_DEFAULT_IMAGE} AND
+                                (inventory_image.position IS NULL OR inventory_image.position = 0)
+                            )
+                          )
+                    AND inventory.overlay_enabled = {$OVERLAY_FOR_PRIMARY_IMAGE}
+                    AND filename_with_overlay IS NULL
+SQL;
+
+        // This query is a good enough approximation, it is not accurate, it will try to pull all inventories
+        // which need to generate overlay, it is not critical due the job will realize in processing time which images
+        // should have an overlay but they do not have an overlay
+        // @todo we will need to ensure all primary images has is_default as 1 (bulk uploader is setting it wrongly up)
+        //       when it happens we need to fix $subQueryPrimaryImage to avoid the workaround criteria
+
+        return Inventory::query()
+            ->select('inventory.*')
+            ->join('dealer', 'dealer.dealer_id', '=', 'inventory.dealer_id')
+            ->join('inventory_image', 'inventory_image.inventory_id', '=', 'inventory.inventory_id')
+            ->join('image', 'image.image_id', '=', 'inventory_image.image_id')
+            ->where('dealer.dealer_id', $dealerId)
+            ->where('inventory.overlay_enabled', '>=', Inventory::OVERLAY_ENABLED_PRIMARY)
+            ->whereRaw("(({$subQueryAllImages}) > 0 OR ({$subQueryPrimaryImage}) > 0)")
+            ->groupBy('inventory.inventory_id')
+            ->cursor();
+    }
 }
