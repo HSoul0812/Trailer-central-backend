@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Services\CRM\Email\DTOs\BlastStats;
 
 /**
  * Class Email Blast
@@ -278,5 +279,25 @@ class Blast extends Model
                    ->where(Lead::getTableName() . '.email_address', '<>', '')
                    ->whereNotNull(Lead::getTableName() . '.email_address')
                    ->groupBy(Lead::getTableName() . '.identifier');
+    }
+
+    /**
+     * Get Status for Email Blast
+     *
+     * @return BlastStats
+     */
+    public function getStatsAttribute(): BlastStats
+    {
+        // Get Stats for Blast
+        return new BlastStats([
+            'sent' => $this->sents->count(),
+            'delivered' => $this->sents()->delivered()->count(),
+            'bounced' => $this->sents()->bounced()->count(),
+            'complained' => $this->sents()->complained()->count(),
+            'unsubscribed' => $this->sents()->unsubscribed()->count(),
+            'opened' => $this->sents()->opened()->count(),
+            'clicked' => $this->sents()->clicked()->count(),
+            'skipped' => $this->sents()->skipped()->count(),
+        ]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models\CRM\Email;
 use App\Models\Traits\Inventory\CompositePrimaryKeys;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\Interactions\EmailHistory;
 
 /**
  * Class Email Blast Sent
@@ -51,4 +52,85 @@ class BlastSent extends Model
         'message_id',
         'crm_email_history_id',
     ];
+
+    /**
+     * Get Email History
+     *
+     * @return BelongsTo
+     */
+    public function history()
+    {
+        return $this->belongsTo(EmailHistory::class, 'crm_email_history_id', 'email_id');
+        // return $this->belongsTo(EmailHistory::class, 'message_id', 'message_id');
+    }
+
+    /**
+     * Query scope of Delivered Email
+     */
+    public function scopeDelivered($query)
+    {
+        return $query->whereHas('history', function($q) {
+            return $q->whereNotNull('date_delivered');
+        });
+    }
+
+    /**
+     * Query scope of Bounced Email
+     */
+    public function scopeBounced($query)
+    {
+        return $query->whereHas('history', function($q) {
+            return $q->whereNotNull('date_bounced');
+        });
+    }
+
+    /**
+     * Query scope of Complained Email
+     */
+    public function scopeComplained($query)
+    {
+        return $query->whereHas('history', function($q) {
+            return $q->whereNotNull('date_complained');
+        });
+    }
+
+    /**
+     * Query scope of Unsubscribed Email
+     */
+    public function scopeUnsubscribed($query)
+    {
+        return $query->whereHas('history', function($q) {
+            return $q->whereNotNull('date_unsubscribed');
+        });
+    }
+
+    /**
+     * Query scope of Opened Email
+     */
+    public function scopeOpened($query)
+    {
+        return $query->whereHas('history', function($q) {
+            return $q->whereNotNull('date_opened');
+        });
+    }
+
+    /**
+     * Query scope of Clicked Email
+     */
+    public function scopeClicked($query)
+    {
+        return $query->whereHas('history', function($q) {
+            return $q->whereNotNull('date_clicked');
+        });
+    }
+
+    /**
+     * Query scope of Skipped Email
+     */
+    public function scopeSkipped($query)
+    {
+        return $query->whereHas('history', function($q) {
+            return $q->where('was_skipped', 1);
+        });
+    }
 }
