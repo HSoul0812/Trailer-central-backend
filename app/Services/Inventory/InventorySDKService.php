@@ -197,6 +197,9 @@ class InventorySDKService implements InventorySDKServiceInterface
             $sorts = explode(';', $sort);
             $sorting = new Sorting([]);
             foreach ($sorts as $s) {
+                if (empty($s)) {
+                    continue;
+                }
                 $order = new SortOrder($s);
                 $sorting->addField(new SortingField($order->field, $order->direction));
             }
