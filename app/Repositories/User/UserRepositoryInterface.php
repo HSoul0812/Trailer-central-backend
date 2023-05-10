@@ -103,4 +103,10 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
      * @return Collection
      */
     public function getByName(string $name): Collection;
+
+    /**
+     * @param  int  $dealerId
+     * @return bool
+     */
+    public function hasRunningOverlayBatch(int $dealerId):bool;
 }

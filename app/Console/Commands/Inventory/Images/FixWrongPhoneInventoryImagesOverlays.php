@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Console\Commands\Inventory;
+namespace App\Console\Commands\Inventory\Images;
 
 use App\Jobs\Inventory\GenerateOverlayImageJob;
+use App\Models\Inventory\Inventory;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Console\Command;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB as Query;
 use stdClass as Row;
 
-class FixInventoryImagesOverlays extends Command
+class FixWrongPhoneInventoryImagesOverlays extends Command
 {
-    private const OVERLAY_ENABLED = 1;
+    private const OVERLAY_ENABLED = Inventory::OVERLAY_ENABLED_PRIMARY;
 
     private const DO_NOT_REINDEX_AND_INVALIDATE = false;
 
@@ -20,14 +21,14 @@ class FixInventoryImagesOverlays extends Command
      *
      * @var string
      */
-    protected $signature = 'inventory:fix-image-overlays';
+    protected $signature = 'inventory:fix-wrong-phone-for-image-overlays {dealer_ids}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Will regenerate all image overlays of every single inventory which has enabled it';
+    protected $description = 'Will regenerate all image overlays of every single inventory which has enabled it and has wrong phone format';
 
     /** @var InventoryServiceInterface */
     private $service;
@@ -41,10 +42,14 @@ class FixInventoryImagesOverlays extends Command
 
     public function handle()
     {
+        /** @var int $dealerIds */
+        $dealerIds = explode(',', $this->argument('dealer_ids'));
+
         $dealers = Query::table('inventory')
             ->distinct()
             ->select('inventory.dealer_id')
             ->leftJoin('dealer', 'dealer.dealer_id', '=', 'inventory.dealer_id')
+            ->whereIn('dealer.dealer_id', $dealerIds)
             ->where('inventory.overlay_enabled', '>=', self::OVERLAY_ENABLED)
             ->where(function (Builder $query): void {
                 $query->where(function (Builder $query): void {
@@ -80,12 +85,13 @@ class FixInventoryImagesOverlays extends Command
 
             $cursor->each(function (Row $inventory): void {
                 dispatch(new GenerateOverlayImageJob(
-                    $inventory->inventory_id,
-                    self::DO_NOT_REINDEX_AND_INVALIDATE
-                ))->onQueue('overlay-images');
+                        $inventory->inventory_id,
+                        self::DO_NOT_REINDEX_AND_INVALIDATE
+                    )
+                )->onQueue(GenerateOverlayImageJob::LOW_PRIORITY_QUEUE);
             });
-
-            $this->service->invalidateCacheAndReindexByDealerIds([$dealer->dealer_id]);
         });
+
+        // we need to manually invalidate cache
     }
 }

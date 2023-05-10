@@ -43,7 +43,7 @@ class CollectorSpecification extends Resource
     }
 
     public static $search = [
-        'collector'
+        'collector_id'
     ];
 
     /**

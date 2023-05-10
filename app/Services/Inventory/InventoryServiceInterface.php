@@ -107,22 +107,23 @@ interface InventoryServiceInterface
      *      2. Redis Cache invalidation by dealer id
      *
      * @param  array  $dealerIds
+     * @param array $context
      * @return void
      */
-    public function invalidateCacheAndReindexByDealerIds(array $dealerIds): void;
+    public function invalidateCacheAndReindexByDealerIds(array $dealerIds, array $context = []): void;
 
     /**
-     * Method name say nothing about real process order, it is only to be consistent with legacy naming convention
-     *
-     *  Real processing order:
-     *      1. Image overlays generation by dealer id
+     * Real processing order:
+     *      1. Image overlays generation by dealer id (it will wait for this when $waitForOverlays is true)
      *      2. ElasticSearch indexation by dealer location id
      *      3. Redis Cache invalidation by dealer id
      *
-     * @param  array  $dealerIds
+     * @param  int[]  $dealerIds
+     * @param bool $waitForOverlays
+     * @param array $context
      * @return void
      */
-    public function invalidateCacheReindexAndGenerateImageOverlaysByDealerIds(array $dealerIds): void;
+    public function generateSomeImageOverlaysByDealerIds(array $dealerIds, bool $waitForOverlays, array $context = []): void;
 
     /**
      * Method name say nothing about real process order, it is only to be consistent with legacy naming convention
@@ -143,5 +144,18 @@ interface InventoryServiceInterface
      * @param  Inventory  $inventory
      * @return void
      */
-    public function tryToIndexAndInvalidateInventory(Inventory $inventory): void;
+    public function tryToIndexAndInvalidateCacheByInventory(Inventory $inventory): void;
+
+    /**
+     * It should dispatch the job which will orchestrate all needed jobs to process an inventory update/creation
+     *
+     * So far, the first job should be the image overlay generation
+     */
+    public function dispatchOrchestrationJobByInventory(Inventory $inventory): void;
+
+    /**
+     * Applies overlays to inventory images by inventory id,
+     * or reset its image to the original/overlay image when needed
+     */
+    public function generateOverlaysByInventoryId(int $inventoryId): void;
 }

@@ -7,19 +7,22 @@ use App\Models\Inventory\Inventory;
 use App\Services\Import\Inventory\CsvImportServiceInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Support\Facades\Log;
-
 use App\Jobs\Job;
 
-class ProcessBulkUpload extends Job {
+class ProcessBulkUpload extends Job
+{
+    private const DO_NOT_WAIT_FOR_OVERLAYS = false;
 
+    /** @var int  */
     public $timeout = 0;
+
+    /** @var int  */
     public $tries = 2;
 
+    /** @var int  */
     protected $bulkId;
 
-    /**
-     * @var CsvImportServiceInterface
-     */
+    /** @var CsvImportServiceInterface */
     protected $csvImportService;
 
     /**
@@ -32,7 +35,10 @@ class ProcessBulkUpload extends Job {
         $this->bulkId = $bulkId;
     }
 
-    public function handle(CsvImportServiceInterface $importerService, InventoryServiceInterface $inventoryService): void
+    public function handle(
+        CsvImportServiceInterface $importerService,
+        InventoryServiceInterface $inventoryService
+    ): void
     {
         Log::info('Starting inventory bulk upload');
 
@@ -41,11 +47,15 @@ class ProcessBulkUpload extends Job {
 
             $importerService->setBulkUpload($bulk);
 
-            Inventory::withoutCacheInvalidationAndSearchSyncing(static function () use ($importerService): void {
+            Inventory::withoutImageOverlayGenerationSearchSyncingAndCacheInvalidation(static function () use ($importerService): void {
                 $importerService->run();
             });
 
-            $inventoryService->invalidateCacheAndReindexByDealerIds([$bulk->dealer_id]);
+            $inventoryService->generateSomeImageOverlaysByDealerIds(
+                [$bulk->dealer_id],
+                self::DO_NOT_WAIT_FOR_OVERLAYS,
+                ['triggered_by' => __CLASS__]
+            );
 
             Log::info(sprintf('Inventory bulk upload %d was processed', $bulk->id));
         } catch (\Exception $ex) {

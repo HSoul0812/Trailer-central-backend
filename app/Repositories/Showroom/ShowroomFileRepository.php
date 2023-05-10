@@ -20,7 +20,7 @@ class ShowroomFileRepository extends RepositoryAbstract implements ShowroomFileR
     public function getAll($params): Collection
     {
         if (!isset($params['showroom_id'])) {
-            throw new RepositoryInvalidArgumentException('showroom_id is absent', $params);
+            throw new RepositoryInvalidArgumentException('showroom_id is absent');
         }
 
         $query = ShowroomFile::query();

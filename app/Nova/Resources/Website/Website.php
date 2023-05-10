@@ -9,6 +9,7 @@ use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Select;
 use App\Models\Website\Config\WebsiteConfig;
+use App\Nova\Actions\Website\ChangeOEMStatus;
 use App\Models\Website\Website as DealerWebsite;
 
 use Laravel\Nova\Panel;
@@ -106,11 +107,13 @@ class Website extends Resource
 
             Text::make('Template')->help("This will apply as the CertificateName on SSL certificates")->hideFromIndex(),
 
+            Boolean::make('OEM', 'is_oem')->sortable(),
+
             Boolean::make('Active', 'is_active')->sortable(),
 
             Boolean::make('Responsive', 'responsive')->sortable(),
 
-            Select::make('Inventory Source', 'inventory_source')->withMeta(['value' => $sourceConfig->value ?? 'env' ])->options(self::INVENTORY_SOURCE_MAP),
+            Select::make('Inventory Source', 'inventory_source')->withMeta(['value' => $sourceConfig->value ?? 'env' ])->options(self::INVENTORY_SOURCE_MAP)->hideWhenCreating(),
 
             Textarea::make('Global Filter', 'type_config')->sortable()->help(
               "Usage:<br>
@@ -170,7 +173,7 @@ class Website extends Resource
               lte (is less than or equal)<br>"
             ),
 
-            Textarea::make('Head Scripts', 'HeadScripts')->hideFromIndex(),
+            Textarea::make('Head Scripts', 'HeadScripts')->hideWhenCreating()->hideFromIndex(),
 
         ];
     }
@@ -261,7 +264,8 @@ class Website extends Resource
     {
         return [
             app()->make(IssueCertificateSsl::class),
-            app()->make(EnableProxiedDomainsSsl::class)
+            app()->make(EnableProxiedDomainsSsl::class),
+            app()->make(ChangeOEMStatus::class)
         ];
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands\Sync;
 
-use App\Models\Image;
+use App\Models\Inventory\Image;
 use App\Models\Inventory\Attribute as InventoryAttribute;
 use App\Models\Inventory\AttributeValue as InventoryAttributeValue;
 use App\Models\Inventory\Inventory;

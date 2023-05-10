@@ -50,6 +50,13 @@ class SettingsRepository implements SettingsRepositoryInterface {
             $query->where('entity_type_id', $params['entity_type_id']);
         }
 
+        if (isset($params['inventory_category_id_or_null'])) {
+            $query->where(function($q) use ($params) {
+                $q->whereNull('inventory_category_id')
+                    ->orWhere('inventory_category_id', $params['inventory_category_id_or_null']);
+            });
+        }
+
         if (isset($params['inventory_condition'])) {
             $query->where('inventory_condition', $params['inventory_condition']);
         }

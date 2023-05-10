@@ -16,6 +16,7 @@ class SettingsTransformer extends TransformerAbstract
             'down' => $settings->down,
             'months' => $settings->months,
             'entity_type_id' => $settings->entity_type_id,
+            'inventory_category_id' => $settings->inventory_category_id,
             'operator' => $settings->operator,
             'inventory_price' => $settings->inventory_price,
             // to avoid breaking changes at legacy dashboard we should continue using `condition` instead `inventory_condition`
