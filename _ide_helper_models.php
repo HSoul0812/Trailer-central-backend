@@ -166,6 +166,47 @@ namespace App\Models\Leads{
     }
 }
 
+namespace App\Models{
+    /**
+     * App\Models\MonthlyImpressionReport.
+     *
+     * @property int                             $id
+     * @property int                             $year
+     * @property int                             $month
+     * @property int                             $dealer_id
+     * @property int                             $inventory_id
+     * @property string                          $inventory_title
+     * @property string                          $inventory_type
+     * @property string                          $inventory_category
+     * @property int                             $plp_total_count            Total count of visit to the PLP pages
+     * @property int                             $pdp_total_count            Total count of visit to the PDP pages
+     * @property int                             $tt_dealer_page_total_count Total count of visit to TT dealer page
+     * @property \Illuminate\Support\Carbon|null $created_at
+     * @property \Illuminate\Support\Carbon|null $updated_at
+     *
+     * @method static \Database\Factories\MonthlyImpressionReportFactory            factory(...$parameters)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport query()
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereCreatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereDealerId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereInventoryCategory($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereInventoryId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereInventoryTitle($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereInventoryType($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereMonth($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport wherePdpTotalCount($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport wherePlpTotalCount($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereTtDealerPageTotalCount($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereUpdatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereYear($value)
+     */
+    class MonthlyImpressionReport extends \Eloquent
+    {
+    }
+}
+
 namespace App\Models\Page{
     /**
      * App\Models\Page\Page.
@@ -314,38 +355,6 @@ namespace App\Models\Parts{
      * @method static \Illuminate\Database\Eloquent\Builder|Type whereUpdatedAt($value)
      */
     class Type extends \Eloquent
-    {
-    }
-}
-
-namespace App\Models\Payment{
-    /**
-     * App\Models\Payment\PaymentLog.
-     *
-     * @property int                             $id
-     * @property string                          $payment_id
-     * @property string                          $client_reference_id
-     * @property string                          $full_response
-     * @property \Illuminate\Support\Carbon|null $created_at
-     * @property \Illuminate\Support\Carbon|null $updated_at
-     * @property string|null                     $plan_key
-     * @property string|null                     $plan_name
-     * @property int|null                        $plan_duration
-     *
-     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog newModelQuery()
-     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog newQuery()
-     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog query()
-     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereClientReferenceId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereFullResponse($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog wherePaymentId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog wherePlanDuration($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog wherePlanKey($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog wherePlanName($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereUpdatedAt($value)
-     */
-    class PaymentLog extends \Eloquent
     {
     }
 }

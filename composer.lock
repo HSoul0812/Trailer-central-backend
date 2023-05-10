@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4945e8ddc001dceb987da7e2e6670327",
+    "content-hash": "fbc2d2165c3304d5b0bd4e89627141bd",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2227,6 +2227,84 @@
                 "source": "https://github.com/laravel/framework"
             },
             "time": "2022-12-08T15:28:55+00:00"
+        },
+        {
+            "name": "laravel/horizon",
+            "version": "v5.15.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/horizon.git",
+                "reference": "952c2a0caa79b3fdc513e8db668029004f3a0f35"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/horizon/zipball/952c2a0caa79b3fdc513e8db668029004f3a0f35",
+                "reference": "952c2a0caa79b3fdc513e8db668029004f3a0f35",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "ext-pcntl": "*",
+                "ext-posix": "*",
+                "illuminate/contracts": "^8.17|^9.0|^10.0",
+                "illuminate/queue": "^8.17|^9.0|^10.0",
+                "illuminate/support": "^8.17|^9.0|^10.0",
+                "nesbot/carbon": "^2.17",
+                "php": "^7.3|^8.0",
+                "ramsey/uuid": "^4.0",
+                "symfony/error-handler": "^5.0|^6.0",
+                "symfony/process": "^5.0|^6.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.0",
+                "orchestra/testbench": "^6.0|^7.0|^8.0",
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^9.0",
+                "predis/predis": "^1.1|^2.0"
+            },
+            "suggest": {
+                "ext-redis": "Required to use the Redis PHP driver.",
+                "predis/predis": "Required when not using the Redis PHP driver (^1.1|^2.0)."
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.x-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "Laravel\\Horizon\\HorizonServiceProvider"
+                    ],
+                    "aliases": {
+                        "Horizon": "Laravel\\Horizon\\Horizon"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\Horizon\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                }
+            ],
+            "description": "Dashboard and code-driven configuration for Laravel queues.",
+            "keywords": [
+                "laravel",
+                "queue"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel/horizon/issues",
+                "source": "https://github.com/laravel/horizon/tree/v5.15.1"
+            },
+            "time": "2023-04-26T16:00:44+00:00"
         },
         {
             "name": "laravel/nova",
@@ -8977,8 +9055,73 @@
             "time": "2023-01-03T09:29:04+00:00"
         },
         {
+            "name": "tpetry/laravel-postgresql-enhanced",
+            "version": "0.30.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tpetry/laravel-postgresql-enhanced.git",
+                "reference": "3388ed15846fdc5c3f8d053b58f8d31c44c5893a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tpetry/laravel-postgresql-enhanced/zipball/3388ed15846fdc5c3f8d053b58f8d31c44c5893a",
+                "reference": "3388ed15846fdc5c3f8d053b58f8d31c44c5893a",
+                "shasum": ""
+            },
+            "require": {
+                "doctrine/dbal": "^2.6|^3.5",
+                "illuminate/container": "^6.0|^7.0|^8.0|^9.0|^10.0",
+                "illuminate/database": "^6.0|^7.0|^8.79|^9.0|^10.0",
+                "illuminate/events": "^6.0|^7.0|^8.0|^9.0|^10.0",
+                "illuminate/support": "^6.0|^7.0|^8.0|^9.0|^10.0",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.19.3|^3.5.0",
+                "nunomaduro/larastan": "^1.0|^2.1",
+                "orchestra/testbench": "^4.0|^5.0|^6.0|^7.0|^8.0",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan": "^1.5",
+                "phpunit/phpunit": "^8.5.23|^9.5.13"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Tpetry\\PostgresqlEnhanced\\PostgresqlEnhancedServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Tpetry\\PostgresqlEnhanced\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "tpetry",
+                    "email": "tobias@tpetry.me"
+                }
+            ],
+            "description": "Support for many missing PostgreSQL specific features",
+            "homepage": "https://github.com/tpetry/laravel-postgresql-enhanced",
+            "keywords": [
+                "laravel",
+                "postgresql"
+            ],
+            "support": {
+                "issues": "https://github.com/tpetry/laravel-postgresql-enhanced/issues",
+                "source": "https://github.com/tpetry/laravel-postgresql-enhanced/tree/0.30.0"
+            },
+            "time": "2023-05-08T06:18:53+00:00"
+        },
+        {
             "name": "trailer-trader/insights",
-            "version": "dev-develop",
+            "version": "dev-feature/TR-835",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/Insights",

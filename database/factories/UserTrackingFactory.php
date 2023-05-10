@@ -17,8 +17,12 @@ class UserTrackingFactory extends Factory
         return [
             'visitor_id' => $this->faker->uuid(),
             'website_user_id' => null,
-            'event' => UserTrackingEvent::PAGE_VIEW,
+            'event' => $this->faker->randomElement([
+                UserTrackingEvent::PAGE_VIEW,
+                UserTrackingEvent::IMPRESSION,
+            ]),
             'url' => $this->faker->url(),
+            'page_name' => $this->faker->word(),
             'meta' => [
                 'foo' => 'bar',
             ],
