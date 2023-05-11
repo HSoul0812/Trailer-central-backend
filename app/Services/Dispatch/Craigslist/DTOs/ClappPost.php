@@ -401,7 +401,7 @@ class ClappPost
      * 
      * @return string
      */
-    private function rvTransmission(): string {
+    public function rvTransmission(): string {
         // Return Transmission
         if(in_array($this->category, array('class_a', 'class_b', 'class_c'))) {
             return '2';
@@ -417,7 +417,7 @@ class ClappPost
      * 
      * @return int
      */
-    private function boatLength(): int {
+    public function boatLength(): int {
         // Get Overall Length
         if($this->overallLength) {
             return floor($this->overallLength);
@@ -432,7 +432,7 @@ class ClappPost
      * 
      * @return int
      */
-    private function boatPropulsion(): int {
+    public function boatPropulsion(): int {
         // Propulsion Set on Inventory?
         if($this->propulsion) {
             if($inventory['attributes']['propulsion'] === 'other') {
