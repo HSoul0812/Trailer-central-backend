@@ -186,6 +186,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'featureList.doorsWindowsRamps'=> $model->getFeatureById(InventoryFeature::DOORS_WINDOWS_RAMPS)->values()->toArray(),
 
             'image'                => $defaultImage,
+            'hasImage'             => !empty($defaultImage),
             'images'               => $primaryImages,
             'originalImages'       => $originalImages,
             'imagesSecondary'      => $secondaryImages,
@@ -199,7 +200,6 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'tilt'                 => $model->getAttributeById(Attribute::TILT),
             'entity_type_id'       => $model->entity_type_id,
             'paymentCalculator' => $paymentCalculatorSettings,
-            'hasImage'             => !empty($defaultImage)
         ];
     }
 
