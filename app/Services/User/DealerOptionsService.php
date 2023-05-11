@@ -292,8 +292,8 @@ class DealerOptionsService implements DealerOptionsServiceInterface
 
             $cdk = $dealer->adminSettings()->where([
                 'setting' => 'website_leads_cdk_source_id'
-            ])->firstOr( function() use ($dealerId, $sourceId) {
-                DealerAdminSetting::create([
+            ])->firstOr(function () use ($dealerId, $sourceId) {
+                return DealerAdminSetting::create([
                     'dealer_id' => $dealerId,
                     'setting' => 'website_leads_cdk_source_id',
                     'setting_value' => ''
@@ -638,7 +638,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      */
     public function isAllowedParts(int $dealerId): bool
     {
-      return !is_null($this->dealerPartRepository->get(['dealer_id' => $dealerId]));
+        return !is_null($this->dealerPartRepository->get(['dealer_id' => $dealerId]));
     }
 
     /**
