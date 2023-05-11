@@ -31,6 +31,11 @@ class IDSServiceTest extends TestCase
      * @var App\Repositories\CRM\Leads\Export\LeadEmailRepository
      */
     private $leadEmailRepository;
+
+    /**
+     * @var LoggerInterface|LegacyMockInterface
+     */
+    protected $logMock;
     
     public function setUp(): void
     {
@@ -41,6 +46,8 @@ class IDSServiceTest extends TestCase
         
         $this->leadEmailRepository = Mockery::mock(LeadEmailRepositoryInterface::class);
         $this->app->instance(LeadEmailRepository::class, $this->leadEmailRepository);
+
+        $this->instanceMock('logMock', LoggerInterface::class);
     }
 
     /**
@@ -62,6 +69,7 @@ class IDSServiceTest extends TestCase
         $lead->dealer_id = 1;
         $lead->website_id = 1;
         
+        $leadEmail->id = 1;
         $leadEmail->dealer_location_id = 1;
         $leadEmail->dealer_id = 1;
         $leadEmail->export_format = LeadEmail::EXPORT_FORMAT_IDS;     
@@ -93,10 +101,17 @@ class IDSServiceTest extends TestCase
                 $this->assertContains('Some string', $msg->getBody());
             });
         
-        Log::shouldReceive('info')
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock->shouldReceive('error')
+            ->never();
+
+        $this->logMock->shouldReceive('info')
             ->with('Mailing IDS Lead', ['lead' => $lead->identifier]);
         
-        Log::shouldReceive('info')
+        $this->logMock->shouldReceive('info')
             ->with('IDS Lead Mailed Successfully', ['lead' => $lead->identifier]);
         
     
@@ -113,7 +128,340 @@ class IDSServiceTest extends TestCase
 
         $this->assertTrue($result);
     }
+
+    /**
+     * @group CRM
+     */
+    public function testExportIDSLeadNoModel()
+    {
+        $lead = $this->getEloquentMock(Lead::class);
+        $leadEmail = $this->getEloquentMock(LeadEmail::class);      
+        $website = $this->getEloquentMock(Website::class);
+        $mail = Mockery::mock('Swift_Mailer');
+        $this->app['mailer']->setSwiftMailer($mail);
+        
+        $website->id = 1;
+        
+        $lead->identifier = 1;
+        $lead->dealer_location_id = 1;
+        $lead->dealer_id = 1;
+        $lead->website_id = 1;
+
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('dealerLocation')->passthru();
+        $lead->shouldReceive('inventory')->passthru();
+        $lead->shouldReceive('website')->passthru();
+        
+        $this->leadEmailRepository
+                ->shouldReceive('getLeadEmailByLead')
+                ->once()
+                ->with($lead);
+
+        $leadEmail->shouldReceive('getToEmailsAttribute')
+                ->never();
+
+        $leadEmail->shouldReceive('getCopiedEmailsAttribute')
+                ->never();
+        
+        $mail->shouldReceive('send')
+            ->never();
+        
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock->shouldReceive('error')
+            ->once()
+            ->with('IDS Lead Export Failed: Export Not Enabled for ' .
+                                ' Dealer #' . $lead->dealer_id);
+        
+        $this->idsService
+            ->shouldReceive('export')
+            ->with($lead)
+            ->andReturn(false);
+        
+        $service = $this->app->make(IDSService::class);
+
+        $result = $service->exportInquiry($lead);
+
+        $this->assertFalse($result);
+    }
+
+    /**
+     * @group CRM
+     */
+    public function testExportIDSLeadWrongType()
+    {
+        $dealerLocation = $this->getEloquentMock(DealerLocation::class);
+        $lead = $this->getEloquentMock(Lead::class);
+        $leadEmail = $this->getEloquentMock(LeadEmail::class);      
+        $website = $this->getEloquentMock(Website::class);
+        $mail = Mockery::mock('Swift_Mailer');
+        $this->app['mailer']->setSwiftMailer($mail);
+        
+        $website->id = 1;
+        
+        $lead->identifier = 1;
+        $lead->dealer_location_id = 1;
+        $lead->dealer_id = 1;
+        $lead->website_id = 1;
+        
+        $leadEmail->id = 1;
+        $leadEmail->dealer_location_id = 1;
+        $leadEmail->dealer_id = 1;
+        $leadEmail->export_format = LeadEmail::EXPORT_FORMAT_ADF;     
+        
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('dealerLocation')->passthru();
+        $lead->shouldReceive('inventory')->passthru();
+        $lead->shouldReceive('website')->passthru();
+        
+        $this->leadEmailRepository
+                ->shouldReceive('getLeadEmailByLead')
+                ->once()
+                ->with($lead)
+                ->andReturn($leadEmail);
+
+        $leadEmail->shouldReceive('getToEmailsAttribute')
+                ->never();
+
+        $leadEmail->shouldReceive('getCopiedEmailsAttribute')
+                ->never();
+
+        $mail->shouldReceive('send')
+            ->never();
+        
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock->shouldReceive('error')
+            ->once()
+            ->with('IDS Lead Export Failed: IDS Export Not Enabled for ' .
+                                ' Dealer #' . $lead->dealer_id . ' and ' .
+                                ' Dealer Location #' . $lead->dealer_location_id);
+        
+        $this->idsService
+            ->shouldReceive('export')
+            ->with($lead)
+            ->andReturn(false);
+        
+        $service = $this->app->make(IDSService::class);
+
+        $result = $service->exportInquiry($lead);
+
+        $this->assertFalse($result);
+    }
+
+
+    /**
+     * @group CRM
+     */
+    public function testInquiryIDSLead()
+    {
+        $dealerLocation = $this->getEloquentMock(DealerLocation::class);
+        $lead = $this->getEloquentMock(Lead::class);
+        $leadEmail = $this->getEloquentMock(LeadEmail::class);      
+        $website = $this->getEloquentMock(Website::class);
+        $mail = Mockery::mock('Swift_Mailer');
+        $this->app['mailer']->setSwiftMailer($mail);
+        
+        $website->id = 1;
+        
+        $lead->identifier = 1;
+        $lead->dealer_location_id = 1;
+        $lead->dealer_id = 1;
+        $lead->website_id = 1;
+        
+        $leadEmail->id = 1;
+        $leadEmail->dealer_location_id = 1;
+        $leadEmail->dealer_id = 1;
+        $leadEmail->export_format = LeadEmail::EXPORT_FORMAT_IDS;     
+        
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('dealerLocation')->passthru();
+        $lead->shouldReceive('inventory')->passthru();
+        $lead->shouldReceive('website')->passthru();
+        
+        $this->leadEmailRepository
+                ->shouldReceive('getLeadEmailByLead')
+                ->once()
+                ->with($lead)
+                ->andReturn($leadEmail);
+        
+        $leadEmail->shouldReceive('getToEmailsAttribute')
+                ->once()
+                ->andReturn([]);
+        
+        $leadEmail->shouldReceive('getCopiedEmailsAttribute')
+                ->once()
+                ->andReturn([]);           
+        
+        $mail->shouldReceive('send')
+            ->andReturnUsing(function($msg) {
+                $this->assertEquals(self::TEST_SUBJECT_EMAIL, $msg->getSubject());
+                $this->assertEquals(self::TEST_EMAIL, $msg->getFrom());
+                $this->assertContains('Some string', $msg->getBody());
+            });
+        
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock->shouldReceive('error')
+            ->never();
+
+        $this->logMock->shouldReceive('info')
+            ->with('Mailing IDS Lead', ['lead' => $lead->identifier]);
+        
+        $this->logMock->shouldReceive('info')
+            ->with('IDS Lead Mailed Successfully', ['lead' => $lead->identifier]);
+        
     
+        $this->expectsJobs(IDSJob::class);
+        
+        $this->idsService
+            ->shouldReceive('export')
+            ->with($lead)
+            ->andReturn(true);         
+        
+        $service = $this->app->make(IDSService::class);
+
+        $result = $service->exportInquiry($lead);
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @group CRM
+     */
+    public function testInquiryIDSLeadNoModel()
+    {
+        $lead = $this->getEloquentMock(Lead::class);
+        $leadEmail = $this->getEloquentMock(LeadEmail::class);      
+        $website = $this->getEloquentMock(Website::class);
+        $mail = Mockery::mock('Swift_Mailer');
+        $this->app['mailer']->setSwiftMailer($mail);
+        
+        $website->id = 1;
+        
+        $lead->identifier = 1;
+        $lead->dealer_location_id = 1;
+        $lead->dealer_id = 1;
+        $lead->website_id = 1;
+
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('dealerLocation')->passthru();
+        $lead->shouldReceive('inventory')->passthru();
+        $lead->shouldReceive('website')->passthru();
+        
+        $this->leadEmailRepository
+                ->shouldReceive('getLeadEmailByLead')
+                ->once()
+                ->with($lead);
+
+        $leadEmail->shouldReceive('getToEmailsAttribute')
+                ->never();
+
+        $leadEmail->shouldReceive('getCopiedEmailsAttribute')
+                ->never();
+        
+        $mail->shouldReceive('send')
+            ->never();
+        
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock->shouldReceive('error')
+            ->once()
+            ->with('IDS Lead Export Failed: Export Not Enabled for ' .
+                                ' Dealer #' . $lead->dealer_id);
+        
+        $this->idsService
+            ->shouldReceive('export')
+            ->with($lead)
+            ->andReturn(false);
+        
+        $service = $this->app->make(IDSService::class);
+
+        $result = $service->exportInquiry($lead);
+
+        $this->assertFalse($result);
+    }
+
+    /**
+     * @group CRM
+     */
+    public function testInquiryIDSLeadWrongType()
+    {
+        $dealerLocation = $this->getEloquentMock(DealerLocation::class);
+        $lead = $this->getEloquentMock(Lead::class);
+        $leadEmail = $this->getEloquentMock(LeadEmail::class);      
+        $website = $this->getEloquentMock(Website::class);
+        $mail = Mockery::mock('Swift_Mailer');
+        $this->app['mailer']->setSwiftMailer($mail);
+        
+        $website->id = 1;
+        
+        $lead->identifier = 1;
+        $lead->dealer_location_id = 1;
+        $lead->dealer_id = 1;
+        $lead->website_id = 1;
+        
+        $leadEmail->id = 1;
+        $leadEmail->dealer_location_id = 1;
+        $leadEmail->dealer_id = 1;
+        $leadEmail->export_format = LeadEmail::EXPORT_FORMAT_ADF;     
+        
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('dealerLocation')->passthru();
+        $lead->shouldReceive('inventory')->passthru();
+        $lead->shouldReceive('website')->passthru();
+        
+        $this->leadEmailRepository
+                ->shouldReceive('getLeadEmailByLead')
+                ->once()
+                ->with($lead)
+                ->andReturn($leadEmail);
+
+        $leadEmail->shouldReceive('getToEmailsAttribute')
+                ->never();
+
+        $leadEmail->shouldReceive('getCopiedEmailsAttribute')
+                ->never();
+
+        $mail->shouldReceive('send')
+            ->never();
+        
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock->shouldReceive('error')
+            ->once()
+            ->with('IDS Lead Export Failed: IDS Export Not Enabled for ' .
+                                ' Dealer #' . $lead->dealer_id . ' and ' .
+                                ' Dealer Location #' . $lead->dealer_location_id);
+        
+        $this->idsService
+            ->shouldReceive('export')
+            ->with($lead)
+            ->andReturn(false);
+        
+        $service = $this->app->make(IDSService::class);
+
+        $result = $service->exportInquiry($lead);
+
+        $this->assertFalse($result);
+    }
+
+
     public function tearDown(): void
     {
         Mockery::close(); 

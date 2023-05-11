@@ -128,7 +128,7 @@ trait CraigslistHelper
         ];
 
         // Get RV Type From Category
-        $chosen = $rvTypes[$category];
+        $chosen = $rvTypes[$category] ?? null;
 
         // No Color Found? Choose Custom
         if(empty($chosen)) {
@@ -160,7 +160,7 @@ trait CraigslistHelper
         ];
 
         // Get RV Type From Category
-        $chosen = $rvTypes[$category];
+        $chosen = $rvTypes[$category] ?? null;
 
         // No Color Found? Choose Custom
         if(empty($chosen)) {
@@ -190,7 +190,7 @@ trait CraigslistHelper
         ];
 
         // Map Condition
-        $chosen = $conditions[$condition];
+        $chosen = $conditions[$condition] ?? null;
 
         // No Conditon Found? Choose New
         if(empty($chosen)) {

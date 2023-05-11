@@ -150,9 +150,9 @@ class PostTransformer extends TransformerAbstract
      */
     private function byRvs(ClappPost $clapp, array $post): array {
         // Make
-        $post['auto_year'] = $clapp->qData->year;
+        $post['auto_year'] = $clapp->year;
         $post['auto_make_model'] = $clapp->makeModel();
-        $post['auto_vin'] = $clapp->qData->vin;
+        $post['auto_vin'] = $clapp->vin;
 
         // Condition
         $post['auto_miles'] = $clapp->miles;

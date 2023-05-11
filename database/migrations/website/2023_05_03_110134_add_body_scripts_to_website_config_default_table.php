@@ -30,8 +30,10 @@ class AddBodyScriptsToWebsiteConfigDefaultTable extends Migration
      */
     public function up(): void
     {
-        DB::table(self::TABLE_NAME)
-            ->insert(self::GENERAL_BODY_SCRIPT);
+        if (DB::table(self::TABLE_NAME)->where('key', self::GENERAL_BODY_SCRIPT['key'])->doesntExist()) {
+            DB::table(self::TABLE_NAME)
+                ->insert(self::GENERAL_BODY_SCRIPT);
+        }
     }
 
     /**

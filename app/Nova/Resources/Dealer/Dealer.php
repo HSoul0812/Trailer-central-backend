@@ -82,7 +82,9 @@ class Dealer extends Resource
 
             Text::make('Primary Email', 'email')
                 ->sortable()
-                ->rules('required', 'email', 'max:254'),
+                ->rules('required', 'email', 'max:254')
+                ->creationRules('unique:dealer,email')
+                ->updateRules("unique:dealer,email,$request->resourceId,dealer_id"),
 
             Text::make('Stripe ID', 'stripe_id')->exceptOnForms(),
 

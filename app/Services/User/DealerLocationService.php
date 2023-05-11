@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\User;
 
 use App\Contracts\LoggerServiceInterface;
+use App\Exceptions\User\DealerDefaultLocationException;
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
@@ -108,6 +109,7 @@ class DealerLocationService implements DealerLocationServiceInterface
      * @throws Exception when there was some unknown db error
      * @throws InvalidArgumentException when provided "sales_tax_items" isn't an array
      * @throws InvalidArgumentException when provided "fees" isn't an array
+     * @throws \Throwable when updating a location when the dealer does not have a main location
      */
     public function create(int $dealerId, array $params): DealerLocation
     {
@@ -117,6 +119,12 @@ class DealerLocationService implements DealerLocationServiceInterface
             if (!empty($params['is_default'])) {
                 // remove any default location if exists
                 $this->locationRepo->turnOffDefaultLocationByDealerId($dealerId);
+            } else {
+                //ensure dealer has only 1 default location
+                throw_unless(
+                    $this->locationRepo->getDefaultByDealerId($dealerId),
+                    new DealerDefaultLocationException('A main location is required')
+                );
             }
 
             if (!empty($params['is_default_for_invoice'])) {
@@ -202,6 +210,7 @@ class DealerLocationService implements DealerLocationServiceInterface
      * @throws InvalidArgumentException when `sales_tax_items` is not an array
      * @throws InvalidArgumentException when `fees` is not an array
      * @throws ModelNotFoundException when $locationId doesn't exist in the database
+     * @throws DealerDefaultLocationException when updating a location when the dealer does not have a main location
      */
     public function update(int $locationId, int $dealerId, array $params): DealerLocation
     {
@@ -211,6 +220,13 @@ class DealerLocationService implements DealerLocationServiceInterface
             if (!empty($params['is_default'])) {
                 // remove any default location if exists
                 $this->locationRepo->turnOffDefaultLocationByDealerId($dealerId);
+            } else {
+                //ensure dealer has only 1 default location
+                $defaultLocation = $this->locationRepo->getDefaultByDealerId($dealerId);
+                throw_unless(
+                   $defaultLocation && ($defaultLocation->dealer_location_id !== $locationId),
+                    new DealerDefaultLocationException('A main location is required')
+                );
             }
 
             if (!empty($params['is_default_for_invoice'])) {
