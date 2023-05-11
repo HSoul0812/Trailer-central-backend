@@ -33,6 +33,7 @@ class CollectorSpecification extends Model
     protected $table = 'collector_specification';
 
     protected $fillable = [
+        'id',
         'collector_id',
         'logical_operator',
         'created_at',

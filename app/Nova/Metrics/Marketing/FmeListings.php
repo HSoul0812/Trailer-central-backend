@@ -16,7 +16,7 @@ class FmeListings extends Value
      */
     public function name(): string
     {
-        return 'Listings';
+        return 'Inventory Listed';
     }
 
     /**
@@ -35,6 +35,16 @@ class FmeListings extends Value
     public function calculate(NovaRequest $request): ValueResult
     {
         return $this->count($request, Listings::class);
+    }
+
+    /**
+     * Determine for how many minutes the metric should be cached.
+     *
+     * @return  \DateTimeInterface|\DateInterval|float|int
+     */
+    public function cacheFor()
+    {
+        return now()->addMinutes(5);
     }
 
     /**

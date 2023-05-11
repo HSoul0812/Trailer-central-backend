@@ -104,11 +104,12 @@ class ShowroomService implements ShowroomServiceInterface
 
     /**
      * @param array $unit
+     * @param array $additionalSearchParams
      * @return array
      */
-    public function mapInventoryToFactory(array $unit): array
+    public function mapInventoryToFactory(array $unit, array $additionalSearchParams = []): array
     {
-        $showroom = $this->getShowroomByUnit($unit);
+        $showroom = $this->getShowroomByUnit($unit, $additionalSearchParams);
 
         if ($showroom === null) {
             return $unit;
@@ -179,12 +180,13 @@ class ShowroomService implements ShowroomServiceInterface
 
     /**
      * @param array $unit
+     * @param array $additionalSearchParams
      * @return Showroom|null
      */
-    protected function getShowroomByUnit(array $unit): ?Showroom
+    protected function getShowroomByUnit(array $unit, array $additionalSearchParams): ?Showroom
     {
         if (!isset($unit['year']) || !isset($unit['manufacturer']) || !isset($unit['model'])) {
-            throw new ShowroomException('Some params are absent', $unit);
+            throw new ShowroomException('Some params are absent. Unit - ' . json_encode($unit));
         }
 
         $searchParams = ['external_mfg_key' => "{$unit['year']};{$unit['manufacturer']};{$unit['model']}"];
@@ -209,6 +211,14 @@ class ShowroomService implements ShowroomServiceInterface
             $showrooms = $this->showroomRepository->getAll($searchParams);
         } else {
             $showrooms = $showroomGenericMaps->first()->showrooms;
+        }
+
+        if (($additionalSearchParams['search_by_model_part'] ?? false) && isset($additionalSearchParams['model_part']) && $showrooms->isEmpty()) {
+            unset($searchParams['model']);
+            $searchParams['like_model'] = '%' . $additionalSearchParams['model_part'] . '%';
+
+            /** @var Collection $showrooms */
+            $showrooms = $this->showroomRepository->getAll($searchParams);
         }
 
         if ($showrooms->isEmpty()) {
@@ -288,7 +298,7 @@ class ShowroomService implements ShowroomServiceInterface
             ];
 
             if ($showroomImage->is_floorplan) {
-                $image['is_secondary'] = 1;
+                $image['is_secondary'] = true;
             }
 
             if ($showroomImage->has_stock_overlay) {

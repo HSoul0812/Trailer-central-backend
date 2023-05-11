@@ -49,4 +49,39 @@ class UserControllerTest extends TestCase
             ->assertJsonPath('data.0.name', $dealer->name)
             ->assertSeeText($dealer->name);
     }
+
+    public function testItAllowCreateDealerWithProperIntegrationToken()
+    {
+        $user = Integration::create([
+            'name' => $this->faker->name(),
+        ]);
+
+        $user->perms()->create([
+            'feature' => 'create_user',
+            'permission_level' => 'can_see_and_change',
+        ]);
+
+        $token = Str::random(AuthToken::INTEGRATION_ACCESS_TOKEN_LENGTH);
+
+        $user->authToken()->create([
+            'user_type' => AuthToken::USER_TYPE_INTEGRATION,
+            'access_token' => $token,
+        ]);
+
+        $name = $this->faker->name();
+        $email = $this->faker->email();
+        $this
+            ->post("/api/users", [
+                'name' => $name,
+                'email' => $email,
+                'password' => 'abcdefg12345678',
+                'from' => 'trailertrader',
+                'clsf_active' => 1
+            ], [
+                'access-token' => $token,
+            ])
+            ->assertStatus(201)
+            ->assertJsonPath('data.name', $name)
+            ->assertJsonPath('data.email', $email);
+    }
 }

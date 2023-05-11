@@ -10,6 +10,9 @@ use Str;
 use Tests\TestCase;
 
 /**
+ * @group DW
+ * @group DW_INVENTORY
+ *
  * Test for App\Jobs\Files\DeleteS3FilesJob
  *
  * Class DeleteFilesJobTest

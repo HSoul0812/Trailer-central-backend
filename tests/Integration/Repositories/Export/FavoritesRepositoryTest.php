@@ -13,6 +13,10 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
 use Tests\TestCase;
 
+/**
+ * @group DW
+ * @group DW_INVENTORY
+ */
 class FavoritesRepositoryTest extends TestCase
 {
     /**

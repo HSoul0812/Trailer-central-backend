@@ -6,8 +6,11 @@ use App\Contracts\LoggerServiceInterface;
 use App\Models\BatchedJob;
 use App\Repositories\Horizon\TagRepositoryInterface;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Redis;
 use Laravel\Horizon\Contracts\JobRepository;
 use Illuminate\Support\Str;
+use stdClass as QueueJob;
+use \Redis as PhpRedis;
 
 class BatchedJobService implements BatchedJobServiceInterface
 {
@@ -17,7 +20,10 @@ class BatchedJobService implements BatchedJobServiceInterface
     private const NO_GROUP = 'no-group';
 
     /** @var int time in seconds */
-    public const WAIT_TIME = 2;
+    public const WAIT_TIME_IN_SECONDS = 2;
+
+    /** @var PhpRedis */
+    private $redisClient;
 
     /** @var \App\Repositories\Horizon\TagRepositoryInterface */
     private $tagRepository;
@@ -33,6 +39,7 @@ class BatchedJobService implements BatchedJobServiceInterface
         JobRepository $jobRepository,
         LoggerServiceInterface $logger
     ) {
+        $this->redisClient = Redis::connection('default')->client();
         $this->tagRepository = $tagRepository;
         $this->jobRepository = $jobRepository;
         $this->logger = $logger;
@@ -41,12 +48,16 @@ class BatchedJobService implements BatchedJobServiceInterface
     /**
      * @inheritDoc
      */
-    public function create(?string $group = null, ?int $waitTime = null, ?array $context = null): BatchedJob
-    {
+    public function create(
+        array $queues,
+        ?string $group = null,
+        ?int $waitTime = null,
+        ?array $context = null
+    ): BatchedJob {
         $batch = BatchedJob::create([
-            'batch_id' => Str::uuid()->toString(),
-            'group' => $group ?: self::NO_GROUP,
-            'wait_time' => $waitTime ?? self::WAIT_TIME,
+            'batch_id' => $this->generateBatchId($group),
+            'queues' => $queues,
+            'wait_time' => $waitTime ?? self::WAIT_TIME_IN_SECONDS,
             'context' => $context
         ]);
 
@@ -58,23 +69,36 @@ class BatchedJobService implements BatchedJobServiceInterface
     }
 
     /**
+     * Generates a unique id like `230417_123042_860-recreate-index-Vm8Kh` where `recreate-index` is the group
+     *
+     * @param  string|null  $group
+     * @return string
+     */
+    public function generateBatchId(?string $group = null): string
+    {
+        return sprintf(
+            '%s-%s_%s',
+            now()->format('ymd_His_v'),
+            Str::slug(empty($group) ? self::NO_GROUP : $group),
+            Str::random('5')
+        );
+    }
+
+    /**
      * @inheritDoc
      */
     public function detach(BatchedJob $batch): void
     {
-        $processed_jobs = $batch->total_jobs - $this->count($batch);
+        $processedJobs = $batch->total_jobs - $this->count($batch);
 
         $this->update($batch, [
-            'processed_jobs' => $processed_jobs,
-            'failed_jobs' => $batch->total_jobs - $processed_jobs,
+            'processed_jobs' => $processedJobs,
+            'failed_jobs' => $batch->total_jobs - $processedJobs,
             'finished_at' => Carbon::now()->format('Y-m-d H:i:s')
         ]);
 
         $this->tagRepository->forget($batch->batch_id);
-
-        if ($processed_jobs === $batch->total_jobs) {
-            $this->tagRepository->stopMonitoring($batch->batch_id);
-        }
+        $this->tagRepository->stopMonitoring($batch->batch_id);
 
         $this->logger->info(sprintf('Batch [%s] was forgot', $batch->batch_id));
     }
@@ -102,17 +126,42 @@ class BatchedJobService implements BatchedJobServiceInterface
     }
 
     /**
-     * Determines if the batch is still running based on jobs numbers, when it is zero, that means it was fully processed
+     * Determines if the batch is still running based on jobs numbers, when it is zero,
+     * that means it was fully processed
      *
      * @param  BatchedJob  $batch
      * @return bool
      */
     protected function isRunning(BatchedJob $batch): bool
     {
+        $shouldFinishJob = false;
+
+        if (!empty($batch->queues)) {
+            $totalJobsEnqueued = 0;
+
+            foreach ($batch->queues as $queue) {
+                $totalJobsEnqueued += $this->pendingQueueJobs($queue);
+            }
+
+            // given there is a bug in horizon which is not updating properly the monitored jobs,
+            // so we have to assume that a batched job is finished when the queue is empty
+            if ($totalJobsEnqueued === 0) {
+                $shouldFinishJob = true;
+
+                $this->logger->info(
+                    sprintf('the batch [%s] will be finished due related-queues are empty', $batch->batch_id)
+                );
+            }
+        }
+
         $jobIds = $this->tagRepository->jobs($batch->batch_id);
 
-        $this->jobRepository->getJobs($jobIds)->each(function (\stdClass $job) use ($batch, &$jobIds) {
-            if ($job->status === self::COMPLETED) {
+        $this->jobRepository->getJobs($jobIds)->each(function (QueueJob $job) use (
+            $batch,
+            &$jobIds,
+            $shouldFinishJob
+        ) {
+            if ($shouldFinishJob || $job->status === self::COMPLETED) {
                 $this->tagRepository->detach($batch->batch_id, $job->id);
                 unset($jobIds[$job->id]);
 
@@ -122,7 +171,12 @@ class BatchedJobService implements BatchedJobServiceInterface
             }
         });
 
-        return count($jobIds);
+        return !$shouldFinishJob && count($jobIds);
+    }
+
+    private function pendingQueueJobs(string $queue): int
+    {
+        return $this->redisClient->lLen("queues:$queue");
     }
 
     /**

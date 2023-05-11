@@ -14,6 +14,7 @@ class CreateSettingsRequest extends WithDealerRequest {
         return array_merge(parent::getRules(), [
             'website_id' => 'integer|min:1|required|exists:website,id,dealer_id,' . $this->dealer_id,
             'entity_type_id' => 'required|integer',
+            'inventory_category_id' => 'integer|nullable',
             'months' => 'required|integer|in:0,12,24,36,48,60,72,84,96,108,120,132,144,156,168,180,192,204,216,228,240', // from 1 to 20 years
             'apr' => 'required|numeric|min:0|max:100',
             'down' => 'required|numeric|min:0',

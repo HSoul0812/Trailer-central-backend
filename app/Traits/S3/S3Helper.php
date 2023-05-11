@@ -2,12 +2,24 @@
 
 namespace App\Traits\S3;
 
+use Symfony\Component\HttpFoundation\Response;
+
 /**
  * Trait UrlHelper
  * @package App\Traits\S3
  */
 trait S3Helper
 {
+    /**
+     * @return string
+     */
+    protected function getProductionS3BaseUrl(): string
+    {
+        $urlMetadata = parse_url(config('services.aws.prod_url'));
+
+        return $urlMetadata['scheme'].'://'.$urlMetadata['host'];
+    }
+
     /**
      * @return string
      */
@@ -29,5 +41,27 @@ trait S3Helper
     protected function getS3Url(string $path): string
     {
         return $this->getS3BaseUrl() . DIRECTORY_SEPARATOR . ltrim($path, '/');
+    }
+
+    /**
+     * Will only check the status code, when it is greater or  equal to 200 and less or equal to 300, then it will return true
+     */
+    protected function exist(string $url): bool
+    {
+        $resource = curl_init();
+
+        curl_setopt($resource, CURLOPT_URL, $url);
+        curl_setopt($resource, CURLOPT_NOBODY, true);
+        curl_setopt($resource, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($resource, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($resource, CURLOPT_TIMEOUT, 2);
+
+        curl_exec($resource);
+
+        $httpCode = curl_getinfo($resource, CURLINFO_HTTP_CODE);
+
+        curl_close($resource);
+
+        return $httpCode >= Response::HTTP_OK && $httpCode < Response::HTTP_MULTIPLE_CHOICES;
     }
 }

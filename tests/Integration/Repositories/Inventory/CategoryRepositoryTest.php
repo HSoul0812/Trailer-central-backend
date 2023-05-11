@@ -13,6 +13,10 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Tests\TestCase;
 
+/**
+ * @group DW
+ * @group DW_INVENTORY
+ */
 class CategoryRepositoryTest extends TestCase
 {
     /**

@@ -3,6 +3,7 @@
 namespace App\Observers\Inventory;
 
 use App\Models\Inventory\Inventory;
+use App\Repositories\Inventory\DeletedInventoryRepositoryInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
@@ -20,13 +21,24 @@ class InventoryObserver
     private $responseCache;
 
     /**
+     * @var DeletedInventoryRepositoryInterface
+     */
+    private $deletedInventoryRepo;
+
+    /**
      * @param ResponseCacheKeyInterface $cacheKey
      * @param InventoryResponseCacheInterface $responseCache
+     * @param DeletedInventoryRepositoryInterface $deletedInventoryRepo
      */
-    public function __construct(ResponseCacheKeyInterface $cacheKey, InventoryResponseCacheInterface $responseCache)
+    public function __construct(
+        ResponseCacheKeyInterface $cacheKey,
+        InventoryResponseCacheInterface $responseCache,
+        DeletedInventoryRepositoryInterface $deletedInventoryRepo
+    )
     {
         $this->cacheKey = $cacheKey;
         $this->responseCache = $responseCache;
+        $this->deletedInventoryRepo = $deletedInventoryRepo;
     }
 
     public static function enableCacheInvalidation(): void
@@ -56,7 +68,7 @@ class InventoryObserver
     public function created(Inventory $inventory)
     {
         if (self::$isCacheInvalidationEnabled) {
-            $this->responseCache->forget([$this->cacheKey->deleteByDealer($inventory->dealer_id)]);
+
         }
     }
 
@@ -69,11 +81,7 @@ class InventoryObserver
     public function updated(Inventory $inventory)
     {
         if (self::$isCacheInvalidationEnabled) {
-            $this->responseCache->forget([
-                    $this->cacheKey->deleteByDealer($inventory->dealer_id),
-                    $this->cacheKey->deleteSingle($inventory->inventory_id, $inventory->dealer_id)
-                ]
-            );
+
         }
     }
 
@@ -86,11 +94,14 @@ class InventoryObserver
     public function deleted(Inventory $inventory)
     {
         if (self::$isCacheInvalidationEnabled) {
-            $this->responseCache->forget([
-                $this->cacheKey->deleteSingleFromCollection($inventory->inventory_id),
-                $this->cacheKey->deleteSingle($inventory->inventory_id, $inventory->dealer_id)
-            ]);
+
         }
+
+        // Add record to deleted_inventory table
+        $this->deletedInventoryRepo->create([
+            'vin' => $inventory->vin,
+            'dealer_id' => $inventory->dealer_id
+        ]);
     }
 
     /**
@@ -102,7 +113,7 @@ class InventoryObserver
     public function restored(Inventory $inventory)
     {
         if (self::$isCacheInvalidationEnabled) {
-            $this->responseCache->forget([$this->cacheKey->deleteByDealer($inventory->dealer_id)]);
+
         }
     }
 
