@@ -336,14 +336,14 @@ doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
         return $this->query;
     }
 
-    public function buildExcludeIdsQuery(array $data): array {
+    public function buildExcludeIdsQuery(array $id): array {
         return [
             'query' => [
                 'bool' => [
                     'must_not' => [
                         [
                             'ids' => [
-                                'values' => $data
+                                'values' => $id
                             ]
                         ]
                     ]
