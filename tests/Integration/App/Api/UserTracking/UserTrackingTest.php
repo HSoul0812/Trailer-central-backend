@@ -4,6 +4,7 @@ namespace Tests\Integration\App\Api\UserTracking;
 
 use App\Models\UserTracking;
 use App\Models\WebsiteUser\WebsiteUser;
+use Queue;
 use Str;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Common\IntegrationTestCase;
@@ -22,6 +23,8 @@ class UserTrackingTest extends IntegrationTestCase
 
     public function testItCanCreateUserTrackingRecord()
     {
+        Queue::fake();
+
         $visitorId = Str::random();
         $event = $this->faker->word();
         $url = $this->faker->url();
@@ -62,6 +65,8 @@ class UserTrackingTest extends IntegrationTestCase
 
     public function testItSetLocationProcessedAsFalseWhenIpAddressIsNotIgnored()
     {
+        Queue::fake();
+
         $ipAddress = '194.59.12.191';
         $userTracking = UserTracking::factory()->make();
 
@@ -86,6 +91,8 @@ class UserTrackingTest extends IntegrationTestCase
 
     public function testItCanCreateUserTrackingWithMetaAsNull()
     {
+        Queue::fake();
+
         $visitorId = Str::random();
         $event = $this->faker->word();
         $url = $this->faker->url();
@@ -120,6 +127,8 @@ class UserTrackingTest extends IntegrationTestCase
 
     public function testItCanAssignWebsiteUserIdFromBearerToken()
     {
+        Queue::fake();
+
         $websiteUser = WebsiteUser::factory()->create();
 
         $token = auth('api')->tokenById($websiteUser->id);
@@ -142,6 +151,8 @@ class UserTrackingTest extends IntegrationTestCase
 
     public function testItAssignWebsiteUserIdAsNullIfTokenIsInvalid()
     {
+        Queue::fake();
+
         $token = Str::random();
 
         $this
@@ -162,6 +173,8 @@ class UserTrackingTest extends IntegrationTestCase
 
     public function testItCanDetectPageNameFromUrl()
     {
+        Queue::fake();
+
         $visitorId = Str::random();
 
         $urls = [[

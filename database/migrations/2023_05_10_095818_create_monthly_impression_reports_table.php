@@ -27,7 +27,7 @@ class CreateMonthlyImpressionReportsTable extends Migration
 
             $table->index(['year', 'month']);
             $table->index(['year', 'month', 'dealer_id']);
-            $table->index(['year', 'month', 'inventory_id']);
+            $table->unique(['year', 'month', 'inventory_id']);
         });
     }
 
