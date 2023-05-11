@@ -694,7 +694,7 @@ $api->version('v1', function ($route) {
 
     $route->post('user/classified', 'App\Http\Controllers\v1\User\UserController@updateDealerClassifieds');
 
-    $route->get('users-of-tt', 'App\Http\Controllers\v1\User\UserController@listOfTTDealers');
+    $route->get('tt-dealers', 'App\Http\Controllers\v1\User\UserController@listOfTTDealers');
 
 
     /*

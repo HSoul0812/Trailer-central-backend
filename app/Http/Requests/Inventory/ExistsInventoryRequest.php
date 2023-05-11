@@ -13,6 +13,8 @@ class ExistsInventoryRequest extends Request
     protected $rules = [
         'stock' => 'string',
         'dealer_id' => 'required|exists:App\Models\User\User,dealer_id',
-        'inventory_id' => 'required_without:stock|exists:App\Models\Inventory\Inventory,inventory_id'
+        'inventory_id' => 'exists:App\Models\Inventory\Inventory,inventory_id',
+        'delaer_location_id' => 'exists:App\Models\User\DealerLocation,dealer_location_id',
+        'entity_type_id' => 'exists:App\Models\Inventory\EntityType,entity_type_id',
     ];
 }
