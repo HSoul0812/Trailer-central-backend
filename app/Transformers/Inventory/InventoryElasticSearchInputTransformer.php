@@ -198,7 +198,8 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'lengthDisplayMode'    => $model->length_display_mode,
             'tilt'                 => $model->getAttributeById(Attribute::TILT),
             'entity_type_id'       => $model->entity_type_id,
-            'paymentCalculator' => $paymentCalculatorSettings
+            'paymentCalculator' => $paymentCalculatorSettings,
+            'hasImage'             => !empty($defaultImage)
         ];
     }
 
