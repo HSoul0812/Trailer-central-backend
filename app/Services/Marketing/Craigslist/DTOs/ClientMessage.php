@@ -80,7 +80,7 @@ class ClientMessage
      * @const string
      */
     const COUNTS_WARNING = 'WARNING: There are currently :past past due scheduler posts on :email! ' .
-                        'This must be reviewed and fixed as soon as possible!' .
+                        'This must be reviewed and fixed as soon as possible! ' .
             'For the rest of the day there are currently :remaining posts on :email remaining.';
 
     /**
