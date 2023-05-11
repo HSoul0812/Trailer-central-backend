@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace App\DTOs\Inventory;
 
-use App\Traits\TypedPropertyTrait;
 use App\DTOs\Dealer\PrivateDealerCheck;
-use Illuminate\Contracts\Support\Arrayable;
+use App\Traits\TypedPropertyTrait;
 use JetBrains\PhpStorm\Pure;
 
 class TcApiResponseInventory
 {
-    const statusToAvailabilityMap = [
+    use \App\DTOs\Arrayable;
+    use TypedPropertyTrait;
+    public const statusToAvailabilityMap = [
         1 => 'available',
         2 => 'sold',
         3 => 'on_order',
         4 => 'pending_sale',
         5 => 'special_order',
     ];
-
-    use \App\DTOs\Arrayable;
-    use TypedPropertyTrait;
 
     public int $id;
     public ?string $url;
@@ -83,50 +81,50 @@ class TcApiResponseInventory
         $obj->manufacturer = $data['manufacturer'];
         $obj->dealer = $data['dealer'];
 
-        if(!empty($obj->dealer)) {
+        if (!empty($obj->dealer)) {
             $obj->dealer['is_private'] = (new PrivateDealerCheck())->checkArray($obj->dealer);
         }
 
         $obj->listing_date = $data['created_at'];
 
-     $obj->availability = self::statusToAvailabilityMap[$data['status_id']] ?? '';
-     $obj->availability_label = $data['status'] ?? '';
-     if($obj->availability !== 'sold') {
-         $obj->price = $data['price'];
-         $obj->sales_price = $data['sales_price'];
-         $obj->website_price = isset($data['use_website_price']) && $data['use_website_price']
-             ? $data['website_price']
-             : $data['price'];
+        $obj->availability = self::statusToAvailabilityMap[$data['status_id']] ?? '';
+        $obj->availability_label = $data['status'] ?? '';
+        if ($obj->availability !== 'sold') {
+            $obj->price = $data['price'];
+            $obj->sales_price = $data['sales_price'];
+            $obj->website_price = isset($data['use_website_price']) && $data['use_website_price']
+                ? $data['website_price']
+                : $data['price'];
 
-         $obj->basic_price = $data['price'];
-     } else {
-         $obj->price = NULL;
-         $obj->sales_price = NULL;
-         $obj->website_price = NULL;
-         $obj->basic_price = NULL;
-     }
+            $obj->basic_price = $data['price'];
+        } else {
+            $obj->price = null;
+            $obj->sales_price = null;
+            $obj->website_price = null;
+            $obj->basic_price = null;
+        }
 
-     $obj->inventory_title = $data['title'];
-     $obj->photos = $data['images'];
-     $obj->dealer_location = $data['dealer_location'];
-     $obj->primary_image = $data['primary_image'];
-     $obj->category = $data['category'];
-     $obj->is_archived = $data['is_archived'];
-     $obj->show_on_website = $data['show_on_website'];
-     $obj->times_viewed = $data['times_viewed'];
-     $obj->sold_at = $data['sold_at'];
-     $obj->is_featured = $data['is_featured'];
-     $obj->is_special = $data['is_special'];
-     $obj->use_website_price = $data['use_website_price'] ?? false;
-     $obj->notes = $data['notes'];
-     $obj->year = $data['year'];
-     $obj->status = $data['status'];
-     $obj->axle_capacity = $data['axle_capacity'];
+        $obj->inventory_title = $data['title'];
+        $obj->photos = $data['images'];
+        $obj->dealer_location = $data['dealer_location'];
+        $obj->primary_image = $data['primary_image'];
+        $obj->category = $data['category'];
+        $obj->is_archived = $data['is_archived'];
+        $obj->show_on_website = $data['show_on_website'];
+        $obj->times_viewed = $data['times_viewed'];
+        $obj->sold_at = $data['sold_at'];
+        $obj->is_featured = $data['is_featured'];
+        $obj->is_special = $data['is_special'];
+        $obj->use_website_price = $data['use_website_price'] ?? false;
+        $obj->notes = $data['notes'];
+        $obj->year = $data['year'];
+        $obj->status = $data['status'];
+        $obj->axle_capacity = $data['axle_capacity'];
 
-     foreach($data['attributes'] as $attribute) {
-       $obj->setTypedProperty($attribute['code'], $attribute['value']);
-     }
+        foreach ($data['attributes'] as $attribute) {
+            $obj->setTypedProperty($attribute['code'], $attribute['value']);
+        }
 
-     return $obj;
- }
+        return $obj;
+    }
 }

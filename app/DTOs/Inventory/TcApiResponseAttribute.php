@@ -14,7 +14,8 @@ class TcApiResponseAttribute
     public ?string $default_value;
     public ?string $aliases;
 
-    public static function fromData(array $data): self {
+    public static function fromData(array $data): self
+    {
         $obj = new self();
         $obj->attribute_id = $data['attribute_id'];
         $obj->code = $data['code'];

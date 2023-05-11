@@ -2,17 +2,13 @@
 
 use App\Models\Parts\ListingCategoryMappings;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 class AddTiltTrailersToListingCategoryMappingsTable extends Migration
 {
-    const MAP_FROM = 'Tilt Trailers';
+    public const MAP_FROM = 'Tilt Trailers';
 
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up(): void
     {
@@ -27,8 +23,6 @@ class AddTiltTrailersToListingCategoryMappingsTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down(): void
     {

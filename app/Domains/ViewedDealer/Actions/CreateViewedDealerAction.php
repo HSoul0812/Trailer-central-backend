@@ -2,28 +2,22 @@
 
 namespace App\Domains\ViewedDealer\Actions;
 
-use App\Domains\ViewedDealer\Exceptions\DealerIdExistsException;
-use App\Domains\ViewedDealer\Exceptions\DuplicateDealerIdException;
 use App\Models\Dealer\ViewedDealer;
-use Arr;
-use DB;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Str;
 use Throwable;
 
 class CreateViewedDealerAction
 {
-    const VIEWED_DEALER_CACHE_SECONDS = 86_400;
+    public const VIEWED_DEALER_CACHE_SECONDS = 86_400;
 
     /**
      * Upsert the given dealer_id & name pair using name as unique identifier
      * if name exists, we update dealer_id to the given one, if not we create
-     * a new record
+     * a new record.
      *
      * @param array<int, array{dealer_id: int, name: string}> $viewedDealers
-     * @return array
+     *
      * @throws Throwable
      */
     public function execute(array $viewedDealers): array
@@ -68,10 +62,7 @@ class CreateViewedDealerAction
 
     /**
      * Transform into a unique names array and then validate that dealer_id
-     * are unique across all array
-     *
-     * @param array $viewedDealers
-     * @return array
+     * are unique across all array.
      */
     private function transformAndValidate(array $viewedDealers): array
     {
@@ -82,10 +73,7 @@ class CreateViewedDealerAction
 
     /**
      * Remove any duplicate name from the array, for example, if the API consumer
-     * send 2 array with the name John, then only the 1st array will be in the final array
-     *
-     * @param array $viewedDealers
-     * @return array
+     * send 2 array with the name John, then only the 1st array will be in the final array.
      */
     private function removeDuplicateNames(array $viewedDealers): array
     {
@@ -107,10 +95,7 @@ class CreateViewedDealerAction
     }
 
     /**
-     * Make sure that we don't have duplicate dealer id in a different name
-     *
-     * @param array $viewedDealers
-     * @return array
+     * Make sure that we don't have duplicate dealer id in a different name.
      */
     private function removeDuplicateDealerIds(array $viewedDealers): array
     {

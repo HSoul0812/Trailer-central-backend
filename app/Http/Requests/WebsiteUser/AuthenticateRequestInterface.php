@@ -6,5 +6,4 @@ use App\Http\Requests\RequestInterface;
 
 interface AuthenticateRequestInterface extends RequestInterface
 {
-
 }

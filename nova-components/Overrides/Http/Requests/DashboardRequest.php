@@ -13,6 +13,7 @@ class DashboardRequest extends NovaRequest
      * Get all the possible cards for the request.
      *
      * @param string $dashboard
+     *
      * @noinspection PhpMissingParamTypeInspection
      */
     public function availableCards($dashboard): Collection

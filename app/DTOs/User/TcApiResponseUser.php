@@ -10,11 +10,14 @@ class TcApiResponseUser
     public string $name;
     public string $email;
 
-    #[Pure] public static function fromData(array $data): self {
-        $obj = new self;
+    #[Pure]
+    public static function fromData(array $data): self
+    {
+        $obj = new self();
         $obj->id = $data['id'];
         $obj->name = $data['name'];
         $obj->email = $data['email'];
+
         return $obj;
     }
 }

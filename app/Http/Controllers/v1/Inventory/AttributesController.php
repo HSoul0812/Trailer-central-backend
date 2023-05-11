@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\v1\Inventory;
 
-use App\DTOs\Inventory\TcApiResponseAttribute;
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
@@ -21,11 +20,15 @@ class AttributesController extends AbstractRestfulController
     {
         parent::__construct();
     }
-    public function index(IndexRequestInterface $request): Response {
-        if($request->validate()) {
+
+    public function index(IndexRequestInterface $request): Response
+    {
+        if ($request->validate()) {
             $result = $this->inventoryService->attributes($request->all());
+
             return $this->response->collection($result, $this->transformer);
         }
+
         return $this->response->errorBadRequest();
     }
 

@@ -12,13 +12,13 @@ class SubscribeEmailSearchDTO
     public ?string $url;
 
     #[Pure]
- public static function fromData(array $data): self
- {
-     $obj = new self();
-     $obj->email = $data['email'];
-     $obj->url = $data['url'];
-     $obj->subject = $data['subject'];
+    public static function fromData(array $data): self
+    {
+        $obj = new self();
+        $obj->email = $data['email'];
+        $obj->url = $data['url'];
+        $obj->subject = $data['subject'];
 
-     return $obj;
- }
+        return $obj;
+    }
 }

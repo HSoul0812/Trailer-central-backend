@@ -6,28 +6,20 @@ use Tests\Common\FeatureTestCase;
 
 class PageTest extends FeatureTestCase
 {
-    /**
-     * @var string
-     */
     protected string $endpoint = '/api/pages';
 
-    /**
-     * @var array
-     */
     protected array $dataStructure = [
         'data' => [
             '*' => [
                 'id',
                 'name',
-                'url'
-            ]
-        ]
+                'url',
+            ],
+        ],
     ];
 
     /**
-     * Tests if the api endpoint is available
-     *
-     * @return void
+     * Tests if the api endpoint is available.
      */
     public function testIndex(): void
     {
@@ -39,9 +31,7 @@ class PageTest extends FeatureTestCase
     }
 
     /**
-     * Tests if the data returned is in the expected structure
-     *
-     * @return void
+     * Tests if the data returned is in the expected structure.
      */
     public function testIndexStructure(): void
     {
@@ -50,31 +40,27 @@ class PageTest extends FeatureTestCase
     }
 
     /**
-     * Tests if the data returned is the expected data
-     *
-     * @return void
+     * Tests if the data returned is the expected data.
      */
     public function testIndexData(): void
     {
         $response = $this->get($this->endpoint);
         $json = json_decode($response->getContent(), true);
 
-        foreach ($json["data"] as $page) {
+        foreach ($json['data'] as $page) {
             $this->assertDatabaseHas('pages', $page);
         }
     }
 
     /**
-     * Tests if the data returned is with an expected encoding
-     *
-     * @return void
+     * Tests if the data returned is with an expected encoding.
      */
     public function testIndexPagesEnconding(): void
     {
         $response = $this->get($this->endpoint);
         $json = json_decode($response->getContent(), true);
 
-        foreach ($json["data"] as $page) {
+        foreach ($json['data'] as $page) {
             foreach ($page as $key => $value) {
                 $this->assertEquals(
                     'UTF-8',

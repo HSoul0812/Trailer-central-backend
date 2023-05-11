@@ -32,5 +32,5 @@ return [
 
     'elasticsearch' => [
         'url' => env('TC_ES_URL', 'http://localhost:9200'),
-    ]
+    ],
 ];

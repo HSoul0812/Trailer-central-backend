@@ -11,21 +11,21 @@ use Illuminate\Support\Collection;
 interface ViewedDealerRepositoryInterface
 {
     /**
-     * Get the ViewedDealer model by name, returns null if it doesn't exist
+     * Get the ViewedDealer model by name, returns null if it doesn't exist.
      *
-     * @param string $name
-     * @return ViewedDealer
      * @throws ModelNotFoundException
      */
     public function findByName(string $name): ViewedDealer;
 
     /**
-     * Create new viewed_dealer records (accepts multiple pairs)
+     * Create new viewed_dealer records (accepts multiple pairs).
      *
      * @param array<int, array{dealer_id: int, name: string}> $params
-     * @return Collection
+     *
      * @throws DuplicateDealerIdException
      * @throws DealerIdExistsException
+     *
+     * @return Collection
      */
     public function create(array $params): array;
 }

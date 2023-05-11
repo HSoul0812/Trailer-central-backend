@@ -47,7 +47,7 @@ class Kernel extends ConsoleKernel
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/commands/cache-crawler-ip-addresses.log'));
 
-		$schedule
+        $schedule
             ->command(ProcessUserTrackingsCommand::class)
             ->daily()
             ->withoutOverlapping()

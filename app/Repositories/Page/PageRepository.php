@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 class PageRepository implements PageRepositoryInterface
 {
-    /**
-     * @var Page
-     */
     protected Page $model;
 
     public function __construct(Page $model)

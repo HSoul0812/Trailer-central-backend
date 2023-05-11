@@ -5,19 +5,16 @@ namespace App\Http\Controllers\v1\Image;
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
-use App\Http\Requests\Home\IndexHomeRequest;
 use App\Http\Requests\Image\UploadImageRequest;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
-use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Api\Image\ImageServiceInterface;
 
 class ImageController extends AbstractRestfulController
 {
     public function __construct(
         private ImageServiceInterface $imageService
-    )
-    {
+    ) {
         parent::__construct();
     }
 
@@ -28,12 +25,14 @@ class ImageController extends AbstractRestfulController
 
     public function create(CreateRequestInterface $request)
     {
-        if($request->validate()) {
+        if ($request->validate()) {
             $user = auth('api')->user();
+
             return $this->response->array($this->imageService->uploadImage(
                 $user->tc_user_id, $request->file
             ));
         }
+
         return $this->response->errorBadRequest();
     }
 

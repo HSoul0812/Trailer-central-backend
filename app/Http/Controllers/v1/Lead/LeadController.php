@@ -19,8 +19,7 @@ class LeadController extends AbstractRestfulController
     /**
      * Create a new controller instance.
      *
-     * @param LeadServiceInterface   $lead
-     * @param TcApiResponseLeadTransformer $transformer
+     * @param LeadServiceInterface $lead
      */
     public function __construct(private LeadServiceInterface $leadService, private TcApiResponseLeadTransformer $transformer)
     {

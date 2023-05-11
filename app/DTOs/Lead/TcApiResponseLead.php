@@ -20,20 +20,20 @@ class TcApiResponseLead
     public ?string $zip;
 
     #[Pure]
- public static function fromData(array $data): self
- {
-     $obj = new self();
-     $obj->id = $data['id'];
-     $obj->website_id = $data['website_id'];
-     $obj->dealer_id = $data['dealer_id'];
-     $obj->name = $data['name'];
-     $obj->lead_types = $data['lead_types'];
-     $obj->email_address = $data['email'];
-     $obj->phone_number = $data['phone'];
-     $obj->comments = $data['comments'];
-     $obj->created_at = $data['created_at'];
-     $obj->zip = $data['zip'];
+    public static function fromData(array $data): self
+    {
+        $obj = new self();
+        $obj->id = $data['id'];
+        $obj->website_id = $data['website_id'];
+        $obj->dealer_id = $data['dealer_id'];
+        $obj->name = $data['name'];
+        $obj->lead_types = $data['lead_types'];
+        $obj->email_address = $data['email'];
+        $obj->phone_number = $data['phone'];
+        $obj->comments = $data['comments'];
+        $obj->created_at = $data['created_at'];
+        $obj->zip = $data['zip'];
 
-     return $obj;
- }
+        return $obj;
+    }
 }

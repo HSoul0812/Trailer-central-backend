@@ -7,6 +7,7 @@ declare(strict_types=1);
 namespace Tests\Common;
 
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 use Tests\Unit\MockPrivateMembers;
 
 abstract class UnitTestCase extends TestCase
@@ -23,9 +24,10 @@ abstract class UnitTestCase extends TestCase
     }
 
     /**
-     * @throws \ReflectionException when the class property does not exist
+     * @throws ReflectionException when the class property does not exist
      *
      * @return mixed|\PHPUnit\Framework\MockObject\MockObject
+     *
      * @noinspection PhpMissingReturnTypeInspection
      */
     public function mockEloquent(string $class, array $attributes = [], array $methods = [])

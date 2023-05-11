@@ -16,7 +16,7 @@ class GoogleGeocodeResponseItem
         $obj = new self();
         $obj->types = $data['types'];
         $obj->address_components = [];
-        foreach($data['address_components'] as $c) {
+        foreach ($data['address_components'] as $c) {
             $obj->address_components[] = GoogleMapAddressComponent::fromData($c);
         }
         $obj->formatted_address = $data['formatted_address'];
@@ -25,6 +25,7 @@ class GoogleGeocodeResponseItem
         $obj->plus_code = isset($data['plus_code'])
             ? GoogleMapPlusCode::fromData($data['plus_code'])
             : null;
+
         return $obj;
     }
 }

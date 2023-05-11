@@ -9,10 +9,13 @@ class GoogleMapViewport
     public GoogleMapPosition $northeast;
     public GoogleMapPosition $southwest;
 
-    #[Pure] public static function fromData(array $data): self {
+    #[Pure]
+    public static function fromData(array $data): self
+    {
         $obj = new self();
         $obj->northeast = GoogleMapPosition::fromData($data['northeast']);
         $obj->southwest = GoogleMapPosition::fromData($data['southwest']);
+
         return $obj;
     }
 }

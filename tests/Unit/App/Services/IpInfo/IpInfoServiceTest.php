@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\App\Services\IpInfo;
 
-use App\Services\Inventory\InventoryService;
 use App\Services\IpInfo\IpInfoService;
 use GeoIp2\Exception\AddressNotFoundException;
 use JetBrains\PhpStorm\Pure;
@@ -19,33 +18,34 @@ class IpInfoServiceTest extends TestCase
     }
 
     /**
-     * @param $ip
-     * @param $country
-     * @param $city
-     * @return void
      * @dataProvider cityIPProvider
      */
-    public function testGetCityByIP($ip, $country, $state, $city) {
+    public function testGetCityByIP($ip, $country, $state, $city)
+    {
         $location = $this->service->city($ip);
         $this->assertEquals($location->countryISO, $country);
         $this->assertEquals($location->stateISO, $state);
         $this->assertEquals($location->city, $city);
     }
 
-    public function cityIPProvider(): array {
+    public function cityIPProvider(): array
+    {
         return [
             'us city1' => ['206.71.50.230', 'US', 'NY', 'Brooklyn'],
             'us city2' => ['65.49.22.66', 'US', 'CA', 'Livermore'],
-            'canada city1' => ['192.206.151.131', 'CA', 'ON', 'Toronto']
+            'canada city1' => ['192.206.151.131', 'CA', 'ON', 'Toronto'],
         ];
     }
-    public function testGetCityByLocalIP() {
+
+    public function testGetCityByLocalIP()
+    {
         $this->expectException(AddressNotFoundException::class);
         $this->service->city('172.17.0.1');
     }
 
-    #[Pure] private function getConcreteService(): IpInfoService
-    {
-        return new IpInfoService();
-    }
+    #[Pure]
+ private function getConcreteService(): IpInfoService
+ {
+     return new IpInfoService();
+ }
 }

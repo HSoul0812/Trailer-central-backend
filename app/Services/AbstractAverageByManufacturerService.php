@@ -29,7 +29,7 @@ class AbstractAverageByManufacturerService implements AverageByManufacturerServi
 
         $rawData = [
             'complement' => $this->repository->{$methodName}($criteriaForAll),
-            'subset'     => !blank($manufacturer) ? $this->repository->{$methodName}($cb) : [],
+            'subset' => !blank($manufacturer) ? $this->repository->{$methodName}($cb) : [],
         ];
 
         $complement = [];

@@ -10,7 +10,15 @@ use Tests\Common\TestCase;
 
 class SysConfigRepositoryTest extends TestCase
 {
-    public function testGetAllWithParams() {
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(FilterSeeder::class);
+        $this->seed(BannerSeeder::class);
+    }
+
+    public function testGetAllWithParams()
+    {
         $repository = $this->getConcreteRepository();
         $filters = $repository->getAll(['key' => 'filter/size/']);
         self::assertEquals($filters->count(), 6);
@@ -19,20 +27,15 @@ class SysConfigRepositoryTest extends TestCase
         self::assertEquals($banners->count(), 38);
     }
 
-    public function testGetAllWithoutParams() {
+    public function testGetAllWithoutParams()
+    {
         $repository = $this->getConcreteRepository();
         $configs = $repository->getAll([]);
-        self::assertEquals($configs->count(),72);
+        self::assertEquals($configs->count(), 72);
     }
 
-    public function setUp(): void
+    private function getConcreteRepository(): SysConfigRepository
     {
-        parent::setUp();
-        $this->seed(FilterSeeder::class);
-        $this->seed(BannerSeeder::class);
-    }
-
-    private function getConcreteRepository(): SysConfigRepository {
         return app()->make(SysConfigRepositoryInterface::class);
     }
 }

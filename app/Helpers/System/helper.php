@@ -6,8 +6,6 @@ if (!function_exists('include_route_files')) {
     /**
      * Loops through a folder and requires all PHP files
      * Searches sub-directories as well.
-     *
-     * @param $folder
      */
     function include_route_files($folder)
     {
@@ -41,13 +39,14 @@ if (!function_exists('inject_request_data')) {
 }
 
 if (!function_exists('camel_case_2_underscore')) {
-    function camel_case_2_underscore($str, $separator = "_")
+    function camel_case_2_underscore($str, $separator = '_')
     {
         if (empty($str)) {
             return $str;
         }
         $str = lcfirst($str);
-        $str = preg_replace("/[A-Z]/", $separator . "$0", $str);
+        $str = preg_replace('/[A-Z]/', $separator . '$0', $str);
+
         return strtolower($str);
     }
 }

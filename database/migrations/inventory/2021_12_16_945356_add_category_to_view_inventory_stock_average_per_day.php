@@ -46,7 +46,7 @@ class AddCategoryToViewInventoryStockAveragePerDay extends Migration
             GROUP BY s.day, m.category, m.manufacturer
             ORDER BY s.day, m.category, m.manufacturer;
 SQL
-);
+        );
     }
 
     /**

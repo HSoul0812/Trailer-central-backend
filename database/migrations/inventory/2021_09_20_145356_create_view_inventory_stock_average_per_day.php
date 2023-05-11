@@ -49,7 +49,7 @@ class CreateViewInventoryStockAveragePerDay extends Migration
             FROM counters c
             ORDER BY c.day, c.manufacturer;
 SQL
-);
+        );
     }
 
     /**

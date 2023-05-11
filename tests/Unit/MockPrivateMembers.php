@@ -33,7 +33,7 @@ trait MockPrivateMembers
         $method = (new ReflectionClass($object))->getMethod($methodName);
         $method->setAccessible(true);
 
-        return $method->invokeArgs((is_string($object) ? null : $object), $parameters);
+        return $method->invokeArgs(is_string($object) ? null : $object, $parameters);
     }
 
     /**

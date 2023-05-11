@@ -31,18 +31,18 @@ class CategoryAndTypeSeeder extends Seeder
           ['name' => 'Office / Fiber Optic', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/office-fiberoptic', 'description' => 'A mobile office or workshop usually with necessary amenities to carry activities.'],
           ['name' => 'Other', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/other-trailers', 'description' => 'A variety of specialised trailers and trailer components.'],
         ],
-        'Horse & Livestock'  => [
+        'Horse & Livestock' => [
           ['name' => 'Horse Trailers', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/horse-trailers', 'description' => 'Trailers ranging in size that are used to transport horses.'],
           ['name' => 'Livestock Trailers', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/livestock-trailers', 'description' => 'Trailers used to transport live animals, including cattle, sheep, goats, horses, rabbits, and more.'],
           ['name' => 'Stock / Stock Combo', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/stock-combo', 'description' => 'Trailers combine the rugged aspects of a livestock trailer with the conveniences of a horse trailer.'],
         ],
-        'Travel Trailers'    => [
+        'Travel Trailers' => [
           ['name' => 'Travel', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/travel', 'description' => 'A vehicle designed to be towed and used as living quarters for travel or recreation.'],
           ['name' => 'Fifth Wheels', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/fifth-wheels', 'description' => 'A fifth wheel is a large RV that tows in the bed of pickup truck. '],
           ['name' => 'Toy Haulers', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/toy-haulers', 'description' => 'A type of RV that features a garage in the rear with a large ramp-door for access.'],
           ['name' => 'Camper / RV', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/camper-rv', 'description' => 'A trailer designed to be drawn by a motor vehicle used for temporary living or sleeping accommodations'],
         ],
-        'Semi Trailers'      => [
+        'Semi Trailers' => [
           ['name' => 'Low Boy / Drop Deck', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/low-boy', 'description' => 'A flat bed platform semi-trailer with no roof, sides and doors, and it has two deck levels. The lower deck allows for hauling taller loads than a regular straight floor flatbed.'],
           ['name' => 'Dry Van', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/dry-van', 'description' => 'A semi-trailer that\'s fully enclosed to protect shipments from outside elements.'],
           ['name' => 'Flatbed', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/flatbed-semi', 'description' => 'A semi-trailer with no roof or sides that typically transports heavy, oversized, or wide goods including machinery, supplies, or equipment.'],
@@ -57,8 +57,8 @@ class CategoryAndTypeSeeder extends Seeder
           ['name' => 'Sleeper Cap Trucks', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/sleeper-cap-trucks', 'description' => 'A compartment attached behind the cabin of a tractor unit used for rest or sleeping.'],
           ['name' => 'Other Trucks', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/other-trucks-semi', 'description' => 'A list of other available truck inventory.'],
         ],
-        'Truck Beds'         => [
-          ['name' => 'Truck Beds', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/truck-beds', 'description' => 'A variety of specialised and flatbed floors for trucks.']
+        'Truck Beds' => [
+          ['name' => 'Truck Beds', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/truck-beds', 'description' => 'A variety of specialised and flatbed floors for trucks.'],
         ],
     ];
 
@@ -78,12 +78,12 @@ class CategoryAndTypeSeeder extends Seeder
 
             foreach ($categories as $key => $category) {
                 $new_category = Category::create([
-                  'name'        => $category['name'],
+                  'name' => $category['name'],
                   'description' => $category['description'],
                 ]);
 
                 $new_image = CategoryImage::create([
-                  'image_url'   => $category['image_url'],
+                  'image_url' => $category['image_url'],
                   'category_id' => $new_category->id,
                 ]);
 

@@ -4,18 +4,13 @@ use App\Models\Parts\CategoryMappings;
 use App\Models\Parts\ListingCategoryMappings;
 use App\Models\Parts\Type;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 class UpdateNamesWithTrailersSuffixInPartCategories extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-
-    const CATEGORY_NAMINGS = [
+    public const CATEGORY_NAMINGS = [
         'General Trailers' => [
             ['from' => 'Cargo (Enclosed)', 'to' => 'Cargo (Enclosed) Trailers'],
             ['from' => 'Flatbed', 'to' => 'Equipment / Flatbed Trailers'],
@@ -32,7 +27,7 @@ class UpdateNamesWithTrailersSuffixInPartCategories extends Migration
             ['from' => 'Other', 'to' => 'Other Trailers'],
         ],
         'Horse & Livestock' => [
-            ['from' => 'Stock / Stock Combo', 'to' => 'Stock / Stock Combo Trailers']
+            ['from' => 'Stock / Stock Combo', 'to' => 'Stock / Stock Combo Trailers'],
         ],
         'Travel Trailers' => [
             ['from' => 'Travel', 'to' => 'Travel Trailers'],
@@ -48,23 +43,23 @@ class UpdateNamesWithTrailersSuffixInPartCategories extends Migration
             ['from' => 'Tank / Bulk', 'to' => 'Tank / Bulk Semi Trailers'],
             ['from' => 'Dump', 'to' => 'Dump Semi Trailers'],
             ['from' => 'Other', 'to' => 'Other Semi Trailers'],
-        ]
+        ],
     ];
 
     public function up()
     {
         // Update part_categories
-        foreach(self::CATEGORY_NAMINGS as $typeName => $namings) {
+        foreach (self::CATEGORY_NAMINGS as $typeName => $namings) {
             $type = Type::where('name', $typeName)->first();
-            foreach($namings as $naming) {
+            foreach ($namings as $naming) {
                 $category = $type->categories()->where('name', $naming['from'])->first();
                 $category->name = $naming['to'];
                 $category->save();
                 CategoryMappings::where('category_id', $category->id)->update([
-                    'map_from' => $naming['to']
+                    'map_from' => $naming['to'],
                 ]);
                 ListingCategoryMappings::where('type_id', $type->id)->where('map_from', $naming['from'])->update([
-                    'map_from' => $naming['to']
+                    'map_from' => $naming['to'],
                 ]);
             }
         }
@@ -72,22 +67,20 @@ class UpdateNamesWithTrailersSuffixInPartCategories extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {
-        foreach(self::CATEGORY_NAMINGS as $typeName => $namings) {
+        foreach (self::CATEGORY_NAMINGS as $typeName => $namings) {
             $type = Type::where('name', $typeName)->first();
-            foreach($namings as $naming) {
+            foreach ($namings as $naming) {
                 $category = $type->categories()->where('name', $naming['to'])->first();
                 $category->name = $naming['from'];
                 $category->save();
                 CategoryMappings::where('category_id', $category->id)->update([
-                    'map_from' => $naming['from']
+                    'map_from' => $naming['from'],
                 ]);
                 ListingCategoryMappings::where('type_id', $type->id)->where('map_from', $naming['to'])->update([
-                    'map_from' => $naming['from']
+                    'map_from' => $naming['from'],
                 ]);
             }
         }

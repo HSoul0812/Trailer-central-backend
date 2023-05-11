@@ -2,7 +2,6 @@
 
 namespace App\Repositories\SysConfig;
 
-use App\Models\SysConfig\SysConfig;
 use Illuminate\Database\Eloquent\Collection;
 
 interface SysConfigRepositoryInterface
