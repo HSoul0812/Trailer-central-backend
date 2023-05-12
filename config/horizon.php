@@ -98,9 +98,9 @@ return [
     */
 
     'trim' => [
-        'recent' => 60,
-        'pending' => 60,
-        'completed' => 60,
+        'recent' => 10,
+        'pending' => 10,
+        'completed' => 10,
         'recent_failed' => 10080,
         'failed' => 10080,
         'monitored' => 10080,
@@ -203,7 +203,7 @@ return [
             'maxTime' => 0,
             'maxJobs' => 0,
             'memory' => 128,
-            'tries' => 1,
+            'tries' => 3,
             'timeout' => 60,
             'nice' => 0,
         ],

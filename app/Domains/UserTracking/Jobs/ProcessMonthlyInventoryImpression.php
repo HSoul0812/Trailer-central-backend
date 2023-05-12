@@ -101,6 +101,10 @@ class ProcessMonthlyInventoryImpression implements ShouldQueue
                 } catch (Exception $exception) {
                     // We throw exception only if it's not the duplicate error
                     if (!Str::of($exception->getMessage())->contains('monthly_impression_reports_year_month_inventory_id_unique')) {
+                        // We sleep for 1 - 5 seconds (random) before throw out the exception and the queue
+                        // worker will process this job again
+                        sleep(random_int(1, 5));
+
                         throw $exception;
                     }
                 }
