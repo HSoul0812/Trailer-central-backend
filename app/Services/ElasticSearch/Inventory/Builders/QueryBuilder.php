@@ -351,6 +351,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
             $this->inRandomOrder();
             unset($sort['tt_sort']);
         }
+
         return $sort;
     }
 
