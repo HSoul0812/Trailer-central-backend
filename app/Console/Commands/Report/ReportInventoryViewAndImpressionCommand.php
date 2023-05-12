@@ -4,6 +4,8 @@ namespace App\Console\Commands\Report;
 
 use App\Domains\Commands\Traits\PrependsOutput;
 use App\Domains\Commands\Traits\PrependsTimestamp;
+use App\Domains\Compression\Actions\CompressFileWithGzipAction;
+use App\Domains\Compression\Exceptions\GzipFailedException;
 use App\Domains\UserTracking\Exporters\InventoryViewAndImpressionCsvExporter;
 use App\Domains\UserTracking\Mail\ReportInventoryViewAndImpressionEmail;
 use Carbon\Carbon;
@@ -36,8 +38,10 @@ class ReportInventoryViewAndImpressionCommand extends Command
     /**
      * Create a new command instance.
      */
-    public function __construct(private InventoryViewAndImpressionCsvExporter $exporter)
-    {
+    public function __construct(
+        private InventoryViewAndImpressionCsvExporter $exporter,
+        private CompressFileWithGzipAction $compressFileWithGzipAction,
+    ) {
         parent::__construct();
     }
 
@@ -65,7 +69,17 @@ class ReportInventoryViewAndImpressionCommand extends Command
             ->setTo($to)
             ->export();
 
-        $this->info("Csv file is being generated at $filePath!");
+        $this->info("Csv file is being generated at $filePath! Now we zip it...");
+
+        try {
+            $zipFilePath = $this->compressFileWithGzipAction->execute($filePath);
+        } catch (GzipFailedException $e) {
+            $this->error($e->getMessage());
+
+            return 3;
+        }
+
+        $this->info("Zip file is being generated at $zipFilePath!");
 
         $sendMail = config('trailertrader.report.inventory-view-and-impression.send_mail');
 
@@ -73,11 +87,15 @@ class ReportInventoryViewAndImpressionCommand extends Command
             $mailTo = config('trailertrader.report.inventory-view-and-impression.mail_to');
 
             try {
-                Mail::to($mailTo)->send(new ReportInventoryViewAndImpressionEmail($filePath, $date));
+                Mail::to($mailTo)->send(new ReportInventoryViewAndImpressionEmail($zipFilePath, $date));
+
+                @unlink($zipFilePath);
 
                 $this->info('Inventory view and impression email sent successfully!');
             } catch (Swift_TransportException $exception) {
                 $this->error("Can't sent out email: {$exception->getMessage()}");
+
+                @unlink($zipFilePath);
 
                 return 2;
             }
