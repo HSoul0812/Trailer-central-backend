@@ -64,15 +64,15 @@ class ReportInventoryViewAndImpressionCommand extends Command
 
         $to = $from->clone()->endOfDay();
 
-        $filePath = $this->exporter
+        $csvFilePath = $this->exporter
             ->setFrom($from)
             ->setTo($to)
             ->export();
 
-        $this->info("Csv file is being generated at $filePath! Now we zip it...");
+        $this->info("Csv file is being generated at $csvFilePath! Now we zip it...");
 
         try {
-            $zipFilePath = $this->compressFileWithGzipAction->execute($filePath);
+            $zipFilePath = $this->compressFileWithGzipAction->execute($csvFilePath);
         } catch (GzipFailedException $e) {
             $this->error($e->getMessage());
 
@@ -89,13 +89,13 @@ class ReportInventoryViewAndImpressionCommand extends Command
             try {
                 Mail::to($mailTo)->send(new ReportInventoryViewAndImpressionEmail($zipFilePath, $date));
 
-                @unlink($zipFilePath);
+                @unlink($csvFilePath);
 
                 $this->info('Inventory view and impression email sent successfully!');
             } catch (Swift_TransportException $exception) {
                 $this->error("Can't sent out email: {$exception->getMessage()}");
 
-                @unlink($zipFilePath);
+                @unlink($csvFilePath);
 
                 return 2;
             }
