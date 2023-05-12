@@ -387,7 +387,7 @@ class CsvImportService implements CsvImportServiceInterface
         "title" => true,
         "manufacturer" => true,
         "model" => true,
-        "category" => true,
+        "category" => false,
         "price" => true,
         "year" => true,
         "condition" => true,
@@ -585,10 +585,6 @@ class CsvImportService implements CsvImportServiceInterface
 
                         if ($isAppend === true) {
                             $this->imageMode = self::IM_APPEND;
-                        } elseif ($isAppend === false) {
-                            $this->imageMode = 0;
-                        } else {
-                            return "Value for append images column must be a valid boolean-type (yes, y, no, n, or 0/1)";
                         }
                     }
 
