@@ -6,15 +6,19 @@ use App\Domains\Commands\Traits\PrependsOutput;
 use App\Domains\Commands\Traits\PrependsTimestamp;
 use App\Domains\Compression\Actions\CompressFileWithGzipAction;
 use App\Domains\Compression\Exceptions\GzipFailedException;
+use App\Models\MonthlyImpressionCounting;
 use App\Models\MonthlyImpressionReport;
-use Carbon\Carbon;
+use DB;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Stringable;
 use Storage;
+use Str;
 
-class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
+class GenerateMonthlyImpressionCountingsReportCommand extends Command
 {
     use PrependsTimestamp;
     use PrependsOutput;
@@ -22,12 +26,12 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
     public const DEALER_CHUNK = 1000;
 
     protected $signature = '
-        report:inventory:monthly-tracking-data
+        report:inventory:monthly-impression-countings
         {year? : The year to run this report.}
         {month? : The month to run this report.}
     ';
 
-    protected $description = 'Report the last month inventory data.';
+    protected $description = 'Report the last month inventory impression counting data.';
 
     private Carbon $date;
 
@@ -35,7 +39,7 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
 
     public function __construct(private CompressFileWithGzipAction $compressFileWithGzipAction)
     {
-        $this->storage = Storage::disk('monthly-inventory-impression-reports');
+        $this->storage = Storage::disk('monthly-inventory-impression-countings-reports');
 
         parent::__construct();
     }
@@ -87,6 +91,12 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
 
     private function deleteExistingData(): void
     {
+        // Clear the data from DB for the selected month
+        MonthlyImpressionCounting::query()
+            ->year($this->date->year)
+            ->month($this->date->month)
+            ->delete();
+
         // Delete directory from the storage
         $directory = sprintf('%d/%02d', $this->date->year, $this->date->month);
 
@@ -104,17 +114,28 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
             ->distinct()
             ->get(['dealer_id'])
             ->pluck('dealer_id')
-            ->each(fn (int $dealerId) => $this->exportCsvForDealerId($dealerId));
+            ->each(fn (int $dealerId) => $this->processForDealerId($dealerId));
     }
 
     /**
      * @throws GzipFailedException
      */
-    private function exportCsvForDealerId(int $dealerId): void
+    private function processForDealerId(int $dealerId): void
+    {
+        // 1. Export zip file and get the path, so we can store it in DB
+        $zipFilePath = $this->exportInventoryImpressionSummaryToCsv($dealerId);
+
+        // 2. Calculate and store data in the database
+        $this->storeTotalCountings($dealerId, $zipFilePath);
+    }
+
+    /**
+     * @throws GzipFailedException
+     */
+    private function exportInventoryImpressionSummaryToCsv(int $dealerId): string
     {
         $filePath = $this->filePath($dealerId);
 
-        // This is just for making sure that we have the proper folder created
         $this->storage->put($filePath, '');
 
         $csvFilePath = $this->storage->path($filePath);
@@ -142,6 +163,8 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
 
         // Delete the csv file, so we have only the zip file left
         @unlink($csvFilePath);
+
+        return $zipFilePath;
     }
 
     private function filePath(int $dealerId): string
@@ -149,16 +172,24 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
         return sprintf('%d/%02d/dealer-id-%d.csv', $this->date->year, $this->date->month, $dealerId);
     }
 
+    private function storeTotalCountings(int $dealerId, string $zipFilePath): void
+    {
+        MonthlyImpressionCounting::create([
+            'year' => $this->date->year,
+            'month' => $this->date->month,
+            'dealer_id' => $dealerId,
+            'impressions_count' => $this->impressionsCount($dealerId),
+            'views_count' => $this->viewsCount($dealerId),
+            'zip_file_path' => $this->relativeZipFilePath($zipFilePath),
+        ]);
+    }
+
     private function csvHeaderRow(): array
     {
         return [
             'Inventory ID',
-            'Inventory Title',
-            'Inventory Type',
-            'Inventory Category',
-            'PLP Total Count',
-            'PDP Total Count',
-            'Dealer Page Total Count',
+            'Impressions Total',
+            'Views Total',
         ];
     }
 
@@ -166,12 +197,36 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
     {
         return [
             $monthlyImpressionReport->inventory_id,
-            $monthlyImpressionReport->inventory_title ?? 'N/A',
-            $monthlyImpressionReport->inventory_type ?? 'N/A',
-            $monthlyImpressionReport->inventory_category ?? 'N/A',
             $monthlyImpressionReport->plp_total_count,
-            $monthlyImpressionReport->pdp_total_count,
-            $monthlyImpressionReport->tt_dealer_page_total_count,
+
+            // Per requirement from https://operatebeyond.atlassian.net/browse/TR-835
+            // Views is the pdp + dealer page count
+            $monthlyImpressionReport->pdp_total_count + $monthlyImpressionReport->tt_dealer_page_total_count,
         ];
+    }
+
+    private function impressionsCount(int $dealerId): int
+    {
+        return MonthlyImpressionReport::query()
+            ->yearMonthDealerId($this->date->year, $this->date->month, $dealerId)
+            ->groupBy('dealer_id')
+            ->sum('plp_total_count');
+    }
+
+    private function viewsCount(int $dealerId): int
+    {
+        return MonthlyImpressionReport::query()
+            ->yearMonthDealerId($this->date->year, $this->date->month, $dealerId)
+            ->groupBy('dealer_id')
+            ->select(DB::raw('(SUM(pdp_total_count) + SUM(tt_dealer_page_total_count)) as sum'))
+            ->first()
+            ->getAttribute('sum');
+    }
+
+    private function relativeZipFilePath(string $zipFilePath): Stringable
+    {
+        $baseStoragePath = $this->storage->path('');
+
+        return Str::of($zipFilePath)->remove($baseStoragePath);
     }
 }

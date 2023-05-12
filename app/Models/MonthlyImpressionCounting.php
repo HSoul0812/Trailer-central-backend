@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MonthlyImpressionReport extends Model
+class MonthlyImpressionCounting extends Model
 {
     use HasFactory;
 
@@ -14,13 +14,9 @@ class MonthlyImpressionReport extends Model
         'year',
         'month',
         'dealer_id',
-        'inventory_id',
-        'inventory_title',
-        'inventory_type',
-        'inventory_category',
-        'plp_total_count',
-        'pdp_total_count',
-        'tt_dealer_page_total_count',
+        'impressions_count',
+        'views_count',
+        'zip_file_path',
     ];
 
     public function scopeYear(Builder $query, int $year): void

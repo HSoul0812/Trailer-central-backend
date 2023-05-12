@@ -168,6 +168,43 @@ namespace App\Models\Leads{
 
 namespace App\Models{
     /**
+     * App\Models\MonthlyImpressionCounting.
+     *
+     * @property int                             $id
+     * @property int                             $year
+     * @property int                             $month
+     * @property int                             $dealer_id
+     * @property int                             $impressions_count This is the total count of PLP count for all inventory_id.
+     * @property int                             $views_count       This is the total count of Dealer Page and PDP count for all inventory_id.
+     * @property string                          $zip_file_path
+     * @property \Illuminate\Support\Carbon|null $created_at
+     * @property \Illuminate\Support\Carbon|null $updated_at
+     *
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting dealerId(int $dealerId)
+     * @method static \Database\Factories\MonthlyImpressionCountingFactory            factory(...$parameters)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting month(int $month)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting query()
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereCreatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereDealerId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereImpressionsCount($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereMonth($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereUpdatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereViewsCount($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereYear($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereZipFilePath($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting year(int $year)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting yearMonthDealerId(int $year, int $month, int $dealerId)
+     */
+    class MonthlyImpressionCounting extends \Eloquent
+    {
+    }
+}
+
+namespace App\Models{
+    /**
      * App\Models\MonthlyImpressionReport.
      *
      * @property int                             $id
@@ -184,7 +221,9 @@ namespace App\Models{
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property \Illuminate\Support\Carbon|null $updated_at
      *
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport dealerId(int $dealerId)
      * @method static \Database\Factories\MonthlyImpressionReportFactory            factory(...$parameters)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport month(int $month)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport query()
@@ -201,6 +240,8 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereTtDealerPageTotalCount($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereYear($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport year(int $year)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport yearMonthDealerId(int $year, int $month, int $dealerId)
      */
     class MonthlyImpressionReport extends \Eloquent
     {
