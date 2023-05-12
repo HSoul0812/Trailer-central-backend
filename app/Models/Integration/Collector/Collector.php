@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $import_prices
  * @property bool $import_description
  * @property string $images_delimiter
+ * @property bool $images_delimiter_used_in_image_url
  * @property string $primary_image_field
  * @property string $overridable_fields
  * @property string $path_to_fields_to_description
@@ -248,7 +249,8 @@ class Collector extends Model implements Filterable
         'use_brands_for_factory_mapping',
         'check_for_bdv_matching',
         'factory_mapping_filter_year_from',
-        'factory_mapping_filter_skip_units'
+        'factory_mapping_filter_skip_units',
+        'images_delimiter_used_in_image_url'
     ];
 
     protected $casts = [

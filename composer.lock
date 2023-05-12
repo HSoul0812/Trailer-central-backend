@@ -2572,42 +2572,6 @@
             "time": "2020-01-07T19:36:36+00:00"
         },
         {
-            "name": "feed/edit-mapping",
-            "version": "dev-develop",
-            "dist": {
-                "type": "path",
-                "url": "./nova-components/EditMapping",
-                "reference": "b43729ad6fdf37df73dbc44aa30beefbf5e3c2a4"
-            },
-            "require": {
-                "php": ">=7.1.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Feed\\EditMapping\\ToolServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Feed\\EditMapping\\": "src/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "A Laravel Nova tool.",
-            "keywords": [
-                "laravel",
-                "nova"
-            ],
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
             "name": "fideloper/proxy",
             "version": "4.4.2",
             "source": {

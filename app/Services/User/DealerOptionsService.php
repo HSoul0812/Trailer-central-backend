@@ -23,8 +23,10 @@ use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
+use App\Repositories\Integration\CollectorRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Repositories\User\Integration\DealerIntegrationRepositoryInterface;
 use App\Repositories\Website\EntityRepositoryInterface as WebsiteEntityRepositoryInterface;
 
 /**
@@ -114,6 +116,16 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     private $inventoryRepository;
 
     /**
+     * @var DealerIntegrationRepositoryInterface
+     */
+    private $dealerIntegrationRepository;
+
+    /**
+     * @var CollectorRepositoryInterface
+     */
+    private $collectorRepository;
+
+    /**
      * @var array
      */
     public $specialSubscriptions = [
@@ -140,20 +152,24 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      * @param WebsiteRepositoryInterface $websiteRepository
      * @param WebsiteEntityRepositoryInterface $websiteEntityRepository
      * @param InventoryRepositoryInterface $inventoryRepository
+     * @param DealerIntegrationRepositoryInterface $dealerIntegrationRepository
+     * @param CollectorRepositoryInterface $collectorRepository
      */
     public function __construct(
-        UserRepositoryInterface          $userRepository,
-        DealerRepositoryInterface        $dealerRepository,
-        CrmUserRepositoryInterface       $crmUserRepository,
-        CrmUserRoleRepositoryInterface   $crmUserRoleRepository,
-        WebsiteConfigRepositoryInterface $websiteConfigRepository,
-        DealerPartRepositoryInterface    $dealerPartRepository,
-        NewDealerUserRepositoryInterface $newDealerUserRepository,
-        NewUserRepositoryInterface       $newUserRepository,
-        StringHelper                     $stringHelper,
-        WebsiteRepositoryInterface       $websiteRepository,
-        WebsiteEntityRepositoryInterface $websiteEntityRepository,
-        InventoryRepositoryInterface     $inventoryRepository
+        UserRepositoryInterface              $userRepository,
+        DealerRepositoryInterface            $dealerRepository,
+        CrmUserRepositoryInterface           $crmUserRepository,
+        CrmUserRoleRepositoryInterface       $crmUserRoleRepository,
+        WebsiteConfigRepositoryInterface     $websiteConfigRepository,
+        DealerPartRepositoryInterface        $dealerPartRepository,
+        NewDealerUserRepositoryInterface     $newDealerUserRepository,
+        NewUserRepositoryInterface           $newUserRepository,
+        StringHelper                         $stringHelper,
+        WebsiteRepositoryInterface           $websiteRepository,
+        WebsiteEntityRepositoryInterface     $websiteEntityRepository,
+        InventoryRepositoryInterface         $inventoryRepository,
+        DealerIntegrationRepositoryInterface $dealerIntegrationRepository,
+        CollectorRepositoryInterface         $collectorRepository
     ) {
         $this->userRepository = $userRepository;
         $this->dealerRepository = $dealerRepository;
@@ -169,6 +185,8 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         $this->websiteEntityRepository = $websiteEntityRepository;
 
         $this->inventoryRepository = $inventoryRepository;
+        $this->dealerIntegrationRepository = $dealerIntegrationRepository;
+        $this->collectorRepository = $collectorRepository;
     }
 
     /**
@@ -251,7 +269,8 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         try {
             // Transaction added in case of any exception occurs we don't mess any data
             DB::beginTransaction();
-            $deletedAt = User::find($dealerId)->deleted_at;
+            $dealer = User::find($dealerId);
+            $deletedAt = $dealer->deleted_at;
             $datetime = Carbon::now()->format('Y-m-d H:i:s');
 
             $inventoryParams = [
@@ -263,6 +282,11 @@ class DealerOptionsService implements DealerOptionsServiceInterface
 
             $this->userRepository->toggleDealerStatus($dealerId, $active, $datetime);
             $this->inventoryRepository->massUpdateDealerInventoryOnActiveStateChange($dealerId, $inventoryParams, $deletedAt);
+            $this->dealerIntegrationRepository->updateAllDealerIntegrations(['dealer_id' => $dealerId, 'active' => $active]);
+
+            if (!is_null($dealer->collector)) {
+                $this->collectorRepository->update(['id' => $dealer->collector->id, 'active' => $active]);
+            }
 
             DB::commit();
             return true;

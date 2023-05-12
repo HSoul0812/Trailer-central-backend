@@ -35,6 +35,7 @@ use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\Parts\Type;
 use App\Models\Parts\Vendor;
 use App\Models\User\DealerLocation;
+use App\Models\User\Integration\DealerIntegration;
 use App\Models\User\NovaUser;
 use App\Models\User\User;
 use App\Models\Website\Entity;
@@ -49,6 +50,7 @@ use App\Nova\Policies\CollectorPolicy;
 use App\Nova\Policies\CollectorSpecificationActionPolicy;
 use App\Nova\Policies\CollectorSpecificationPolicy;
 use App\Nova\Policies\CollectorSpecificationRulePolicy;
+use App\Nova\Policies\DealerIntegrationPolicy;
 use App\Nova\Policies\DealerPolicy;
 use App\Nova\Policies\FeatureFlagPolicy;
 use App\Nova\Policies\ExternalDealerMappingPolicy;
@@ -138,7 +140,8 @@ class AuthServiceProvider extends ServiceProvider
         CollectorSpecificationRule::class => CollectorSpecificationRulePolicy::class,
         CollectorSpecificationAction::class => CollectorSpecificationActionPolicy::class,
         FeatureFlag::class => FeatureFlagPolicy::class,
-        FeedApiUpload::class => FeedApiUploadPolicy::class
+        FeedApiUpload::class => FeedApiUploadPolicy::class,
+        DealerIntegration::class => DealerIntegrationPolicy::class,
     ];
 
     /**

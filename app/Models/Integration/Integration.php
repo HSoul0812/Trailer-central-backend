@@ -2,9 +2,9 @@
 
 namespace App\Models\Integration;
 
-use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\User\Integration\DealerIntegration;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Integration
@@ -82,6 +82,11 @@ class Integration extends Model
         'show_for_integrated'
     ];
 
+    protected $attributes = [
+        'active' => true,
+        'uses_staging' => true
+    ];
+
     /**
      * To avoid mutations and break something
      *
@@ -150,8 +155,8 @@ class Integration extends Model
     /**
      * Get Dealers
      */
-    public function dealers(): BelongsToMany
+    public function integrationDealers(): HasMany
     {
-        return $this->belongsToMany(User::class, 'integration_dealer', 'integration_id', 'dealer_id')->withPivot(['active']);
+        return $this->hasMany(DealerIntegration::class, 'integration_id', 'integration_id');
     }
 }
