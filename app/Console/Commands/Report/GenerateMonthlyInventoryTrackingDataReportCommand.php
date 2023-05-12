@@ -14,7 +14,7 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Collection;
 use Storage;
 
-class ReportMonthlyInventoryTrackingDataCommand extends Command
+class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
 {
     use PrependsTimestamp;
     use PrependsOutput;
@@ -102,6 +102,7 @@ class ReportMonthlyInventoryTrackingDataCommand extends Command
     {
         $fileName = $this->fileName($dealerId);
 
+        // This is just for making sure that we have the proper folder created
         $this->storage->put($fileName, '');
 
         $csvFilePath = $this->storage->path($fileName);
