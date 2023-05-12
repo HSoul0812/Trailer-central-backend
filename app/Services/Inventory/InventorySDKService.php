@@ -194,10 +194,17 @@ class InventorySDKService implements InventorySDKServiceInterface
                 $sort = self::DEFAULT_NO_LOCATION_SORT;
             }
 
-            $order = new SortOrder($sort);
-            $this->request->withSorting(new Sorting([
-                new SortingField($order->field, $order->direction),
-            ]));
+            $sorts = explode(';', $sort);
+            $sorting = new Sorting([]);
+            foreach ($sorts as $s) {
+                if (empty($s)) {
+                    continue;
+                }
+                $order = new SortOrder($s);
+                $sorting->addField(new SortingField($order->field, $order->direction));
+            }
+
+            $this->request->withSorting($sorting);
         }
     }
 
@@ -213,6 +220,15 @@ class InventorySDKService implements InventorySDKServiceInterface
         }
 
         $this->mainFilterGroup->add(new Filter('sale_price_script', new Collection($attributes)));
+
+        if (!empty($params['exclude_ids'])) {
+            $this->mainFilterGroup->add(
+                new Filter(
+                    'id',
+                    new Collection(explode(';', $params['exclude_ids']), Operator::NOT_EQUAL)
+                )
+            );
+        }
 
         $this->mainFilterGroup->add(new Filter('classifieds_site', new Collection([true])));
         $this->mainFilterGroup->add(new Filter(
