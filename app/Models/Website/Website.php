@@ -257,11 +257,9 @@ class Website extends Model
     }
 
     /**
-     * @param string $value
-     *
      * @return void
      */
-    public function setBodyScriptsAttribute(string $value) : void
+    public function setBodyScriptsAttribute($value) : void
     {
         $script = $this->websiteConfigs()->where('key', WebsiteConfig::GENERAL_BODY_SCRIPT_KEY)->first();
         $value = base64_encode($value);
