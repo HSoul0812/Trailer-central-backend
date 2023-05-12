@@ -223,8 +223,10 @@ class InventorySDKService implements InventorySDKServiceInterface
 
         if (!empty($params['exclude_ids'])) {
             $this->mainFilterGroup->add(
-                new Filter('exclude_ids',
-                    new Collection(explode(';', $params['exclude_ids'])))
+                new Filter(
+                    'id',
+                    new Collection(explode(';', $params['exclude_ids']), Operator::NOT_EQUAL)
+                )
             );
         }
 
