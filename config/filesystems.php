@@ -40,6 +40,11 @@ return [
             'root' => storage_path('app/reports/inventory/view-and-impression'),
         ],
 
+        'monthly-inventory-impression-reports' => [
+            'driver' => 'local',
+            'root' => storage_path('app/reports/inventory/monthly-impression'),
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

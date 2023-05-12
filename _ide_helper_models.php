@@ -175,9 +175,9 @@ namespace App\Models{
      * @property int                             $month
      * @property int                             $dealer_id
      * @property int                             $inventory_id
-     * @property string                          $inventory_title
-     * @property string                          $inventory_type
-     * @property string                          $inventory_category
+     * @property string|null                     $inventory_title
+     * @property string|null                     $inventory_type
+     * @property string|null                     $inventory_category
      * @property int                             $plp_total_count            Total count of visit to the PLP pages
      * @property int                             $pdp_total_count            Total count of visit to the PDP pages
      * @property int                             $tt_dealer_page_total_count Total count of visit to TT dealer page

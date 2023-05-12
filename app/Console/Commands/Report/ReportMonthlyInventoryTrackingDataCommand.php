@@ -2,112 +2,165 @@
 
 namespace App\Console\Commands\Report;
 
-use App\Domains\UserTracking\Actions\GetPageNameFromUrlAction;
-use App\Domains\UserTracking\Types\UserTrackingEvent;
+use App\Domains\Commands\Traits\PrependsOutput;
+use App\Domains\Commands\Traits\PrependsTimestamp;
+use App\Domains\Compression\Actions\CompressFileWithGzipAction;
+use App\Domains\Compression\Exceptions\GzipFailedException;
 use App\Models\MonthlyImpressionReport;
-use App\Models\UserTracking;
-use DB;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Collection;
-use Throwable;
+use Storage;
 
 class ReportMonthlyInventoryTrackingDataCommand extends Command
 {
-    public const CHUNK_SIZE = 10000;
+    use PrependsTimestamp;
+    use PrependsOutput;
 
-    protected $signature = 'report:inventory:monthly-tracking-data';
+    public const DEALER_CHUNK = 1000;
+
+    protected $signature = '
+        report:inventory:monthly-tracking-data
+        {year? : The year to run this report.}
+        {month? : The month to run this report.}
+    ';
 
     protected $description = 'Report the last month inventory data.';
 
-    private Carbon $from;
+    private Carbon $date;
 
-    private Carbon $to;
+    private FilesystemAdapter $storage;
 
-    private int $year;
-
-    private int $month;
-
-    private array $inventories = [];
-
-    private int $processedTotal = 0;
-
-    public function __construct()
+    public function __construct(private CompressFileWithGzipAction $compressFileWithGzipAction)
     {
-        $this->from = now()->subMonth()->startOfMonth();
-        $this->to = $this->from->clone()->endOfMonth();
-
-        $this->year = $this->from->year;
-        $this->month = $this->from->month;
+        $this->storage = Storage::disk('monthly-inventory-impression-reports');
 
         parent::__construct();
     }
 
     /**
-     * @throws Throwable
+     * @throws GzipFailedException
      */
     public function handle(): int
     {
-        MonthlyImpressionReport::query()
-            ->where('year', $this->from->year)
-            ->where('month', $this->from->month)
-            ->delete();
+        try {
+            $this->validate();
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
 
-        DB::table((new UserTracking())->getTable())
-            ->whereBetween('created_at', [$this->from, $this->to])
-            ->where('event', UserTrackingEvent::IMPRESSION)
-            ->whereIn('page_name', GetPageNameFromUrlAction::PAGE_NAMES)
-            ->chunkById(self::CHUNK_SIZE, function (Collection $userTrackings) {
-                foreach ($userTrackings as $userTracking) {
-                    $metaJson = json_decode($userTracking->meta);
-                    foreach ($metaJson as $meta) {
-                        $inventoryId = data_get($meta, 'inventory_id');
-                        $dealerId = data_get($meta, 'dealer_id');
-                        $totalColumn = match ($userTracking->page_name) {
-                            GetPageNameFromUrlAction::PAGE_NAMES['TT_PLP'] => 'plp_total_count',
-                            GetPageNameFromUrlAction::PAGE_NAMES['TT_PDP'] => 'pdp_total_count',
-                            GetPageNameFromUrlAction::PAGE_NAMES['TT_DEALER'] => 'tt_dealer_page_total_count',
-                            default => null,
-                        };
+            return 1;
+        }
 
-                        if ($inventoryId === null || $dealerId === null || $totalColumn === null) {
-                            continue;
-                        }
+        $this->info("Command $this->name is running.");
 
-                        // If this is a new record, we create it first
-                        if (!array_key_exists($inventoryId, $this->inventories)) {
-                            MonthlyImpressionReport::create([
-                                'year' => $this->from->year,
-                                'month' => $this->from->month,
-                                'dealer_id' => $dealerId,
-                                'inventory_id' => $inventoryId,
-                                'inventory_title' => data_get($meta, 'title'),
-                                'inventory_type' => data_get($meta, 'type_label'),
-                                'inventory_category' => data_get($meta, 'category_label'),
-                            ]);
-                        }
+        $this->exportData();
 
-                        // Then, we increment the total column count by 1
-                        MonthlyImpressionReport::query()
-                            ->where('year', $this->year)
-                            ->where('month', $this->month)
-                            ->where('inventory_id', $inventoryId)
-                            ->increment($totalColumn);
+        $memoryUsage = memory_get_peak_usage(true) / 1024 / 1024;
 
-                        // Save that we have stored this inventory
-                        $this->inventories[$inventoryId] = true;
-                    }
-
-                    $this->processedTotal++;
-
-                    $this->info("Finished processing one set of user tracking data: $this->processedTotal.");
-                }
-
-                $memoryUsage = memory_get_usage(true) / 1024 / 1024;
-
-                $this->info('Finished ' . self::CHUNK_SIZE . " records, total: $this->processedTotal, memory usage: $memoryUsage MB.");
-            });
+        $this->info("Command $this->name is finished. Memory usage: $memoryUsage MB.");
 
         return 0;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function validate(): void
+    {
+        $now = now()->startOfMonth();
+
+        $year = intval($this->argument('year') ?? $now->year);
+        $month = intval($this->argument('month') ?? ($now->month - 1));
+
+        $this->date = Carbon::createFromDate($year, $month)->startOfMonth();
+
+        if ($this->date->gte($now)) {
+            throw new Exception('You can only generate the report up to last month.');
+        }
+    }
+
+    /**
+     * @throws GzipFailedException
+     */
+    private function exportData(): void
+    {
+        MonthlyImpressionReport::query()
+            ->where('year', $this->date->year)
+            ->where('month', $this->date->month)
+            ->distinct()
+            ->get(['dealer_id'])
+            ->pluck('dealer_id')
+            ->each(fn (int $dealerId) => $this->exportCsvForDealerId($dealerId));
+    }
+
+    /**
+     * @throws GzipFailedException
+     */
+    private function exportCsvForDealerId(int $dealerId): void
+    {
+        $fileName = $this->fileName($dealerId);
+
+        $this->storage->put($fileName, '');
+
+        $csvFilePath = $this->storage->path($fileName);
+
+        $csvFile = fopen($csvFilePath, 'w');
+
+        fputcsv($csvFile, $this->csvHeaderRow());
+
+        MonthlyImpressionReport::query()
+            ->where('year', $this->date->year)
+            ->where('month', $this->date->month)
+            ->where('dealer_id', $dealerId)
+            ->chunkById(self::DEALER_CHUNK, function (Collection $monthlyImpressionReports) use ($csvFile) {
+                foreach ($monthlyImpressionReports as $monthlyImpressionReport) {
+                    fputcsv(
+                        stream: $csvFile,
+                        fields: $this->monthlyImpressionReportToCsvRow($monthlyImpressionReport),
+                    );
+                }
+            });
+
+        fclose($csvFile);
+
+        $zipFilePath = $this->compressFileWithGzipAction->execute($csvFilePath);
+
+        $this->info("Zip file created for Dealer ID: $dealerId, zip location: $zipFilePath.");
+
+        // Delete the csv file, so we have only the zip file left
+        @unlink($csvFilePath);
+    }
+
+    private function fileName(int $dealerId): string
+    {
+        return sprintf('%d/%02d/dealer-id-%d.csv', $this->date->year, $this->date->month, $dealerId);
+    }
+
+    private function csvHeaderRow(): array
+    {
+        return [
+            'Inventory ID',
+            'Inventory Title',
+            'Inventory Type',
+            'Inventory Category',
+            'PLP Total Count',
+            'PDP Total Count',
+            'Dealer Page Total Count',
+        ];
+    }
+
+    private function monthlyImpressionReportToCsvRow(MonthlyImpressionReport $monthlyImpressionReport): array
+    {
+        return [
+            $monthlyImpressionReport->inventory_id,
+            $monthlyImpressionReport->inventory_title ?? 'N/A',
+            $monthlyImpressionReport->inventory_type ?? 'N/A',
+            $monthlyImpressionReport->inventory_category ?? 'N/A',
+            $monthlyImpressionReport->plp_total_count,
+            $monthlyImpressionReport->pdp_total_count,
+            $monthlyImpressionReport->tt_dealer_page_total_count,
+        ];
     }
 }
