@@ -79,6 +79,10 @@ class GenerateMonthlyImpressionCountingsReportCommand extends Command
     {
         $now = now()->startOfMonth();
 
+        if (!is_int($this->argument('year')) || !is_int($this->argument('month'))) {
+            throw new Exception('Year and month must be integer.');
+        }
+
         $year = intval($this->argument('year') ?? $now->year);
         $month = intval($this->argument('month') ?? ($now->month - 1));
 
@@ -225,8 +229,8 @@ class GenerateMonthlyImpressionCountingsReportCommand extends Command
 
     private function relativeZipFilePath(string $zipFilePath): Stringable
     {
-        $baseStoragePath = $this->storage->path('');
-
-        return Str::of($zipFilePath)->remove($baseStoragePath);
+        return Str::of($zipFilePath)->remove(
+            search: $this->storage->path(''),
+        );
     }
 }
