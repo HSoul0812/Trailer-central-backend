@@ -1,6 +1,6 @@
 [program:horizon]
 process_name=%(program_name)s
-command=php /var/www/backend horizon
+command=php /var/www/backend/artisan horizon
 autostart=true
 autorestart=true
 user=ubuntu
