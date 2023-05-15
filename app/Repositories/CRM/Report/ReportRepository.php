@@ -52,7 +52,7 @@ class ReportRepository extends RepositoryAbstract implements ReportRepositoryInt
             's_start' => $params['s_start'],
             's_end' => $params['s_end'],
             'chart_span' => $params['chart_span'],
-            'lead_source' => $params['lead_source']
+            'lead_source' => $params['lead_source'] ?? ''
         ];
 
         if (isset($params['sales_people']) && !is_null($params['sales_people']) 
