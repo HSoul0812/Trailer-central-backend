@@ -55,6 +55,8 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
 
         $this->info("Command $this->name is running.");
 
+        $this->info("Input: Year {$this->date->year}, Month {$this->date->month}.");
+
         $this->deleteExistingData();
 
         $this->info('Existing data removed.');
@@ -74,6 +76,14 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
     private function validate(): void
     {
         $now = now()->startOfMonth();
+        $yearInput = $this->argument('year');
+        $monthInput = $this->argument('month');
+
+        if ($yearInput !== null || $monthInput !== null) {
+            if (filter_var($yearInput, FILTER_VALIDATE_INT) === false || filter_var($monthInput, FILTER_VALIDATE_INT) === false) {
+                throw new Exception('Year and month must be an integer.');
+            }
+        }
 
         $year = intval($this->argument('year') ?? $now->year);
         $month = intval($this->argument('month') ?? ($now->month - 1));

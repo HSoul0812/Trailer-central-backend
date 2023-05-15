@@ -9,6 +9,16 @@ use Tests\Common\TestCase;
 
 class GenerateMonthlyInventoryTrackingDataReportCommandTest extends TestCase
 {
+    public function testItCanValidateInput(): void
+    {
+        $this
+            ->artisan(GenerateMonthlyInventoryTrackingDataReportCommand::class, [
+                'year' => 'invalid',
+                'month' => 'invalid',
+            ])
+            ->assertExitCode(1);
+    }
+
     public function testItCanGenerateZipFiles(): void
     {
         $now = now();

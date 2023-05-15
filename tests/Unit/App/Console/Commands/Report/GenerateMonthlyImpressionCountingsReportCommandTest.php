@@ -78,6 +78,8 @@ class GenerateMonthlyImpressionCountingsReportCommandTest extends TestCase
 
             $this->assertEquals($expectedReport['impressions_count'], $report->impressions_count);
             $this->assertEquals($expectedReport['views_count'], $report->views_count);
+
+            $this->assertTrue($storage->exists($report->zip_file_path));
         }
 
         $files = $storage->files($directory);
