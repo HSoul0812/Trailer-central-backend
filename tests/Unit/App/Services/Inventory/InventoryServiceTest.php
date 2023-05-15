@@ -70,7 +70,7 @@ class InventoryServiceTest extends TestCase
     public function testListAttributes()
     {
         $this->service = $this->getAttributesService();
-        $attributes = $this->service->attributes(['type_id' => 1, 'category' => 'Cargo (Enclosed)']);
+        $attributes = $this->service->attributes(['type_id' => 1, 'category' => 'Cargo (Enclosed) Trailers']);
         $this->assertCount(1, $attributes);
         $this->assertEquals(1, $attributes[0]->attribute_id);
         $this->assertStringEndsWith('entity_type_id=1', $this->httpHistory[0]['request']->getUri());

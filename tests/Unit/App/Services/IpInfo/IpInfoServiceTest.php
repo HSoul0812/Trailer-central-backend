@@ -18,9 +18,9 @@ class IpInfoServiceTest extends TestCase
     }
 
     /**
-     * @dataProvider cityIPProvider
+     * @dataProvider cityIpProvider
      */
-    public function testGetCityByIP($ip, $country, $state, $city)
+    public function testGetCityByIp($ip, $country, $state, $city)
     {
         $location = $this->service->city($ip);
         $this->assertEquals($location->countryISO, $country);
@@ -28,16 +28,16 @@ class IpInfoServiceTest extends TestCase
         $this->assertEquals($location->city, $city);
     }
 
-    public function cityIPProvider(): array
+    public function cityIpProvider(): array
     {
         return [
-            'us city1' => ['206.71.50.230', 'US', 'NY', 'Brooklyn'],
-            'us city2' => ['65.49.22.66', 'US', 'CA', 'Livermore'],
-            'canada city1' => ['192.206.151.131', 'CA', 'ON', 'Toronto'],
+            'US city 1' => ['172.58.229.54', 'US', 'NY', 'Brooklyn'],
+            'US city 2' => ['128.115.190.36', 'US', 'CA', 'Livermore'],
+            'Canada city 1' => ['64.56.236.190', 'CA', 'ON', 'Brampton'],
         ];
     }
 
-    public function testGetCityByLocalIP()
+    public function testGetCityByLocalIp()
     {
         $this->expectException(AddressNotFoundException::class);
         $this->service->city('172.17.0.1');

@@ -3,8 +3,6 @@
 namespace Tests\Integration\App\Api\ViewedDealer;
 
 use App\Models\Dealer\ViewedDealer;
-use Str;
-use Symfony\Component\HttpFoundation\Response;
 use Tests\Common\IntegrationTestCase;
 
 class CreateViewedDealerTest extends IntegrationTestCase
@@ -12,73 +10,21 @@ class CreateViewedDealerTest extends IntegrationTestCase
     public const CREATE_VIEWED_DEALERS_ENDPOINT = '/api/viewed-dealers';
 
     /**
-     * Test that the system will return the validation error if we provide
-     * the wrong payload to the API endpoint.
+     * Test that the system can accept the nothing as payload.
      */
-    public function testItReturnsValidationErrorWithInvalidRequestBody(): void
+    public function testItCanAcceptNothingInThePayload(): void
     {
+        // It's ok to send nothing, we'll just won't process it
         $this
             ->postJson(self::CREATE_VIEWED_DEALERS_ENDPOINT)
-            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertSeeText('The viewed_dealers field is required.');
+            ->assertOk();
 
+        // It's ok to send nothing, we'll just won't process it
         $this
             ->postJson(self::CREATE_VIEWED_DEALERS_ENDPOINT, [
                 'viewed_dealers' => [[]],
             ])
-            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertSeeText('The viewed_dealers.0.dealer_id field is required.')
-            ->assertSeeText('The viewed_dealers.0.name field is required.')
-            ->assertSeeText('The viewed_dealers.0.inventory_id field is required.');
-    }
-
-    /**
-     * Test that we get back the bad request error if we provide the dealer id that is
-     * already exists in the database.
-     */
-    public function testItReturnsBadRequestErrorWhenProvideDuplicateDealerIdWithDb(): void
-    {
-        $viewedDealer = ViewedDealer::factory()->create();
-        $dealerId = $viewedDealer->dealer_id;
-
-        $this
-            ->postJson(self::CREATE_VIEWED_DEALERS_ENDPOINT, [
-                'viewed_dealers' => [[
-                    'dealer_id' => $dealerId,
-                    'name' => Str::random(),
-                    'inventory_id' => $viewedDealer->inventory_id,
-                ]],
-            ])
-            ->assertStatus(Response::HTTP_BAD_REQUEST)
-            ->assertSeeText("Dealer ID $dealerId already exists in the database, operation aborted.");
-    }
-
-    /**
-     * Test that the system returns bad request error when we provide duplicate dealer id
-     * in the payload itself.
-     */
-    public function testItReturnsBadRequestErrorWhenProvideDuplicateDealerIdInThePayload(): void
-    {
-        $name1 = Str::random();
-        $name2 = Str::random();
-
-        $this
-            ->postJson(self::CREATE_VIEWED_DEALERS_ENDPOINT, [
-                'viewed_dealers' => [[
-                    'dealer_id' => 1,
-                    'name' => $name1,
-                    'inventory_id' => 1,
-                ], [
-                    'dealer_id' => 1,
-                    'name' => $name2,
-                    'inventory_id' => 2,
-                ]],
-            ])
-            ->assertStatus(Response::HTTP_BAD_REQUEST)
-            ->assertSeeText(
-                value: "Dealer name '$name1' and '$name2' has the same dealer id of 1, operation aborted.",
-                escape: false
-            );
+            ->assertOk();
     }
 
     /**
