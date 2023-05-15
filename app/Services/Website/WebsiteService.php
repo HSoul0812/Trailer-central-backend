@@ -50,7 +50,7 @@ class WebsiteService
     {
         $www = 'www.';
         $website = $this->websiteRepository->get(['id' => $websiteId]);
-        $domain = strpos($website, $www) !== 0 ? $www . $website->domain : $website->domain;
+        $domain = preg_replace("/$www/", '', $website->domain);
 
         $data = [
             "CertificateName" => $website->template,
