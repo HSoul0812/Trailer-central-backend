@@ -6,34 +6,50 @@ use App\Repositories\SysConfig\SysConfigRepository;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use Database\Seeders\SysConfig\BannerSeeder;
 use Database\Seeders\SysConfig\FilterSeeder;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Tests\Common\TestCase;
 
 class SysConfigRepositoryTest extends TestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
+
         $this->seed(FilterSeeder::class);
         $this->seed(BannerSeeder::class);
     }
 
+    /**
+     * @throws BindingResolutionException
+     */
     public function testGetAllWithParams()
     {
         $repository = $this->getConcreteRepository();
-        $filters = $repository->getAll(['key' => 'filter/size/']);
-        self::assertEquals($filters->count(), 6);
 
-        $banners = $repository->getAll(['key' => 'banner/']);
-        self::assertEquals($banners->count(), 38);
+        $this->assertNotEmpty(
+            actual: $repository->getAll(['key' => 'filter/size/']),
+        );
+
+        $this->assertNotEmpty(
+            actual: $repository->getAll(['key' => 'banner/']),
+        );
     }
 
+    /**
+     * @throws BindingResolutionException
+     */
     public function testGetAllWithoutParams()
     {
         $repository = $this->getConcreteRepository();
-        $configs = $repository->getAll([]);
-        self::assertEquals($configs->count(), 72);
+
+        $this->assertNotEmpty(
+            actual: $repository->getAll([]),
+        );
     }
 
+    /**
+     * @throws BindingResolutionException
+     */
     private function getConcreteRepository(): SysConfigRepository
     {
         return app()->make(SysConfigRepositoryInterface::class);

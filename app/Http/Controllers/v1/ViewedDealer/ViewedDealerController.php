@@ -44,7 +44,7 @@ class ViewedDealerController extends AbstractRestfulController
 
         try {
             return $this->response->array([
-                'data' => $this->repository->create($request->input('viewed_dealers')),
+                'data' => $this->repository->create($request->input('viewed_dealers', [])),
             ]);
         } catch (Throwable $e) {
             $statusCode = $e->getCode();

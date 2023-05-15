@@ -24,6 +24,7 @@ return (new PhpCsFixer\Config())
         'phpdoc_order' => true,
         'phpdoc_no_package' => true,
         'global_namespace_import' => true,
+        'increment_style' => ['style' => 'post'],
     ])
     ->setFinder($finder)
     ->setUsingCache(false);

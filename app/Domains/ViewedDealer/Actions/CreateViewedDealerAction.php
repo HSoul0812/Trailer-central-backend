@@ -9,6 +9,8 @@ use Throwable;
 
 class CreateViewedDealerAction
 {
+    public const REQUIRED_FIELDS = ['name', 'dealer_id', 'inventory_id'];
+
     public const VIEWED_DEALER_CACHE_SECONDS = 86_400;
 
     /**
@@ -27,6 +29,23 @@ class CreateViewedDealerAction
         $returnValues = collect([]);
 
         foreach ($viewedDealers as $viewedDealer) {
+            $keys = array_keys($viewedDealer);
+
+            $hasAllRequiredKeys = true;
+
+            // Do not create a record if one of the required field isn't in the request
+            foreach (self::REQUIRED_FIELDS as $requiredField) {
+                if (!in_array($requiredField, $keys)) {
+                    $hasAllRequiredKeys = false;
+
+                    break;
+                }
+            }
+
+            if (!$hasAllRequiredKeys) {
+                continue;
+            }
+
             $nameSlug = Str::of($viewedDealer['name'])->slug();
 
             $cachedModel = Cache::remember(
@@ -81,6 +100,10 @@ class CreateViewedDealerAction
         $names = [];
 
         foreach ($viewedDealers as $viewedDealer) {
+            if (!array_key_exists('name', $viewedDealer)) {
+                continue;
+            }
+
             // Use key for best performance
             if (array_key_exists($viewedDealer['name'], $names)) {
                 continue;

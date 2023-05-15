@@ -3,6 +3,8 @@
 namespace App\Repositories\WebsiteUser;
 
 use App\Domains\UserTracking\Actions\GetPageNameFromUrlAction;
+use App\Domains\UserTracking\Jobs\ProcessMonthlyInventoryImpression;
+use App\Domains\UserTracking\Types\UserTrackingEvent;
 use App\Models\UserTracking;
 use Arr;
 use Log;
@@ -39,7 +41,11 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
         }
 
         try {
-            return UserTracking::create($params);
+            $userTracking = UserTracking::create($params);
+
+            $this->dispatchProcessMonthlyInventoryImpressionJob($userTracking);
+
+            return $userTracking;
         } catch (Throwable $exception) {
             Log::error(__METHOD__ . ': Failed to create a user tracking record - ' . $exception->getMessage());
 
@@ -89,5 +95,20 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
         // , so it can read from any server variable that we don't
         // have on the priority list above
         return request()->ip();
+    }
+
+    private function dispatchProcessMonthlyInventoryImpressionJob(UserTracking $userTracking): void
+    {
+        // Do not dispatch the job if the page_name is not in the valid list
+        if (!in_array($userTracking->page_name, GetPageNameFromUrlAction::PAGE_NAMES)) {
+            return;
+        }
+
+        // Do not dispatch if the event is not impression
+        if ($userTracking->event !== UserTrackingEvent::IMPRESSION) {
+            return;
+        }
+
+        ProcessMonthlyInventoryImpression::dispatch($userTracking);
     }
 }
