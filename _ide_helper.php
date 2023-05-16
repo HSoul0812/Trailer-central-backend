@@ -19254,6 +19254,18 @@ namespace Illuminate\Support {
     class Collection
     {
         /**
+         * @see \Spatie\LaravelRay\RayServiceProvider::registerMacros()
+         *
+         * @param string $description
+         *
+         * @static
+         */
+        public static function ray($description = '')
+        {
+            return \Illuminate\Support\Collection::ray($description);
+        }
+
+        /**
          * @see \Laravel\Nova\NovaServiceProvider::registerCollectionMacros()
          *
          * @static
@@ -19261,6 +19273,21 @@ namespace Illuminate\Support {
         public static function isAssoc()
         {
             return \Illuminate\Support\Collection::isAssoc();
+        }
+    }
+
+    class Stringable
+    {
+        /**
+         * @see \Spatie\LaravelRay\RayServiceProvider::registerMacros()
+         *
+         * @param string $description
+         *
+         * @static
+         */
+        public static function ray($description = '')
+        {
+            return \Illuminate\Support\Stringable::ray($description);
         }
     }
 }
@@ -21082,6 +21109,39 @@ namespace Illuminate\Http {
         public static function hasValidRelativeSignature()
         {
             return \Illuminate\Http\Request::hasValidRelativeSignature();
+        }
+    }
+}
+
+namespace Illuminate\Testing {
+    /**
+     * @mixin \Illuminate\Http\Response
+     */
+    class TestResponse
+    {
+        /**
+         * @see \Spatie\LaravelRay\RayServiceProvider::registerMacros()
+         *
+         * @static
+         */
+        public static function ray()
+        {
+            return \Illuminate\Testing\TestResponse::ray();
+        }
+    }
+}
+
+namespace Illuminate\Database\Query {
+    class Builder
+    {
+        /**
+         * @see \Spatie\LaravelRay\RayServiceProvider::registerMacros()
+         *
+         * @static
+         */
+        public static function ray()
+        {
+            return \Illuminate\Database\Query\Builder::ray();
         }
     }
 }
@@ -25324,6 +25384,16 @@ namespace {
         {
             /* @var \Illuminate\Database\Query\Builder $instance */
             return $instance->macroCall($method, $parameters);
+        }
+
+        /**
+         * @see \Spatie\LaravelRay\RayServiceProvider::registerMacros()
+         *
+         * @static
+         */
+        public static function ray()
+        {
+            return \Illuminate\Database\Query\Builder::ray();
         }
     }
     class Event extends \Illuminate\Support\Facades\Event
