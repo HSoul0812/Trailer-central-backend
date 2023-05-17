@@ -28,10 +28,6 @@ class TTAndAffiliateController extends AbstractRestfulController
         );
     }
 
-    public function download()
-    {
-    }
-
     public function create(CreateRequestInterface $request)
     {
         throw new NotImplementedException();

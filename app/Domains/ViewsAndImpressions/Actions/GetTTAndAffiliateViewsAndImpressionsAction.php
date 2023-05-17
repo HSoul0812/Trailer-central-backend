@@ -52,6 +52,10 @@ class GetTTAndAffiliateViewsAndImpressionsAction
         $viewedDealerTable = (new ViewedDealer())->getTable();
 
         return DB::table($monthlyImpressionCountingsTable)
+            ->select([
+                "$monthlyImpressionCountingsTable.dealer_id",
+                DB::raw("COALESCE($viewedDealerTable.name, 'N/A') as name"),
+            ])
             ->leftJoin($viewedDealerTable, "$monthlyImpressionCountingsTable.dealer_id", '=', "$viewedDealerTable.dealer_id")
             ->when($this->criteria->search !== null, function (Builder $query) use ($monthlyImpressionCountingsTable, $viewedDealerTable) {
                 $query
@@ -64,6 +68,7 @@ class GetTTAndAffiliateViewsAndImpressionsAction
             ->when($this->criteria->sortBy === GetTTAndAffiliateViewsAndImpressionCriteria::SORT_BY_DEALER_NAME, function (Builder $query) use ($viewedDealerTable) {
                 $query->orderBy("$viewedDealerTable.name", $this->criteria->sortDirection);
             })
+            ->groupBy("$monthlyImpressionCountingsTable.dealer_id", 'name')
             ->paginate(
                 perPage: $this->criteria->perPage,
                 columns: [
@@ -71,10 +76,8 @@ class GetTTAndAffiliateViewsAndImpressionsAction
                     DB::raw("COALESCE($viewedDealerTable.name, 'N/A') as name"),
                 ],
                 page: $this->criteria->page,
-            );
-
-        // TODO: Fix duplicate dealer id issue
-        // Try http://127.0.0.1:8000/api/views-and-impressions/tt-and-affiliate?search=828&sort_by=dealer_name&sort_direction=desc and I'll see
+            )
+            ->withQueryString();
     }
 
     private function appendReportData(LengthAwarePaginator $dealers, Collection $yearsAndMonths): void
@@ -102,9 +105,8 @@ class GetTTAndAffiliateViewsAndImpressionsAction
                         'month' => $month,
                         'impressions_count' => 0,
                         'views_count' => 0,
+                        'zip_file_download_path' => null,
                     ];
-
-                    $dealer->zip_file_download_path = null;
 
                     /** @var MonthlyImpressionCounting|null $monthlyImpressionCounting */
                     $monthlyImpressionCounting = $dealerMonthlyImpressions
@@ -115,8 +117,7 @@ class GetTTAndAffiliateViewsAndImpressionsAction
                     if ($monthlyImpressionCounting !== null) {
                         $statistic['impressions_count'] = $monthlyImpressionCounting->impressions_count;
                         $statistic['views_count'] = $monthlyImpressionCounting->views_count;
-
-                        $dealer->zip_file_download_path = $this->getZipFileDownloadPath($monthlyImpressionCounting->zip_file_path);
+                        $statistic['zip_file_download_path'] = $this->getZipFileDownloadPath($monthlyImpressionCounting->zip_file_path);
                     }
 
                     $dealer->statistics[] = $statistic;
