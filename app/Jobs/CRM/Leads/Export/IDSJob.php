@@ -70,7 +70,7 @@ class IDSJob extends Job
         $inquiryLead = $inquiryEmailService->createFromLead($this->lead);
 
         try {
-            $log->info('Attempt to Mail IDS Email', ['lead' => $this->lead->identifier]);
+            $log->info('Attempt to Mail IDS Email', ['lead' => $this->lead->identifier, 'to' => $this->toEmails, 'bcc' => $this->hiddenCopiedEmails]);
 
             Mail::to($this->toEmails) 
                 ->bcc($this->hiddenCopiedEmails)
