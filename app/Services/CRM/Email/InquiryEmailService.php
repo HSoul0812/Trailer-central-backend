@@ -172,23 +172,16 @@ class InquiryEmailService implements InquiryEmailServiceInterface
      */
     public function createFromLead(Lead $lead) : InquiryLead
     {
-        $log = Log::channel('leads-export');
         $params = [];
         $params['dealer_id'] = $lead->dealer_id;
         $params['website_id'] = $lead->website_id;
         $params['dealer_location_id'] = $lead->dealer_location_id;
-        $log->info('Get Inquiry Type for Lead: ' . $lead->identifier);
         $params['inquiry_type'] = $lead->inquiry_type;
-        $log->info('Get Lead Types for Lead: ' . $lead->identifier);
         $params['lead_types'] = $lead->lead_types;
-        $log->info('Get Units of Interest for Lead: ' . $lead->identifier);
         $params['inventory'] = $lead->inventory_ids;
-        $log->info('Get Primary Unit of Interest for Lead: ' . $lead->identifier);
         $params['item_id'] = $lead->inventory_id;
         $params['title'] = $lead->title;
-        $log->info('Get Inventory URL for Lead: ' . $lead->identifier);
         $params['url'] = !empty($lead->inventory) ? $lead->inventory->getUrl() : '';
-        $log->info('Got Inventory URL ' . $params['url'] . ' for Lead: ' . $lead->identifier);
         $params['referral'] = $lead->referral;
         $params['first_name'] = $lead->first_name;
         $params['last_name'] = $lead->last_name;
@@ -207,11 +200,8 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $params['adf_email_sent'] = $lead->adf_email_sent;
         $params['cdk_email_sent'] = $lead->cdk_email_sent;
         $params['is_spam'] = $lead->is_spam;
-        $log->info('Got Lead Source for Lead: ' . $lead->identifier);
         $params['lead_source'] = $lead->getSource();
-        $log->info('Got Lead Status for Lead: ' . $lead->identifier);
         $params['lead_status'] = !empty($lead->leadStatus) ? $lead->leadStatus->status : null;
-        $log->info('Fill Out Additional Details for Lead: ' . $lead->identifier);
         return $this->fill($params);
     }
 

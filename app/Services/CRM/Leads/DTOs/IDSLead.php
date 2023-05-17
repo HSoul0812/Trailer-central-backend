@@ -47,6 +47,11 @@ class IDSLead
     private $emailAddress;
 
     /**
+     * @var string Phone Number
+     */
+    private $phoneNumber;
+
+    /**
      * @var string Comments
      */
     private $comments;
