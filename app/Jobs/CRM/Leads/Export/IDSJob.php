@@ -4,15 +4,16 @@ namespace App\Jobs\CRM\Leads\Export;
 
 use App\Jobs\Job;
 use App\Mail\CRM\Leads\Export\IDSEmail;
+use App\Mail\InquiryEmail;
 use App\Models\CRM\Leads\Lead;
+use App\Services\CRM\Email\InquiryEmailServiceInterface;
+use App\Services\CRM\Leads\DTOs\IDSLead;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Services\CRM\Email\InquiryEmailServiceInterface;
-use App\Mail\InquiryEmail;
 
 /**
  * Class IDSJob
@@ -64,18 +65,17 @@ class IDSJob extends Job
         // Initialize Log
         $log = Log::channel('leads-export');
         $log->info('Mailing IDS Lead', ['lead' => $this->lead->identifier]);
-        
+
+        $ids = IDSLead::fromLead($this->lead);
         $inquiryLead = $inquiryEmailService->createFromLead($this->lead);
-        
+
         try {
             $log->info('Attempt to Mail IDS Email', ['lead' => $this->lead->identifier]);
 
             Mail::to($this->toEmails) 
                 ->bcc($this->hiddenCopiedEmails)
                 ->send(
-                    new IDSEmail([
-                        'lead' => $this->lead,
-                    ])
+                    new IDSEmail($ids)
                 );
 
             $log->info('Attempt to Mail Clone of Email Inquiry', ['lead' => $this->lead->identifier]);
@@ -83,9 +83,7 @@ class IDSJob extends Job
             Mail::to($this->copiedEmails)
                 ->bcc($this->hiddenCopiedEmails)
                 ->send(
-                    new InquiryEmail(
-                      $inquiryLead
-                    )
+                    new InquiryEmail($inquiryLead)
                 );
 
             $log->info('Mark Lead as IDS Exported', ['lead' => $this->lead->identifier]);
