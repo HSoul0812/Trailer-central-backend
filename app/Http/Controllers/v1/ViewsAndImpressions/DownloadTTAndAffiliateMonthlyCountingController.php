@@ -8,9 +8,10 @@ use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\ViewsAndImpressions\DownloadTTAndAffiliateZipFileRequest;
+use Arr;
 use Illuminate\Filesystem\FilesystemAdapter;
+use JetBrains\PhpStorm\NoReturn;
 use Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DownloadTTAndAffiliateMonthlyCountingController extends AbstractRestfulController
 {
@@ -26,7 +27,8 @@ class DownloadTTAndAffiliateMonthlyCountingController extends AbstractRestfulCon
         $this->storage = Storage::disk('monthly-inventory-impression-countings-reports');
     }
 
-    public function index(IndexRequestInterface $request): StreamedResponse
+    #[NoReturn]
+    public function index(IndexRequestInterface $request): void
     {
         $request->validate();
 
@@ -40,10 +42,7 @@ class DownloadTTAndAffiliateMonthlyCountingController extends AbstractRestfulCon
             $fileName = sprintf('%d-%02d-%d.csv.gz', $matches['dealer_id'][0], $matches['month'][0], $matches['year'][0]);
         }
 
-        return response()->streamDownload(
-            fn () => $this->storage->readStream($filePath),
-            $fileName,
-        );
+        $this->downloadFile($filePath, $fileName);
     }
 
     public function create(CreateRequestInterface $request)
@@ -71,5 +70,25 @@ class DownloadTTAndAffiliateMonthlyCountingController extends AbstractRestfulCon
         app()->bind(IndexRequestInterface::class, function () {
             return inject_request_data(DownloadTTAndAffiliateZipFileRequest::class);
         });
+    }
+
+    #[NoReturn]
+    private function downloadFile(string $filePath, string $fileName): void
+    {
+        // For some reason, our backend staging server doesn't let us use the response()->download()
+        // from Laravel, it causes the issue where the download file is 0 bytes in size
+
+        $serverProtocol = Arr::get($_SERVER, 'SERVER_PROTOCOL', 'HTTP/1.1');
+
+        header("$serverProtocol 200 OK");
+        header('Cache-Control: public');
+        header('Content-Type: application/gzip');
+        header('Content-Transfer-Encoding: Binary');
+        header('Content-Length:' . filesize($this->storage->path($filePath)));
+        header("Content-Disposition: attachment; filename=$fileName");
+
+        readfile($this->storage->path($filePath));
+
+        exit;
     }
 }
