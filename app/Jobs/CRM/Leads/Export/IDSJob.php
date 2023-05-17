@@ -78,7 +78,7 @@ class IDSJob extends Job
                     new IDSEmail($ids)
                 );
 
-            $log->info('Attempt to Mail Clone of Email Inquiry', ['lead' => $this->lead->identifier]);
+            $log->info('Attempt to Mail Clone of Email Inquiry', ['lead' => $this->lead->identifier, 'to' => $this->copiedEmails, 'bcc' => $this->hiddenCopiedEmails]);
             Mail::to($this->copiedEmails)
                 ->bcc($this->hiddenCopiedEmails)
                 ->send(
