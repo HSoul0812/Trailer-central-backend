@@ -172,7 +172,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
      */
     public function createFromLead(Lead $lead) : InquiryLead
     {
-        $log = Log::channel('inquiry');
+        $log = Log::channel('leads-export');
         $params = [];
         $params['dealer_id'] = $lead->dealer_id;
         $params['website_id'] = $lead->website_id;
