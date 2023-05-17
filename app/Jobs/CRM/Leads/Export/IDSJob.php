@@ -68,6 +68,8 @@ class IDSJob extends Job
         $inquiryLead = $inquiryEmailService->createFromLead($this->lead);
         
         try {
+            $log->info('Attempt to Mail IDS Email', ['lead' => $this->lead->identifier]);
+
             Mail::to($this->toEmails) 
                 ->bcc($this->hiddenCopiedEmails)
                 ->send(
@@ -75,14 +77,18 @@ class IDSJob extends Job
                         'lead' => $this->lead,
                     ])
                 );
-            
+
+            $log->info('Attempt to Mail Clone of Email Inquiry', ['lead' => $this->lead->identifier]);
+
             Mail::to($this->copiedEmails)
                 ->bcc($this->hiddenCopiedEmails)
                 ->send(
                     new InquiryEmail(
                       $inquiryLead
                     )
-                );           
+                );
+
+            $log->info('Mark Lead as IDS Exported', ['lead' => $this->lead->identifier]);
 
             $this->lead->ids_exported = 1;
             $this->lead->save();
