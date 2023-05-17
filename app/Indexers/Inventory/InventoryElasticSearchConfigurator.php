@@ -274,6 +274,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'paymentCalculator.month'   => ['type' => 'integer', 'index' => false],
         'paymentCalculator.monthly_payment' => ['type' => 'float', 'index' => false],
         'paymentCalculator.down_percentage' => ['type' => 'float', 'index' => false],
+        'hasImage' => ['type' => 'boolean'],
     ];
 
     public function name(): string
