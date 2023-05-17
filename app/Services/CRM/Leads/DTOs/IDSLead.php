@@ -197,7 +197,7 @@ class IDSLead
                 'inventoryMfg' => $this->inventoryMfg,
                 'inventoryBrand' => $this->inventoryBrand,
                 'inventoryModel' => $this->inventoryModel,
-                'inventoryLength' => $this->inventoryLngth
+                'inventoryLength' => $this->inventoryLength
             ];
     }
 }
