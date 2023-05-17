@@ -64,14 +64,14 @@ class IDSJob extends Job
 
         // Initialize Log
         $log = Log::channel('leads-export');
-        $log->info('Mailing IDS Lead', ['lead' => $this->lead->identifier]);
-
+        $log->info('Creating IDS Lead Details', ['lead' => $this->lead->identifier]);
         $ids = IDSLead::fromLead($this->lead);
+
+        $log->info('Creating Inquiry Lead Details', ['lead' => $this->lead->identifier]);
         $inquiryLead = $inquiryEmailService->createFromLead($this->lead);
 
         try {
             $log->info('Attempt to Mail IDS Email', ['lead' => $this->lead->identifier, 'to' => $this->toEmails, 'bcc' => $this->hiddenCopiedEmails]);
-
             Mail::to($this->toEmails) 
                 ->bcc($this->hiddenCopiedEmails)
                 ->send(
@@ -79,7 +79,6 @@ class IDSJob extends Job
                 );
 
             $log->info('Attempt to Mail Clone of Email Inquiry', ['lead' => $this->lead->identifier]);
-
             Mail::to($this->copiedEmails)
                 ->bcc($this->hiddenCopiedEmails)
                 ->send(
