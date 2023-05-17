@@ -183,7 +183,7 @@ class IDSLead
         return ['source' => $this->source,
                 'firstName' => $this->firstName,
                 'lastName' => $this->lastName,
-                'emailAdress' => $this->emailAddress,
+                'emailAddress' => $this->emailAddress,
                 'phoneNumber' => $this->phoneNumber,
                 'comments' => $this->comments,
                 'addressStreet' => $this->addressStreet,
