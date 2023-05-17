@@ -75,7 +75,7 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
      */
     private function validate(): void
     {
-        $now = now()->startOfMonth();
+        $now = now();
         $yearInput = $this->argument('year');
         $monthInput = $this->argument('month');
 
@@ -89,10 +89,6 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
         $month = intval($this->argument('month') ?? ($now->month - 1));
 
         $this->date = Carbon::createFromDate($year, $month)->startOfMonth();
-
-        if ($this->date->gte($now)) {
-            throw new Exception('You can only generate the report up to last month.');
-        }
     }
 
     private function deleteExistingData(): void
