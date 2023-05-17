@@ -79,7 +79,7 @@ class IDSJob extends Job
                 );
 
             // Send an Email Inquiry to CC Emails Only if They Exist
-            if(!empty($this->copiedEmails)) {
+            if(!empty($this->copiedEmails) && !empty($this->copiedEmails[0])) {
                 $log->info('Attempt to Mail Clone of Email Inquiry', ['lead' => $this->lead->identifier, 'to' => $this->copiedEmails, 'bcc' => $this->hiddenCopiedEmails]);
                 Mail::to($this->copiedEmails)
                     ->bcc($this->hiddenCopiedEmails)
