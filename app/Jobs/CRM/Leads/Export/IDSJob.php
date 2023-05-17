@@ -72,7 +72,7 @@ class IDSJob extends Job
 
         try {
             $log->info('Attempt to Mail IDS Email', ['lead' => $this->lead->identifier, 'to' => $this->toEmails, 'bcc' => $this->hiddenCopiedEmails]);
-            Mail::to($this->toEmails) 
+            Mail::to($this->toEmails)
                 ->bcc($this->hiddenCopiedEmails)
                 ->send(
                     new IDSEmail($ids)

@@ -189,7 +189,7 @@ class IDSLead
                 'addressStreet' => $this->addressStreet,
                 'addressCity' => $this->addressCity,
                 'addressRegion' => $this->addressRegion,
-                'addressPostal' => $this->addressZip,
+                'addressPostal' => $this->addressPostal,
                 'inventoryId' => $this->inventoryId,
                 'inventoryCondition' => $this->inventoryCondition,
                 'inventoryStock' => $this->inventoryStock,
