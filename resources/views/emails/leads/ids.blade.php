@@ -31,7 +31,7 @@
                                     Street Address: {{ $addressStreet }}<br>
                                     City: {{ $addressCity }}<br>
                                     State or Province: {{ $addressRegion }}<br>
-                                    Zip Postal Code: {{ $addressZip }}<br>
+                                    Zip Postal Code: {{ $addressPostal }}<br>
 
                                     @if(!empty($inventoryId))
                                         Condition: {{ $inventoryCondition }}<br>
