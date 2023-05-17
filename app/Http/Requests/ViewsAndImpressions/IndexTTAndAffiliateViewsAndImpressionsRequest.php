@@ -21,8 +21,15 @@ class IndexTTAndAffiliateViewsAndImpressionsRequest extends Request implements I
                 'string',
                 Rule::in(GetTTAndAffiliateViewsAndImpressionCriteria::VALID_SORT_DIRECTION),
             ],
-            'page' => 'integer',
-            'per_page' => 'integer',
+            'page' => [
+                'integer',
+                'min:1',
+            ],
+            'per_page' => [
+                'integer',
+                'min:1',
+                'max:' . GetTTAndAffiliateViewsAndImpressionCriteria::MAX_PER_PAGE,
+            ],
         ];
     }
 }
