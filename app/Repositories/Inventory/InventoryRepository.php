@@ -503,14 +503,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query->where('dealer_id', '=', $params['dealer_id']);
         }
 
-        if (isset($params['dealer_location_id'])) {
-            $query = $query->where('dealer_location_id', $params['dealer_location_id']);
-        }
-
-        if (isset($params['entity_type_id'])) {
-            $query = $query->where('entity_type_id', $params['entity_type_id']);
-        }
-
         if (isset($params['stock'])) {
             $query->where('stock', '=', $params['stock']);
         }

@@ -178,6 +178,12 @@ class DealerLocation extends Model
             Inventory::where('dealer_location_id', $this->dealer_location_id)->count() : 0;
     }
 
+    public function inventoryExists(int $type_id): bool
+    {
+        return $this->dealer_location_id ?
+            Inventory::where('dealer_location_id', $this->dealer_location_id)->where('entity_type_id', $type_id)->exists() : false;
+    }
+
     public function referenceCount(): int
     {
         return $this->dealer_location_id ?
