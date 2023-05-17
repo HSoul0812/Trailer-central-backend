@@ -78,12 +78,15 @@ class IDSJob extends Job
                     new IDSEmail($ids)
                 );
 
-            $log->info('Attempt to Mail Clone of Email Inquiry', ['lead' => $this->lead->identifier, 'to' => $this->copiedEmails, 'bcc' => $this->hiddenCopiedEmails]);
-            Mail::to($this->copiedEmails)
-                ->bcc($this->hiddenCopiedEmails)
-                ->send(
-                    new InquiryEmail($inquiryLead)
-                );
+            // Send an Email Inquiry to CC Emails Only if They Exist
+            if(!empty($this->copiedEmails)) {
+                $log->info('Attempt to Mail Clone of Email Inquiry', ['lead' => $this->lead->identifier, 'to' => $this->copiedEmails, 'bcc' => $this->hiddenCopiedEmails]);
+                Mail::to($this->copiedEmails)
+                    ->bcc($this->hiddenCopiedEmails)
+                    ->send(
+                        new InquiryEmail($inquiryLead)
+                    );
+            }
 
             $log->info('Mark Lead as IDS Exported', ['lead' => $this->lead->identifier]);
 
