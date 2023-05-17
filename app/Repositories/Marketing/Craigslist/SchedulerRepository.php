@@ -5,6 +5,7 @@ namespace App\Repositories\Marketing\Craigslist;
 use App\Exceptions\Marketing\Craigslist\InvalidDealerIdException;
 use App\Exceptions\NotImplementedException;
 use App\Models\Marketing\Craigslist\ActivePost;
+use App\Models\Marketing\Craigslist\Balance;
 use App\Models\Marketing\Craigslist\Queue;
 use App\Models\Marketing\Craigslist\Session;
 use App\Models\User\User;
@@ -274,6 +275,9 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         $params['s_status_not'] = ['error', 'done'];
         $params['q_status_not'] = ['error', 'done'];
 
+        // Append Minimum Balance
+        $params['min_balance'] = (int) config('marketing.cl.settings.costs.min', 7);
+
         // Only Get Slot 99
         if(!isset($params['slot_id'])) {
             $params['slot_id'] = 99;
@@ -283,7 +287,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         $params['end'] = DB::raw('NOW()');
 
         // Return Counts of Posts
-        return $this->initQuery($params)->count();
+        return $this->initQuery($params)->has('inventoryActive')->count();
     }
 
     /**
@@ -308,7 +312,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         $params['end'] = Carbon::now()->endOfDay()->toDateTimeString();
 
         // Return Counts of Posts
-        return $this->initQuery($params)->count();
+        return $this->initQuery($params)->has('inventoryActive')->count();
     }
 
 
@@ -386,6 +390,13 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         }
         if (isset($params['end'])) {
             $query->where(Session::getTableName() . '.session_scheduled', '<=', $params['end']);
+        }
+
+        // Only Return Count That Has Balance
+        if (isset($params['min_balance'])) {
+            $query->leftJoin(Balance::getTableName(), Balance::getTableName() . '.dealer_id',
+                                '=', Queue::getTableName().'.dealer_id')
+                  ->where(Balance::getTableName() . '.balance', '>', $params['min_balance']);
         }
 
         if (isset($params['with'])) {

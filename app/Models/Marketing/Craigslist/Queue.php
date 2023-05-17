@@ -124,6 +124,17 @@ class Queue extends Model
     }
 
     /**
+     * Get Active Inventory
+     * 
+     * @return BelongsTo
+     */
+    public function inventoryActive(): BelongsTo
+    {
+        return $this->inventory()->where('status', '<>', Inventory::STATUS_SOLD)
+                                 ->where('is_archived', Inventory::IS_NOT_ARCHIVED);
+    }
+
+    /**
      * Get Part
      * 
      * @return BelongsTo
