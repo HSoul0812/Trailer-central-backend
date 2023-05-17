@@ -3,6 +3,7 @@
 namespace Tests\Unit\App\Console\Commands\Report;
 
 use App\Console\Commands\Report\ReportInventoryViewAndImpressionCommand;
+use App\Domains\Compression\Actions\CompressFileWithGzipAction;
 use App\Domains\UserTracking\Exporters\InventoryViewAndImpressionCsvExporter;
 use App\Domains\UserTracking\Mail\ReportInventoryViewAndImpressionEmail;
 use Mail;
@@ -33,6 +34,13 @@ class ReportInventoryViewAndImpressionCommandTest extends TestCase
                 $mock->shouldReceive('setTo')->once()->withAnyArgs()->andReturnSelf();
                 $mock->shouldReceive('export')->once()->withAnyArgs()->andReturns('/tmp/dummy.csv');
             }),
+        );
+
+        $this->instance(
+            CompressFileWithGzipAction::class,
+            Mockery::mock(CompressFileWithGzipAction::class, function (MockInterface $mock) {
+                $mock->shouldReceive('execute')->once()->withAnyArgs()->andReturns();
+            })
         );
 
         $this
