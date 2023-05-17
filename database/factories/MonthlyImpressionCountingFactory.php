@@ -11,13 +11,17 @@ class MonthlyImpressionCountingFactory extends Factory
      */
     public function definition(): array
     {
+        $year = $this->faker->year();
+        $month = $this->faker->month();
+        $dealerId = $this->faker->unique()->numberBetween(1, 1000);
+
         return [
-            'year' => $this->faker->year(),
-            'month' => $this->faker->month(),
-            'dealer_id' => $this->faker->numberBetween(1, 1000),
+            'year' => $year,
+            'month' => $month,
+            'dealer_id' => $dealerId,
             'impressions_count' => $this->faker->numberBetween(1, 10000),
             'views_count' => $this->faker->numberBetween(1, 10000),
-            'zip_file_path' => $this->faker->filePath(),
+            'zip_file_path' => sprintf('%d/%02d/dealer-id-%d.csv.gz', $year, $month, $dealerId),
         ];
     }
 }
