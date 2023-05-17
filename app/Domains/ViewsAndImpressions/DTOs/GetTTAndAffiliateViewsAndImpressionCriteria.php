@@ -26,6 +26,8 @@ class GetTTAndAffiliateViewsAndImpressionCriteria
 
     public const DEFAULT_PER_PAGE = 10;
 
+    public const MAX_PER_PAGE = 100;
+
     public ?string $search = null;
 
     public string $sortBy = self::SORT_BY_DEALER_ID;
