@@ -14,7 +14,7 @@ class AddIndexToClsfActiveInDealerTable extends Migration
     public function up()
     {
         Schema::table('dealer', function (Blueprint $table) {
-            $table->index('clsf_active');
+            $table->index(['clsf_active']);
         });
     }
 
