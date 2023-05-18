@@ -22,30 +22,29 @@
                                 <td bgcolor="#FFFFFF" style="padding: 30px;">
                                     <!-- Begin Content -->
                                     You received a new unit inquiry from your website. The details of the request are below:
-                                    <br>
-                                    <br>
-                                    Source: {{ $lead->website->domain }}<br>
-                                    First Name: {{ $lead->first_name }}<br>
-                                    Last Name: {{ $lead->last_name }}<br>
-                                    Email: {{ $lead->email_address }}<br>
-                                    Home Phone: {{ $lead->phone_number }}<br>
-                                    Street Address: {{ $lead->address }}<br>
-                                    City: {{ $lead->city }}<br>
-                                    State or Province: {{ $lead->region }}<br>
-                                    Zip Postal Code: {{ $lead->zip }}<br>
-                                    
-                                    @if($lead->inventory)                                        
-                                        Condition: {{ strtoupper($lead->inventory->condition) }}<br>
-                                        Stock #: {{ $lead->inventory->stock }}<br>
-                                        Year: {{ $lead->inventory->year }}<br>
-                                        Mfg: {{ $lead->inventory->manufacturer }}<br>
-                                        Brand: {{ $lead->inventory->brand }}<br>
-                                        Model: {{ $lead->inventory->model }}<br>
-                                        Length: {{ $lead->inventory->length }}<br>                                        
+                                    <br><br>
+                                    Source: {{ $source }}<br>
+                                    First Name: {{ $firstName }}<br>
+                                    Last Name: {{ $lastName }}<br>
+                                    Email: {{ $emailAddress }}<br>
+                                    Home Phone: {{ $phoneNumber }}<br>
+                                    Street Address: {{ $addressStreet }}<br>
+                                    City: {{ $addressCity }}<br>
+                                    State or Province: {{ $addressRegion }}<br>
+                                    Zip Postal Code: {{ $addressPostal }}<br>
+
+                                    @if(!empty($inventoryId))
+                                        Condition: {{ $inventoryCondition }}<br>
+                                        Stock #: {{ $inventoryStock }}<br>
+                                        Year: {{ $inventoryYear }}<br>
+                                        Mfg: {{ $inventoryMfg }}<br>
+                                        Brand: {{ $inventoryBrand }}<br>
+                                        Model: {{ $inventoryModel }}<br>
+                                        Length: {{ $inventoryLength }}<br>                                        
                                     @endif
-                                    
-                                    Comment: {{ $lead->comments }}<br
-                                    
+
+                                    Comment: {{ $comments }}<br>
+
                                     <!-- End Content -->
                                 </td>
                             </tr>
