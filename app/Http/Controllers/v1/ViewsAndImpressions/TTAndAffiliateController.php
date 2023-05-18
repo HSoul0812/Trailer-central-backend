@@ -10,6 +10,7 @@ use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\ViewsAndImpressions\IndexTTAndAffiliateViewsAndImpressionsRequest;
+use App\Models\AppToken;
 
 class TTAndAffiliateController extends AbstractRestfulController
 {
@@ -21,6 +22,7 @@ class TTAndAffiliateController extends AbstractRestfulController
 
         $viewsAndImpressions = resolve(GetTTAndAffiliateViewsAndImpressionsAction::class)
             ->setCriteria($criteria)
+            ->setAppToken(resolve(AppToken::class))
             ->execute();
 
         return $this->response->array(

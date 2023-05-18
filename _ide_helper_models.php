@@ -9,6 +9,31 @@
  * @author Barry vd. Heuvel <barryvdh@gmail.com>
  */
 
+namespace App\Models{
+    /**
+     * App\Models\AppToken.
+     *
+     * @property int                             $id
+     * @property string                          $app_name
+     * @property string                          $token
+     * @property \Illuminate\Support\Carbon|null $created_at
+     * @property \Illuminate\Support\Carbon|null $updated_at
+     *
+     * @method static \Database\Factories\AppTokenFactory            factory(...$parameters)
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken query()
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken whereAppName($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken whereCreatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken whereToken($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken whereUpdatedAt($value)
+     */
+    class AppToken extends \Eloquent
+    {
+    }
+}
+
 namespace App\Models\Dealer{
     /**
      * App\Models\Dealer\ViewedDealer.

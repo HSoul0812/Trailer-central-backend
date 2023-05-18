@@ -3,12 +3,15 @@
 namespace App\Domains\ViewsAndImpressions\Actions;
 
 use App\Domains\ViewsAndImpressions\DTOs\GetTTAndAffiliateViewsAndImpressionCriteria;
+use App\Http\Middleware\AllowedApps;
+use App\Models\AppToken;
 use App\Models\Dealer\ViewedDealer;
 use App\Models\MonthlyImpressionCounting;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Stringable;
 use Str;
 
 class GetTTAndAffiliateViewsAndImpressionsAction
@@ -16,6 +19,8 @@ class GetTTAndAffiliateViewsAndImpressionsAction
     public const ZIP_DOWNLOAD_PATH = '/api/views-and-impressions/tt-and-affiliate/download-zip';
 
     private GetTTAndAffiliateViewsAndImpressionCriteria $criteria;
+
+    private ?AppToken $appToken = null;
 
     public function __construct()
     {
@@ -42,6 +47,18 @@ class GetTTAndAffiliateViewsAndImpressionsAction
     public function setCriteria(GetTTAndAffiliateViewsAndImpressionCriteria $criteria): GetTTAndAffiliateViewsAndImpressionsAction
     {
         $this->criteria = $criteria;
+
+        return $this;
+    }
+
+    public function getAppToken(): AppToken
+    {
+        return $this->appToken;
+    }
+
+    public function setAppToken(AppToken $appToken): GetTTAndAffiliateViewsAndImpressionsAction
+    {
+        $this->appToken = $appToken;
 
         return $this;
     }
@@ -144,6 +161,9 @@ class GetTTAndAffiliateViewsAndImpressionsAction
         return Str::of(config('app.url'))
             ->rtrim('/')
             ->append(self::ZIP_DOWNLOAD_PATH)
-            ->append("?file_path=$zipFilePath");
+            ->append("?file_path=$zipFilePath")
+            ->when($this->appToken !== null, function (Stringable $str) {
+                return $str->append('&' . AllowedApps::APP_TOKEN_PARAM_NAME . "={$this->appToken->token}");
+            });
     }
 }

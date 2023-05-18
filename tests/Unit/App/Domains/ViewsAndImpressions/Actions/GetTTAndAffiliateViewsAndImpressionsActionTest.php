@@ -4,6 +4,7 @@ namespace Tests\Unit\App\Domains\ViewsAndImpressions\Actions;
 
 use App\Domains\ViewsAndImpressions\Actions\GetTTAndAffiliateViewsAndImpressionsAction;
 use App\Domains\ViewsAndImpressions\DTOs\GetTTAndAffiliateViewsAndImpressionCriteria;
+use App\Models\AppToken;
 use App\Models\Dealer\ViewedDealer;
 use App\Models\MonthlyImpressionCounting;
 use Str;
@@ -122,6 +123,8 @@ class GetTTAndAffiliateViewsAndImpressionsActionTest extends TestCase
     {
         $this->createViewedDealers();
 
+        $appToken = AppToken::factory()->create();
+
         $criteria = new GetTTAndAffiliateViewsAndImpressionCriteria();
 
         $criteria->search = 'Dealer';
@@ -157,6 +160,7 @@ class GetTTAndAffiliateViewsAndImpressionsActionTest extends TestCase
 
         $viewsAndImpressions = resolve(GetTTAndAffiliateViewsAndImpressionsAction::class)
             ->setCriteria($criteria)
+            ->setAppToken($appToken)
             ->execute();
 
         // Convert any PHP object inside the 'data' key to associative array
@@ -170,6 +174,10 @@ class GetTTAndAffiliateViewsAndImpressionsActionTest extends TestCase
         $this->assertEquals('Dealer 3', data_get($viewsAndImpressions, 'data.0.name'));
         $this->assertEquals('Dealer 2', data_get($viewsAndImpressions, 'data.1.name'));
         $this->assertEquals('Dealer 1', data_get($viewsAndImpressions, 'data.2.name'));
+
+        $expectedZipFileDownloadPath = $this->expectedZipFileDownloadPath("2023/04/dealer-id-3.csv.gz&app-token=$appToken->token");
+
+        $this->assertEquals($expectedZipFileDownloadPath, data_get($viewsAndImpressions, 'data.0.statistics.0.zip_file_download_path'));
 
         // Make sure we don't have the 4th dealer in the data array
         $this->assertNull(data_get($viewsAndImpressions, 'data.3.name'));
