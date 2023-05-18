@@ -2,16 +2,16 @@
 
 namespace App\Mail\CRM\Leads\Export;
 
+use App\Services\CRM\Leads\DTOs\IDSLead;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 class IDSEmail extends Mailable
-{
+{   
+    use Queueable, SerializesModels;
     
     const SUBJECT = 'You have a request from your website';
-    
-    use Queueable, SerializesModels;
 
     /**
      * @var array
@@ -21,11 +21,12 @@ class IDSEmail extends Mailable
     /**
      * Create a new message instance.
      *
-     * @param array $data
+     * @param IDSLead $ids
      */
-    public function __construct(array $data)
+    public function __construct(IDSLead $ids)
     {
-        $this->data = $data;
+        // Set Extra Vars
+        $this->data = $ids->getEmailVars();
     }
 
     /**
