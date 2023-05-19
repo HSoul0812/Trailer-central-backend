@@ -53,11 +53,11 @@ class LeadEmail extends Model
     
     public function getToEmailsAttribute() : array
     {
-        return $this->email ? explode(',', $this->email) : [];
+        return $this->email ? explode(',', trim($this->email)) : [];
     }
     
     public function getCopiedEmailsAttribute() : array
     {
-        return $this->cc_email ? explode(',', $this->cc_email) : [];
+        return $this->cc_email ? explode(',', trim($this->cc_email)) : [];
     }
 }

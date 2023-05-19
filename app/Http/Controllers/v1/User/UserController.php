@@ -15,6 +15,7 @@ use App\Models\User\Interfaces\PermissionsInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\User\DealerOptionsService;
 use App\Transformers\User\UserTransformer;
+use App\Transformers\User\DealerOfTTTransformer;
 use Dingo\Api\Http\Response;
 use Illuminate\Http\Request;
 
@@ -145,6 +146,18 @@ class UserController extends RestfulControllerV2
         return $this->response->collection(
             $this->userRepository->getByName($request->input('name')),
             new UserTransformer()
+        );
+    }
+
+    /**
+     * @throws NoObjectTypeSetException
+     * @throws NoObjectIdValueSetException
+     */
+    public function listOfTTDealers(Request $request): Response
+    {
+        return $this->response->collection(
+            $this->userRepository->getClsfActiveUsers(),
+            new DealerOfTTTransformer()
         );
     }
 }
