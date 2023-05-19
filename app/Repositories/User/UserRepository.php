@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use App\Models\User\User;
 use App\Models\User\DealerUser;
 use App\Models\User\NewDealerUser;
+use App\Models\Inventory\EntityType;
 use App\Traits\Repository\Transaction;
 use App\Exceptions\NotImplementedException;
 use App\Services\Common\EncrypterServiceInterface;
@@ -304,7 +305,7 @@ class UserRepository implements UserRepositoryInterface {
      */
     public function getTrailerTraderDealers($params)
     {
-        $types = [1, 2, 3, 4, 5];
+        $types = EntityType::TRAILER_TRADER_TYPES;
         
         if (isset($params['type'])) {
             $types = [$params['type']];
