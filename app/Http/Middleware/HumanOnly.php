@@ -35,6 +35,9 @@ class HumanOnly
         // We use trailertrader-frontend on the server.js file of the frontend side
         'trailertrader',
 
+        // We allow all the call from TrailerCentral API server
+        'TrailerCentral API',
+
         // We'll allow Google Bots
         // @see https://developers.google.com/search/docs/crawling-indexing/overview-google-crawlers
         'APIs-Google',
