@@ -108,7 +108,6 @@ class SettingsRepository implements SettingsRepositoryInterface
     public function update($params)
     {
         /** @var Settings $settings */
-        dd($this->getCalculatedSettingsByInventory(Inventory::where('inventory_id', 1947771)->first()));
         $settings = Settings::findOrFail($params['id']);
         $settings->fill($params);
         $settings->save();
