@@ -318,11 +318,11 @@ class UserRepository implements UserRepositoryInterface {
                 WHERE
                     dealer.clsf_active = 1';
         if(isset($parmas['state'])) {
-            $sql = $sql . 'AND dealer_location.region = "' . $parmas['state'] . '" ';
+            $sql = $sql . ' AND dealer_location.region = "' . $parmas['state'] . '"';
         }
 
         if(isset($parmas['type'])) {
-            $sql = $sql . 'AND EXISTS (
+            $sql = $sql . ' AND EXISTS (
                 SELECT
                     *
                 FROM
