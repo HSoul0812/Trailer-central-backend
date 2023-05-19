@@ -11,6 +11,7 @@ use App\Http\Requests\User\DealerClassifiedsRequest;
 use App\Http\Requests\User\GetDealerRequest;
 use App\Http\Requests\User\GetUserRequest;
 use App\Http\Requests\User\ListUserByNameRequest;
+use App\Http\Requests\User\ListTTDealersRequest;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\User\DealerOptionsService;
@@ -155,8 +156,12 @@ class UserController extends RestfulControllerV2
      */
     public function listOfTTDealers(Request $request): Response
     {
+        $request = new ListTTDealersRequest($request->all());
+
+        $request->validate();
+
         return $this->response->collection(
-            $this->userRepository->getClsfActiveUsers(),
+            $this->userRepository->getTrailerTraderDealers($request->all()),
             new DealerOfTTTransformer()
         );
     }
