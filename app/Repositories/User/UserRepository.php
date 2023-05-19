@@ -14,6 +14,7 @@ use App\Services\Common\EncrypterServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Query\Builder;
 
 /**
  * class UserRepository
@@ -301,37 +302,37 @@ class UserRepository implements UserRepositoryInterface {
     /**
      * {@inheritDoc}
      */
-    public function getClsfActiveUsers($params)
+    public function getTrailerTraderDealers($params)
     {
-        $sql = 'SELECT
-                    dealer.dealer_id as id,
-                    dealer.name,
-                    dealer.clsf_active,
-                    dealer_location.dealer_location_id,
-                    dealer_location.name as location_name,
-                    dealer_location.region,
-                    dealer_location.city,
-                    dealer_location.postalcode
-                FROM
-                    dealer
-                    JOIN dealer_location ON dealer.dealer_id = dealer_location.dealer_id
-                WHERE
-                    dealer.clsf_active = 1';
-        if(isset($parmas['state'])) {
-            $sql = $sql . ' AND dealer_location.region = "' . $parmas['state'] . '"';
+        $types = [1, 2, 3, 4, 5];
+        
+        if (isset($params['type'])) {
+            $types = [$params['type']];
         }
-
-        if(isset($parmas['type'])) {
-            $sql = $sql . ' AND EXISTS (
-                SELECT
-                    *
-                FROM
-                    inventory
-                WHERE
-                    inventory.dealer_location_id = dealer_location.dealer_location_id
-                    AND inventory.entity_type_id in(' . $parmas['type'] . '));';
-        }
-        return collect(DB::select(DB::raw($sql)));
+        $query = DB::table('dealer')
+            ->select([
+                DB::raw('dealer.dealer_id as id'),
+                'dealer.name',
+                'dealer.clsf_active',
+                'dealer_location.dealer_location_id',
+                DB::raw('dealer_location.name as location_name'),
+                'dealer_location.region',
+                'dealer_location.city',
+                'dealer_location.postalcode',
+            ])
+            ->join('dealer_location', 'dealer.dealer_id', '=', 'dealer_location.dealer_id')
+            ->where('dealer.clsf_active', 1)
+            ->when(isset($params['state']), function (Builder $query) use ($params) {
+                $query->where('dealer_location.region', $params['state']);
+            })
+            ->whereExists(function (Builder $query) use ($types) {
+                $query
+                    ->select(['*'])
+                    ->from('inventory')
+                    ->whereColumn('inventory.dealer_location_id', 'dealer_location.dealer_location_id')
+                    ->whereIn('inventory.entity_type_id', $types);
+            });
+        return $query->get();
     }
 
     /**

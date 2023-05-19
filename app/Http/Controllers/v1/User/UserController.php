@@ -161,7 +161,7 @@ class UserController extends RestfulControllerV2
         $request->validate();
 
         return $this->response->collection(
-            $this->userRepository->getClsfActiveUsers($request->all()),
+            $this->userRepository->getTrailerTraderDealers($request->all()),
             new DealerOfTTTransformer()
         );
     }
