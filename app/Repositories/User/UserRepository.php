@@ -311,11 +311,11 @@ class UserRepository implements UserRepositoryInterface {
         }
         $query = DB::table('dealer')
             ->select([
-                DB::raw('dealer.dealer_id as id'),
+                'dealer.dealer_id as id',
                 'dealer.name',
                 'dealer.clsf_active',
                 'dealer_location.dealer_location_id',
-                DB::raw('dealer_location.name as location_name'),
+                'dealer_location.name as location_name',
                 'dealer_location.region',
                 'dealer_location.city',
                 'dealer_location.postalcode',
