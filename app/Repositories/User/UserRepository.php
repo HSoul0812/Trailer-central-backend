@@ -13,6 +13,7 @@ use App\Exceptions\NotImplementedException;
 use App\Services\Common\EncrypterServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 /**
  * class UserRepository
@@ -300,9 +301,37 @@ class UserRepository implements UserRepositoryInterface {
     /**
      * {@inheritDoc}
      */
-    public function getClsfActiveUsers(): Collection
+    public function getClsfActiveUsers($params)
     {
-        return User::where('clsf_active', 1)->get();
+        $sql = 'SELECT
+                    dealer.dealer_id as id,
+                    dealer.name,
+                    dealer.clsf_active,
+                    dealer_location.dealer_location_id,
+                    dealer_location.name as location_name,
+                    dealer_location.region,
+                    dealer_location.city,
+                    dealer_location.postalcode
+                FROM
+                    dealer
+                    JOIN dealer_location ON dealer.dealer_id = dealer_location.dealer_id
+                WHERE
+                    dealer.clsf_active = 1';
+        if(isset($parmas['state'])) {
+            $sql = $sql . 'AND dealer_location.region = "' . $parmas['state'] . '" ';
+        }
+
+        if(isset($parmas['type'])) {
+            $sql = $sql . 'AND EXISTS (
+                SELECT
+                    *
+                FROM
+                    inventory
+                WHERE
+                    inventory.dealer_location_id = dealer_location.dealer_location_id
+                    AND inventory.entity_type_id in(' . $parmas['type'] . '));';
+        }
+        return collect(DB::select(DB::raw($sql)));
     }
 
     /**
