@@ -11,10 +11,12 @@ use App\Http\Requests\User\DealerClassifiedsRequest;
 use App\Http\Requests\User\GetDealerRequest;
 use App\Http\Requests\User\GetUserRequest;
 use App\Http\Requests\User\ListUserByNameRequest;
+use App\Http\Requests\User\ListTTDealersRequest;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\User\DealerOptionsService;
 use App\Transformers\User\UserTransformer;
+use App\Transformers\User\DealerOfTTTransformer;
 use Dingo\Api\Http\Response;
 use Illuminate\Http\Request;
 
@@ -145,6 +147,22 @@ class UserController extends RestfulControllerV2
         return $this->response->collection(
             $this->userRepository->getByName($request->input('name')),
             new UserTransformer()
+        );
+    }
+
+    /**
+     * @throws NoObjectTypeSetException
+     * @throws NoObjectIdValueSetException
+     */
+    public function listOfTTDealers(Request $request): Response
+    {
+        $request = new ListTTDealersRequest($request->all());
+
+        $request->validate();
+
+        return $this->response->collection(
+            $this->userRepository->getTrailerTraderDealers($request->all()),
+            new DealerOfTTTransformer()
         );
     }
 }
