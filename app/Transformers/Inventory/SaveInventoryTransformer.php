@@ -77,9 +77,12 @@ class SaveInventoryTransformer implements TransformerInterface
 
     private const NOT_NULL_FIELDS = [
         'hidden_price',
-        'chosen_overlay',
         'pac_type',
         'slideouts',
+    ];
+
+    private const NULL_FIELDS = [
+        'chosen_overlay',
     ];
 
     private const IMAGES_FIELDS = [
@@ -241,6 +244,12 @@ class SaveInventoryTransformer implements TransformerInterface
             foreach (self::NOT_NULL_FIELDS as $notNullField) {
                 if (array_key_exists($notNullField, $createParams) && is_null($createParams[$notNullField])) {
                     unset($createParams[$notNullField]);
+                }
+            }
+
+            foreach (self::NULL_FIELDS as $nullField) {
+                if (array_key_exists($nullField, $createParams) && is_null($createParams[$nullField])) {
+                    $createParams[$nullField] == NULL;
                 }
             }
 
