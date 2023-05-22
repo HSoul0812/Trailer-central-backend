@@ -221,11 +221,11 @@ class InventorySDKService implements InventorySDKServiceInterface
 
         $this->mainFilterGroup->add(new Filter('sale_price_script', new Collection($attributes)));
 
-        if (!empty($params['exclude_ids'])) {
+        if (!empty($params['exclude_stocks'])) {
             $this->mainFilterGroup->add(
                 new Filter(
-                    'id',
-                    new Collection(explode(';', $params['exclude_ids']), Operator::NOT_EQUAL)
+                    'stock',
+                    new Collection($params['exclude_stocks'], Operator::NOT_EQUAL)
                 )
             );
         }
