@@ -21,6 +21,7 @@ class MonthlyImpressionReport extends Model
         'plp_total_count',
         'pdp_total_count',
         'tt_dealer_page_total_count',
+        'site',
     ];
 
     public function scopeYear(Builder $query, int $year): void

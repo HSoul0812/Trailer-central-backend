@@ -47,6 +47,10 @@ class ProcessMonthlyInventoryImpression implements ShouldQueue
             return;
         }
 
+        $pageName = $this->userTracking->page_name;
+
+        $site = data_get(GetPageNameFromUrlAction::PAGE_NAME_TO_SITE, $pageName, GetPageNameFromUrlAction::SITE_TT_AF);
+
         $year = $this->userTracking->created_at->year;
         $month = $this->userTracking->created_at->month;
 
@@ -97,6 +101,7 @@ class ProcessMonthlyInventoryImpression implements ShouldQueue
                         'plp_total_count' => 0,
                         'pdp_total_count' => 0,
                         'tt_dealer_page_total_count' => 0,
+                        'site' => $site,
                     ]);
                 } catch (Exception $exception) {
                     // We throw exception only if it's not the duplicate error

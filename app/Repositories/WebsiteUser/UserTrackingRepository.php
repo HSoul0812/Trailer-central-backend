@@ -29,7 +29,9 @@ class UserTrackingRepository implements UserTrackingRepositoryInterface
             $params['meta'] = null;
         }
 
-        $params['page_name'] = $this->getPageName($params['url']);
+        if (!isset($params['page_name'])) {
+            $params['page_name'] = $this->getPageName($params['url']);
+        }
 
         $params['ip_address'] = $this->getUserIpAddress();
 

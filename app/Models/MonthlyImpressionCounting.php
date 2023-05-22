@@ -17,6 +17,7 @@ class MonthlyImpressionCounting extends Model
         'impressions_count',
         'views_count',
         'zip_file_path',
+        'site',
     ];
 
     public function scopeYear(Builder $query, int $year): void

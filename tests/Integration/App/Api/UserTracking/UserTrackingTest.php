@@ -44,6 +44,7 @@ class UserTrackingTest extends IntegrationTestCase
                     'event' => $event,
                     'url' => $url,
                     'meta' => $meta,
+                    'page_name' => 'MANUAL',
                 ],
                 headers: [
                     'REMOTE_ADDR' => $ipAddress,
@@ -53,7 +54,7 @@ class UserTrackingTest extends IntegrationTestCase
             ->assertJsonPath('user_tracking.visitor_id', $visitorId)
             ->assertJsonPath('user_tracking.event', $event)
             ->assertJsonPath('user_tracking.url', $url)
-            ->assertJsonPath('user_tracking.page_name', null)
+            ->assertJsonPath('user_tracking.page_name', 'MANUAL')
             ->assertJsonPath('user_tracking.meta.foo', 'bar')
             ->assertJsonPath('user_tracking.ip_address', $ipAddress)
             ->assertJsonPath('user_tracking.location_processed', true)

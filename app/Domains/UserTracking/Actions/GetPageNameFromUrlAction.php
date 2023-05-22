@@ -10,6 +10,28 @@ class GetPageNameFromUrlAction
         'TT_PLP' => 'TT_PLP_PAGE',
         'TT_PDP' => 'TT_PDP_PAGE',
         'TT_DEALER' => 'TT_DEALER_PAGE',
+
+        'AF_PLP' => 'AF_PLP_PAGE',
+        'AF_PDP' => 'AF_PDP_PAGE',
+
+        'DW_PLP' => 'DW_PLP_PAGE',
+        'DW_PDP' => 'DW_PDP_PAGE',
+    ];
+
+    public const SITE_TT_AF = 'TT_AF';
+
+    public const SITE_DW = 'DW';
+
+    public const PAGE_NAME_TO_SITE = [
+        'TT_PLP_PAGE' => self::SITE_TT_AF,
+        'TT_PDP_PAGE' => self::SITE_TT_AF,
+        'TT_DEALER_PAGE' => self::SITE_TT_AF,
+
+        'AF_PLP_PAGE' => self::SITE_TT_AF,
+        'AF_PDP_PAGE' => self::SITE_TT_AF,
+
+        'DW_PLP_PAGE' => self::SITE_DW,
+        'DW_PDP_PAGE' => self::SITE_DW,
     ];
 
     public function __construct(private TrailerTraderDomain $trailerTraderDomain)
