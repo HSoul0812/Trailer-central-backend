@@ -3,29 +3,21 @@
 namespace App\Transformers\User;
 
 use App\Models\User\User;
-use App\Transformers\User\DealerLocationSimpleTransformer;
 use League\Fractal\TransformerAbstract;
 
 class DealerOfTTTransformer extends TransformerAbstract
 {
-    protected $defaultIncludes = [
-        'locations',
-    ];
-
     public function transform($user): array
     {
         return [
-            'id' => $user->dealer_id,
-            'identifier' => $user->identifier,
-            'created_at' => $user->created_at,
+            'id' => $user->id,
             'name' => $user->name,
-            'email' => $user->email,
             'clsf_active' => $user->clsf_active,
+            'location_id' => $user->dealer_location_id,
+            'location_name' => $user->location_name,
+            'region' => $user->region,
+            'city' => $user->city,
+            'zip' => $user->postalcode,
         ];
-    }
-
-    public function includeLocations($user)
-    {
-        return $this->collection($user->locations, new DealerLocationSimpleTransformer());
     }
 }

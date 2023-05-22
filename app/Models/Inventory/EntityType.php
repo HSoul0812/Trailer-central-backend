@@ -38,6 +38,14 @@ class EntityType extends Model {
         self::TYPE_SPORTS_VEHICLE => 'Sports Vehicle',
     ];
 
+    public const TRAILER_TRADER_TYPES = [
+        self::TYPE_TRAILER,
+        self::TYPE_HOSE_TRAILER,
+        self::TYPE_RV,
+        self::TYPE_VEHICLE,
+        self::ENTITY_TYPE_WATERCRAFT,
+    ];
+
     public const ENTITY_TYPE_BUILDING = 10;
 
     public const ENTITY_TYPE_RV = 3;
