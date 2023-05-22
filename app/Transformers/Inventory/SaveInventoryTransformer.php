@@ -249,7 +249,7 @@ class SaveInventoryTransformer implements TransformerInterface
 
             foreach (self::NULL_FIELDS as $nullField) {
                 if (array_key_exists($nullField, $createParams) && is_null($createParams[$nullField])) {
-                    $createParams[$nullField] == NULL;
+                    $createParams[$nullField] = NULL;
                 }
             }
 
