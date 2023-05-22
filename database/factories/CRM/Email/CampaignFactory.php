@@ -43,12 +43,15 @@ $factory->define(CampaignSent::class, function(Faker $faker, array $attributes) 
     $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create()->getKey();
     $now = Carbon::now();
 
+    $messageId = '<' . $faker->md5 . '@' . $faker->freeEmailDomain . '>';
+
     // Return Overrides
     return [
         'drip_campaigns_id' => $drip_campaigns_id,
         'lead_id' => $lead_id,
-        'message_id' => '<' . $faker->md5 . '@' . $faker->freeEmailDomain . '>',
+        'message_id' => $messageId,
         'crm_email_history_id' => $attributes['crm_email_history_id'] ?? factory(EmailHistory::class)->create([
+            'message_id' => $messageId,
             'date_sent' => $now,
             'date_delivered' => $now,
             'date_bounced' => $now,
@@ -56,7 +59,8 @@ $factory->define(CampaignSent::class, function(Faker $faker, array $attributes) 
             'date_unsubscribed' => $now,
             'date_opened' => $now,
             'date_clicked' => $now,
-            'was_skipped' => 1
+            'was_skipped' => 1,
+            'invalid_email' => 1,
         ])->getKey()
     ];
 });

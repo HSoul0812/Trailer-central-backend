@@ -19,7 +19,7 @@ $factory->define(EmailHistory::class, function (Faker $faker, array $attributes)
                 'interaction_time' => $email['date_sent']
             ]);
         },
-        'message_id' => '<' . $faker->md5 . '@' . $faker->freeEmailDomain . '>',
+        'message_id' => $attributes['message_id'] ?? '<' . $faker->md5 . '@' . $faker->freeEmailDomain . '>',
         'to_email' => $faker->email,
         'to_name' => $faker->name,
         'from_email' => $faker->companyEmail,

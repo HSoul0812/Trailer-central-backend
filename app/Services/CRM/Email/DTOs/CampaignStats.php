@@ -32,7 +32,7 @@ class CampaignStats
     /**
      * @var int Number of Complained
      */
-    protected $complained;
+    protected $complaints;
 
     /**
      * @var int Number of Unsubscribed
@@ -53,4 +53,9 @@ class CampaignStats
      * @var int Number of Skipped
      */
     protected $skipped;
+
+    /**
+     * @var int Number of Failed
+     */
+    protected $failed;
 }

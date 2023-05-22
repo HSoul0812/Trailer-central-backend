@@ -161,11 +161,12 @@ class Campaign extends Model
             'sent' => $this->sents->count(),
             'delivered' => $this->sents()->delivered()->count(),
             'bounced' => $this->sents()->bounced()->count(),
-            'complained' => $this->sents()->complained()->count(),
+            'complaints' => $this->sents()->complained()->count(),
             'unsubscribed' => $this->sents()->unsubscribed()->count(),
             'opened' => $this->sents()->opened()->count(),
             'clicked' => $this->sents()->clicked()->count(),
             'skipped' => $this->sents()->skipped()->count(),
+            'failed' => $this->sents()->failed()->count(),
         ]);
     }
 }
