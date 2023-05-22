@@ -16,6 +16,6 @@ class IndexInventoryRequest extends Request implements IndexRequestInterface
         'location' => 'nullable|string',
         'sort' => ["regex:/^((\+|\-){0,1}(distance|createdAt|price|numFeatures|hasImage)(;|$))+$/"],
         'is_random' => 'boolean',
-        'exclude_ids' => ["regex:/^((?:^|;)(\d+))+$/"],
+        'exclude_stocks' => 'array',
     ];
 }

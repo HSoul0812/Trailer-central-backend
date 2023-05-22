@@ -36,15 +36,15 @@ class SearchInventoryTest extends IntegrationTestCase
             ->assertSeeText('The sort format is invalid.');
 
         $this
-            ->json('GET', self::SEARCH_INVENTORY_ENDPOINT, ['exclude_ids' => '1,2,3,3'])
+            ->json('GET', self::SEARCH_INVENTORY_ENDPOINT, ['exclude_stocks' => '12231'])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertSeeText('The exclude ids format is invalid.');
+            ->assertSeeText('The exclude stocks must be an array.');
     }
 
     public function testItReturnValidResponseWithValidParams(): void
     {
         $this
-            ->json('GET', self::SEARCH_INVENTORY_ENDPOINT, ['exclude_ids' => '1;2;3;3'])
+            ->json('GET', self::SEARCH_INVENTORY_ENDPOINT, ['exclude_stocks' => ['12', '32']])
             ->assertStatus(Response::HTTP_OK);
     }
 }
