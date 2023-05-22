@@ -10,6 +10,7 @@ use GuzzleHttp\Client;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class AbstractFileService
@@ -68,7 +69,7 @@ abstract class AbstractFileService implements FileServiceInterface
      */
     protected function getUploadDirectory(string $type, $identifiers): string
     {
-        switch(strtolower($type)) {
+        switch (strtolower($type)) {
             case self::UPLOAD_TYPE_WEBSITE_MEDIA:
             case self::UPLOAD_TYPE_IMAGE:
             case self::UPLOAD_TYPE_VIDEO:
@@ -81,12 +82,12 @@ abstract class AbstractFileService implements FileServiceInterface
 
         $path = $type . DIRECTORY_SEPARATOR;
 
-        if(empty($identifiers)) {
+        if (empty($identifiers)) {
             return $path;
         }
 
-        if(is_array($identifiers)) {
-            foreach($identifiers as $identifier) {
+        if (is_array($identifiers)) {
+            foreach ($identifiers as $identifier) {
                 $path .= CompactHelper::hash($identifier, 6) . DIRECTORY_SEPARATOR;
             }
             $path = rtrim($path, DIRECTORY_SEPARATOR);
@@ -146,10 +147,10 @@ abstract class AbstractFileService implements FileServiceInterface
     {
         $path = '';
 
-        if(is_array($identifiers)) {
+        if (is_array($identifiers)) {
 
-            foreach($identifiers as $identifier) {
-                if(!is_numeric($identifier)) {
+            foreach ($identifiers as $identifier) {
+                if (!is_numeric($identifier)) {
                     $path .= $identifier;
                 } else {
                     $path .= CompactHelper::hash($identifier, 6) . DIRECTORY_SEPARATOR;
@@ -187,7 +188,17 @@ abstract class AbstractFileService implements FileServiceInterface
         if ($this->checkIfUrlIsFtp($url)) {
             $fileContents = file_get_contents($url);
         } else {
-            $fileContents = $this->httpClient->get($url, ['http_errors' => false])->getBody()->getContents();
+            $request = $this->httpClient->get($url, ['http_errors' => false]);
+            if ($request->getStatusCode() === Response::HTTP_NOT_FOUND) {
+                //try with the cdn url
+                $url = str_replace(
+                    parse_url($url, PHP_URL_HOST),
+                    parse_url(env('CDN_URL'), PHP_URL_HOST),
+                    $url
+                );
+                $request = $this->httpClient->get($url, ['http_errors' => false]);
+            }
+            $fileContents = $request->getBody()->getContents();
         }
 
         if (!$skipNotExisting && !$fileContents) {
