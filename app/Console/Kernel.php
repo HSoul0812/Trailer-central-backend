@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Console;
 
 use App\Console\Commands\Crawlers\CacheCrawlerIpAddressesCommand;
-use App\Console\Commands\Report\GenerateMonthlyImpressionCountingsReportCommand;
-use App\Console\Commands\Report\GenerateMonthlyInventoryTrackingDataReportCommand;
+use App\Console\Commands\UserTracking\ProcessMonthlyUserTrackingCommand;
 use App\Console\Commands\UserTracking\ProcessUserTrackingsCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -57,20 +56,12 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule
-            ->command(GenerateMonthlyInventoryTrackingDataReportCommand::class)
+            ->command(ProcessMonthlyUserTrackingCommand::class)
             ->monthly()
             ->withoutOverlapping()
             ->onOneServer()
             ->runInBackground()
-            ->appendOutputTo(storage_path('logs/commands/report:inventory:monthly-tracking-data.log'));
-
-        $schedule
-            ->command(GenerateMonthlyImpressionCountingsReportCommand::class)
-            ->monthly()
-            ->withoutOverlapping()
-            ->onOneServer()
-            ->runInBackground()
-            ->appendOutputTo(storage_path('logs/commands/report:inventory:monthly-impression-countings.log'));
+            ->appendOutputTo(storage_path('logs/commands/user-tracking:process-monthly.log'));
     }
 
     /**

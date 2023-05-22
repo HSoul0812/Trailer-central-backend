@@ -95,6 +95,8 @@ class ProcessMonthlyInventoryImpressionTest extends TestCase
         $records = MonthlyImpressionReport::all();
 
         $this->assertEquals(1, $records[0]->plp_total_count);
+        $this->assertEquals(GetPageNameFromUrlAction::SITE_TT_AF, $records[0]->site);
+
         $this->assertEquals(1, $records[1]->plp_total_count);
         $this->assertEquals(1, $records[2]->plp_total_count);
 
