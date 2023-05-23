@@ -29,18 +29,21 @@ class StripePaymentService implements StripePaymentServiceInterface
             'price' => 75.00,
             'description' => '1 day plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
             'duration' => 1,
+            'grace_days' => 0,
         ],
         'tt30' => [
             'name' => 'TrailerTrader-30days',
             'price' => 75.00,
             'description' => '30 day plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
             'duration' => 30,
+            'grace_days' => 2,
         ],
         'tt60' => [
             'name' => 'TrailerTrader-60days',
             'price' => 100.00,
             'description' => '60 days plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
             'duration' => 60,
+            'grace_days' => 2,
         ],
     ];
 
@@ -177,6 +180,7 @@ class StripePaymentService implements StripePaymentServiceInterface
             $planName = $session->metadata->planName;
             $planDescription = $session->metadata->planDescription;
             $planDuration = $session->metadata->planDuration;
+            $selectedPlan = self::PLANS[$planKey];
 
             $this->paymentLogRepository->create([
                 'payment_id' => $session->id,
@@ -200,9 +204,9 @@ class StripePaymentService implements StripePaymentServiceInterface
             $planDuration = intval($planDuration) ?: 30;
 
             $inventoryExpiry = $inventoryExpiry
-                // As we calculate the duration from the current day, we are adding 2 days in the plan duration just to
-                // give the extra day to the user.
-                ->addDays($planDuration + 2)
+                // As we calculate the duration from the current day, we are adding grace days in the plan duration just
+                // to give the extra day(s) to the user.
+                ->addDays($planDuration + $selectedPlan['grace_days'] ?? 0)
                 ->setTimezone(config('trailercentral.api_timezone'))
                 ->format(config('trailercentral.api_datetime_format'));
 
