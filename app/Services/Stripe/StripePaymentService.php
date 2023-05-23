@@ -179,8 +179,10 @@ class StripePaymentService implements StripePaymentServiceInterface
             $planKey = $session->metadata->planKey;
             $planName = $session->metadata->planName;
             $planDescription = $session->metadata->planDescription;
-            $planDuration = $session->metadata->planDuration;
-            $selectedPlan = self::PLANS[$planKey];
+            $graceDays = self::PLANS[$planKey]['grace_days'] ?? 0;
+            // As we calculate the duration from the current day, we are adding grace days in the plan duration just
+            // to give the extra day(s) to the user.
+            $planDuration = $session->metadata->planDuration + $graceDays;
 
             $this->paymentLogRepository->create([
                 'payment_id' => $session->id,
@@ -204,9 +206,7 @@ class StripePaymentService implements StripePaymentServiceInterface
             $planDuration = intval($planDuration) ?: 30;
 
             $inventoryExpiry = $inventoryExpiry
-                // As we calculate the duration from the current day, we are adding grace days in the plan duration just
-                // to give the extra day(s) to the user.
-                ->addDays($planDuration + $selectedPlan['grace_days'] ?? 0)
+                ->addDays($planDuration)
                 ->setTimezone(config('trailercentral.api_timezone'))
                 ->format(config('trailercentral.api_datetime_format'));
 
