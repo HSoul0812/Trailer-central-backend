@@ -2,7 +2,6 @@
 
 namespace App\Nova\Policies;
 
-use App\Models\FeatureFlag;
 use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -10,91 +9,46 @@ use Illuminate\Auth\Access\HandlesAuthorization;
  * Class FeatureFlagPolicy
  * @package App\Nova\Polices
  */
-class FeatureFlagPolicy
+class FeatureFlagPolicy extends PolicyManager
 {
     use HandlesAuthorization;
 
     /**
-     * Create a new policy instance.
-     *
-     * @return void
+     * @var array
      */
-    public function __construct() {
-        //
+    private const VALID_ROLES = ['Admin', 'Support', 'Sales', 'DataSupport'];
+
+    /**
+     * {@inheritDoc}
+     */
+    public function __construct()
+    {
+        parent::__construct(
+            self::VALID_ROLES
+        );
     }
 
     /**
-     * Determine whether the user can view any FeatureFlags.
-     *
-     * @param NovaUser $user
-     * @return bool
+     * {@inheritDoc}
      */
-    public function viewAny(NovaUser $user): bool {
-        return true;
-    }
-
-    /**
-     * Determine whether the user can view the FeatureFlag.
-     *
-     * @param NovaUser|null $user
-     * @param FeatureFlag $flag
-     * @return bool
-     */
-    public function view(?NovaUser $user, FeatureFlag $flag): bool {
-        return true;
-    }
-
-    /**
-     * Determine whether the user can create FeatureFlags.
-     *
-     * @param NovaUser $user
-     * @return bool
-     */
-    public function create(NovaUser $user): bool {
+    public function create(NovaUser $user): bool
+    {
         return false;
     }
 
     /**
-     * Determine whether the user can update the FeatureFlag.
-     *
-     * @param NovaUser $user
-     * @param FeatureFlag $flag
-     * @return bool
+     * {@inheritDoc}
      */
-    public function update(NovaUser $user, FeatureFlag $flag): bool {
+    public function update(NovaUser $user, $model): bool
+    {
         return false;
     }
 
     /**
-     * Determine whether the user can delete the FeatureFlag.
-     *
-     * @param NovaUser $user
-     * @param FeatureFlag $flag
-     * @return bool
+     * {@inheritDoc}
      */
-    public function delete(NovaUser $user, FeatureFlag $flag): bool {
+    public function delete(NovaUser $user, $model): bool
+    {
         return false;
-    }
-
-    /**
-     * Determine whether the user can restore the FeatureFlag.
-     *
-     * @param NovaUser $user
-     * @param FeatureFlag $flag
-     * @return void
-     */
-    public function restore(NovaUser $user, FeatureFlag $flag): void {
-        //
-    }
-
-    /**
-     * Determine whether the user can permanently delete the FeatureFlag.
-     *
-     * @param NovaUser $user
-     * @param FeatureFlag $flag
-     * @return void
-     */
-    public function forceDelete(NovaUser $user, FeatureFlag $flag): void {
-        //
     }
 }

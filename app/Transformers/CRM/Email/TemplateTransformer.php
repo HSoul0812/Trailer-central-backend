@@ -13,8 +13,11 @@ class TemplateTransformer extends TransformerAbstract
             'id' => (int)$template->id,
             'user_id' => (int)$template->user_id,
             'name' => $template->name,
+            'html' => $template->html,
             'custom' => $template->custom_template_name,
             'key' => $template->template_key,
+            'template_metadata' => $template->template_metadata,
+            'template_json' => $template->template_json,
             'template' => [
                'key' => $template->template,
                'name' => $template->name,

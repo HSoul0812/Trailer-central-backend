@@ -18,6 +18,7 @@ class EmailHistoryTransformer extends TransformerAbstract {
     {
         return [
             'id' => $emailHistory->email_id,
+            'interaction_id' => $emailHistory->interaction_id,
             'message_id' => $emailHistory->message_id,
             'to_email' => $emailHistory->to_email,
             'to_name' => $emailHistory->to_name,

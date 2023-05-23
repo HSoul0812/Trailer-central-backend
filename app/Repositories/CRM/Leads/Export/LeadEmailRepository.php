@@ -65,21 +65,30 @@ class LeadEmailRepository implements LeadEmailRepositoryInterface
         // Get Lead Email for JUST Dealer
         return LeadEmail::where('dealer_location_id', 0)->where('dealer_id', $dealerId)->first();
     }
-    
-    public function getLeadEmailByLead(Lead $lead) : LeadEmail
+
+    /**
+     * Return Valid Lead Email From Lead
+     * 
+     * @param Lead $lead
+     * @return null|LeadEmail
+     */
+    public function getLeadEmailByLead(Lead $lead): ?LeadEmail
     {
+        // Default Location
         $dealerLocationId = 0;
 
+        // Find Location From Associated Location
         if ($lead->dealerLocation) {
             $dealerLocationId = $lead->dealerLocation->dealer_location_id;
         }
-        
+
+        // Find Location From Associated Inventory
         if ($lead->inventory) {
             $dealerLocationId = $lead->inventory->dealer_location_id;
         }
-        
-        
-        return LeadEmail::where('dealer_location_id', $dealerLocationId)->where('dealer_id', $lead->website->dealer_id)->firstOrFail();
+
+        // Find VALID Location With To Email
+        return $this->find($lead->dealer_id, $dealerLocationId);
     }
 
     /**

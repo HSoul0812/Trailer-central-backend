@@ -16,6 +16,7 @@ use Mockery;
 use Mockery\LegacyMockInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 /**
@@ -109,6 +110,11 @@ class FileServiceTest extends TestCase
             ->andReturn($this->httpResponse);
 
         $this->httpResponse
+            ->shouldReceive('getStatusCode')
+            ->once()
+            ->andReturn(Response::HTTP_OK);
+
+        $this->httpResponse
             ->shouldReceive('getBody')
             ->once()
             ->with()
@@ -158,6 +164,11 @@ class FileServiceTest extends TestCase
             ->andReturn($this->httpResponse);
 
         $this->httpResponse
+            ->shouldReceive('getStatusCode')
+            ->once()
+            ->andReturn(Response::HTTP_OK);
+
+        $this->httpResponse
             ->shouldReceive('getBody')
             ->once()
             ->with()
@@ -197,6 +208,11 @@ class FileServiceTest extends TestCase
             ->once()
             ->with(self::TEST_URL, ['http_errors' => false])
             ->andReturn($this->httpResponse);
+
+        $this->httpResponse
+            ->shouldReceive('getStatusCode')
+            ->once()
+            ->andReturn(Response::HTTP_OK);
 
         $this->httpResponse
             ->shouldReceive('getBody')
