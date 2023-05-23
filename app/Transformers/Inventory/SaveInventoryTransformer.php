@@ -77,7 +77,6 @@ class SaveInventoryTransformer implements TransformerInterface
 
     private const NOT_NULL_FIELDS = [
         'hidden_price',
-        'chosen_overlay',
         'pac_type',
         'slideouts',
     ];
