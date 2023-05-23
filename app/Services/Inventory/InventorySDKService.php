@@ -130,7 +130,6 @@ class InventorySDKService implements InventorySDKServiceInterface
         if ($showQuery) {
             $this->request->withDebug(true);
         }
-        echo json_encode($this->request->serialize());
 
         return $this->responseFromSDKResponse($showQuery);
     }
