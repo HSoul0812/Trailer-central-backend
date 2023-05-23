@@ -60,8 +60,7 @@ class CampaignSent extends Model
      */
     public function history()
     {
-        return $this->belongsTo(EmailHistory::class, 'crm_email_history_id', 'email_id');
-        // return $this->belongsTo(EmailHistory::class, 'message_id', 'message_id');
+        return $this->belongsTo(EmailHistory::class, 'message_id', 'message_id');
     }
 
     /**
@@ -131,6 +130,16 @@ class CampaignSent extends Model
     {
         return $query->whereHas('history', function($q) {
             return $q->where('was_skipped', 1);
+        });
+    }
+
+    /**
+     * Query scope of Failed Email
+     */
+    public function scopeFailed($query)
+    {
+        return $query->whereHas('history', function($q) {
+            return $q->where('invalid_email', 1);
         });
     }
 }

@@ -241,11 +241,12 @@ class CampaignControllerTest extends IntegrationTestCase
                             'sent',
                             'delivered',
                             'bounced',
-                            'complained',
+                            'complaints',
                             'unsubscribed',
                             'opened',
                             'clicked',
-                            'skipped'
+                            'skipped',
+                            'failed',
                         ]
                     ],
                 ]
@@ -253,11 +254,12 @@ class CampaignControllerTest extends IntegrationTestCase
             ->assertJsonPath('data.report.data.sent', $totalAction)
             ->assertJsonPath('data.report.data.delivered', $totalAction)
             ->assertJsonPath('data.report.data.bounced', $totalAction)
-            ->assertJsonPath('data.report.data.complained', $totalAction)
+            ->assertJsonPath('data.report.data.complaints', $totalAction)
             ->assertJsonPath('data.report.data.unsubscribed', $totalAction)
             ->assertJsonPath('data.report.data.opened', $totalAction)
             ->assertJsonPath('data.report.data.clicked', $totalAction)
-            ->assertJsonPath('data.report.data.skipped', $totalAction);
+            ->assertJsonPath('data.report.data.skipped', $totalAction)
+            ->assertJsonPath('data.report.data.failed', $totalAction);
 
         $expectedData = [
             'id' => (int)$campaign->drip_campaigns_id,

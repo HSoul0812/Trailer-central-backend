@@ -13,11 +13,12 @@ class CampaignReportTransformer extends TransformerAbstract
             'sent' => (int) $stats->sent,
             'delivered' => (int) $stats->delivered,
             'bounced' => (int) $stats->bounced,
-            'complained' => (int) $stats->complained,
+            'complaints' => (int) $stats->complaints,
             'unsubscribed' => (int) $stats->unsubscribed,
             'opened' => (int) $stats->opened,
             'clicked' => (int) $stats->clicked,
-            'skipped' => (int) $stats->skipped
+            'skipped' => (int) $stats->skipped,
+            'failed' => (int) $stats->failed
         ];
     }
 }
