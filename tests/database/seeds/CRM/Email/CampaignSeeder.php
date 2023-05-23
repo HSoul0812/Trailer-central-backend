@@ -178,6 +178,7 @@ class CampaignSeeder extends Seeder
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
+        $userId = $this->user->getKey();
 
         // Database clean up
         if(!empty($this->createdCampaigns) && count($this->createdCampaigns)) {
@@ -187,14 +188,13 @@ class CampaignSeeder extends Seeder
                 Campaign::destroy($campaignId);
             }
         }
-        Template::where('user_id', $dealerId)->delete();
-        Template::where('user_id', $this->user->getKey())->delete();
+        Template::where('user_id', $userId)->delete();
         Lead::where('dealer_id', $dealerId)->each(function($lead) {
             EmailHistory::where('lead_id', $lead->getKey())->delete();
             $lead->delete();
         });
-        SalesPerson::where('user_id', $dealerId)->delete();
-        NewUser::where('id', $dealerId)->delete();
+        SalesPerson::where('user_id', $userId)->delete();
+        NewUser::destroy($userId);
         NewDealerUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();
