@@ -14,10 +14,10 @@ use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepositoryInterface;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
+use App\Services\Dealers\DealerServiceInterface;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
-use App\Services\Dealers\DealerServiceInterface;
 use Cache;
 use Carbon\Carbon;
 use Dingo\Api\Routing\Helpers;
@@ -253,9 +253,9 @@ class InventoryService implements InventoryServiceInterface
             'map_from' => $params['category'],
             'type_id' => $params['type_id'],
         ]);
-        if(!$mapping) {
-            throw new NotFoundHttpException("Mapped entity type was not found. "
-            . "Please check category and type_id is correct");
+        if (!$mapping) {
+            throw new NotFoundHttpException('Mapped entity type was not found. '
+            . 'Please check category and type_id is correct');
         }
         $results = new Collection();
         $url = config('services.trailercentral.api') . 'inventory/attributes' . "?entity_type_id=$mapping->entity_type_id";
