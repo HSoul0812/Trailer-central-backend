@@ -29,7 +29,7 @@ class StripePaymentService implements StripePaymentServiceInterface
             'price' => 75.00,
             'description' => '1 day plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
             'duration' => 1,
-            'grace_days' => 0,
+            'grace_days' => 1,
         ],
         'tt30' => [
             'name' => 'TrailerTrader-30days',
