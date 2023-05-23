@@ -14,9 +14,17 @@ class ProcessMonthlyUserTrackingCommand extends Command
 
     public function handle(): int
     {
-        $this->call(GenerateMonthlyInventoryTrackingDataReportCommand::class);
+        $lastMonth = now()->subMonth()->startOfMonth();
 
-        $this->call(GenerateMonthlyImpressionCountingsReportCommand::class);
+        $this->call(GenerateMonthlyInventoryTrackingDataReportCommand::class, [
+            'year' => $lastMonth->year,
+            'month' => $lastMonth->month,
+        ]);
+
+        $this->call(GenerateMonthlyImpressionCountingsReportCommand::class, [
+            'year' => $lastMonth->year,
+            'month' => $lastMonth->month,
+        ]);
 
         // TODO: Add a call to clear logs here.
 

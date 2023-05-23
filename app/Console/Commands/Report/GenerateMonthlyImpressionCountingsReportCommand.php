@@ -6,6 +6,7 @@ use App\Domains\Commands\Traits\PrependsOutput;
 use App\Domains\Commands\Traits\PrependsTimestamp;
 use App\Domains\Compression\Actions\CompressFileWithGzipAction;
 use App\Domains\Compression\Exceptions\GzipFailedException;
+use App\Domains\UserTracking\Actions\GetPageNameFromUrlAction;
 use App\Models\MonthlyImpressionCounting;
 use App\Models\MonthlyImpressionReport;
 use DB;
@@ -99,6 +100,7 @@ class GenerateMonthlyImpressionCountingsReportCommand extends Command
     {
         // Clear the data from DB for the selected month
         MonthlyImpressionCounting::query()
+            ->site(GetPageNameFromUrlAction::SITE_TT_AF)
             ->year($this->date->year)
             ->month($this->date->month)
             ->delete();
@@ -115,6 +117,7 @@ class GenerateMonthlyImpressionCountingsReportCommand extends Command
     private function exportData(): void
     {
         MonthlyImpressionReport::query()
+            ->site(GetPageNameFromUrlAction::SITE_TT_AF)
             ->year($this->date->year)
             ->month($this->date->month)
             ->distinct()
@@ -151,6 +154,7 @@ class GenerateMonthlyImpressionCountingsReportCommand extends Command
         fputcsv($csvFile, $this->csvHeaderRow());
 
         MonthlyImpressionReport::query()
+            ->site(GetPageNameFromUrlAction::SITE_TT_AF)
             ->yearMonthDealerId($this->date->year, $this->date->month, $dealerId)
             ->chunkById(self::DEALER_CHUNK, function (Collection $monthlyImpressionReports) use ($csvFile) {
                 foreach ($monthlyImpressionReports as $monthlyImpressionReport) {
@@ -175,7 +179,13 @@ class GenerateMonthlyImpressionCountingsReportCommand extends Command
 
     private function filePath(int $dealerId): string
     {
-        return sprintf('%d/%02d/dealer-id-%d.csv', $this->date->year, $this->date->month, $dealerId);
+        return sprintf(
+            '%s/%d/%02d/dealer-id-%d.csv',
+            GetPageNameFromUrlAction::SITE_TT_AF,
+            $this->date->year,
+            $this->date->month,
+            $dealerId
+        );
     }
 
     private function storeTotalCountings(int $dealerId, string $zipFilePath): void
@@ -214,6 +224,7 @@ class GenerateMonthlyImpressionCountingsReportCommand extends Command
     private function impressionsCount(int $dealerId): int
     {
         return MonthlyImpressionReport::query()
+            ->site(GetPageNameFromUrlAction::SITE_TT_AF)
             ->yearMonthDealerId($this->date->year, $this->date->month, $dealerId)
             ->groupBy('dealer_id')
             ->sum('plp_total_count');
@@ -222,6 +233,7 @@ class GenerateMonthlyImpressionCountingsReportCommand extends Command
     private function viewsCount(int $dealerId): int
     {
         return MonthlyImpressionReport::query()
+            ->site(GetPageNameFromUrlAction::SITE_TT_AF)
             ->yearMonthDealerId($this->date->year, $this->date->month, $dealerId)
             ->groupBy('dealer_id')
             ->select(DB::raw('(SUM(pdp_total_count) + SUM(tt_dealer_page_total_count)) as sum'))

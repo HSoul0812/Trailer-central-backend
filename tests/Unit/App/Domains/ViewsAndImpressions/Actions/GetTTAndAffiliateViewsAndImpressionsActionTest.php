@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\App\Domains\ViewsAndImpressions\Actions;
 
+use App\Domains\UserTracking\Actions\GetPageNameFromUrlAction;
 use App\Domains\ViewsAndImpressions\Actions\GetTTAndAffiliateViewsAndImpressionsAction;
 use App\Domains\ViewsAndImpressions\DTOs\GetTTAndAffiliateViewsAndImpressionCriteria;
 use App\Models\AppToken;
@@ -137,21 +138,21 @@ class GetTTAndAffiliateViewsAndImpressionsActionTest extends TestCase
             'dealer_id' => 1,
             'impressions_count' => 20,
             'views_count' => 30,
-            'zip_file_path' => '2023/04/dealer-id-1.csv.gz',
+            'zip_file_path' => GetPageNameFromUrlAction::SITE_TT_AF . '/2023/04/dealer-id-1.csv.gz',
         ], [
             'year' => 2023,
             'month' => 4,
             'dealer_id' => 2,
             'impressions_count' => 40,
             'views_count' => 50,
-            'zip_file_path' => '2023/04/dealer-id-2.csv.gz',
+            'zip_file_path' => GetPageNameFromUrlAction::SITE_TT_AF . '/2023/04/dealer-id-2.csv.gz',
         ], [
             'year' => 2023,
             'month' => 4,
             'dealer_id' => 3,
             'impressions_count' => 80,
             'views_count' => 90,
-            'zip_file_path' => '2023/04/dealer-id-3.csv.gz',
+            'zip_file_path' => GetPageNameFromUrlAction::SITE_TT_AF . '/2023/04/dealer-id-3.csv.gz',
         ]];
 
         foreach ($monthlyImpressionCountings as $monthlyImpressionCounting) {
@@ -175,7 +176,7 @@ class GetTTAndAffiliateViewsAndImpressionsActionTest extends TestCase
         $this->assertEquals('Dealer 2', data_get($viewsAndImpressions, 'data.1.name'));
         $this->assertEquals('Dealer 1', data_get($viewsAndImpressions, 'data.2.name'));
 
-        $expectedZipFileDownloadPath = $this->expectedZipFileDownloadPath("2023/04/dealer-id-3.csv.gz&app-token=$appToken->token");
+        $expectedZipFileDownloadPath = $this->expectedZipFileDownloadPath(GetPageNameFromUrlAction::SITE_TT_AF . "/2023/04/dealer-id-3.csv.gz&app-token=$appToken->token");
 
         $this->assertEquals($expectedZipFileDownloadPath, data_get($viewsAndImpressions, 'data.0.statistics.0.zip_file_download_path'));
 

@@ -2,6 +2,7 @@
 
 namespace App\Domains\ViewsAndImpressions\Actions;
 
+use App\Domains\UserTracking\Actions\GetPageNameFromUrlAction;
 use App\Domains\ViewsAndImpressions\DTOs\GetTTAndAffiliateViewsAndImpressionCriteria;
 use App\Http\Middleware\AllowedApps;
 use App\Models\AppToken;
@@ -19,6 +20,8 @@ class GetTTAndAffiliateViewsAndImpressionsAction
     public const ZIP_DOWNLOAD_PATH = '/api/views-and-impressions/tt-and-affiliate/download-zip';
 
     private GetTTAndAffiliateViewsAndImpressionCriteria $criteria;
+
+    private string $site = GetPageNameFromUrlAction::SITE_TT_AF;
 
     private ?AppToken $appToken = null;
 
@@ -74,6 +77,7 @@ class GetTTAndAffiliateViewsAndImpressionsAction
                 DB::raw("COALESCE($viewedDealerTable.name, 'N/A') as name"),
             ])
             ->leftJoin($viewedDealerTable, "$monthlyImpressionCountingsTable.dealer_id", '=', "$viewedDealerTable.dealer_id")
+            ->where('site', $this->site)
             ->when($this->criteria->search !== null, function (Builder $query) use ($monthlyImpressionCountingsTable, $viewedDealerTable) {
                 $query
                     ->where("$monthlyImpressionCountingsTable.dealer_id", 'like', "{$this->criteria->search}%")
@@ -100,6 +104,7 @@ class GetTTAndAffiliateViewsAndImpressionsAction
     private function appendReportData(LengthAwarePaginator $dealers, Collection $yearsAndMonths): void
     {
         $monthlyImpressionCountings = MonthlyImpressionCounting::query()
+            ->where('site', $this->site)
             ->whereIn('dealer_id', $dealers->pluck('dealer_id'))
             ->orderByDesc('year')
             ->orderByDesc('month')
@@ -149,6 +154,7 @@ class GetTTAndAffiliateViewsAndImpressionsAction
     {
         return MonthlyImpressionCounting::query()
             ->distinct()
+            ->where('site', $this->site)
             ->select(['year', 'month'])
             ->orderByDesc('year')
             ->orderByDesc('month')

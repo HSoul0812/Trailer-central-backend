@@ -24,6 +24,11 @@ class MonthlyImpressionReport extends Model
         'site',
     ];
 
+    public function scopeSite(Builder $query, string $site): void
+    {
+        $query->where('site', $site);
+    }
+
     public function scopeYear(Builder $query, int $year): void
     {
         $query->where('year', $year);
