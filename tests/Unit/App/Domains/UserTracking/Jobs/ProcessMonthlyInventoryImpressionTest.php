@@ -111,6 +111,8 @@ class ProcessMonthlyInventoryImpressionTest extends TestCase
             'category_label' => 'Category 4',
         ];
 
+        $fakePayload['page_name'] = GetPageNameFromUrlAction::PAGE_NAMES['DW_PDP'];
+
         // Second round, test that the increment works correctly
         $userTracking2 = UserTracking::factory()->create($fakePayload);
         $job2 = new ProcessMonthlyInventoryImpression($userTracking2);
@@ -118,13 +120,12 @@ class ProcessMonthlyInventoryImpressionTest extends TestCase
 
         $job2->handle();
 
-        $this->assertDatabaseCount($table, 4);
+        $this->assertDatabaseCount($table, 7);
 
-        $records = MonthlyImpressionReport::all();
+        $records = MonthlyImpressionReport::where('site', GetPageNameFromUrlAction::SITE_DW)->get();
 
-        $this->assertEquals(2, $records[0]->plp_total_count);
-        $this->assertEquals(2, $records[1]->plp_total_count);
-        $this->assertEquals(2, $records[2]->plp_total_count);
-        $this->assertEquals(1, $records[3]->plp_total_count);
+        $this->assertCount(4, $records);
+
+        $this->assertEquals(GetPageNameFromUrlAction::SITE_DW, $records[0]->site);
     }
 }

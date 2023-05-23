@@ -11,7 +11,7 @@ class TrackUserRequest extends Request implements CreateRequestInterface
         'visitor_id' => 'required|string',
         'event' => 'string',
         'url' => 'required|string',
-        'page_name' => 'string',
+        'page_name' => 'nullable|string',
         'meta' => 'array',
     ];
 }

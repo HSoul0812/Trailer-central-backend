@@ -34,6 +34,18 @@ class GetPageNameFromUrlAction
         'DW_PDP_PAGE' => self::SITE_DW,
     ];
 
+    public const PAGE_NAME_TO_TOTAL_COUNT_COLUMN = [
+        'TT_PLP_PAGE' => 'plp_total_count',
+        'TT_PDP_PAGE' => 'pdp_total_count',
+        'TT_DEALER_PAGE' => 'tt_dealer_page_total_count',
+
+        'AF_PLP_PAGE' => 'plp_total_count',
+        'AF_PDP_PAGE' => 'pdp_total_count',
+
+        'DW_PLP_PAGE' => 'plp_total_count',
+        'DW_PDP_PAGE' => 'pdp_total_count',
+    ];
+
     public function __construct(private TrailerTraderDomain $trailerTraderDomain)
     {
     }
