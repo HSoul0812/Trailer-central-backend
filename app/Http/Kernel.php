@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http;
 
+use App\Http\Middleware\AllowedApps;
 use App\Http\Middleware\GzipResponse;
 use App\Http\Middleware\HumanOnly;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
@@ -71,5 +72,6 @@ class Kernel extends HttpKernel
         // TrailerTrader Middlewares
         'human-only' => HumanOnly::class,
         'gzip' => GzipResponse::class,
+        'allowed-apps' => AllowedApps::class,
     ];
 }

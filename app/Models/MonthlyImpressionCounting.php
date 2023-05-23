@@ -17,7 +17,13 @@ class MonthlyImpressionCounting extends Model
         'impressions_count',
         'views_count',
         'zip_file_path',
+        'site',
     ];
+
+    public function scopeSite(Builder $query, string $site): void
+    {
+        $query->where('site', $site);
+    }
 
     public function scopeYear(Builder $query, int $year): void
     {

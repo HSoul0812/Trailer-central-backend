@@ -3,6 +3,7 @@
 namespace Tests\Unit\App\Console\Commands\Report;
 
 use App\Console\Commands\Report\GenerateMonthlyInventoryTrackingDataReportCommand;
+use App\Domains\UserTracking\Actions\GetPageNameFromUrlAction;
 use App\Models\MonthlyImpressionReport;
 use Illuminate\Support\Facades\Storage;
 use Tests\Common\TestCase;
@@ -33,6 +34,7 @@ class GenerateMonthlyInventoryTrackingDataReportCommandTest extends TestCase
                 'year' => $year,
                 'month' => $month,
                 'dealer_id' => $dealerId,
+                'site' => GetPageNameFromUrlAction::SITE_TT_AF,
             ]);
         }
 
@@ -41,7 +43,7 @@ class GenerateMonthlyInventoryTrackingDataReportCommandTest extends TestCase
             'month' => $month,
         ]);
 
-        $directory = sprintf('%d/%02d', $year, $month);
+        $directory = sprintf('%s/%d/%02d', GetPageNameFromUrlAction::SITE_TT_AF, $year, $month);
 
         $files = $storage->files($directory);
 

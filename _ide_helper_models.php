@@ -9,6 +9,31 @@
  * @author Barry vd. Heuvel <barryvdh@gmail.com>
  */
 
+namespace App\Models{
+    /**
+     * App\Models\AppToken.
+     *
+     * @property int                             $id
+     * @property string                          $app_name
+     * @property string                          $token
+     * @property \Illuminate\Support\Carbon|null $created_at
+     * @property \Illuminate\Support\Carbon|null $updated_at
+     *
+     * @method static \Database\Factories\AppTokenFactory            factory(...$parameters)
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken query()
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken whereAppName($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken whereCreatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken whereToken($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|AppToken whereUpdatedAt($value)
+     */
+    class AppToken extends \Eloquent
+    {
+    }
+}
+
 namespace App\Models\Dealer{
     /**
      * App\Models\Dealer\ViewedDealer.
@@ -179,6 +204,7 @@ namespace App\Models{
      * @property string                          $zip_file_path
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property \Illuminate\Support\Carbon|null $updated_at
+     * @property string                          $site
      *
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting dealerId(int $dealerId)
      * @method static \Database\Factories\MonthlyImpressionCountingFactory            factory(...$parameters)
@@ -186,11 +212,13 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting query()
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting site(string $site)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereCreatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereDealerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereImpressionsCount($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereMonth($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereSite($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereViewsCount($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionCounting whereYear($value)
@@ -220,6 +248,7 @@ namespace App\Models{
      * @property int                             $tt_dealer_page_total_count Total count of visit to TT dealer page
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property \Illuminate\Support\Carbon|null $updated_at
+     * @property string                          $site
      *
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport dealerId(int $dealerId)
      * @method static \Database\Factories\MonthlyImpressionReportFactory            factory(...$parameters)
@@ -227,6 +256,7 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport query()
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport site(string $site)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereCreatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereDealerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereId($value)
@@ -237,6 +267,7 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereMonth($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport wherePdpTotalCount($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport wherePlpTotalCount($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereSite($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereTtDealerPageTotalCount($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereYear($value)

@@ -47,6 +47,10 @@ class ProcessMonthlyInventoryImpression implements ShouldQueue
             return;
         }
 
+        $pageName = $this->userTracking->page_name;
+
+        $site = data_get(GetPageNameFromUrlAction::PAGE_NAME_TO_SITE, $pageName, GetPageNameFromUrlAction::SITE_TT_AF);
+
         $year = $this->userTracking->created_at->year;
         $month = $this->userTracking->created_at->month;
 
@@ -56,13 +60,7 @@ class ProcessMonthlyInventoryImpression implements ShouldQueue
             $inventoryTitle = data_get($meta, 'title');
             $inventoryType = data_get($meta, 'type_label');
             $inventoryCategory = data_get($meta, 'category_label');
-
-            $totalCountColumn = match ($this->userTracking->page_name) {
-                GetPageNameFromUrlAction::PAGE_NAMES['TT_PLP'] => 'plp_total_count',
-                GetPageNameFromUrlAction::PAGE_NAMES['TT_PDP'] => 'pdp_total_count',
-                GetPageNameFromUrlAction::PAGE_NAMES['TT_DEALER'] => 'tt_dealer_page_total_count',
-                default => null,
-            };
+            $totalCountColumn = data_get(GetPageNameFromUrlAction::PAGE_NAME_TO_TOTAL_COUNT_COLUMN, $this->userTracking->page_name);
 
             // List of fields that we don't want to process if any of them
             // is null
@@ -77,9 +75,12 @@ class ProcessMonthlyInventoryImpression implements ShouldQueue
                 continue;
             }
 
+            $site = data_get(GetPageNameFromUrlAction::PAGE_NAME_TO_SITE, $this->userTracking->page_name, GetPageNameFromUrlAction::SITE_TT_AF);
+
             $rowExists = MonthlyImpressionReport::query()
-                ->where('year', $year)
-                ->where('month', $month)
+                ->site($site)
+                ->year($year)
+                ->month($month)
                 ->where('inventory_id', $inventoryId)
                 ->exists();
 
@@ -97,10 +98,11 @@ class ProcessMonthlyInventoryImpression implements ShouldQueue
                         'plp_total_count' => 0,
                         'pdp_total_count' => 0,
                         'tt_dealer_page_total_count' => 0,
+                        'site' => $site,
                     ]);
                 } catch (Exception $exception) {
                     // We throw exception only if it's not the duplicate error
-                    if (!Str::of($exception->getMessage())->contains('monthly_impression_reports_year_month_inventory_id_unique')) {
+                    if (!Str::of($exception->getMessage())->contains('monthly_impression_reports_site_year_month_inventory_id_unique')) {
                         // We sleep for 1 - 5 seconds (random) before throw out the exception and the queue
                         // worker will process this job again
                         sleep(random_int(1, 5));
@@ -111,8 +113,9 @@ class ProcessMonthlyInventoryImpression implements ShouldQueue
             }
 
             MonthlyImpressionReport::query()
-                ->where('year', $year)
-                ->where('month', $month)
+                ->site($site)
+                ->year($year)
+                ->month($month)
                 ->where('inventory_id', $inventoryId)
                 ->increment($totalCountColumn);
         }

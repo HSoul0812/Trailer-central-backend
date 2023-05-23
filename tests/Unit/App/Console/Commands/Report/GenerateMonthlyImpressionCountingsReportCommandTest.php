@@ -3,6 +3,7 @@
 namespace Tests\Unit\App\Console\Commands\Report;
 
 use App\Console\Commands\Report\GenerateMonthlyImpressionCountingsReportCommand;
+use App\Domains\UserTracking\Actions\GetPageNameFromUrlAction;
 use App\Models\MonthlyImpressionCounting;
 use App\Models\MonthlyImpressionReport;
 use Storage;
@@ -26,7 +27,7 @@ class GenerateMonthlyImpressionCountingsReportCommandTest extends TestCase
         $year = $now->year;
         $month = $now->month - 1;
         $storage = Storage::disk('monthly-inventory-impression-countings-reports');
-        $directory = sprintf('%d/%02d', $year, $month);
+        $directory = sprintf('%s/%d/%02d', GetPageNameFromUrlAction::SITE_TT_AF, $year, $month);
 
         $storage->deleteDirectory($directory);
 
@@ -41,6 +42,7 @@ class GenerateMonthlyImpressionCountingsReportCommandTest extends TestCase
                 'year' => $year,
                 'month' => $month,
                 'dealer_id' => $dealerId,
+                'site' => GetPageNameFromUrlAction::SITE_TT_AF,
             ]);
 
             $expectedReportData[$dealerId] = [
@@ -69,6 +71,7 @@ class GenerateMonthlyImpressionCountingsReportCommandTest extends TestCase
 
         foreach ($expectedReportData as $expectedReport) {
             $report = MonthlyImpressionCounting::query()
+                ->site(GetPageNameFromUrlAction::SITE_TT_AF)
                 ->yearMonthDealerId(
                     year: $expectedReport['year'],
                     month: $expectedReport['month'],

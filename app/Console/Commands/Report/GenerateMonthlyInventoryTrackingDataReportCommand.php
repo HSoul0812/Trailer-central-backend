@@ -6,6 +6,7 @@ use App\Domains\Commands\Traits\PrependsOutput;
 use App\Domains\Commands\Traits\PrependsTimestamp;
 use App\Domains\Compression\Actions\CompressFileWithGzipAction;
 use App\Domains\Compression\Exceptions\GzipFailedException;
+use App\Domains\UserTracking\Actions\GetPageNameFromUrlAction;
 use App\Models\MonthlyImpressionReport;
 use Carbon\Carbon;
 use Exception;
@@ -105,6 +106,7 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
     private function exportData(): void
     {
         MonthlyImpressionReport::query()
+            ->site(GetPageNameFromUrlAction::SITE_TT_AF)
             ->year($this->date->year)
             ->month($this->date->month)
             ->distinct()
@@ -130,6 +132,7 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
         fputcsv($csvFile, $this->csvHeaderRow());
 
         MonthlyImpressionReport::query()
+            ->site(GetPageNameFromUrlAction::SITE_TT_AF)
             ->yearMonthDealerId($this->date->year, $this->date->month, $dealerId)
             ->chunkById(self::DEALER_CHUNK, function (Collection $monthlyImpressionReports) use ($csvFile) {
                 foreach ($monthlyImpressionReports as $monthlyImpressionReport) {
@@ -152,7 +155,13 @@ class GenerateMonthlyInventoryTrackingDataReportCommand extends Command
 
     private function filePath(int $dealerId): string
     {
-        return sprintf('%d/%02d/dealer-id-%d.csv', $this->date->year, $this->date->month, $dealerId);
+        return sprintf(
+            '%s/%d/%02d/dealer-id-%d.csv',
+            GetPageNameFromUrlAction::SITE_TT_AF,
+            $this->date->year,
+            $this->date->month,
+            $dealerId
+        );
     }
 
     private function csvHeaderRow(): array

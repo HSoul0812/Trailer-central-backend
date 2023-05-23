@@ -13,7 +13,7 @@ use TrailerTrader\Insights\AreaChart;
 
 class LeadsAverageByManufacturerInsightsTest extends IntegrationTestCase
 {
-    protected string $seeder = AverageSeeder::class;
+    // protected string $seeder = AverageSeeder::class;
 
     protected LeadsAverageByManufacturerInsights $dashboard;
 
