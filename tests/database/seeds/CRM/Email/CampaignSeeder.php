@@ -9,6 +9,7 @@ use App\Models\CRM\Email\CampaignSent;
 use App\Models\CRM\Email\Template;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\CRM\Interactions\Interaction;
 use App\Models\User\NewDealerUser;
 use App\Models\User\User;
 use App\Models\User\NewUser;
@@ -193,7 +194,7 @@ class CampaignSeeder extends Seeder
             $lead->delete();
         });
         SalesPerson::where('user_id', $dealerId)->delete();
-        NewUser::destroy($dealerId);
+        NewUser::where('id', $dealerId)->delete();
         NewDealerUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();
