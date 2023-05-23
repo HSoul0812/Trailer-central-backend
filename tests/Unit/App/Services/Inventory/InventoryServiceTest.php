@@ -14,6 +14,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\MockObject\MockObject;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Common\TestCase;
 
 class InventoryServiceTest extends TestCase
@@ -67,10 +68,17 @@ class InventoryServiceTest extends TestCase
         $this->assertContains('hhhh', $featureList);
     }
 
-    public function testListAttributes()
+    public function testListAttributesWithException()
+    {
+        $this->expectException(NotFoundHttpException::class);
+        $this->service = $this->getAttributesService();
+        $this->service->attributes(['type_id' => 1, 'category' => 'Cargo (Enclosed)']);
+    }
+
+    public function testListAttributesWithSuccess()
     {
         $this->service = $this->getAttributesService();
-        $attributes = $this->service->attributes(['type_id' => 1, 'category' => 'Cargo (Enclosed)']);
+        $attributes = $this->service->attributes(['type_id' => 1, 'category' => 'Cargo (Enclosed) Trailers']);
         $this->assertCount(1, $attributes);
         $this->assertEquals(1, $attributes[0]->attribute_id);
         $this->assertStringEndsWith('entity_type_id=1', $this->httpHistory[0]['request']->getUri());

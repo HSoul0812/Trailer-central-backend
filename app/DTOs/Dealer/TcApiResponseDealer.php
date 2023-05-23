@@ -19,6 +19,7 @@ class TcApiResponseDealer
     public ?array $website;
     public ?string $from;
     public ?array $permissions;
+    public string $logo;
     public ?int $dealer_location_id;
     public ?string $location_name;
     public ?string $region;
@@ -44,6 +45,7 @@ class TcApiResponseDealer
         $dto->website = $data['website'] ?? null;
         $dto->from = $data['from'] ?? '';
         $dto->permissions = $data['permissions'] ?? [];
+        $dto->logo = $data['logo'] ?? '';
         $dto->location_name = $data['location_name'] ?? '';
         $dto->dealer_location_id = $data['location_id'] ?? 0;
         $dto->region = $data['region'] ?? '';
