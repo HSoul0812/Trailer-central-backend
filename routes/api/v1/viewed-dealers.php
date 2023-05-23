@@ -11,7 +11,4 @@ $api->version('v1', function ($api) {
         $api->get('/', [ViewedDealerController::class, 'index']);
         $api->post('/', [ViewedDealerController::class, 'create']);
     });
-    $api->group(['prefix' => '/dealers'], function ($api) {
-        $api->get('/', [ViewedDealerController::class, 'getDealers']);
-    });
 });
