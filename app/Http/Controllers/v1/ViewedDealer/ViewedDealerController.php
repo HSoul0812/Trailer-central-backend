@@ -5,11 +5,15 @@ namespace App\Http\Controllers\v1\ViewedDealer;
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
+use App\Http\Requests\GetDealersRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\ViewedDealer\CreateViewedDealerRequest;
+use App\Http\Requests\ViewedDealer\GetDealersRequest;
 use App\Http\Requests\ViewedDealer\IndexViewedDealerRequest;
 use App\Repositories\ViewedDealer\ViewedDealerRepositoryInterface;
+use App\Services\Dealers\DealerServiceInterface;
+use App\Transformers\ViewedDealer\TcApiResponseDealerTransformer;
 use App\Transformers\ViewedDealer\ViewedDealerIndexTransformer;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Throwable;
@@ -18,6 +22,7 @@ class ViewedDealerController extends AbstractRestfulController
 {
     public function __construct(
         private ViewedDealerRepositoryInterface $repository,
+        private DealerServiceInterface $dealerService,
     ) {
         parent::__construct();
     }
@@ -75,6 +80,16 @@ class ViewedDealerController extends AbstractRestfulController
         throw new NotImplementedException();
     }
 
+    public function getDealers(GetDealersRequestInterface $request)
+    {
+        $request->validate();
+
+        return $this->response->collection(
+            $this->dealerService->dealersList($request->all()),
+            new TcApiResponseDealerTransformer()
+        );
+    }
+
     protected function constructRequestBindings(): void
     {
         app()->bind(IndexRequestInterface::class, function () {
@@ -83,6 +98,10 @@ class ViewedDealerController extends AbstractRestfulController
 
         app()->bind(CreateRequestInterface::class, function () {
             return inject_request_data(CreateViewedDealerRequest::class);
+        });
+
+        app()->bind(GetDealersRequestInterface::class, function () {
+            return inject_request_data(GetDealersRequest::class);
         });
     }
 }
