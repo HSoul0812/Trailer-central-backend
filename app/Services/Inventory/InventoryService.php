@@ -12,6 +12,7 @@ use App\Models\Geolocation\Geolocation;
 use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
+use App\Services\Dealers\DealerServiceInterface;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
@@ -25,6 +26,7 @@ use Illuminate\Support\Collection;
 use JetBrains\PhpStorm\ArrayShape;
 use Log;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class InventoryService implements InventoryServiceInterface
 {
@@ -69,7 +71,8 @@ class InventoryService implements InventoryServiceInterface
         private GuzzleHttpClient $httpClient,
         private SysConfigRepositoryInterface $sysConfigRepository,
         private ListingCategoryMappingsRepositoryInterface $listingCategoryMappingsRepository,
-        private AuthTokenRepositoryInterface $authTokenRepository
+        private AuthTokenRepositoryInterface $authTokenRepository,
+        private DealerServiceInterface $dealerService,
     ) {
     }
 
@@ -217,6 +220,11 @@ class InventoryService implements InventoryServiceInterface
         $respObj->type_id = $newCategory['type_id'];
         $respObj->type_label = $newCategory['type_label'];
 
+        $dealerName = $inventory['data']['dealer']['name'];
+        $dealer = $this->dealerService->listByName($dealerName);
+        $respObj->dealer['logo_url'] = $dealer[0]->logo['data']['url'] ?? '';
+        $respObj->dealer['benefit_statement'] = $dealer[0]->logo['data']['benefit_statement'] ?? '';
+
         return $respObj;
     }
 
@@ -226,7 +234,10 @@ class InventoryService implements InventoryServiceInterface
             'map_from' => $params['category'],
             'type_id' => $params['type_id'],
         ]);
-
+        if(!$mapping) {
+            throw new NotFoundHttpException("Mapped entity type was not found. "
+            . "Please check category and type_id is correct");
+        }
         $results = new Collection();
         $url = config('services.trailercentral.api') . 'inventory/attributes' . "?entity_type_id=$mapping->entity_type_id";
         $attributes = $this->handleHttpRequest('GET', $url);
