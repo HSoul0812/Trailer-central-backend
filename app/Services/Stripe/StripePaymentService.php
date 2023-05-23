@@ -200,7 +200,9 @@ class StripePaymentService implements StripePaymentServiceInterface
             $planDuration = intval($planDuration) ?: 30;
 
             $inventoryExpiry = $inventoryExpiry
-                ->addDays($planDuration)
+                // As we calculate the duration from the current day, we are adding 2 days in the plan duration just to
+                // give the extra day to the user.
+                ->addDays($planDuration + 2)
                 ->setTimezone(config('trailercentral.api_timezone'))
                 ->format(config('trailercentral.api_datetime_format'));
 
