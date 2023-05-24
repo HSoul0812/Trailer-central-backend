@@ -180,6 +180,7 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property Collection<CustomerInventory> $customerInventory
  * @property DealerInventory $lotVantageInventory
  * @property Vendor $floorplanVendor
+ * @property CustomOverlay $customOverlay
  *
  * @method static Builder select($columns = ['*'])
  * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
@@ -888,7 +889,7 @@ class Inventory extends Model
             $attribute = $attributeInfo['attribute'];
 
             if($attribute instanceof Attribute && $attribute->isSelect()){
-                $validValues = $attribute->getValuesArray();
+                $validValues = array_change_key_case($attribute->getValuesArray());
                 $value = strtolower($value);
                 if(!isset($validValues[$value])){
                     return null;
@@ -993,5 +994,11 @@ class Inventory extends Model
     public static function unMemoizeCategories()
     {
         self::$memoizedCategories = null;
+    }
+
+    public function customOverlay()
+    {
+        return $this->hasOne(CustomOverlay::class,'name','chosen_overlay')
+            ->where('dealer_id', $this->dealer_id);
     }
 }
