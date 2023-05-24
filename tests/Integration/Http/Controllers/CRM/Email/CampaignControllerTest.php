@@ -194,6 +194,100 @@ class CampaignControllerTest extends IntegrationTestCase
 
     /**
      * @group CRM
+     * @covers ::show
+     *
+     * @return void
+     */
+    public function testShowReport()
+    {
+        $this->seeder->seed();
+
+        /** @var Campaign $campaign */
+        $campaign = $this->seeder->createdCampaigns[0];
+
+        $totalAction = count($this->seeder->campaignsSent);
+
+        $response = $this->json(
+            'GET',
+            '/api/user/emailbuilder/campaign/' . $campaign->drip_campaigns_id .'?include=report',
+            [],
+            ['access-token' => $this->accessToken]
+        );
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'template_id',
+                    'template',
+                    'location_id',
+                    'location',
+                    'send_after_days',
+                    'action',
+                    'unit_category',
+                    'campaign_name',
+                    'user_id',
+                    'from_email_address',
+                    'campaign_subject',
+                    'include_archived',
+                    'is_enabled',
+                    'categories',
+                    'brands',
+                    'factory_campaign_id',
+                    'approved',
+                    'is_from_factory',
+                    'report' => [
+                        'data' => [
+                            'sent',
+                            'delivered',
+                            'bounced',
+                            'complaints',
+                            'unsubscribed',
+                            'opened',
+                            'clicked',
+                            'skipped',
+                            'failed',
+                        ]
+                    ],
+                ]
+            ])
+            ->assertJsonPath('data.report.data.sent', $totalAction)
+            ->assertJsonPath('data.report.data.delivered', $totalAction)
+            ->assertJsonPath('data.report.data.bounced', $totalAction)
+            ->assertJsonPath('data.report.data.complaints', $totalAction)
+            ->assertJsonPath('data.report.data.unsubscribed', $totalAction)
+            ->assertJsonPath('data.report.data.opened', $totalAction)
+            ->assertJsonPath('data.report.data.clicked', $totalAction)
+            ->assertJsonPath('data.report.data.skipped', $totalAction)
+            ->assertJsonPath('data.report.data.failed', $totalAction);
+
+        $expectedData = [
+            'id' => (int)$campaign->drip_campaigns_id,
+            'template_id' => (int)$campaign->email_template_id,
+            'template' => $campaign->template->toArray(),
+            'location_id' => (int)$campaign->location_id,
+            'location' => $campaign->location,
+            'send_after_days' => (int)$campaign->send_after_days,
+            'action' => $campaign->action,
+            'unit_category' => $campaign->unit_category,
+            'campaign_name' => $campaign->campaign_name,
+            'user_id' => (int)$campaign->user_id,
+            'from_email_address' => $campaign->from_email_address,
+            'campaign_subject' => $campaign->campaign_subject,
+            'include_archived' => (int)$campaign->include_archived,
+            'is_enabled' => (int)$campaign->is_enabled,
+            'categories' => $campaign->categories->toArray(),
+            'brands' => $campaign->brands->toArray(),
+            'factory_campaign_id' => $campaign->factory ? $campaign->factory->id : null,
+            'approved' => $campaign->factory ? $campaign->factory->is_approved : true,
+            'is_from_factory' => isset($campaign->factory)
+        ];
+
+        $this->assertResponseDataEquals($response, $expectedData, false);
+    }
+
+    /**
+     * @group CRM
      * @covers ::create
      *
      * @return void

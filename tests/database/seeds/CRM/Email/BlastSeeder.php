@@ -16,6 +16,7 @@ use App\Models\Website\Website;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Traits\WithGetter;
 use Tests\database\seeds\Seeder;
+use App\Models\CRM\Interactions\EmailHistory;
 
 /**
  * @property-read User $dealer
@@ -187,7 +188,10 @@ class BlastSeeder extends Seeder
             }
         }
         Template::where('user_id', $userId)->delete();
-        Lead::where('dealer_id', $dealerId)->delete();
+        Lead::where('dealer_id', $dealerId)->each(function($lead) {
+            EmailHistory::where('lead_id', $lead->getKey())->delete();
+            $lead->delete();
+        });
         SalesPerson::where('user_id', $dealerId)->delete();
         NewUser::destroy($userId);
         DealerLocation::where('dealer_id', $dealerId)->delete();

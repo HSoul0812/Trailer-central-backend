@@ -174,6 +174,58 @@ class BlastControllerTest extends IntegrationTestCase
 
     /**
      * @group CRM
+     * @covers ::show
+     */
+    public function testShowReport()
+    {
+        // Get a blast from the seeder
+        $blast = $this->seeder->createdBlasts[0];
+
+        // Get the data from the API endpoint
+        $response = $this->json(
+            'GET',
+            self::API_ENDPOINT . '/' . $blast->email_blasts_id .'?include=report',
+            [],
+            ['access-token' => $this->accessToken]
+        );
+
+        // Check that we have a valid response from the API
+        $singleJsonStructureWithReport = self::SINGLE_JSON_STRUCTURE;
+        $singleJsonStructureWithReport['data']['report'] = [
+            'data' => [
+                'sent',
+                'delivered',
+                'bounced',
+                'complaints',
+                'unsubscribed',
+                'opened',
+                'clicked',
+                'skipped',
+                'failed'
+            ]
+        ];
+
+        $totalAction = count($this->seeder->blastsSent);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure($singleJsonStructureWithReport)
+            ->assertJsonPath('data.report.data.sent', $totalAction)
+            ->assertJsonPath('data.report.data.delivered', $totalAction)
+            ->assertJsonPath('data.report.data.bounced', $totalAction)
+            ->assertJsonPath('data.report.data.complaints', $totalAction)
+            ->assertJsonPath('data.report.data.unsubscribed', $totalAction)
+            ->assertJsonPath('data.report.data.opened', $totalAction)
+            ->assertJsonPath('data.report.data.clicked', $totalAction)
+            ->assertJsonPath('data.report.data.skipped', $totalAction)
+            ->assertJsonPath('data.report.data.failed', $totalAction);
+
+        // Is the data in the expected format?
+        $expectedData = $this->expectedDataFormat($blast);
+        $this->assertResponseDataEquals($response, $expectedData, false);
+    }
+
+    /**
+     * @group CRM
      * @covers ::create
      */
     public function testCreate()
