@@ -12,6 +12,7 @@ use Throwable;
 class DealerService implements DealerServiceInterface
 {
     public const ENDPOINT_USERS_BY_NAME = '/users-by-name';
+    public const ENDPOINT_DEALERS = '/tt-dealers';
 
     /**
      * @return Collection<int, TcApiResponseDealer>
@@ -22,6 +23,24 @@ class DealerService implements DealerServiceInterface
             'query' => [
                 'name' => $name,
             ],
+        ])?->collect('data');
+
+        if ($dealers === null) {
+            return collect([]);
+        }
+
+        return $dealers->map(
+            fn (array $dealer) => TcApiResponseDealer::fromData($dealer)
+        );
+    }
+
+    /**
+     * @return Collection<int, TcApiResponseDealer>
+     */
+    public function dealersList(array $params): Collection
+    {
+        $dealers = $this->handleHttpRequest('GET', self::ENDPOINT_DEALERS, [
+            'query' => $params,
         ])?->collect('data');
 
         if ($dealers === null) {
