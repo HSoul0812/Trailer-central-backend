@@ -213,8 +213,9 @@ class ShowroomService implements ShowroomServiceInterface
             $showrooms = $showroomGenericMaps->first()->showrooms;
         }
 
-        if (!empty($additionalSearchParams) && $showrooms->isEmpty()) {
-            $searchParams = array_merge($searchParams, $additionalSearchParams);
+        if (($additionalSearchParams['search_by_model_part'] ?? false) && isset($additionalSearchParams['model_part']) && $showrooms->isEmpty()) {
+            unset($searchParams['model']);
+            $searchParams['like_model'] = '%' . $additionalSearchParams['model_part'] . '%';
 
             /** @var Collection $showrooms */
             $showrooms = $this->showroomRepository->getAll($searchParams);

@@ -184,6 +184,49 @@ class ReportControllerTest extends IntegrationTestCase
         $reportName = $this->faker->md5();
         $reportType = $this->faker->randomElement(Report::REPORT_TYPES);
         $chartSpan = $this->faker->randomElement(['daily', 'monthly']);
+        $userId = $this->dealer->newDealerUser->user_id;
+
+        $response = $this->json(
+            'PUT', self::API_URL, 
+            [
+                'report_name' => $reportName,
+                'report_type' => $reportType,
+                'p_start' => Carbon::now()->format('Y-m-d'),
+                'p_end' => Carbon::now()->endOfMonth()->format('Y-m-d'),
+                's_start' => Carbon::now()->startOfYear()->format('Y-m-d'),
+                's_end' => Carbon::now()->endOfYear()->format('Y-m-d'),
+                'chart_span' => $chartSpan
+
+            ], 
+            ['access-token' => $this->accessToken]
+        );
+        
+        $totalReports = Report::where('report_type', $reportType)->where('user_id', $userId)->count();
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'report_id',
+                        'report_name',
+                        'filters',
+                        'user_id',
+                        'report_type'
+                    ]
+                ]
+            ])
+            ->assertJsonFragment(['report_name' => $reportName])
+            ->assertJsonCount($totalReports, 'data.*');
+    }
+
+    /**
+     * @group CRM
+     */
+    public function testCreateLeadSource()
+    {
+        $reportName = $this->faker->md5();
+        $reportType = $this->faker->randomElement(Report::REPORT_TYPES);
+        $chartSpan = $this->faker->randomElement(['daily', 'monthly']);
         $leadSource = $this->faker->company();
         $userId = $this->dealer->newDealerUser->user_id;
 

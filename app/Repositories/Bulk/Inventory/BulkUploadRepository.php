@@ -68,7 +68,7 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface
             $params['per_page'] = 100;
         }
 
-        return $this->model::where('dealer_id', $params['dealer_id'])->paginate($params['per_page'])->appends($params);
+        return $this->model::where('dealer_id', $params['dealer_id'])->orderBy('created_at', 'desc')->paginate($params['per_page'])->appends($params);
     }
 
     /**

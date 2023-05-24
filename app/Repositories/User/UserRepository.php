@@ -8,11 +8,14 @@ use Carbon\Carbon;
 use App\Models\User\User;
 use App\Models\User\DealerUser;
 use App\Models\User\NewDealerUser;
+use App\Models\Inventory\EntityType;
 use App\Traits\Repository\Transaction;
 use App\Exceptions\NotImplementedException;
 use App\Services\Common\EncrypterServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Query\Builder;
 
 /**
  * class UserRepository
@@ -300,6 +303,42 @@ class UserRepository implements UserRepositoryInterface {
     public function getByName(string $name): Collection
     {
         return User::where('name', $name)->get();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getTrailerTraderDealers($params)
+    {
+        $types = EntityType::TRAILER_TRADER_TYPES;
+        
+        if (isset($params['type'])) {
+            $types = [$params['type']];
+        }
+        $query = DB::table('dealer')
+            ->select([
+                'dealer.dealer_id as id',
+                'dealer.name',
+                'dealer.clsf_active',
+                'dealer_location.dealer_location_id',
+                'dealer_location.name as location_name',
+                'dealer_location.region',
+                'dealer_location.city',
+                'dealer_location.postalcode',
+            ])
+            ->join('dealer_location', 'dealer.dealer_id', '=', 'dealer_location.dealer_id')
+            ->where('dealer.clsf_active', 1)
+            ->when(isset($params['state']), function (Builder $query) use ($params) {
+                $query->where('dealer_location.region', $params['state']);
+            })
+            ->whereExists(function (Builder $query) use ($types) {
+                $query
+                    ->select(['*'])
+                    ->from('inventory')
+                    ->whereColumn('inventory.dealer_location_id', 'dealer_location.dealer_location_id')
+                    ->whereIn('inventory.entity_type_id', $types);
+            });
+        return $query->get();
     }
 
     /**

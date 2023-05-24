@@ -5,10 +5,10 @@ namespace App\Nova\Policies;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
- * Class FieldMapPolicy
+ * Class DealerIntegrationPolicy
  * @package App\Nova\Policies
  */
-class FieldMapPolicy extends PolicyManager
+class DealerIntegrationPolicy extends PolicyManager
 {
     use HandlesAuthorization;
 
@@ -27,4 +27,3 @@ class FieldMapPolicy extends PolicyManager
         );
     }
 }
-

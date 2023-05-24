@@ -101,6 +101,10 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
             $query = $query->where('model', '=', $params['model']);
         }
 
+        if (isset($params['like_model'])) {
+            $query = $query->where('model', 'LIKE', $params['model']);
+        }
+
         if (isset($params['year'])) {
             $query = $query->where('year', '=', $params['year']);
         }

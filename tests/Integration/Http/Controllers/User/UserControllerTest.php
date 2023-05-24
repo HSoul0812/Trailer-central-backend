@@ -84,4 +84,40 @@ class UserControllerTest extends TestCase
             ->assertJsonPath('data.name', $name)
             ->assertJsonPath('data.email', $email);
     }
+
+    public function testItAllowGettingTrailerTradeDealersWithProperAccessToken()
+    {
+        $dealer = factory(User::class)->create([
+            'clsf_active' => true,
+        ]);
+
+        $user = Integration::create([
+            'name' => $this->faker->name(),
+        ]);
+
+        $user->perms()->create([
+            'feature' => 'get_dealers_of_trailertrade',
+            'permission_level' => 'can_see',
+        ]);
+
+        $token = Str::random(AuthToken::INTEGRATION_ACCESS_TOKEN_LENGTH);
+
+        $user->authToken()->create([
+            'user_type' => AuthToken::USER_TYPE_INTEGRATION,
+            'access_token' => $token,
+        ]);
+
+        $response = $this->getJson("/api/tt-dealers", [
+            'access-token' => $token,
+        ]);
+        
+        $response
+            ->assertOk()
+            ->assertJsonPath('data.0.clsf_active', true)
+            ->assertSeeText($dealer->name);
+        
+        foreach($response['data'] as $value) {
+            $this->assertTrue($value['clsf_active']);
+        }
+    }
 }
