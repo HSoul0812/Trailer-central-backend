@@ -9,6 +9,7 @@ use App\Models\CRM\Email\CampaignSent;
 use App\Models\CRM\Email\Template;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\CRM\Interactions\Interaction;
 use App\Models\User\NewDealerUser;
 use App\Models\User\User;
 use App\Models\User\NewUser;
@@ -17,6 +18,7 @@ use App\Models\Website\Website;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Traits\WithGetter;
 use Tests\database\seeds\Seeder;
+use App\Models\CRM\Interactions\EmailHistory;
 
 /**
  * @property-read User $dealer
@@ -176,6 +178,7 @@ class CampaignSeeder extends Seeder
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
+        $userId = $this->user->getKey();
 
         // Database clean up
         if(!empty($this->createdCampaigns) && count($this->createdCampaigns)) {
@@ -185,11 +188,13 @@ class CampaignSeeder extends Seeder
                 Campaign::destroy($campaignId);
             }
         }
-        Template::where('user_id', $dealerId)->delete();
-        Template::where('user_id', $this->user->getKey())->delete();
-        Lead::where('dealer_id', $dealerId)->delete();
-        SalesPerson::where('user_id', $dealerId)->delete();
-        NewUser::destroy($dealerId);
+        Template::where('user_id', $userId)->delete();
+        Lead::where('dealer_id', $dealerId)->each(function($lead) {
+            EmailHistory::where('lead_id', $lead->getKey())->delete();
+            $lead->delete();
+        });
+        SalesPerson::where('user_id', $userId)->delete();
+        NewUser::destroy($userId);
         NewDealerUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();
