@@ -58,6 +58,8 @@ return [
 
     'cdn_url' => env('CDN_URL_STORAGE', 'https://dealer-cdn.com'),
 
+    'prod_cdn_url' => env('PROD_CDN_URL_STORAGE', 'https://dealer-cdn.com'),
+
     'showroom_files_url' => env('SHOWROOM_FILES_URL', 'http://dealer-cdn.com/showroom-files/'),
 
     'new_design_crm_url' => env('NEW_DESIGN_CRM_URL', 'https://design-prod.crm.trailercentral.com/'),

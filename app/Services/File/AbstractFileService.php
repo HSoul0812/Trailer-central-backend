@@ -193,7 +193,7 @@ abstract class AbstractFileService implements FileServiceInterface
                 //try with the cdn url
                 $url = str_replace(
                     parse_url($url, PHP_URL_HOST),
-                    parse_url(env('CDN_URL'), PHP_URL_HOST),
+                    parse_url(config('app.prod_cdn_url'), PHP_URL_HOST),
                     $url
                 );
                 $request = $this->httpClient->get($url, ['http_errors' => false]);
