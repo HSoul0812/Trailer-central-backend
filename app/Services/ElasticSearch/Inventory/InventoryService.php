@@ -26,13 +26,15 @@ class InventoryService implements InventoryServiceInterface
 
     public function search(
         array                $dealerIds,
+        int                  $aggregationSize,
         array                $terms,
         GeolocationInterface $geolocation,
         array                $sort = [],
         array                $pagination = [],
         bool                 $debug = false): ElasticSearchQueryResult
     {
-        $query = $this->queryBuilder->addTerms($terms)
+        $query = $this->queryBuilder->initializeAggregators($aggregationSize)
+            ->addTerms($terms)
             ->addDealers($dealerIds)
             ->addGeolocation($geolocation)
             ->addSort($sort)
