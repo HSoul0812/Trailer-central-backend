@@ -55,7 +55,7 @@ class IDSService implements IDSServiceInterface
 
         // Export Format is Not IDS?
         if ($leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_IDS) {
-            $this->log->info('IDS LEad Export Not Enabled for Dealer #' . $lead->dealer_id .
+            $this->log->info('IDS Lead Export Not Enabled for Dealer #' . $lead->dealer_id .
                                 ' and Dealer Location #' . $lead->dealer_location_id);
             return false;
         }
