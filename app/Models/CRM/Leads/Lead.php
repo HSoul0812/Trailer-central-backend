@@ -383,7 +383,7 @@ class Lead extends Model
         if (empty($this->leadStatus)) {
             return '';
         }
-        $source = $this->leadStatus->pluck('source')->toArray();
+        $source = $this->leadStatus()->pluck('source')->toArray();
         return $source['source'] ?? '';
     }
 

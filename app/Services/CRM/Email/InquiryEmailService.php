@@ -176,12 +176,12 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $params['dealer_id'] = $lead->dealer_id;
         $params['website_id'] = $lead->website_id;
         $params['dealer_location_id'] = $lead->dealer_location_id;
-        $params['inquiry_type'] = $lead->inquiryType;
-        $params['lead_types'] = $lead->leadTypes;
-        $params['inventory'] = $lead->inventoryIds;
+        $params['inquiry_type'] = $lead->inquiry_type;
+        $params['lead_types'] = $lead->lead_types;
+        $params['inventory'] = $lead->inventory_ids;
         $params['item_id'] = $lead->inventory_id;
         $params['title'] = $lead->title;
-        $params['url'] = $lead->inventory ? $lead->inventory->getUrl() : '';
+        $params['url'] = !empty($lead->inventory) ? $lead->inventory->getUrl() : '';
         $params['referral'] = $lead->referral;
         $params['first_name'] = $lead->first_name;
         $params['last_name'] = $lead->last_name;
@@ -201,7 +201,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $params['cdk_email_sent'] = $lead->cdk_email_sent;
         $params['is_spam'] = $lead->is_spam;
         $params['lead_source'] = $lead->getSource();
-        $params['lead_status'] = $lead->leadStatus ? $lead->leadStatus->status : null;
+        $params['lead_status'] = !empty($lead->leadStatus) ? $lead->leadStatus->status : null;
         return $this->fill($params);
     }
 

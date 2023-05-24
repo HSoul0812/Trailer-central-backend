@@ -52,7 +52,10 @@ class TemplateControllerTest extends IntegrationTestCase
             'user_id',
             'key',
             'name',
-            'created_at'
+            'created_at',
+            'html',
+            'template_metadata',
+            'template_json'
         ]
     ];
 
@@ -66,7 +69,10 @@ class TemplateControllerTest extends IntegrationTestCase
                 'user_id',
                 'key',
                 'name',
-                'created_at'
+                'created_at',
+                'html',
+                'template_metadata',
+                'template_json'
             ]
         ],
         'meta' => [
@@ -307,6 +313,9 @@ class TemplateControllerTest extends IntegrationTestCase
                'json' => $template->template_json,
             ], 
             'created_at' => (string)$template->date,
+            'html' => $template->html,
+            'template_metadata' => $template->template_metadata,
+            'template_json' => $template->template_json
         ];
     }
 

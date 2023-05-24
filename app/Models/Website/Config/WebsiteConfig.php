@@ -23,6 +23,7 @@ class WebsiteConfig extends Model
     const MOBILE_KEY_ENABLED = 'general/mobile/enabled';
     const ECOMMERCE_KEY_ENABLE = 'parts/ecommerce/enabled';
     const GENERAL_HEAD_SCRIPT_KEY = 'general/head_script';
+    const GENERAL_BODY_SCRIPT_KEY = 'general/body_script';
     const CALL_TO_ACTION = 'call-to-action';
     const SHOWROOM_USE_SERIES = 'showroom/use_series';
     const LEADS_MERGE_ENABLED = 'leads/merge/enabled';

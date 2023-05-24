@@ -93,7 +93,7 @@ class CollectorLog extends Resource
                 ->hideFromIndex(),
 
             Boolean::make('Validation Errors', function () {
-                return !$this->validation_errors;
+                return empty(json_decode($this->validation_errors, true));
             })->onlyOnIndex(),
 
             Code::make('Validation Errors')->language('javascript')->json()
@@ -102,6 +102,7 @@ class CollectorLog extends Resource
             Text::make('Exception'),
 
             DateTime::make('Created At', 'created_at')
+                ->format('DD MMM, YYYY - LT')
                 ->exceptOnForms(),
         ];
     }

@@ -191,20 +191,21 @@ class Website extends Model
 
     public function getHeadScriptsAttribute() : string
     {
-      return base64_decode($this->websiteConfigs()->where('key',  WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY)->take(1)->value('value'));
+        return base64_decode(
+            $this->websiteConfigs()->where('key', WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY)->take(1)->value('value')
+        );
     }
 
     public function setHeadScriptsAttribute($value) : void
     {
-      $headScript = $this->websiteConfigs()->where('key',  WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY)->first();
-      $value = base64_encode($value);
+        $headScript = $this->websiteConfigs()->where('key', WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY)->first();
+        $value = base64_encode($value);
 
-      if ($headScript) {
-        $headScript->update(['value' => $value]);
-      } else {
-        $this->websiteConfigs()->create(['key' =>  WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY, 'value' => $value]);
-      }
-
+        if ($headScript) {
+            $headScript->update(['value' => $value]);
+        } else {
+            $this->websiteConfigs()->create(['key' =>  WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY, 'value' => $value]);
+        }
     }
 
     public function dealer()
@@ -243,5 +244,33 @@ class Website extends Model
     public function getIdentifierAttribute()
     {
         return CompactHelper::shorten($this->id);
+    }
+
+    /**
+     * @return string
+     */
+    public function getBodyScriptsAttribute(): string
+    {
+        return base64_decode(
+            $this->websiteConfigs()->where('key', WebsiteConfig::GENERAL_BODY_SCRIPT_KEY)->take(1)->value('value')
+        );
+    }
+
+    /**
+     * @return void
+     */
+    public function setBodyScriptsAttribute($value) : void
+    {
+        $script = $this->websiteConfigs()->where('key', WebsiteConfig::GENERAL_BODY_SCRIPT_KEY)->first();
+        $value = base64_encode($value);
+
+        if (!empty($script)) {
+            $script->update(['value' => $value]);
+        } else {
+            $this->websiteConfigs()->create([
+                'key' =>  WebsiteConfig::GENERAL_BODY_SCRIPT_KEY,
+                'value' => $value,
+            ]);
+        }
     }
 }

@@ -498,6 +498,13 @@ $api->version('v1', function ($route) {
         $route->post('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@update')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail');
         $route->get('leads/{leadId}/contact-date', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@getContactDate');
+
+        /**
+         * Email Draft
+         */
+        $route->get('leads/{leadId}/interactions/draft', 'App\Http\Controllers\v1\CRM\Interactions\DraftController@getEmailDraft');
+        $route->post('leads/{leadId}/interactions/draft', 'App\Http\Controllers\v1\CRM\Interactions\DraftController@saveEmailDraft');
+        $route->get('leads/{leadId}/interactions/{id}/draft', 'App\Http\Controllers\v1\CRM\Interactions\DraftController@getReplyEmailDraft');
     });
 
     /**
@@ -515,7 +522,7 @@ $api->version('v1', function ($route) {
     // Stop Text!
     $route->post('leads/texts/stop', 'App\Http\Controllers\v1\CRM\Text\StopController@index');
     // Reply
-    $route->put('leads/texts/reply', 'App\Http\Controllers\v1\CRM\Text\TextController@reply')->middleware(['accesstoken.validate', 'replytext.validate']);;
+    $route->put('leads/texts/reply', 'App\Http\Controllers\v1\CRM\Text\TextController@reply')->middleware(['accesstoken.validate', 'replytext.validate']);
 
     /**
      * Facebook Webhooks
@@ -693,6 +700,8 @@ $api->version('v1', function ($route) {
     $route->get('users-by-name', 'App\Http\Controllers\v1\User\UserController@listByName')->middleware('integration-permission:get_dealers_by_name,can_see');
 
     $route->post('user/classified', 'App\Http\Controllers\v1\User\UserController@updateDealerClassifieds');
+
+    $route->get('tt-dealers', 'App\Http\Controllers\v1\User\UserController@listOfTTDealers');
 
 
     /*
@@ -1159,6 +1168,17 @@ $api->version('v1', function ($route) {
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');
                 });
+
+                // Mosaico
+                $route->group([
+                    'prefix' => 'mosaico'
+                ], function($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Email\MosaicoController@getConfigs');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\MosaicoController@processHtml');
+                    $route->post('/upload', 'App\Http\Controllers\v1\CRM\Email\MosaicoController@uploadImages');
+                    $route->get('/upload', 'App\Http\Controllers\v1\CRM\Email\MosaicoController@getImages');
+                    $route->get('/img', 'App\Http\Controllers\v1\CRM\Email\MosaicoController@processImage');
+                });
             });
 
             /*
@@ -1434,6 +1454,22 @@ $api->version('v1', function ($route) {
         $route->post('reports/custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@customReport');
         $route->post('reports/export-custom-sales', 'App\Http\Controllers\v1\Pos\SalesReportController@exportCustomReport');
         $route->get('reports/service-monthly-hours', 'App\Http\Controllers\v1\Dms\ServiceOrder\ReportsController@monthly');
+
+        /**
+         * CRM Reports
+         */
+        $route->group([
+            'prefix' => 'reports/crm',
+            'middleware' => 'report.validate'
+        ], function($route) {
+
+            $route->get('/', 'App\Http\Controllers\v1\CRM\ReportsController@index');
+            $route->put('/', 'App\Http\Controllers\v1\CRM\ReportsController@create');
+            $route->delete('/{reportId}', 'App\Http\Controllers\v1\CRM\ReportsController@destroy');
+            $route->get('/filtered', 'App\Http\Controllers\v1\CRM\ReportsController@getFilteredLeads');
+            $route->get('/filtered-inventory', 'App\Http\Controllers\v1\CRM\ReportsController@getFilteredInventories');
+        });
+        
         /*
         |--------------------------------------------------------------------------
         | Parts related
