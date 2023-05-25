@@ -202,6 +202,43 @@ class TemplateControllerTest extends IntegrationTestCase
     /**
      * @group CRM
      * @covers ::create
+     */
+    public function testCreateTemplateSameKey()
+    {
+        // Initialize the required data for the template
+        $rawTemplate = [
+            'name' => 'Create Email Template Test',
+            'template' => self::TEMPLATE_FILE,
+            'template_key' => Str::random(7)
+        ];
+
+        // PUT the data into the API
+        $response = $this->json(
+            'PUT',
+            self::API_ENDPOINT,
+            $rawTemplate,
+            ['access-token' => $this->accessToken]
+        );
+
+        // Check if we have a valid response from the API
+        $response->assertStatus(200)
+            ->assertJsonStructure(self::SINGLE_JSON_STRUCTURE);
+
+        // create another template with same key
+        $response = $this->json(
+            'PUT',
+            self::API_ENDPOINT,
+            $rawTemplate,
+            ['access-token' => $this->accessToken]
+        );
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['template_key']);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::create
      * @dataProvider badArgumentsProvider
      */
     public function testCreateWithBadArguments(
