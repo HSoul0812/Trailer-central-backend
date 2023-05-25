@@ -46,6 +46,7 @@ use App\Http\Middleware\Marketing\Facebook\PagetabValidate;
 use App\Http\Middleware\Parts\PartOrderValidate;
 use App\Http\Middleware\CRM\Leads\LeadDocumentValidate;
 use App\Http\Middleware\CRM\Leads\LeadSourceValidate;
+use App\Http\Middleware\CRM\Report\ReportValidate;
 
 class Kernel extends HttpKernel
 {
@@ -147,6 +148,7 @@ class Kernel extends HttpKernel
         'integration-permission' => IntegrationPermission::class,
         'leads.document.validate' => LeadDocumentValidate::class,
         'leads.source.validate' => LeadSourceValidate::class,
+        'report.validate' => ReportValidate::class,
     ];
 
     /**
