@@ -13,8 +13,8 @@ class CreateWebsiteUsersCacheTable extends Migration
     {
         Schema::create('website_user_caches', function (Blueprint $table) {
             $table->id();
-            $table->json('profile_data');
-            $table->json('inventory_data');
+            $table->json('profile_data')->default('null');
+            $table->json('inventory_data')->default('null');
             $table->timestamps();
 
             $table->foreignId('website_user_id')->unique()

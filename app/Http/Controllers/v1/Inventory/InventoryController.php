@@ -118,8 +118,15 @@ class InventoryController extends AbstractRestfulController
     {
         $user = auth('api')->user();
         $progress = $request->all();
-        $user->cache->inventory_data = $progress;
-        $user->cache->save();
+        if (!$user->cache) {
+            $user->cache()->create([
+                'inventory_data' => $progress,
+            ]);
+        } else {
+            $user->cache->update([
+                'inventory_data' => $progress,
+            ]);
+        }
 
         return $this->response->noContent();
     }
@@ -129,7 +136,7 @@ class InventoryController extends AbstractRestfulController
         $user = auth('api')->user();
 
         return $this->response->array(
-            $user->cache->inventory_data ?: []
+            $user->cache && $user->cache->inventory_data ? $user->cache->inventory_data : []
         );
     }
 

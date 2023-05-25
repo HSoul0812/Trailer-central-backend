@@ -70,6 +70,7 @@ class UsersService implements UsersServiceInterface
         $options['headers'] = [
             'access-token' => $accessToken,
         ];
+        $options['verify'] = false;
 
         try {
             $response = $this->httpClient->request($method, $url, $options);
