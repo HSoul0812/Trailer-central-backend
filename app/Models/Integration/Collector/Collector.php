@@ -153,7 +153,8 @@ class Collector extends Model implements Filterable
     public const MEASURE_FORMATS = [
         'Feet' => 'feet',
         'Inches' => 'inches',
-        'Feet Inches String (e.g "10\' 22\'")' => 'feet_inches_string'
+        'Feet Inches String (e.g "10\' 22\'\'")' => 'feet_inches_string',
+        'Dirty Measure String (e.g "24\' 11", "32’ 10”", "41\'", "35.92ft", "32’ 10”", "163", "22ft10"", etc.)' => 'dirty_measure_string'
     ];
 
     /**
