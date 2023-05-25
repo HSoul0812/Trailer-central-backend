@@ -28,6 +28,6 @@ class CreateWebsiteUsersCacheTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('website_users_cache');
+        Schema::dropIfExists('website_user_caches');
     }
 }
