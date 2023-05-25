@@ -14,11 +14,11 @@ use App\Http\Requests\Inventory\UpdateInventoryRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\Inventory\InventorySDKServiceInterface;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Services\WebsiteUser\AuthServiceInterface;
 use App\Transformers\Inventory\InventoryListResponseTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryCreateTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryDeleteTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryTransformer;
-use Cache;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
@@ -28,6 +28,7 @@ class InventoryController extends AbstractRestfulController
      * Create a new controller instance.
      */
     public function __construct(
+        private AuthServiceInterface $authService,
         private InventoryServiceInterface $inventoryService,
         private InventorySDKServiceInterface $inventorySDKService,
         private TcApiResponseInventoryTransformer $transformer,
@@ -42,6 +43,8 @@ class InventoryController extends AbstractRestfulController
     {
         $user = auth('api')->user();
         if ($request->validate()) {
+            $this->authService->createTcUserIfNotExist($user);
+
             return $this->response->item(
                 $this->inventoryService->create($user->tc_user_id, $request->all()),
                 new TcApiResponseInventoryCreateTransformer()
@@ -115,7 +118,8 @@ class InventoryController extends AbstractRestfulController
     {
         $user = auth('api')->user();
         $progress = $request->all();
-        Cache::forever($user->getAuthIdentifier() . '/trailer-progress', json_encode($progress));
+        $user->cache->inventory_data = $progress;
+        $user->cache->save();
 
         return $this->response->noContent();
     }
@@ -125,7 +129,7 @@ class InventoryController extends AbstractRestfulController
         $user = auth('api')->user();
 
         return $this->response->array(
-            json_decode(Cache::get($user->getAuthIdentifier() . '/trailer-progress', '{}'), true)
+            $user->cache->inventory_data ?: []
         );
     }
 

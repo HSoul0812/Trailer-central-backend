@@ -133,13 +133,41 @@ class AuthService implements AuthServiceInterface
         return $this->websiteUserRepository->update($user->id, $attributes);
     }
 
+    public function createTcUserIfNotExist(WebsiteUser $user)
+    {
+        if (!$user->tc_user_id) {
+            if (!$user->cache->profile_data) {
+                throw ValidationException::withMessages([
+                    'profile_data' => 'The user profile data doesn\'t exist',
+                ]);
+            }
+
+            $tcUser = $this->createTcUser($user->cache->profile_data);
+            $user->tc_user_id = $tcUser->id;
+            $user->save();
+        }
+    }
+
     private function createUser(array $attributes)
     {
-        $tcUser = $this->createTcUser($attributes);
+        $user = $this->websiteUserRepository->create($attributes);
+        $this->cacheUserData($user, $attributes);
 
-        $attributes['tc_user_id'] = $tcUser->id;
+        return $user;
+    }
 
-        return $this->websiteUserRepository->create($attributes);
+    private function cacheUserData(WebsiteUser $user, array $data)
+    {
+        if ($user->cache) {
+            $user->cache->update([
+                'profile_data' => $data,
+            ]);
+            $user->cache->save();
+        } else {
+            $user->cache()->create([
+                'profile_data' => $data,
+            ]);
+        }
     }
 
     private function createTcUser(array $data): TcApiResponseUser

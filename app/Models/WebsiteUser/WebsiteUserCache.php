@@ -14,6 +14,11 @@ class WebsiteUserCache extends Model
         'inventory_data',
     ];
 
+    protected $casts = [
+        'profile_data' => 'array',
+        'inventory_data' => 'array',
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(WebsiteUser::class);
