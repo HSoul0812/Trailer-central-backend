@@ -8,6 +8,7 @@ use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInter
 interface InventoryServiceInterface
 {
     public function search(array                $dealerIds,
+                           int                  $aggregationSize,
                            array                $terms,
                            GeolocationInterface $geolocation,
                            array                $sort = [],
