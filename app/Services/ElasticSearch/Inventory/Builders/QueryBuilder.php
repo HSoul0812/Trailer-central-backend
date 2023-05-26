@@ -19,216 +19,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     /**  @var FieldMapperService */
     private $mapper;
 
-    private const AGGREGATION_SIZE = 200;
-
-    private $aggregations = [
-        'status' => [
-            'terms' => [
-                'field' => 'status',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'dry_weight' => [
-            'stats' => [
-                'field' => 'dryWeight'
-            ]
-        ],
-        'is_featured' => [
-            'terms' => [
-                'field' => 'isFeatured',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'gvwr' => [
-            'stats' => [
-                'field' => 'gvwr'
-            ]
-        ],
-        'fuel_type' => [
-            'terms' => [
-                'field' => 'fuelType',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'sleeping_capacity' => [
-            'terms' => [
-                'field' => 'numSleeps',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'is_special' => [
-            'terms' => [
-                'field' => 'isSpecial',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'category' => [
-            'terms' => [
-                'field' => 'category',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'condition' => [
-            'terms' => [
-                'field' => 'condition',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'length' => [
-            'stats' => [
-                'field' => 'length'
-            ]
-        ],
-        'length_inches' => [
-            'stats' => [
-                'field' => 'lengthInches'
-            ]
-        ],
-        'width_inches' => [
-            'stats' => [
-                'field' => 'widthInches'
-            ]
-        ],
-        'width' => [
-            'stats' => [
-                'field' => 'width'
-            ]
-        ],
-        'height' => [
-            'stats' => [
-                'field' => 'height'
-            ]
-        ],
-        'height_inches' => [
-            'stats' => [
-                'field' => 'heightInches'
-            ]
-        ],
-        'dealer_location_id' => [
-            'terms' => [
-                'field' => 'dealerLocationId',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'pull_type' => [
-            'terms' => [
-                'field' => 'pullType',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'stalls' => [
-            'terms' => [
-                'field' => 'numStalls',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'livingquarters' => [
-            'terms' => [
-                'field' => 'hasLq',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'slideouts' => [
-            'terms' => [
-                'field' => 'numSlideouts',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'configuration' => [
-            'terms' => [
-                'field' => 'loadType',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'midtack' => [
-            'terms' => [
-                'field' => 'hasMidtack',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'payload_capacity' => [
-            'stats' => [
-                'field' => 'payloadCapacity'
-            ]
-        ],
-        'mileage_miles' => [
-            'stats' => [
-                'field' => 'mileageMiles'
-            ]
-        ],
-        'mileage_kilometres' => [
-            'stats' => [
-                'field' => 'mileageKilometres'
-            ]
-        ],
-        'is_rental' => [
-            'terms' => [
-                'field' => 'isRental',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'manufacturer' => [
-            'terms' => [
-                'field' => 'manufacturer',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'brand' => [
-            'terms' => [
-                'field' => 'brand',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'price' => [
-            'stats' => [
-                'field' => 'basicPrice'
-            ]
-        ],
-        'year' => [
-            'terms' => [
-                'field' => 'year',
-                'size' => self::AGGREGATION_SIZE,
-                'order' => [
-                    '_term' => 'desc'
-                ]
-            ]
-        ],
-        'axles' => [
-            'terms' => [
-                'field' => 'numAxles',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'construction' => [
-            'terms' => [
-                'field' => 'frameMaterial',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'color' => [
-            'terms' => [
-                'field' => 'color',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'ramps' => [
-            'terms' => [
-                'field' => 'hasRamps',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'floor_plans' => [
-            'terms' => [
-                'field' => 'featureList.floorPlan',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'passengers' => [
-            'stats' => [
-                'field' => 'numPassengers'
-            ]
-        ]
-    ];
+    private $aggregations = [];
 
     private $query = [
         'track_total_hits' => true,
@@ -664,5 +455,219 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 "boost_mode" => "replace",
             ]
         ];
+    }
+
+    public function initializeAggregators(int $aggregationSize): QueryBuilderInterface
+    {
+        $this->aggregations = [
+            'status' => [
+                'terms' => [
+                    'field' => 'status',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'dry_weight' => [
+                'stats' => [
+                    'field' => 'dryWeight'
+                ]
+            ],
+            'is_featured' => [
+                'terms' => [
+                    'field' => 'isFeatured',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'gvwr' => [
+                'stats' => [
+                    'field' => 'gvwr'
+                ]
+            ],
+            'fuel_type' => [
+                'terms' => [
+                    'field' => 'fuelType',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'sleeping_capacity' => [
+                'terms' => [
+                    'field' => 'numSleeps',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'is_special' => [
+                'terms' => [
+                    'field' => 'isSpecial',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'category' => [
+                'terms' => [
+                    'field' => 'category',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'condition' => [
+                'terms' => [
+                    'field' => 'condition',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'length' => [
+                'stats' => [
+                    'field' => 'length'
+                ]
+            ],
+            'length_inches' => [
+                'stats' => [
+                    'field' => 'lengthInches'
+                ]
+            ],
+            'width_inches' => [
+                'stats' => [
+                    'field' => 'widthInches'
+                ]
+            ],
+            'width' => [
+                'stats' => [
+                    'field' => 'width'
+                ]
+            ],
+            'height' => [
+                'stats' => [
+                    'field' => 'height'
+                ]
+            ],
+            'height_inches' => [
+                'stats' => [
+                    'field' => 'heightInches'
+                ]
+            ],
+            'dealer_location_id' => [
+                'terms' => [
+                    'field' => 'dealerLocationId',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'pull_type' => [
+                'terms' => [
+                    'field' => 'pullType',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'stalls' => [
+                'terms' => [
+                    'field' => 'numStalls',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'livingquarters' => [
+                'terms' => [
+                    'field' => 'hasLq',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'slideouts' => [
+                'terms' => [
+                    'field' => 'numSlideouts',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'configuration' => [
+                'terms' => [
+                    'field' => 'loadType',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'midtack' => [
+                'terms' => [
+                    'field' => 'hasMidtack',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'payload_capacity' => [
+                'stats' => [
+                    'field' => 'payloadCapacity'
+                ]
+            ],
+            'mileage_miles' => [
+                'stats' => [
+                    'field' => 'mileageMiles'
+                ]
+            ],
+            'mileage_kilometres' => [
+                'stats' => [
+                    'field' => 'mileageKilometres'
+                ]
+            ],
+            'is_rental' => [
+                'terms' => [
+                    'field' => 'isRental',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'manufacturer' => [
+                'terms' => [
+                    'field' => 'manufacturer',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'brand' => [
+                'terms' => [
+                    'field' => 'brand',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'price' => [
+                'stats' => [
+                    'field' => 'basicPrice'
+                ]
+            ],
+            'year' => [
+                'terms' => [
+                    'field' => 'year',
+                    'size' => $aggregationSize,
+                    'order' => [
+                        '_term' => 'desc'
+                    ]
+                ]
+            ],
+            'axles' => [
+                'terms' => [
+                    'field' => 'numAxles',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'construction' => [
+                'terms' => [
+                    'field' => 'frameMaterial',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'color' => [
+                'terms' => [
+                    'field' => 'color',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'ramps' => [
+                'terms' => [
+                    'field' => 'hasRamps',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'floor_plans' => [
+                'terms' => [
+                    'field' => 'featureList.floorPlan',
+                    'size' => $aggregationSize
+                ]
+            ],
+            'passengers' => [
+                'stats' => [
+                    'field' => 'numPassengers'
+                ]
+            ]
+        ];
+
+        return $this;
     }
 }

@@ -10,6 +10,8 @@ interface QueryBuilderInterface
 
     public function addDealers(array $dealerIds): self;
 
+    public function initializeAggregators(int $aggregationSize): self;
+
     public function addTerms(array $terms): self;
 
     public function addSort(array $sort): self;

@@ -21,6 +21,8 @@ use Illuminate\Validation\Rule;
  */
 class SearchInventoryRequest extends Request
 {
+    private const AGGREGATION_SIZE = 200;
+
     public function terms(): array
     {
         return $this->json('filter_groups');
@@ -111,5 +113,10 @@ class SearchInventoryRequest extends Request
     public function requestId()
     {
         return $this->json('request_id');
+    }
+
+    public function aggregationSize(): int
+    {
+        return (int)$this->json('aggregation_size',self::AGGREGATION_SIZE);
     }
 }
