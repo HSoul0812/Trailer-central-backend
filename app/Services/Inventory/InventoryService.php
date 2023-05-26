@@ -301,6 +301,10 @@ class InventoryService implements InventoryServiceInterface
                     $params['description_html'] = $this->convertMarkdown($params['description']);
                 }
 
+                if ($params['chosen_overlay'] === null) {
+                    $params['chosen_overlay'] = '';
+                }
+
                 $inventory = $this->inventoryRepository->create($params);
 
                 if (!$inventory instanceof Inventory) {
@@ -398,6 +402,10 @@ class InventoryService implements InventoryServiceInterface
                     if ($location->postalcode) {
                         $params['geolocation'] = $this->geoLocationService->geoPointFromZipCode($location->postalcode);
                     }
+                }
+
+                if ($params['chosen_overlay'] === null) {
+                    $params['chosen_overlay'] = '';
                 }
 
                 $inventory = $this->inventoryRepository->update($params, $options);
