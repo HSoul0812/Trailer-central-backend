@@ -90,7 +90,9 @@ class InventorySDKService implements InventorySDKServiceInterface
         $this->request = new Request();
         $this->mainFilterGroup = new FilterGroup();
 
-        $this->request->addFilterGroup($this->mainFilterGroup);
+        $this->request
+            ->addFilterGroup($this->mainFilterGroup)
+            ->withAggregationSize(config('inventory-sdk.aggregation_size'));
 
         $sdk = new Sdk(config('inventory-sdk.url'), [
             'headers' => [
