@@ -44,6 +44,7 @@ class ValidInventoryInquiry implements Rule
             foreach ($dealersIds as $dealerId) {
                 if($inventory->dealer_id == $dealerId) {
                     $isInventoryFound = true;
+                    break;
                 }
             }
             return $isInventoryFound;

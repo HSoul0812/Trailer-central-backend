@@ -50,6 +50,7 @@ class ValidDealerLocationInquiry implements Rule
             foreach ($dealersIds as $dealerId) {
                 if($dealerLocation->dealer_id == $dealerId) {
                     $isLocationFound = true;
+                    break;
                 }
             }
             return $isLocationFound;
