@@ -182,11 +182,6 @@ class Kernel extends ConsoleKernel
          * Import textrail parts
          */
 
-        $schedule->command('command:get-textrail-parts')
-           ->dailyAt('1:00')
-           ->onOneServer()
-           ->runInBackground();
-
         if ($this->isProduction()) {
             /**
              * @todo Calo say we could schedule this to be removed in next scheduled release (Early May of 2023)
