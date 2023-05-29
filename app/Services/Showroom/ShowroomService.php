@@ -296,8 +296,14 @@ class ShowroomService implements ShowroomServiceInterface
         $position = 1;
 
         foreach ($showroomImages as $showroomImage) {
+            $url = env('CDN_URL') . '/showroom-files/' . $showroomImage->src;
+
+            if (!filter_var($url, FILTER_VALIDATE_URL)) {
+                continue;
+            }
+
             $image = [
-                'url' => config('app.cdn_url') . '/showroom-files/' . $showroomImage->src,
+                'url' => $url,
                 'is_stock' => $showroomImage->has_stock_overlay,
                 'position' => $position++,
             ];
