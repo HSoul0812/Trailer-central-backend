@@ -301,7 +301,7 @@ class InventoryService implements InventoryServiceInterface
                     $params['description_html'] = $this->convertMarkdown($params['description']);
                 }
 
-                if ($params['chosen_overlay'] === null) {
+                if (empty($params['chosen_overlay'])) {
                     $params['chosen_overlay'] = '';
                 }
 
@@ -409,7 +409,7 @@ class InventoryService implements InventoryServiceInterface
                     }
                 }
 
-                if ($params['chosen_overlay'] === null) {
+                if (empty($params['chosen_overlay'])) {
                     $params['chosen_overlay'] = '';
                 }
 
