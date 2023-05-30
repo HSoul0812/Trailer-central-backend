@@ -151,6 +151,10 @@ class InventoryService implements InventoryServiceInterface
         $params['category'] = $categoryMapping->map_to;
         $params['entity_type_id'] = $categoryMapping->entity_type_id;
 
+        if (!isset($params['show_on_website'])) {
+            $params['show_on_website'] = 0;
+        }
+
         $inventory = $this->handleHttpRequest(
             'PUT',
             $url,
