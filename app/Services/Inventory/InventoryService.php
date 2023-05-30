@@ -19,7 +19,6 @@ use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
 use Cache;
-use Carbon\Carbon;
 use Dingo\Api\Routing\Helpers;
 use Exception;
 use GuzzleHttp\Client as GuzzleHttpClient;
@@ -238,13 +237,6 @@ class InventoryService implements InventoryServiceInterface
         $respObj->dealer['benefit_statement'] = $dealer[0]->logo['data']['benefit_statement'] ?? '';
 
         return $respObj;
-    }
-
-    public function hideExpired()
-    {
-        $from = Carbon::today()->startOfDay();
-        $to = Carbon::today()->startOfDay()->addDay();
-        $this->inventoryRepository->hideExpiredItems($from, $to);
     }
 
     public function attributes(array $params): Collection
