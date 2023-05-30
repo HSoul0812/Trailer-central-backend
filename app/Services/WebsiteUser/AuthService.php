@@ -151,7 +151,8 @@ class AuthService implements AuthServiceInterface
     private function createUser(array $attributes)
     {
         $user = $this->websiteUserRepository->create($attributes);
-        $this->cacheUserData($user, $attributes);
+
+        $this->cacheUserData($user, array_diff_key($attributes, array_flip(['password', 'password_confirm'])));
 
         return $user;
     }
