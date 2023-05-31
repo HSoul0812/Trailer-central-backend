@@ -35,6 +35,9 @@ class HumanOnly
         // We use trailertrader-frontend on the server.js file of the frontend side
         'trailertrader',
 
+        // We'll allow access from DW too
+        'bens-playground',
+
         // We'll allow Google Bots
         // @see https://developers.google.com/search/docs/crawling-indexing/overview-google-crawlers
         'APIs-Google',
@@ -85,9 +88,12 @@ class HumanOnly
             return true;
         }
 
+        // Always block anything else
+        return false;
+
         // Do not allow request to go through if it's from a bot
         // Ref: https://github.com/JayBizzle/Crawler-Detect/blob/master/raw/Crawlers.json
-        return !LaravelCrawlerDetect::isCrawler($request->userAgent());
+        // return !LaravelCrawlerDetect::isCrawler($request->userAgent());
     }
 
     private function allowUserAgent(string $userAgent): bool
