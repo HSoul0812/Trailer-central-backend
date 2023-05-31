@@ -132,10 +132,8 @@ class SafeIndexer
         $this->dispatchAndMonitorMainInventoryIngestion();
         $this->dispatchAndMonitorRecentlyUpdatedInventoryIngestion();
 
-        // it will delete all indexes excepts the current one, so it may help as rollback
-        $indexesToDelete = $this->indexes->filter(function (array $aliases, string $indexName): bool {
-            return $indexName !== $this->currentIndexName;
-        })->toArray();
+        // it will delete all unnecessary indexes
+        $indexesToDelete = $this->indexes->toArray();
 
         $numberOfDocuments = $this->elasticEngine->numberOfDocuments($this->newIndexName);
 

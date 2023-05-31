@@ -171,7 +171,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
                 try {
                     $this->indexManager->drop($indexName);
                 } catch (Exception $exception) {
-                    // dropping an index should not interrups a subsequent process
+                    // dropping an index should not interrupts a subsequent process
                     // it should only notifies
                     Log::critical($exception->getMessage(), ['indexName' => $indexName]);
                 }

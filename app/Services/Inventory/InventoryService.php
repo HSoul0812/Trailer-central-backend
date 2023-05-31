@@ -305,6 +305,11 @@ class InventoryService implements InventoryServiceInterface
                     $params['chosen_overlay'] = '';
                 }
 
+                if (!empty($params['tt_payment_expiration_date'])) {
+                    $params['tt_payment_expiration_date'] = Carbon::parse($params['tt_payment_expiration_date'])
+                        ->format('Y-m-d H:i:s');
+                }
+
                 $inventory = $this->inventoryRepository->create($params);
 
                 if (!$inventory instanceof Inventory) {
@@ -406,6 +411,11 @@ class InventoryService implements InventoryServiceInterface
 
                 if ($params['chosen_overlay'] === null) {
                     $params['chosen_overlay'] = '';
+                }
+
+                if (!empty($params['tt_payment_expiration_date'])) {
+                    $params['tt_payment_expiration_date'] = Carbon::parse($params['tt_payment_expiration_date'])
+                        ->format('Y-m-d H:i:s');
                 }
 
                 $inventory = $this->inventoryRepository->update($params, $options);

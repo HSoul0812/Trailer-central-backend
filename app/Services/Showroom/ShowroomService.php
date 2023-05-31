@@ -146,13 +146,13 @@ class ShowroomService implements ShowroomServiceInterface
         $unit['payload_capacity'] = preg_replace('/[^0-9]/', '', $showroom->payload_capacity);
 
         if (!empty($showroom->length_max)) {
-            $unit['length_inches'] = $this->convertHelper->fromFeetAndInches($showroom->length_max, ConvertHelper::DISPLAY_MODE_INCHES_ONLY, ConvertHelper::TYPE_LENGTH);
-            $unit['length'] = $this->convertHelper->fromFeetAndInches($showroom->length_max, ConvertHelper::DISPLAY_MODE_FEET_ONLY, ConvertHelper::TYPE_LENGTH);
+            $unit['length_inches'] = $this->convertHelper->fromFeetAndInches($showroom->length_max, ConvertHelper::DISPLAY_MODE_INCHES_ONLY, ConvertHelper::TYPE_LENGTH) ?? 0;
+            $unit['length'] = $this->convertHelper->fromFeetAndInches($showroom->length_max, ConvertHelper::DISPLAY_MODE_FEET_ONLY, ConvertHelper::TYPE_LENGTH) ?? 0;
         }
 
         if (!empty($showroom->width_max_real)) {
-            $unit['width_inches'] = $this->convertHelper->fromFeetAndInches($showroom->width_max_real, ConvertHelper::DISPLAY_MODE_INCHES_ONLY, ConvertHelper::TYPE_WIDTH);
-            $unit['width'] = $this->convertHelper->fromFeetAndInches($showroom->width_max_real, ConvertHelper::DISPLAY_MODE_FEET_ONLY, ConvertHelper::TYPE_WIDTH);
+            $unit['width_inches'] = $this->convertHelper->fromFeetAndInches($showroom->width_max_real, ConvertHelper::DISPLAY_MODE_INCHES_ONLY, ConvertHelper::TYPE_WIDTH) ?? 0;
+            $unit['width'] = $this->convertHelper->fromFeetAndInches($showroom->width_max_real, ConvertHelper::DISPLAY_MODE_FEET_ONLY, ConvertHelper::TYPE_WIDTH) ?? 0;
         }
 
         if (!empty($showroom->video_embed_code)) {
@@ -174,6 +174,11 @@ class ShowroomService implements ShowroomServiceInterface
         $unit['new_files'] = array_merge($unit['new_files'] ?? [], $files);
         $unit['features'] = array_merge($unit['features'] ?? [], $features);
         $unit['attributes'] = array_merge($unit['attributes'] ?? [], $inventoryAttributes);
+
+        // remove duplicates
+        $unit['attributes'] = array_intersect_key($unit['attributes'], array_unique(array_map(function ($attribute) {
+            return $attribute['attribute_id'];
+        }, $unit['attributes'])));
 
         return $unit;
     }
@@ -291,8 +296,14 @@ class ShowroomService implements ShowroomServiceInterface
         $position = 1;
 
         foreach ($showroomImages as $showroomImage) {
+            $url = env('CDN_URL') . '/showroom-files/' . $showroomImage->src;
+
+            if (!filter_var($url, FILTER_VALIDATE_URL)) {
+                continue;
+            }
+
             $image = [
-                'url' => config('app.cdn_url') . '/showroom-files/' . $showroomImage->src,
+                'url' => $url,
                 'is_stock' => $showroomImage->has_stock_overlay,
                 'position' => $position++,
             ];
