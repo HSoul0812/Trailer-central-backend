@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\v1\Inventory\AttributesController;
+use App\Http\Controllers\v1\Inventory\BrandController;
 use App\Http\Controllers\v1\Inventory\InventoryController;
 
 $api = app(Dingo\Api\Routing\Router::class);
@@ -30,5 +31,6 @@ $api->version('v1', function ($api) {
             ->middleware('auth:api');
 
         $api->get('/attributes', [AttributesController::class, 'index']);
+        $api->get('/brands', [BrandController::class, 'index']);
     });
 });
