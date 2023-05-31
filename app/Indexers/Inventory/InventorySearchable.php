@@ -4,10 +4,12 @@ namespace App\Indexers\Inventory;
 
 use App\Indexers\Searchable;
 use App\Indexers\WithIndexConfigurator;
+use App\Models\Inventory\Inventory;
 use App\Observers\Inventory\InventoryObserver;
 use App\Repositories\FeatureFlagRepositoryInterface;
 use Exception;
 use App\Jobs\Scout\MakeSearchable;
+use Illuminate\Support\Collection;
 use Laravel\Scout\ModelObserver;
 use App\Models\User\User as Dealer;
 
@@ -96,12 +98,21 @@ trait InventorySearchable
      */
     public static function makeAllSearchable(): void
     {
-        Dealer::query()->select('dealer.dealer_id')
-            ->get()
-            ->each(function (Dealer $dealer): void {
-                self::query()->select('inventory.inventory_id')
-                    ->where('inventory.dealer_id', $dealer->dealer_id)
-                    ->searchable();
+        $chunkSize = 500;
+        $sleepThreshold = 10000;
+        $sleepSeconds = 10;
+        $totalCount = 0;
+
+        Inventory::query()
+            ->chunkById($chunkSize, function (Collection $inventories) use (&$totalCount, &$sleepThreshold, &$sleepSeconds) {
+                $inventories->searchable();
+
+                $totalCount += $inventories->count();
+
+                if ($totalCount >= $sleepThreshold) {
+                    sleep($sleepSeconds);
+                    $totalCount = 0;
+                }
             });
     }
 
