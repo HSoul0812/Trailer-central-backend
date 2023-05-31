@@ -57,8 +57,22 @@ class HumanOnly
         'Google-Site-Verification',
     ];
 
+    /**
+     * @var string[]
+     */
+    private array $allowedDomainNames = [
+        'qa.trailertrader.com',
+        'deployment.trailertrader.com',
+        'trailertrader.com',
+    ];
+
     public function handle(Request $request, Closure $next)
     {
+        // Allow localhost domain if env is not production
+        if (config('app.env') !== 'production') {
+            $this->allowedDomainNames[] = 'localhost';
+        }
+
         if ($this->shouldAllowRequestToGoThrough($request)) {
             return $next($request);
         }
@@ -70,6 +84,13 @@ class HumanOnly
 
     private function shouldAllowRequestToGoThrough(Request $request): bool
     {
+        // Allow domain in the allowed list
+        $origin = trim(parse_url($request->headers->get('origin'), PHP_URL_HOST));
+
+        if (in_array($origin, $this->allowedDomainNames)) {
+            return true;
+        }
+
         // Allow request to go through if it's in the allows ip address list
         // even when the user agent is empty
         if ($this->allowIpAddress($request->ip())) {
