@@ -118,6 +118,13 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * @return null|LeadAssign
      */
     public function autoAssign(Lead $lead): ?LeadAssign {
+        // Don't Auto Assign if Spam
+        if(!empty($lead->is_spam)) {
+            $this->log->error('FATAL ERROR: The Lead #' . $lead->identifier .
+                                ' is marked as spam and should not have been sent through auto assign!');
+            return null;
+        }
+
         // Initialize Comments
         $dealer = $lead->newDealerUser;
         $this->addLeadExplanationNotes($lead->identifier, 'Checking Lead #' . $lead->identifier . ' and Dealer #' . $dealer->id . ' ' . $dealer->name . ' to Auto Assign');

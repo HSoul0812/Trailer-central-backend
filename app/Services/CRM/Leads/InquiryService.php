@@ -337,7 +337,7 @@ class InquiryService implements InquiryServiceInterface
     private function queueInquiryJobs(Lead $lead, InquiryLead $inquiry)
     {
         // Create Auto Assign Job
-        if (empty($lead->leadStatus->sales_person_id)) {
+        if (empty($lead->leadStatus->sales_person_id) && empty($lead->is_spam)) {
             // Dispatch Auto Assign Job
             $this->log->info('Handling auto assign on lead #' . $lead->identifier);
             $job = new AutoAssignJob($lead);
@@ -345,7 +345,7 @@ class InquiryService implements InquiryServiceInterface
         }
 
         // Export ADF if Possible
-        if (!in_array(LeadType::TYPE_FINANCING, $inquiry->leadTypes)) {
+        if (!in_array(LeadType::TYPE_FINANCING, $inquiry->leadTypes) && empty($lead->is_spam)) {
             $this->log->info('Handling ADF export on lead #' . $lead->identifier);
             $this->adf->export($lead);
 
