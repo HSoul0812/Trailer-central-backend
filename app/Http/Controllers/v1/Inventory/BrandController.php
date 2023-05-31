@@ -2,26 +2,28 @@
 
 namespace App\Http\Controllers\v1\Inventory;
 
+use App\DTOs\Inventory\TcApiResponseBrand;
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\Inventory\Brand\IndexBrandRequest;
 use App\Http\Requests\UpdateRequestInterface;
+use App\Services\Inventory\InventoryService;
 use App\Transformers\Inventory\BrandTransformer;
 use Dingo\Api\Http\Response;
 use Illuminate\Support\Facades\Http;
 
 class BrandController extends AbstractRestfulController
 {
-    protected $brandTransformer;
     /**
      * Create a new controller instance.
      *
      */
-    public function __construct(BrandTransformer $brandTransformer)
-    {
-        $this->brandTransformer = $brandTransformer;
+    public function __construct(
+        private BrandTransformer $brandTransformer,
+        private InventoryService $inventoryService
+    ) {
         parent::__construct();
     }
 
@@ -31,9 +33,7 @@ class BrandController extends AbstractRestfulController
     public function index(IndexRequestInterface $request): Response
     {
         if ($request->validate()) {
-            $brands = Http::tcApi()->get('inventory/brands')
-                ->throw()
-                ->collect('data');
+            $brands = $this->inventoryService->getBrands();
 
             return $this->response->collection($brands, $this->brandTransformer);
         }

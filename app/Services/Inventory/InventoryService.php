@@ -4,6 +4,7 @@ namespace App\Services\Inventory;
 
 use App\Domains\Inventory\Actions\DeleteLocalImagesFromNewImagesAction;
 use App\DTOs\Inventory\TcApiResponseAttribute;
+use App\DTOs\Inventory\TcApiResponseBrand;
 use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
 use App\DTOs\Inventory\TcApiResponseInventoryDelete;
@@ -688,5 +689,17 @@ class InventoryService implements InventoryServiceInterface
         } else {
             $queryBuilder->addTermInValuesQuery(self::TERM_SEARCH_KEY_MAP['availability'], self::INVENTORY_AVAILABLE);
         }
+    }
+
+    public function getBrands(): Collection
+    {
+        $brandsUrl = config('services.trailercentral.api') . 'inventory/brands';
+
+        $brands = $this->handleHttpRequest('GET', $brandsUrl, ['query' => ['per_page' => 9999]]);
+
+        return collect($brands['data'])
+            ->map(function ($brand) {
+                return TcApiResponseBrand::fromData($brand);
+            });
     }
 }
