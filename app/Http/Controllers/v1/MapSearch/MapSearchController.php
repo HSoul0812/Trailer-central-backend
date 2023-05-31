@@ -28,6 +28,10 @@ class MapSearchController extends AbstractRestfulController
 
     public function autocomplete(AutocompleteRequest $request): Response
     {
+        return $this->response->array([
+            'data' => [],
+        ]);
+
         if (!$request->validate()) {
             $this->response->errorBadRequest();
         }
@@ -46,6 +50,10 @@ class MapSearchController extends AbstractRestfulController
 
     public function geocode(GeocodeRequest $request): Response
     {
+        return $this->response->array([
+            'data' => [],
+        ]);
+
         if (!$request->validate()) {
             $this->response->errorBadRequest();
         }
@@ -71,6 +79,10 @@ class MapSearchController extends AbstractRestfulController
 
     public function reverse(ReverseRequest $request): Response
     {
+        return $this->response->array([
+            'data' => [],
+        ]);
+
         if (!$request->validate()) {
             $this->response->errorBadRequest();
         }
