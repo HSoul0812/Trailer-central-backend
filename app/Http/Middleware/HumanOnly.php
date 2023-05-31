@@ -35,6 +35,9 @@ class HumanOnly
         // We use trailertrader-frontend on the server.js file of the frontend side
         'trailertrader',
 
+        // We'll allow access from DW too
+        'bens-playground',
+
         // We allow all the call from TrailerCentral API server
         'TrailerCentral API',
 
@@ -57,8 +60,22 @@ class HumanOnly
         'Google-Site-Verification',
     ];
 
+    /**
+     * @var string[]
+     */
+    private array $allowedDomainNames = [
+        'qa.trailertrader.com',
+        'deployment.trailertrader.com',
+        'trailertrader.com',
+    ];
+
     public function handle(Request $request, Closure $next)
     {
+        // Allow localhost domain if env is not production
+        if (config('app.env') !== 'production') {
+            $this->allowedDomainNames[] = 'localhost';
+        }
+
         if ($this->shouldAllowRequestToGoThrough($request)) {
             return $next($request);
         }
@@ -70,6 +87,13 @@ class HumanOnly
 
     private function shouldAllowRequestToGoThrough(Request $request): bool
     {
+        // Allow domain in the allowed list
+        $origin = trim(parse_url($request->headers->get('origin'), PHP_URL_HOST));
+
+        if (in_array($origin, $this->allowedDomainNames)) {
+            return true;
+        }
+
         // Allow request to go through if it's in the allows ip address list
         // even when the user agent is empty
         if ($this->allowIpAddress($request->ip())) {
@@ -88,9 +112,12 @@ class HumanOnly
             return true;
         }
 
+        // Always block anything else
+        return false;
+
         // Do not allow request to go through if it's from a bot
         // Ref: https://github.com/JayBizzle/Crawler-Detect/blob/master/raw/Crawlers.json
-        return !LaravelCrawlerDetect::isCrawler($request->userAgent());
+        // return !LaravelCrawlerDetect::isCrawler($request->userAgent());
     }
 
     private function allowUserAgent(string $userAgent): bool
