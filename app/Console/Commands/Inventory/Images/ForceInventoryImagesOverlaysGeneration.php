@@ -32,7 +32,7 @@ class ForceInventoryImagesOverlaysGeneration extends Command
     {
 
         /** @var int $dealerId */
-        $dealerId = $this->argument('dealer_ids');
+        $dealerId = $this->argument('dealer_id');
 
         User::query()
             ->where('dealer_id', $dealerId)
