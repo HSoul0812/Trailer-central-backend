@@ -55,6 +55,10 @@ class UpdateInventoryRequest extends SaveInventoryRequest
 
             'changed_fields_in_dashboard' => 'array|nullable',
             'source' => 'sometimes|string',
+
+            'features' => 'array|nullable',
+            'features.*.feature_list_id' => 'int|exists:App\Models\Inventory\InventoryFeatureList,feature_list_id',
+            'features.*.value' => 'string',
         ]);
     }
 }
