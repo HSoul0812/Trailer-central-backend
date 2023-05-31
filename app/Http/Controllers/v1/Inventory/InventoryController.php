@@ -123,7 +123,7 @@ class InventoryController extends AbstractRestfulController
                 'inventory_data' => $progress,
             ]);
         } else {
-            $user->cache->update([
+            $user->cache()->update([
                 'inventory_data' => $progress,
             ]);
         }
