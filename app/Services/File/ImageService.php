@@ -318,7 +318,7 @@ class ImageService extends AbstractFileService
         $overlayFilename = $filenameParts[0].('_overlay_'.time());
 
         if (count($filenameParts) > 1) {
-            $overlayFilename .= '.'.$filenameParts[1];
+            $overlayFilename .= '.'.end($filenameParts);
         }
 
         try {
