@@ -14,7 +14,7 @@ class TextInquiryRequest extends Request
         return [
             'dealer_id' => 'required|exists:dealer,dealer_id',
             'website_id' => 'required|website_exists',
-            'dealer_location_id' => 'required|dealer_location_valid',
+            'dealer_location_id' => 'required|dealer_location_inquiry_valid',
             'inventory_id' => 'nullable|exists:inventory,inventory_id,dealer_id,' . $this->dealer_id,
             'phone_number' => 'required|min:10|phone:US,CA,CL,mobile',
             'sms_message' => ['required', new BannedLeadTextsRule()],
