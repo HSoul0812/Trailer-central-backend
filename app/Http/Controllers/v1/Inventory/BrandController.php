@@ -14,14 +14,14 @@ use Illuminate\Support\Facades\Http;
 
 class BrandController extends AbstractRestfulController
 {
-    protected $typesTransformer;
+    protected $brandTransformer;
     /**
      * Create a new controller instance.
      *
      */
-    public function __construct(BrandTransformer $typesTransformer)
+    public function __construct(BrandTransformer $brandTransformer)
     {
-        $this->typesTransformer = $typesTransformer;
+        $this->brandTransformer = $brandTransformer;
         parent::__construct();
     }
 
@@ -34,7 +34,8 @@ class BrandController extends AbstractRestfulController
             $brands = Http::tcApi()->get('inventory/brands')
                 ->throw()
                 ->json();
-            return $this->response->collection($brands, $this->typesTransformer);
+
+            return $this->response->collection(collect($brands), $this->brandTransformer);
         }
 
         return $this->response->errorBadRequest();
