@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Website\Config;
 
 use App\Http\Requests\Request;
+use App\Models\Website\Config\WebsiteConfig;
 
 class CreateOrUpdateRequest extends Request
 {
@@ -83,6 +84,7 @@ class CreateOrUpdateRequest extends Request
             'general/fbchat_plugin_code' => 'string',
             'general/favorites_export_emails' => 'string',
             'general/head_script' => 'string',
+            'general/body_script' => 'string',
             'call-to-action/custom-text' => 'string',
             'website/show_your_search' => ['integer', self::YES_NO],
             'website/show_inventory_count_for_all_locations' => ['integer', self::YES_NO],
@@ -98,6 +100,7 @@ class CreateOrUpdateRequest extends Request
             'showroom/brands' => 'string',
             'general/favorites_export_schedule' => ['integer', 'in:0,1,2,3'],
             'payment-calculator/term-list' => 'json',
+            WebsiteConfig::PAYMENT_CALCULATOR_DURATION_KEY => 'string',
             'inventory/filters/enable_filters' => 'json'
         ];
     }

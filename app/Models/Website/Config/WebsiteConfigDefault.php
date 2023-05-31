@@ -29,6 +29,10 @@ class WebsiteConfigDefault extends Model
     const CONFIG_INCLUDE_ARCHIVING_INVENTORY = 'inventory/include_archived_inventory';
     const CHECKBOX_TYPE = 'checkbox';
 
+    const GROUPING_PAYMENT_CALCULATOR = 'Payment Calculator';
+    const PAYMENT_CALCULATOR_DURATION_MONTHLY = 'monthly';
+    const PAYMENT_CALCULATOR_DURATION_BIWEEKLY = 'biweekly';
+
     protected $table = 'website_config_default';
 
     public $timestamps = false;
@@ -40,7 +44,7 @@ class WebsiteConfigDefault extends Model
     public $incrementing = false;
 
     protected $fillable = [
-      'private', 'type', 'label', 'note', 'grouping', 'values', 'values_mapping',
+        'private', 'type', 'label', 'note', 'grouping', 'values', 'values_mapping',
         'default_label', 'default_value', 'sort_order'
     ];
 
@@ -67,7 +71,7 @@ class WebsiteConfigDefault extends Model
      */
     public function getValueAccordingWebsite(int $websiteId)
     {
-        if(!$this->exists){
+        if (!$this->exists) {
             throw new \RuntimeException('`WebsiteConfigDefault::getValueAccordingWebsite` There is not a loaded active record');
         }
 

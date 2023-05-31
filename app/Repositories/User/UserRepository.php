@@ -40,6 +40,15 @@ class UserRepository implements UserRepositoryInterface {
      */
     private const SUSPENDED_STATE = 'suspended';
 
+    private const PRIVATE_DEALER_IDS = [
+        8410,
+        1004,
+        12213,
+        10005,
+    ];
+
+    private const FROM_TC = 'trailercentral';
+
     /**
      * @param  EncrypterServiceInterface  $encrypterService
      */
@@ -328,6 +337,8 @@ class UserRepository implements UserRepositoryInterface {
             ])
             ->join('dealer_location', 'dealer.dealer_id', '=', 'dealer_location.dealer_id')
             ->where('dealer.clsf_active', 1)
+            ->whereNotIn('dealer.dealer_id', self::PRIVATE_DEALER_IDS)
+            ->where('dealer.from', self::FROM_TC)
             ->when(isset($params['state']), function (Builder $query) use ($params) {
                 $query->where('dealer_location.region', $params['state']);
             })
@@ -336,6 +347,7 @@ class UserRepository implements UserRepositoryInterface {
                     ->select(['*'])
                     ->from('inventory')
                     ->whereColumn('inventory.dealer_location_id', 'dealer_location.dealer_location_id')
+                    ->where('inventory.is_archived', '!=', 1)
                     ->whereIn('inventory.entity_type_id', $types);
             });
         return $query->get();
