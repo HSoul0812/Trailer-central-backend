@@ -33,9 +33,9 @@ class BrandController extends AbstractRestfulController
         if ($request->validate()) {
             $brands = Http::tcApi()->get('inventory/brands')
                 ->throw()
-                ->json();
+                ->collect('data');
 
-            return $this->response->collection(collect($brands), $this->brandTransformer);
+            return $this->response->collection($brands, $this->brandTransformer);
         }
 
         return $this->response->errorBadRequest();
