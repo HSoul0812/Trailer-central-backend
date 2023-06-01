@@ -8,6 +8,7 @@ use App\DTOs\Inventory\TcApiResponseBrand;
 use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
 use App\DTOs\Inventory\TcApiResponseInventoryDelete;
+use App\DTOs\Inventory\TcApiResponseManufacturer;
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\Models\Geolocation\Geolocation;
@@ -700,6 +701,16 @@ class InventoryService implements InventoryServiceInterface
         return collect($brands['data'])
             ->map(function ($brand) {
                 return TcApiResponseBrand::fromData($brand);
+            });
+    }
+    public function getManufacturers(): Collection
+    {
+        $manufacturerUrl = config('services.trailercentral.api') . 'inventory/manufacturers';
+        $manufacturer = $this->handleHttpRequest('GET', $manufacturerUrl, ['query' => ['per_page' => 9999]]);
+
+        return collect($manufacturer['data'])
+            ->map(function ($manufacturer) {
+                return TcApiResponseManufacturer::fromData($manufacturer);
             });
     }
 }
