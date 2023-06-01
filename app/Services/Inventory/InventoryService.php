@@ -164,15 +164,16 @@ class InventoryService implements InventoryServiceInterface
         $authToken = $this->authTokenRepository->get(['user_id' => $userId]);
         $url = config('services.trailercentral.api') . 'inventory/' . $id;
 
-        $response = $this->handleHttpRequest(
-            'DELETE',
+        $params['show_on_website'] = 0;
+        $params['is_archived'] = 1;
+
+        $this->handleHttpRequest(
+            'POST',
             $url,
-            ['headers' => ['access-token' => $authToken->access_token]]
+            ['json' => $params, 'headers' => ['access-token' => $authToken->access_token]]
         );
 
-        $respObj = TcApiResponseInventoryDelete::fromData($response['response']);
-
-        return $respObj;
+        return TcApiResponseInventoryDelete::fromData(['status' => 'success']);
     }
 
     /**
@@ -234,9 +235,9 @@ class InventoryService implements InventoryServiceInterface
             'map_from' => $params['category'],
             'type_id' => $params['type_id'],
         ]);
-        if(!$mapping) {
-            throw new NotFoundHttpException("Mapped entity type was not found. "
-            . "Please check category and type_id is correct");
+        if (!$mapping) {
+            throw new NotFoundHttpException('Mapped entity type was not found. '
+            . 'Please check category and type_id is correct');
         }
         $results = new Collection();
         $url = config('services.trailercentral.api') . 'inventory/attributes' . "?entity_type_id=$mapping->entity_type_id";
