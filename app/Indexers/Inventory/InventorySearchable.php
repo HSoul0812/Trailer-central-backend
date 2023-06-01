@@ -9,7 +9,8 @@ use App\Observers\Inventory\InventoryObserver;
 use App\Repositories\FeatureFlagRepositoryInterface;
 use Exception;
 use App\Jobs\Scout\MakeSearchable;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
+use Laravel\Scout\Events\ModelsImported;
 use Laravel\Scout\ModelObserver;
 use App\Models\User\User as Dealer;
 
@@ -100,7 +101,7 @@ trait InventorySearchable
     {
         $chunkSize = 500;
         $sleepThreshold = 10000;
-        $sleepSeconds = 10;
+        $sleepSeconds = 15;
         $totalCount = 0;
 
         Inventory::query()
@@ -108,6 +109,8 @@ trait InventorySearchable
                 $inventories->searchable();
 
                 $totalCount += $inventories->count();
+
+                event(new ModelsImported($inventories));
 
                 if ($totalCount >= $sleepThreshold) {
                     sleep($sleepSeconds);
