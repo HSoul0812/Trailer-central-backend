@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   postgres:
-    image: postgres:12.0 # Aurora Postgres is v12
+    image: postgres:13.0 # Aurora Postgres is v13
     container_name: trailertrader_postgres
     volumes:
         - ./bin/pg-init-scripts:/docker-entrypoint-initdb.d
