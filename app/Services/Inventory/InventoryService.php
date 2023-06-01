@@ -4,6 +4,7 @@ namespace App\Services\Inventory;
 
 use App\Domains\Inventory\Actions\DeleteLocalImagesFromNewImagesAction;
 use App\DTOs\Inventory\TcApiResponseAttribute;
+use App\DTOs\Inventory\TcApiResponseBrand;
 use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
 use App\DTOs\Inventory\TcApiResponseInventoryDelete;
@@ -19,7 +20,6 @@ use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
 use Cache;
-use Carbon\Carbon;
 use Dingo\Api\Routing\Helpers;
 use Exception;
 use GuzzleHttp\Client as GuzzleHttpClient;
@@ -151,6 +151,10 @@ class InventoryService implements InventoryServiceInterface
         $params['category'] = $categoryMapping->map_to;
         $params['entity_type_id'] = $categoryMapping->entity_type_id;
 
+        if (!isset($params['show_on_website'])) {
+            $params['show_on_website'] = 0;
+        }
+
         $inventory = $this->handleHttpRequest(
             'PUT',
             $url,
@@ -238,13 +242,6 @@ class InventoryService implements InventoryServiceInterface
         $respObj->dealer['benefit_statement'] = $dealer[0]->logo['data']['benefit_statement'] ?? '';
 
         return $respObj;
-    }
-
-    public function hideExpired()
-    {
-        $from = Carbon::today()->startOfDay();
-        $to = Carbon::today()->startOfDay()->addDay();
-        $this->inventoryRepository->hideExpiredItems($from, $to);
     }
 
     public function attributes(array $params): Collection
@@ -692,5 +689,17 @@ class InventoryService implements InventoryServiceInterface
         } else {
             $queryBuilder->addTermInValuesQuery(self::TERM_SEARCH_KEY_MAP['availability'], self::INVENTORY_AVAILABLE);
         }
+    }
+
+    public function getBrands(): Collection
+    {
+        $brandsUrl = config('services.trailercentral.api') . 'inventory/brands';
+
+        $brands = $this->handleHttpRequest('GET', $brandsUrl, ['query' => ['per_page' => 9999]]);
+
+        return collect($brands['data'])
+            ->map(function ($brand) {
+                return TcApiResponseBrand::fromData($brand);
+            });
     }
 }

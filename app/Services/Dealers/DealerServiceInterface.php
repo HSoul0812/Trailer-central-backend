@@ -11,4 +11,9 @@ interface DealerServiceInterface
      * @return Collection<int, TcApiResponseDealer>
      */
     public function listByName(string $name): Collection;
+
+    /**
+     * @return Collection<int, TcApiResponseDealer>
+     */
+    public function dealersList(array $params): Collection;
 }

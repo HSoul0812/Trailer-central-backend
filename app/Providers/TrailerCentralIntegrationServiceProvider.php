@@ -112,7 +112,7 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
     {
         Http::macro('tcApi', function () {
             return Http::withHeaders([
-                'access-token' => config('trailercentral.integration.api.access_token'),
+                'access-token' => config('services.trailercentral.integration_access_token'),
             ])->baseUrl(config('services.trailercentral.api'));
         });
     }

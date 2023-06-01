@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Repositories\Integrations\TrailerCentral;
 
-use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -24,14 +23,6 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         return $query->orderBy('i.updated_at_auto');
-    }
-
-    public function hideExpiredItems(Carbon $from, Carbon $to)
-    {
-        DB::connection('mysql')
-            ->table('inventory')
-            ->whereBetween('tt_payment_expiration_date', [$from, $to])
-            ->update(['show_on_website' => 0]);
     }
 
     public function getSerializableColumnsNames(): array

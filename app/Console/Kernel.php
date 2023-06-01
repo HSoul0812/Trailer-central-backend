@@ -26,26 +26,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('sync:inventory')
-            ->daily()
-            ->withoutOverlapping()
-            ->runInBackground();
-
-        $schedule->command('inventory:hide-expired')
-            ->daily()
-            ->withoutOverlapping()
-            ->runInBackground();
-
-        $schedule->command('sync:leads')
-            ->daily()
-            ->withoutOverlapping()
-            ->runInBackground();
-
-        $schedule->command('db:refresh-views')
-            ->daily()
-            ->withoutOverlapping()
-            ->runInBackground();
-
         $schedule
             ->command(ProcessUserTrackingsCommand::class)
             ->daily()
