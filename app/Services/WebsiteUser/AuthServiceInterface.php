@@ -15,4 +15,6 @@ interface AuthServiceInterface
     public function register(array $attributes);
 
     public function update(WebsiteUser $user, array $attributes): bool;
+
+    public function createTcUserIfNotExist(WebsiteUser $user);
 }

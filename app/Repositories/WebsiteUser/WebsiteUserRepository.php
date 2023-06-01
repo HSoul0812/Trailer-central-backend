@@ -22,7 +22,6 @@ class WebsiteUserRepository implements WebsiteUserRepositoryInterface
         $websiteUser = new WebsiteUser();
         $websiteUser->fill($attributes);
         $websiteUser->password = $attributes['password'] ?? '';
-        $websiteUser->tc_user_id = $attributes['tc_user_id'];
         $websiteUser->save();
 
         return $websiteUser;

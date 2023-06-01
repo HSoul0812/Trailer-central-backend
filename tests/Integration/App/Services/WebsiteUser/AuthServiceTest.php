@@ -2,7 +2,6 @@
 
 namespace Tests\Integration\App\Services\WebsiteUser;
 
-use App\DTOs\User\TcApiResponseUser;
 use App\Models\WebsiteUser\WebsiteUser;
 use App\Repositories\WebsiteUser\WebsiteUserRepository;
 use App\Services\Captcha\Google\GoogleCaptchaService;
@@ -47,13 +46,15 @@ class AuthServiceTest extends IntegrationTestCase
         $service = $this->getConcreteService();
 
         $this->captchaServiceMock->expects($this->once())->method('validate')->willReturn(true);
-        $this->usersServiceMock->expects($this->once())->method('create')->willReturn(TcApiResponseUser::fromData([
-            'id' => 1,
-            'name' => 'test',
-            'email' => 'test@test.com',
-        ]));
 
-        $service->register($attributes);
+        $user = $service->register($attributes);
+        $this->assertDatabaseHas('website_user_caches',
+            [
+                'website_user_id' => $user->id,
+                'profile_data->email' => 'test@test.com',
+                'profile_data->first_name' => 'Ryo',
+                'profile_data->last_name' => 'Ryu',
+            ]);
         $this->assertDatabaseHas('website_users', ['email' => 'test@test.com']);
         Event::assertDispatched(Registered::class);
     }
