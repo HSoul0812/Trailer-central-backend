@@ -99,24 +99,24 @@ trait InventorySearchable
      */
     public static function makeAllSearchable(): void
     {
-        $chunkSize = 500;
-        $sleepThreshold = 10000;
-        $sleepSeconds = 15;
         $totalCount = 0;
 
         Inventory::query()
-            ->chunkById($chunkSize, function (Collection $inventories) use (&$totalCount, &$sleepThreshold, &$sleepSeconds) {
-                $inventories->searchable();
+            ->chunkById(
+                config('inventory.indexer.chunk_size'),
+                function (Collection $inventories) use (&$totalCount) {
+                    $inventories->searchable();
 
-                $totalCount += $inventories->count();
+                    $totalCount += $inventories->count();
 
-                event(new ModelsImported($inventories));
+                    event(new ModelsImported($inventories));
 
-                if ($totalCount >= $sleepThreshold) {
-                    sleep($sleepSeconds);
-                    $totalCount = 0;
+                    if ($totalCount >= config('inventory.indexer.sleep_threshold')) {
+                        sleep(config('inventory.indexer.sleep_seconds'));
+                        $totalCount = 0;
+                    }
                 }
-            });
+            );
     }
 
     /**
