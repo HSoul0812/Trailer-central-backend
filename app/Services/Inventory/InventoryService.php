@@ -9,6 +9,7 @@ use App\DTOs\Inventory\TcApiResponseInventoryDelete;
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\Models\Geolocation\Geolocation;
+use App\Models\Inventory\InventoryStatusMap;
 use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
@@ -195,6 +196,14 @@ class InventoryService implements InventoryServiceInterface
             }
             $params['category'] = $categoryMapping->map_to;
             $params['entity_type_id'] = $categoryMapping->entity_type_id;
+        }
+
+        if ((isset($params['status']) && $params['status'] == InventoryStatusMap::SOLD_ID) ||
+            (isset($params['availability']) && $params['availability'] == InventoryStatusMap::SOLD)) {
+            $params['status'] = InventoryStatusMap::SOLD_ID;
+            $params['availability'] = InventoryStatusMap::SOLD;
+            $params['show_on_website'] = 0;
+            $params['is_archived'] = 1;
         }
 
         $inventory = $this->handleHttpRequest(
