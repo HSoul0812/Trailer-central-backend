@@ -1178,6 +1178,172 @@ class InquiryServiceTest extends TestCase
         $this->assertSame($result['data']['phone'], $lead->phone_number);
     }
 
+    /**
+     * @group CRM
+     * @covers ::send
+     *
+     * @throws BindingResolutionException
+     */
+    public function testSendSpam()
+    {
+        // Mock Website
+        $website = $this->getEloquentMock(Website::class);
+        $website->id = 1;
+        $website->dealer_id = 1;
+        $website->domain = self::TEST_DOMAIN;
+
+        // Mock User
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = 1;
+        $dealer->isCrmActive = 1;
+
+        // Get Model Mocks
+        $lead = $this->getEloquentMock(Lead::class);
+        $lead->identifier = 1;
+        $lead->dealer_id = 1;
+        $lead->first_name = self::TEST_FIRST_NAME;
+        $lead->last_name = self::TEST_LAST_NAME;
+        $lead->phone_number = self::TEST_PHONE;
+        $lead->email_address = self::TEST_EMAIL;
+        $lead->is_spam = 1;
+
+        $status = $this->getEloquentMock(LeadStatus::class);
+        $status->sales_person_id = 1;
+        $lead->leadStatus = $status;
+        $lead->units = new Collection();
+
+        // Send Request Params
+        $sendRequestParams = [
+            'dealer_id' => $dealer->dealer_id,
+            'website_id' => $website->id,
+            'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
+            'lead_types' => [LeadType::TYPE_GENERAL],
+            'device' => self::TEST_DEVICE,
+            'first_name' => $lead->first_name,
+            'last_name' => $lead->last_name,
+            'phone_number' => $lead->phone_number,
+            'email_address' => $lead->email_address,
+            'cookie_session_id' => self::TEST_SESSION_ID
+        ];
+
+        // Send Inquiry Params
+        $sendInquiryParams = $sendRequestParams;
+        $sendInquiryParams['inventory'] = [];
+
+        // Get Inquiry Lead
+        $inquiry = new InquiryLead($sendRequestParams);
+
+
+        // Lead Relations
+        $lead->shouldReceive('setRelation')->passthru();
+        $lead->shouldReceive('belongsTo')->passthru();
+        $lead->shouldReceive('belongsToMany')->passthru();
+        $lead->shouldReceive('hasOne')->passthru();
+        $lead->shouldReceive('leadStatus')->passthru();
+        $lead->shouldReceive('newDealerUser')->passthru();
+        $lead->shouldReceive('units')->passthru();
+
+        // @var InquiryServiceInterface $service
+        $service = $this->app->make(InquiryServiceInterface::class);
+
+        // Mock Fill Inquiry Lead
+        $this->inquiryEmailServiceMock
+            ->shouldReceive('fill')
+            ->once()
+            ->with($sendInquiryParams)
+            ->andReturn($inquiry);
+
+        // Mock Send Inquiry Lead
+        $this->inquiryEmailServiceMock
+            ->shouldReceive('send')
+            ->once();
+
+        // Mock User Repository
+        $this->userRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $dealer->dealer_id])
+            ->andReturn($dealer);
+
+        // Mock Website Config Service
+        $this->websiteConfigServiceMock
+            ->shouldReceive('getConfigByWebsite')
+            ->once()
+            ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
+
+        // Mock Lead Repository
+        $this->leadRepositoryMock
+            ->shouldReceive('findAllMatches')
+            ->once()
+            ->with($sendInquiryParams)
+            ->andReturn(new Collection());
+
+        // Mock Create Lead
+        $this->leadServiceMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($sendInquiryParams)
+            ->andReturn($lead);
+
+        // Mock ADF Export
+        $this->adfServiceMock
+            ->shouldReceive('export')
+            ->never();
+
+        // Mock IDS Export
+        $this->idsServiceMock
+            ->shouldReceive('exportInquiry')
+            ->never();
+
+        // Mock Sales Person Repository
+        $this->trackingRepositoryMock
+            ->shouldReceive('updateTrackLead')
+            ->once()
+            ->with($inquiry->cookieSessionId, $lead->identifier);
+
+        // Mock Sales Person Repository
+        $this->trackingUnitRepositoryMock
+            ->shouldReceive('markUnitInquired')
+            ->never();
+
+        // Mock Lead
+        $lead->shouldReceive('getFullNameAttribute')
+            ->andReturn($lead->first_name . ' ' . $lead->last_name);
+
+        // Get Inventory ID's
+        $lead->shouldReceive('getInventoryIdsAttribute')
+             ->andReturn($sendInquiryParams['inventory']);
+
+        // Get Lead Types
+        $lead->shouldReceive('getLeadTypesAttribute')
+             ->andReturn([LeadType::TYPE_GENERAL]);
+
+        // Get Full Address
+        $lead->shouldReceive('getFullAddressAttribute')
+             ->andReturn('');
+
+        // Get Pretty Phone
+        $lead->shouldReceive('getPrettyPhoneNumberAttribute')
+             ->andReturn($lead->phone_number);
+
+        // Get Pretty Phone
+        $lead->shouldReceive('getPreferredDealerLocationAttribute')
+             ->andReturn(null);
+
+        // Fake Mail
+        Mail::fake();
+
+
+        // Validate Send Inquiry Result
+        $result = $service->send($sendRequestParams);
+
+        // Match Lead Details
+        $this->assertSame($result['data']['name'], $lead->full_name);
+        $this->assertSame($result['data']['email'], $lead->email_address);
+        $this->assertSame($result['data']['phone'], $lead->phone_number);
+    }
+
 
     /**
      * @group CRM
