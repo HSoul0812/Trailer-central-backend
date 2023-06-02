@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 $api = app(Dingo\Api\Routing\Router::class);
 
-$api->version('v1', config('api.routes_throttle'), function ($api) {
+$api->version('v1', function ($api) {
     /*
     |--------------------------------------------------------------------------
     | API Parts
