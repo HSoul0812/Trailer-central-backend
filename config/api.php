@@ -224,4 +224,10 @@ return [
             'indent_size' => env('API_JSON_FORMAT_INDENT_SIZE', 2),
         ],
     ],
+
+    'routes_throttle' => [
+        'middleware' => 'api.throttle',
+        'limit' => env('API_ROUTES_THROTTLE_LIMIT', 60),
+        'expires' => 1,
+    ],
 ];

@@ -6,7 +6,7 @@ use App\Http\Controllers\v1\MapSearch\MapSearchController;
 
 $api = app(Dingo\Api\Routing\Router::class);
 
-$api->version('v1', function ($api) {
+$api->version('v1', config('api.routes_throttle'), function ($api) {
     $api->group(['prefix' => '/map_search', 'middleware' => ['human-only']], function ($api) {
         $api->get('/geocode', [MapSearchController::class, 'geocode']);
         $api->get('/autocomplete', [MapSearchController::class, 'autocomplete']);

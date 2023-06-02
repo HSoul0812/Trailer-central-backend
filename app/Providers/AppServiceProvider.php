@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\Http\Response\Header;
+use App\Domains\Throttle\Handler;
 use App\Repositories\WebsiteUser\UserTrackingRepository;
 use App\Repositories\WebsiteUser\UserTrackingRepositoryInterface;
 use App\Services\LoggerService;
@@ -61,5 +62,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserTrackingRepositoryInterface::class, UserTrackingRepository::class);
 
         $this->app->singleton(Header::class, fn () => new Header());
+
+        $this->app->alias('api.limiting', Handler::class);
+
+        $this->app->singleton('api.limiting', function ($app) {
+            return new Handler($app, $app['cache'], config('api.throttling'));
+        });
     }
 }
