@@ -301,6 +301,10 @@ class InventoryService implements InventoryServiceInterface
                     $params['description_html'] = $this->convertMarkdown($params['description']);
                 }
 
+                if (empty($params['chosen_overlay'])) {
+                    $params['chosen_overlay'] = '';
+                }
+
                 if (!empty($params['tt_payment_expiration_date'])) {
                     $params['tt_payment_expiration_date'] = Carbon::parse($params['tt_payment_expiration_date'])
                         ->format('Y-m-d H:i:s');
@@ -403,6 +407,10 @@ class InventoryService implements InventoryServiceInterface
                     if ($location->postalcode) {
                         $params['geolocation'] = $this->geoLocationService->geoPointFromZipCode($location->postalcode);
                     }
+                }
+
+                if (empty($params['chosen_overlay'])) {
+                    $params['chosen_overlay'] = '';
                 }
 
                 if (!empty($params['tt_payment_expiration_date'])) {
