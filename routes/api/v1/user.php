@@ -11,7 +11,7 @@ use App\Http\Controllers\v1\WebsiteUser\VerificationController;
 
 $api = app(Dingo\Api\Routing\Router::class);
 
-$api->version('v1', function ($api) {
+$api->version('v1', config('api.routes_throttle'), function ($api) {
     /*
     |--------------------------------------------------------------------------
     | API Auth
