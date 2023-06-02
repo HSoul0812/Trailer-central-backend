@@ -10,6 +10,7 @@ use App\Http\Middleware\Integration\ValidIntegrationAccessToken;
 use App\Http\Middleware\InteractionIntegration\IntegrationPermission;
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Middleware\Inventory\InvalidatePermissionMiddleware;
+use App\Http\Middleware\ThrottleRequestsByUserAgent;
 use App\Http\Middleware\User\ManageAccountPermissionMiddleware;
 use App\Http\Middleware\SetDealerIdFilterOnRequest;
 use App\Http\Middleware\SetDealerIdWhenAuthenticatedOnRequest;
@@ -149,6 +150,7 @@ class Kernel extends HttpKernel
         'leads.document.validate' => LeadDocumentValidate::class,
         'leads.source.validate' => LeadSourceValidate::class,
         'report.validate' => ReportValidate::class,
+        'throttled.by_user_agent' => ThrottleRequestsByUserAgent::class,
     ];
 
     /**
