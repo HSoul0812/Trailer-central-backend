@@ -9,6 +9,7 @@ use Closure;
 use Dingo\Api\Routing\Helpers;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ThrottleRequestsByUserAgent extends ThrottleRequests
 {
@@ -24,27 +25,12 @@ class ThrottleRequestsByUserAgent extends ThrottleRequests
      */
     public function handle($request, Closure $next, $maxAttempts = 60, $decayMinutes = 1, $prefix = '')
     {
-        $key = $prefix.$this->resolveRequestSignature($request);
-        $response = $next($request);
-
         if (Str::contains(strtolower($request->userAgent()), $this->getBlackList())) {
-            $maxAttempts = $this->resolveMaxAttempts($request, $maxAttempts);
-
-            if ($this->limiter->tooManyAttempts($key, $maxAttempts)) {
-                // according to Norris, someone from CloudFlare told him that the best way to avoid bot mutations
-                // is by responding valid content, and 200 HTTP status, so instead of response 409 http status
-                // we will approach this in that way hoping there not will be bot mutations
-                $result = new ElasticSearchQueryResult([], [], 0, []);
-
-                $response = $this->response
-                    ->collection($result->hints, new InventoryElasticSearchOutputTransformer())
-                    ->addMeta('aggregations', $result->aggregations)
-                    ->addMeta('total', $result->total);
-            }
-
-            $this->limiter->hit($key, $decayMinutes * 60);
+            return parent::handle($request, $next, $maxAttempts, $decayMinutes, $prefix);
         }
 
+        $key = $prefix.$this->resolveRequestSignature($request);
+        $response = $next($request);
 
         return $this->addHeaders(
             $response, $maxAttempts,
