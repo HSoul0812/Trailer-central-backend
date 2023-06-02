@@ -327,7 +327,9 @@ $api->version('v1', function ($route) {
     $route->delete('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')->where('id', '[0-9]+');
     $route->get('inventory/exists', 'App\Http\Controllers\v1\Inventory\InventoryController@exists');
     $route->post('inventory/{id}/export', 'App\Http\Controllers\v1\Inventory\InventoryController@export')->where('id', '[0-9]+');
-    $route->post('inventory/search', 'App\Http\Controllers\v1\Inventory\InventoryController@search');
+
+    // it will be throttle 2 request per minute
+    $route->post('inventory/search', 'App\Http\Controllers\v1\Inventory\InventoryController@search')->middleware('throttled.by_user_agent:2,1');
     /**
      * Inventory images
      */
@@ -1469,7 +1471,7 @@ $api->version('v1', function ($route) {
             $route->get('/filtered', 'App\Http\Controllers\v1\CRM\ReportsController@getFilteredLeads');
             $route->get('/filtered-inventory', 'App\Http\Controllers\v1\CRM\ReportsController@getFilteredInventories');
         });
-        
+
         /*
         |--------------------------------------------------------------------------
         | Parts related
