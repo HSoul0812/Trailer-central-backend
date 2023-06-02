@@ -40,6 +40,8 @@ class ThrottleRequestsByUserAgent extends ThrottleRequests
 
     private function getBlackList(): array
     {
-        return config('security.rate_limiting.user_agent.black_list');
+        $blackList = config('security.rate_limiting.user_agent.black_list');
+
+        return is_array($blackList)? $blackList: explode(',', $blackList);
     }
 }
