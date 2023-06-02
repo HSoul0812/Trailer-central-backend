@@ -328,7 +328,7 @@ $api->version('v1', function ($route) {
     $route->get('inventory/exists', 'App\Http\Controllers\v1\Inventory\InventoryController@exists');
     $route->post('inventory/{id}/export', 'App\Http\Controllers\v1\Inventory\InventoryController@export')->where('id', '[0-9]+');
 
-    // it will be throttle 2 request per minute
+    // it will be throttled 2 request per minute
     $route->post('inventory/search', 'App\Http\Controllers\v1\Inventory\InventoryController@search')->middleware('throttled.by_user_agent:2,1');
     /**
      * Inventory images
