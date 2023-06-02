@@ -31,7 +31,9 @@ class ThrottleRequestsByUserAgent extends ThrottleRequests
             $maxAttempts = $this->resolveMaxAttempts($request, $maxAttempts);
 
             if ($this->limiter->tooManyAttempts($key, $maxAttempts)) {
-                // bots will be happy with this result, then probably they will not mutate
+                // according to Norris, someone from CloudFlare told him that the best way to avoid bot mutations
+                // is by responding valid content, and 200 HTTP status, so instead of response 409 http status
+                // we will approach this in that way hoping there not will be bot mutations
                 $result = new ElasticSearchQueryResult([], [], 0, []);
 
                 $response = $this->response
