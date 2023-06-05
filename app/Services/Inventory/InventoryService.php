@@ -234,9 +234,9 @@ class InventoryService implements InventoryServiceInterface
             'map_from' => $params['category'],
             'type_id' => $params['type_id'],
         ]);
-        if(!$mapping) {
-            throw new NotFoundHttpException("Mapped entity type was not found. "
-            . "Please check category and type_id is correct");
+        if (!$mapping) {
+            throw new NotFoundHttpException('Mapped entity type was not found. '
+            . 'Please check category and type_id is correct');
         }
         $results = new Collection();
         $url = config('services.trailercentral.api') . 'inventory/attributes' . "?entity_type_id=$mapping->entity_type_id";
@@ -374,7 +374,7 @@ class InventoryService implements InventoryServiceInterface
     private function addScriptFilter(ESInventoryQueryBuilder $queryBuilder, array $params)
     {
         $priceDef = "double price = 0; double websitePrice = 0; double salesPrice = 0;
-                        if(doc['websitePrice'].size > 0){ price = websitePrice = doc['websitePrice'].value; }
+                        if(doc['websitePrice'] !== null){ price = websitePrice = doc['websitePrice'].value; }
                         if(doc['salesPrice'].size() > 0){ salesPrice = doc['salesPrice'].value; }
                         if(0 < salesPrice && salesPrice < price) { price = salesPrice; }";
 
