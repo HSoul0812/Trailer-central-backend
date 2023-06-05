@@ -81,7 +81,7 @@ return [
             'read' => [
                 'host' => [
                     // if no separate read write hosts are configured, then
-                    // the same host will be used for both connectsion
+                    // the same host will be used for both connection
                     env('DB_HOST', '127.0.0.1'),
                 ],
             ],
@@ -190,18 +190,18 @@ return [
          * also this is faster and safe
          */
         'sdk-search-cache' => [
-            'url' => env('REDIS_URL'),
-            'host' => env('REDIS_HOST', '127.0.0.1'),
-            'password' => env('REDIS_PASSWORD', null),
-            'port' => env('REDIS_PORT', '6379'),
+            'url' => env('REDIS_CACHE_URL', env('REDIS_URL')),
+            'host' => env('REDIS_CACHE_HOST', env('REDIS_HOST','127.0.0.1')),
+            'password' => env('REDIS_CACHE_PASSWORD', env('REDIS_CACHE_PASSWORD', null)),
+            'port' => env('REDIS_CACHE_PORT', env('REDIS_PORT', '6379')),
             'database' => env('REDIS_SDK_SEARCH_CACHE_DB', '3'),
         ],
 
         'sdk-single-cache' => [
-            'url' => env('REDIS_URL'),
-            'host' => env('REDIS_HOST', '127.0.0.1'),
-            'password' => env('REDIS_PASSWORD', null),
-            'port' => env('REDIS_PORT', '6379'),
+            'url' => env('REDIS_CACHE_URL', env('REDIS_URL')),
+            'host' => env('REDIS_CACHE_HOST', env('REDIS_HOST','127.0.0.1')),
+            'password' => env('REDIS_CACHE_PASSWORD', env('REDIS_CACHE_PASSWORD', null)),
+            'port' => env('REDIS_CACHE_PORT', env('REDIS_PORT', '6379')),
             'database' => env('REDIS_SDK_SINGLE_CACHE_DB', '4'),
         ],
 
