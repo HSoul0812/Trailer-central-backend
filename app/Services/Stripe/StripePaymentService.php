@@ -27,21 +27,24 @@ class StripePaymentService implements StripePaymentServiceInterface
         'tt1' => [
             'name' => 'TrailerTrader-1days',
             'price' => 75.00,
-            'description' => '1 day plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
+            'description' => '1 day plan for publishing your listing on TrailerTrader.com',
+            'template' => '1 day plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
             'duration' => 1,
             'grace_days' => 1,
         ],
         'tt30' => [
             'name' => 'TrailerTrader-30days',
             'price' => 75.00,
-            'description' => '30 day plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
+            'description' => '30 day plan for publishing your listing on TrailerTrader.com',
+            'template' => '30 day plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
             'duration' => 30,
             'grace_days' => 2,
         ],
         'tt60' => [
             'name' => 'TrailerTrader-60days',
             'price' => 100.00,
-            'description' => '60 days plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
+            'description' => '60 days plan for publishing your listing on TrailerTrader.com',
+            'template' => '60 days plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
             'duration' => 60,
             'grace_days' => 2,
         ],
@@ -65,8 +68,9 @@ class StripePaymentService implements StripePaymentServiceInterface
         $planName = $plan['name'];
         $planDuration = $plan['duration'];
         $planDescription = $plan['description'];
-        $planDescription = str_replace('{id}', $inventoryId, $planDescription);
-        $planDescription = str_replace('{user_id}', $userId, $planDescription);
+        $customText = $plan['template'];
+        $customText = str_replace('{id}', $inventoryId, $customText);
+        $customText = str_replace('{user_id}', $userId, $customText);
 
         $metadata['planKey'] = $planId;
         $metadata['planName'] = $planName;
@@ -87,6 +91,7 @@ class StripePaymentService implements StripePaymentServiceInterface
             'line_items' => $priceObjects,
             'client_reference_id' => 'tt' . Str::uuid(),
             'metadata' => $metadata,
+            'custom_text' => $customText,
             'mode' => 'payment',
             'success_url' => $siteUrl . $successUrl,
             'cancel_url' => $siteUrl . $failUrl,
@@ -189,7 +194,7 @@ class StripePaymentService implements StripePaymentServiceInterface
                 'client_reference_id' => $session->client_reference_id,
                 'full_response' => json_encode($session->values()),
                 'plan_key' => $planKey,
-                'plan_name' => $planDescription,
+                'plan_name' => $planName,
                 'plan_duration' => $planDuration,
             ]);
 
