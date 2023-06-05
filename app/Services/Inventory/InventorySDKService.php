@@ -7,7 +7,6 @@ use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\Models\Parts\CategoryMappings;
 use App\Models\Parts\Type;
 use App\Services\Inventory\ESQuery\SortOrder;
-use App\Services\RequestAgentService;
 use Dingo\Api\Routing\Helpers;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Pagination\LengthAwarePaginator;
