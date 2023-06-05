@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-class RequestAgentService
+class RequestAgentService implements RequestAgentServiceInterface
 {
-    public static function getUserAgent(): string
+    public function getUserAgent(): string
     {
-        return request()->header('User-Agent');
+        return request()->header('User-Agent') ?? '';
     }
 }

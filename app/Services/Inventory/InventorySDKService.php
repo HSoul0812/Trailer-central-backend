@@ -99,7 +99,7 @@ class InventorySDKService implements InventorySDKServiceInterface
             'headers' => [
                 'access-token' => '',
                 'sample_key' => '',
-                'User-Agent' => 'trailertrader-backend;' . RequestAgentService::getUserAgent(),
+                'User-Agent' => 'trailertrader-backend;' . (new RequestAgentService)->getUserAgent(),
             ],
             'verify' => false,
         ]);
