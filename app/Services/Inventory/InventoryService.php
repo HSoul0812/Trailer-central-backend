@@ -95,9 +95,6 @@ class InventoryService implements InventoryServiceInterface
         );
 
         $res = $this->httpClient->post($esSearchUrl, [
-            'headers' => [
-                'User-Agent' => 'trailertrader-backend',
-            ],
             'json' => $body,
         ]);
 
@@ -307,9 +304,6 @@ class InventoryService implements InventoryServiceInterface
         return Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use ($esSearchUrl, $query) {
             $res = $this->httpClient->post($esSearchUrl, [
                 'json' => $query,
-                'headers' => [
-                    'User-Agent' => 'trailertrader-backend',
-                ],
             ]);
             $resJson = json_decode($res->getBody()->getContents(), true);
             $resJson['aggregations']['category']['buckets'] = $this->mapCategoryBuckets(
@@ -339,9 +333,6 @@ class InventoryService implements InventoryServiceInterface
         return Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use ($esSearchUrl, $query) {
             $res = $this->httpClient->post($esSearchUrl, [
                 'json' => $query,
-                'headers' => [
-                    'User-Agent' => 'trailertrader-backend',
-                ],
             ]);
             $resJson = json_decode($res->getBody()->getContents(), true);
 
