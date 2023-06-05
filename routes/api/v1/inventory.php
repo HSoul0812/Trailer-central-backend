@@ -7,9 +7,9 @@ use App\Http\Controllers\v1\Inventory\InventoryController;
 
 $api = app(Dingo\Api\Routing\Router::class);
 
-$api->version('v1', function ($api) {
+$api->version('v1', ['middleware' => 'human-only'], function ($api) {
     $api->group(['prefix' => '/inventory'], function ($api) {
-        $api->get('/', [InventoryController::class, 'index'])->middleware(['human-only', 'gzip']);
+        $api->get('/', [InventoryController::class, 'index'])->middleware(['gzip']);
         $api->put('/', 'App\Http\Controllers\v1\Inventory\InventoryController@create')
             ->middleware('auth:api');
         $api->post('/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@update')
