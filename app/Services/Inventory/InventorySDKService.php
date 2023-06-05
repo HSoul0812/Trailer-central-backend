@@ -359,6 +359,6 @@ class InventorySDKService implements InventorySDKServiceInterface
 
     protected function getUserAgent(): string
     {
-        return 'trailertrader-backed;' . request()->header('User-Agent') ? request()->header('User-Agent') : '';
+        return 'trailertrader-backed' . (request()->header('User-Agent') ? ';'.request()->header('User-Agent') : '');
     }
 }
