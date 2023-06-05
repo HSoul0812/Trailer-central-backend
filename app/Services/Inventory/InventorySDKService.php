@@ -98,6 +98,7 @@ class InventorySDKService implements InventorySDKServiceInterface
             'headers' => [
                 'access-token' => '',
                 'sample_key' => '',
+                'User-Agent' => $this->getUserAgent(),
             ],
             'verify' => false,
         ]);
@@ -354,5 +355,10 @@ class InventorySDKService implements InventorySDKServiceInterface
         }
 
         return null;
+    }
+
+    protected function getUserAgent(): string
+    {
+        return 'trailertrader-backed' . (request()->header('User-Agent') ? ';'.request()->header('User-Agent') : '');
     }
 }
