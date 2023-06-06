@@ -4,6 +4,8 @@ namespace App\Http\Requests\CRM\Leads\Inquiry;
 
 use App\Http\Requests\Request;
 use App\Rules\CRM\Leads\BannedLeadTextsRule;
+use App\Rules\Inventory\ValidInventoryInquiry;
+use App\Rules\CRM\Leads\ValidDealerLocationInquiry;
 
 class SendInquiryRequest extends Request
 {
@@ -12,12 +14,12 @@ class SendInquiryRequest extends Request
         return [
             'dealer_id' => 'required|exists:dealer,dealer_id',
             'website_id' => 'required|website_exists',
-            'dealer_location_id' => 'nullable|dealer_location_inquiry_valid',
+            'dealer_location_id' => ['nullable', new ValidDealerLocationInquiry($this->input('website_id'))],
             'inquiry_type' => 'required|inquiry_email_valid',
             'lead_types' => 'required|array',
             'lead_types.*' => 'lead_type_valid',
             'inventory' => 'array',
-            'inventory.*' => 'inventory_valid_inquiry',
+            'inventory.*' => [new ValidInventoryInquiry($this->input('website_id'))],
             'item_id' => 'nullable|integer',
             'device' => 'nullable|string',
             'title' => 'nullable|string',

@@ -66,7 +66,6 @@ use App\Rules\Inventory\MfgNameValid;
 use App\Rules\Inventory\QuotesNotExist;
 use App\Rules\Inventory\UniqueStock;
 use App\Rules\Inventory\ValidInventory;
-use App\Rules\Inventory\ValidInventoryInquiry;
 use App\Rules\Inventory\VendorExists;
 use App\Services\ElasticSearch\Inventory\Builders\QueryBuilder;
 use App\Services\ElasticSearch\Inventory\FieldMapperService;
@@ -99,7 +98,6 @@ class InventoryServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Validator::extend('inventory_valid', ValidInventory::class . '@passes');
-        Validator::extend('inventory_valid_inquiry', ValidInventoryInquiry::class . '@passes');
         Validator::extend('inventory_mfg_exists', ManufacturerExists::class . '@passes');
         Validator::extend('inventory_mfg_valid', ManufacturerValid::class . '@passes');
         Validator::extend('inventory_mfg_id_valid', MfgIdExists::class . '@passes');

@@ -9,6 +9,17 @@ use Illuminate\Support\Facades\Auth;
 
 class ValidInventoryInquiry implements Rule
 {
+    private $websiteId;
+
+    /**
+     * Create a new rule instance.
+     *
+     * @param $websiteId
+     */
+    public function __construct($websiteId)
+    {
+        $this->websiteId = $websiteId;
+    }
 
     /**
      * Determine if the validation rule passes.
@@ -31,10 +42,7 @@ class ValidInventoryInquiry implements Rule
             return false;
         }
 
-        $website = Website::whereDealerId($user->dealer_id)->first();
-        if(is_null($website)){
-            return false;
-        }
+        $website = Website::find($this->websiteId);
 
         $dealersIds = $website->getFilterValue('dealer_id') ?? [];
 
