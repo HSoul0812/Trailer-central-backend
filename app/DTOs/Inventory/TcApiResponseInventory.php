@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DTOs\Inventory;
 
 use App\DTOs\Dealer\PrivateDealerCheck;
+use App\Models\Inventory\InventoryStatusMap;
 use App\Traits\TypedPropertyTrait;
 use JetBrains\PhpStorm\Pure;
 
@@ -12,13 +13,6 @@ class TcApiResponseInventory
 {
     use \App\DTOs\Arrayable;
     use TypedPropertyTrait;
-    public const statusToAvailabilityMap = [
-        1 => 'available',
-        2 => 'sold',
-        3 => 'on_order',
-        4 => 'pending_sale',
-        5 => 'special_order',
-    ];
 
     public int $id;
     public ?string $url;
@@ -88,7 +82,7 @@ class TcApiResponseInventory
 
         $obj->listing_date = $data['created_at'];
 
-        $obj->availability = self::statusToAvailabilityMap[$data['status_id']] ?? '';
+        $obj->availability = InventoryStatusMap::GetStatus($data['status_id']) ?? '';
         $obj->availability_label = $data['status'] ?? '';
         if ($obj->availability !== 'sold') {
             $obj->price = $data['price'];

@@ -4,6 +4,7 @@ namespace App\Services\Inventory;
 
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
+use App\Models\Inventory\InventoryStatusMap;
 use App\Models\Parts\CategoryMappings;
 use App\Models\Parts\Type;
 use App\Services\Inventory\ESQuery\SortOrder;
@@ -67,9 +68,6 @@ class InventorySDKService implements InventorySDKServiceInterface
         'type_id' => 1,
         'type_label' => 'General Trailers',
     ];
-
-    public const INVENTORY_SOLD = 'sold';
-    public const INVENTORY_AVAILABLE = 'available';
 
     public const DEFAULT_DISTANCE = 300;
     public const DEFAULT_SORT = '+distance';
@@ -237,7 +235,7 @@ class InventorySDKService implements InventorySDKServiceInterface
 
         $this->postFilterGroup->add(new Filter('classifieds_site', new Collection([true])));
         $this->postFilterGroup->add(new Filter(
-            'availability', new Collection([self::INVENTORY_SOLD], Operator::NOT_EQUAL
+            'availability', new Collection([InventoryStatusMap::SOLD], Operator::NOT_EQUAL
             )));
         $this->postFilterGroup->add(new Filter('isRental', new Collection([false])));
     }

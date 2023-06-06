@@ -12,6 +12,7 @@ use App\DTOs\Inventory\TcApiResponseManufacturer;
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\Models\Geolocation\Geolocation;
+use App\Models\Inventory\InventoryStatusMap;
 use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepositoryInterface;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
@@ -176,15 +177,16 @@ class InventoryService implements InventoryServiceInterface
         $authToken = $this->authTokenRepository->get(['user_id' => $userId]);
         $url = config('services.trailercentral.api') . 'inventory/' . $id;
 
-        $response = $this->handleHttpRequest(
-            'DELETE',
+        $params['show_on_website'] = 0;
+        $params['is_archived'] = 1;
+
+        $this->handleHttpRequest(
+            'POST',
             $url,
-            ['headers' => ['access-token' => $authToken->access_token]]
+            ['json' => $params, 'headers' => ['access-token' => $authToken->access_token]]
         );
 
-        $respObj = TcApiResponseInventoryDelete::fromData($response['response']);
-
-        return $respObj;
+        return TcApiResponseInventoryDelete::fromData(['status' => 'success']);
     }
 
     /**
@@ -206,6 +208,14 @@ class InventoryService implements InventoryServiceInterface
             }
             $params['category'] = $categoryMapping->map_to;
             $params['entity_type_id'] = $categoryMapping->entity_type_id;
+        }
+
+        if ((isset($params['status']) && $params['status'] == InventoryStatusMap::SOLD_ID) ||
+            (isset($params['availability']) && $params['availability'] == InventoryStatusMap::SOLD)) {
+            $params['status'] = InventoryStatusMap::SOLD_ID;
+            $params['availability'] = InventoryStatusMap::SOLD;
+            $params['show_on_website'] = 0;
+            $params['is_archived'] = 1;
         }
 
         $inventory = $this->handleHttpRequest(
@@ -264,6 +274,29 @@ class InventoryService implements InventoryServiceInterface
         }
 
         return $results;
+    }
+
+    public function getBrands(): Collection
+    {
+        $brandsUrl = config('services.trailercentral.api') . 'inventory/brands';
+
+        $brands = $this->handleHttpRequest('GET', $brandsUrl, ['query' => ['per_page' => 9999]]);
+
+        return collect($brands['data'])
+            ->map(function ($brand) {
+                return TcApiResponseBrand::fromData($brand);
+            });
+    }
+
+    public function getManufacturers(): Collection
+    {
+        $manufacturerUrl = config('services.trailercentral.api') . 'inventory/manufacturers';
+        $manufacturer = $this->handleHttpRequest('GET', $manufacturerUrl, ['query' => ['per_page' => 9999]]);
+
+        return collect($manufacturer['data'])
+            ->map(function ($manufacturer) {
+                return TcApiResponseManufacturer::fromData($manufacturer);
+            });
     }
 
     private function esSearchUrl(): string
@@ -690,27 +723,5 @@ class InventoryService implements InventoryServiceInterface
         } else {
             $queryBuilder->addTermInValuesQuery(self::TERM_SEARCH_KEY_MAP['availability'], self::INVENTORY_AVAILABLE);
         }
-    }
-
-    public function getBrands(): Collection
-    {
-        $brandsUrl = config('services.trailercentral.api') . 'inventory/brands';
-
-        $brands = $this->handleHttpRequest('GET', $brandsUrl, ['query' => ['per_page' => 9999]]);
-
-        return collect($brands['data'])
-            ->map(function ($brand) {
-                return TcApiResponseBrand::fromData($brand);
-            });
-    }
-    public function getManufacturers(): Collection
-    {
-        $manufacturerUrl = config('services.trailercentral.api') . 'inventory/manufacturers';
-        $manufacturer = $this->handleHttpRequest('GET', $manufacturerUrl, ['query' => ['per_page' => 9999]]);
-
-        return collect($manufacturer['data'])
-            ->map(function ($manufacturer) {
-                return TcApiResponseManufacturer::fromData($manufacturer);
-            });
     }
 }
