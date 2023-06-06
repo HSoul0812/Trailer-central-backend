@@ -50,15 +50,13 @@ class ValidDealerLocationInquiry implements Rule
                 return false;
             }
         } else {
-            $isLocationFound = false;
             $dealersIds = (array)$dealersIds;
             foreach ($dealersIds as $dealerId) {
                 if($dealerLocation->dealer_id == $dealerId) {
-                    $isLocationFound = true;
-                    break;
+                    return true;
                 }
             }
-            return $isLocationFound;
+            return false;
         }
 
 

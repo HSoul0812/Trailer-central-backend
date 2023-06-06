@@ -32,6 +32,10 @@ class ValidInventoryInquiry implements Rule
         }
 
         $website = Website::whereDealerId($user->dealer_id)->first();
+        if(is_null($website)){
+            return false;
+        }
+
         $dealersIds = $website->getFilterValue('dealer_id') ?? [];
 
         if (empty($dealersIds)) {
@@ -40,14 +44,13 @@ class ValidInventoryInquiry implements Rule
                 return false;
             }
         } else {
-            $isInventoryFound = false;
+            $dealersIds = (array)$dealersIds;
             foreach ($dealersIds as $dealerId) {
                 if($inventory->dealer_id == $dealerId) {
-                    $isInventoryFound = true;
-                    break;
+                    return true;
                 }
             }
-            return $isInventoryFound;
+            return false;
         }
 
         // Success!
