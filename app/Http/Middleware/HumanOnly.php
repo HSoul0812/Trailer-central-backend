@@ -55,6 +55,12 @@ class HumanOnly
         'Google-Read-Aloud',
         'Storebot-Google',
         'Google-Site-Verification',
+
+        // Bingbot
+        'Bingbot',
+        'AdIdxBot',
+        'BingPreview',
+        'MicrosoftPreview',
     ];
 
     /**
