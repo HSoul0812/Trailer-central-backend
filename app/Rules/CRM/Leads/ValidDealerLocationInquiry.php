@@ -38,6 +38,10 @@ class ValidDealerLocationInquiry implements Rule
         }
 
         $website = Website::whereDealerId($user->dealer_id)->first();
+        if(is_null($website)){
+            return false;
+        }
+
         $dealersIds = $website->getFilterValue('dealer_id') ?? [];
 
         if (empty($dealersIds)) {
@@ -47,6 +51,7 @@ class ValidDealerLocationInquiry implements Rule
             }
         } else {
             $isLocationFound = false;
+            $dealersIds = (array)$dealersIds;
             foreach ($dealersIds as $dealerId) {
                 if($dealerLocation->dealer_id == $dealerId) {
                     $isLocationFound = true;
