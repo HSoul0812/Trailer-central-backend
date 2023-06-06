@@ -168,7 +168,7 @@ class StripePaymentService implements StripePaymentServiceInterface
         }
 
         $product = Product::create([
-            'name' => $planId,
+            'name' => $plan['name'],
             'description' => $plan['description'],
             'default_price_data' => [
                 'currency' => 'usd',
