@@ -262,7 +262,9 @@ class InventoryElasticSearchInputTransformer implements Transformer
      */
     private function transformInventoryFeatures($model): array
     {
-        return $model->inventoryFeatures->map(function ($feature){
+        return $model->inventoryFeatures->filter(function ($feature){
+            return !is_null($feature->featureList);
+        })->map(function ($feature){
             return [
                 'feature_name' => $feature->featureList->feature_name,
                 'value' => $feature->value
