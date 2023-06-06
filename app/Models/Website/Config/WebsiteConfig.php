@@ -27,7 +27,6 @@ class WebsiteConfig extends Model
     const CALL_TO_ACTION = 'call-to-action';
     const SHOWROOM_USE_SERIES = 'showroom/use_series';
     const LEADS_MERGE_ENABLED = 'leads/merge/enabled';
-    const PAYMENT_CALCULATOR_DURATION_KEY = 'payment-calculator/duration';
 
     protected $table = 'website_config';
 

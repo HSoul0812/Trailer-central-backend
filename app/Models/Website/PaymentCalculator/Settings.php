@@ -5,11 +5,9 @@ namespace App\Models\Website\PaymentCalculator;
 use App\Models\Inventory\Category;
 use App\Models\Inventory\EntityType;
 use App\Models\Traits\TableAware;
-use App\Models\Website\Config\WebsiteConfigDefault;
 use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Str;
 
 /**
  * @property int $id
@@ -39,7 +37,7 @@ class Settings extends Model
         'years' => null,
         'months' => null,
         'monthly_payment' => null,
-        'down_percentage' => null,
+        'down_percentage' => null
     ];
 
     const CONDITION_USED = 'used';
@@ -101,15 +99,5 @@ class Settings extends Model
     public function isNoFinancing(): bool
     {
         return $this->financing === self::NO_FINANCING;
-    }
-
-    /**
-     * @return array
-     */
-    public static function noSettingsAvailable(): array
-    {
-        return self::NO_SETTINGS_AVAILABLE + [
-            'payment_calculator_duration' => Str::ucfirst(WebsiteConfigDefault::PAYMENT_CALCULATOR_DURATION_MONTHLY),
-        ];
     }
 }

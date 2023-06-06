@@ -3,15 +3,11 @@
 namespace App\Repositories\Website\PaymentCalculator;
 
 use App\Models\Inventory\Inventory;
-use App\Models\Website\Config\WebsiteConfig;
-use App\Models\Website\Config\WebsiteConfigDefault;
 use App\Models\Website\PaymentCalculator\Settings;
-use App\Repositories\Website\Config\DefaultConfigRepository;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Str;
 
-class SettingsRepository implements SettingsRepositoryInterface
-{
+class SettingsRepository implements SettingsRepositoryInterface {
+
     public function create($params)
     {
         return Settings::create($params);
@@ -19,7 +15,6 @@ class SettingsRepository implements SettingsRepositoryInterface
 
     /**
      * @param array $params `id` parameter is required
-     *
      * @return bool
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
@@ -36,8 +31,7 @@ class SettingsRepository implements SettingsRepositoryInterface
         return (bool)$settings->delete();
     }
 
-    public function get($params)
-    {
+    public function get($params) {
         return Settings::where('website_id', $params['website_id'])->firstOrFail();
     }
 
@@ -46,11 +40,9 @@ class SettingsRepository implements SettingsRepositoryInterface
      * it should determine which is the correct config payment calculator
      *
      * @param $params
-     *
      * @return \Illuminate\Support\Collection
      */
-    public function getAll($params)
-    {
+    public function getAll($params) {
         /** @var Builder $query */
         $query = Settings::with('entityType')->where('website_id', $params['website_id']);
 
@@ -59,7 +51,7 @@ class SettingsRepository implements SettingsRepositoryInterface
         }
 
         if (isset($params['inventory_category_id_or_null'])) {
-            $query->where(function ($q) use ($params) {
+            $query->where(function($q) use ($params) {
                 $q->whereNull('inventory_category_id')
                     ->orWhere('inventory_category_id', $params['inventory_category_id_or_null']);
             });
@@ -117,7 +109,6 @@ class SettingsRepository implements SettingsRepositoryInterface
 
     /**
      * @param Inventory $inventory
-     *
      * @return array{apr: float, down: float, years: int, months: int, monthly_payment: float, down_percentage:float}
      */
     public function getCalculatedSettingsByInventory(Inventory $inventory): array
@@ -126,16 +117,17 @@ class SettingsRepository implements SettingsRepositoryInterface
         $inventoryPrice = $inventorySettings['inventory_price'];
 
         if (!$inventorySettings['inventory_price']) {
-            return Settings::noSettingsAvailable();
+            return Settings::NO_SETTINGS_AVAILABLE;
         }
 
         /** @var Settings|null $financingSettings */
-        $financingSettings = $this->getAll($inventorySettings + ['financing' => 'financing'])->first();
         /** @var Settings|null $noFinancingSettings */
-        $noFinancingSettings = $this->getAll($inventorySettings + ['financing' => 'no_financing'])->first();
+
+        $financingSettings = $this->getAll(array_merge($inventorySettings + ['financing' => 'financing']))->first();
+        $noFinancingSettings = $this->getAll(array_merge($inventorySettings + ['financing' => 'no_financing']))->first();
 
         if (!$financingSettings && !$noFinancingSettings) {
-            return Settings::noSettingsAvailable();
+            return Settings::NO_SETTINGS_AVAILABLE;
         }
 
         $calculatorSettings = null;
@@ -144,13 +136,13 @@ class SettingsRepository implements SettingsRepositoryInterface
             $calculatorSettings = $financingSettings;
         } elseif (!$financingSettings && $noFinancingSettings) {
             $calculatorSettings = $noFinancingSettings;
-        } elseif (($financingSettings->isLessThan() && $noFinancingSettings->isLessThan())) {
+        } else if (($financingSettings->isLessThan() && $noFinancingSettings->isLessThan())) {
             $calculatorSettings = $financingSettings;
 
             if ($inventoryPrice < $financingSettings->inventory_price) {
                 $calculatorSettings = $noFinancingSettings;
             }
-        } elseif (($financingSettings->isOver() && $noFinancingSettings->isOver())) {
+        } else if (($financingSettings->isOver() && $noFinancingSettings->isOver())) {
             $calculatorSettings = $financingSettings;
 
             if ($inventoryPrice > $financingSettings->inventory_price) {
@@ -159,44 +151,23 @@ class SettingsRepository implements SettingsRepositoryInterface
         }
 
         if (!$calculatorSettings || $calculatorSettings->isNoFinancing()) {
-            return Settings::noSettingsAvailable();
+            return Settings::NO_SETTINGS_AVAILABLE;
         }
 
-        $paymentCalcDuration = WebsiteConfigDefault::PAYMENT_CALCULATOR_DURATION_MONTHLY;
-        if (!empty($inventorySettings['website_id'])) {
-            $configurations = resolve(DefaultConfigRepository::class)
-                ->getAll(['key' => WebsiteConfig::PAYMENT_CALCULATOR_DURATION_KEY])
-                ->groupBy('grouping');
-            $paymentCalcConfig = $configurations->get(WebsiteConfigDefault::GROUPING_PAYMENT_CALCULATOR)->first();
-            $paymentCalcDuration = $paymentCalcConfig->getValueAccordingWebsite($inventorySettings['website_id']);
-        }
-
-        switch ($paymentCalcDuration) {
-            case WebsiteConfigDefault::PAYMENT_CALCULATOR_DURATION_MONTHLY:
-                $interest = (float)$calculatorSettings->apr / 100 / 12;
-                $payments = $calculatorSettings->months;
-
-                break;
-            case WebsiteConfigDefault::PAYMENT_CALCULATOR_DURATION_BIWEEKLY:
-                $interest = (float)$calculatorSettings->apr / 100 / 26;
-                $payments = $calculatorSettings->months / 12 * 26;
-
-                break;
-        }
-
-        $priceDown = (float)($calculatorSettings->down / 100) * $inventoryPrice;
+        $priceDown = (double)($calculatorSettings->down / 100) * $inventoryPrice;
         $principal = $inventoryPrice - $priceDown;
+        $interest = (double)$calculatorSettings->apr / 100 / 12;
+        $payments = $calculatorSettings->months;
         $compInterest = (1 + $interest) ** $payments;
-        $payment = number_format((float)($principal * $compInterest * $interest) / ($compInterest - 1), 2, '.', '');
+        $monthlyPayment = number_format((float)($principal * $compInterest * $interest) / ($compInterest - 1), 2, '.', '');
 
         return [
             'apr' => $calculatorSettings->apr,
             'down' => $priceDown,
             'years' => $calculatorSettings->months / 12,
             'months' => $calculatorSettings->months,
-            'monthly_payment' => abs($payment),
-            'down_percentage' => $calculatorSettings->down,
-            'payment_calculator_duration' => Str::ucfirst($paymentCalcDuration),
+            'monthly_payment' => abs($monthlyPayment),
+            'down_percentage' => $calculatorSettings->down
         ];
     }
 }
