@@ -76,6 +76,7 @@ class StripePaymentService implements StripePaymentServiceInterface
         $metadata['planName'] = $planName;
         $metadata['planDescription'] = $planDescription;
         $metadata['planDuration'] = $planDuration;
+        $metadata['detail'] = $customText;
 
         $product = $this->findOrCreatePlan($planId);
 
@@ -91,7 +92,11 @@ class StripePaymentService implements StripePaymentServiceInterface
             'line_items' => $priceObjects,
             'client_reference_id' => 'tt' . Str::uuid(),
             'metadata' => $metadata,
-            'custom_text' => $customText,
+            'custom_text' => [
+                'submit' => [
+                    'message' => $customText,
+                ],
+            ],
             'mode' => 'payment',
             'success_url' => $siteUrl . $successUrl,
             'cancel_url' => $siteUrl . $failUrl,
@@ -183,7 +188,6 @@ class StripePaymentService implements StripePaymentServiceInterface
             $userId = $session->metadata->user_id;
             $planKey = $session->metadata->planKey;
             $planName = $session->metadata->planName;
-            $planDescription = $session->metadata->planDescription;
             $graceDays = self::PLANS[$planKey]['grace_days'] ?? 0;
             // As we calculate the duration from the current day, we are adding grace days in the plan duration just
             // to give the extra day(s) to the user.
