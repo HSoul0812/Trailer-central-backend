@@ -14,7 +14,7 @@ class CreateTemplateRequest extends Request
     protected $rules = [
         'name' => 'string',
         'template' => 'string',
-        'template_key' => 'required|string',
+        'template_key' => 'required|string|unique:crm_email_template,template_key',
         'html' => 'string',
         'template_metadata' => 'string',
         'template_json' => 'string'

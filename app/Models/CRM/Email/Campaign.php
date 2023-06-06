@@ -8,6 +8,7 @@ use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Services\CRM\Email\DTOs\CampaignStats;
 
 /**
  * Class Email Campaign
@@ -138,5 +139,34 @@ class Campaign extends Model
     public function factory(): BelongsTo
     {
         return $this->belongsTo(CampaignFactory::class, 'drip_campaigns_id');
+    }
+
+    /**
+     * @return type
+     */
+    public function sents(): HasMany
+    {
+        return $this->hasMany(CampaignSent::class, 'drip_campaigns_id');
+    }
+
+    /**
+     * Get Stats for Email Campaigns
+     *
+     * @return CampaignStats
+     */
+    public function getStatsAttribute(): CampaignStats
+    {
+        // Get Stats for Blast
+        return new CampaignStats([
+            'sent' => $this->sents->count(),
+            'delivered' => $this->sents()->delivered()->count(),
+            'bounced' => $this->sents()->bounced()->count(),
+            'complaints' => $this->sents()->complained()->count(),
+            'unsubscribed' => $this->sents()->unsubscribed()->count(),
+            'opened' => $this->sents()->opened()->count(),
+            'clicked' => $this->sents()->clicked()->count(),
+            'skipped' => $this->sents()->skipped()->count(),
+            'failed' => $this->sents()->failed()->count(),
+        ]);
     }
 }

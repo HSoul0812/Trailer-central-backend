@@ -214,6 +214,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('database:prune-ssn')
             ->daily()
             ->runInBackground();
+
+        $schedule->command('tt:process-expired-inventories')
+            ->daily()
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground()
+            ->appendOutputTo(storage_path("logs/commands/tt:process-expired-inventories/{$this->dailyLogFileName()}"));
     }
 
     /**
@@ -231,5 +238,10 @@ class Kernel extends ConsoleKernel
     private function isProduction(): bool
     {
         return config('app.env') === 'production';
+    }
+
+    private function dailyLogFileName(): string
+    {
+        return now()->format('Y-m-d') . '.log';
     }
 }

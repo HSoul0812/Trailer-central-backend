@@ -11,6 +11,7 @@ use App\Models\CRM\Email\Template;
 use App\Models\User\NewUser;
 use Faker\Generator as Faker;
 use Carbon\Carbon;
+use App\Models\CRM\Interactions\EmailHistory;
 
 /**
  * Define Blast Factory
@@ -41,12 +42,27 @@ $factory->define(BlastSent::class, function(Faker $faker, array $attributes) {
     $email_blasts_id = $attributes['email_blasts_id'] ?? factory(Blast::class)->create()->getKey();
 
     $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create()->getKey();
+    $now = Carbon::now();
+
+    $messageId = '<' . $faker->md5 . '@' . $faker->freeEmailDomain . '>';
 
     // Return Overrides
     return [
         'email_blasts_id' => $email_blasts_id,
         'lead_id' => $lead_id,
-        'message_id' => '<' . $faker->md5 . '@' . $faker->freeEmailDomain . '>'
+        'message_id' => $messageId,
+        'crm_email_history_id' => $attributes['crm_email_history_id'] ?? factory(EmailHistory::class)->create([
+            'message_id' => $messageId,
+            'date_sent' => $now,
+            'date_delivered' => $now,
+            'date_bounced' => $now,
+            'date_complained' => $now,
+            'date_unsubscribed' => $now,
+            'date_opened' => $now,
+            'date_clicked' => $now,
+            'was_skipped' => 1,
+            'invalid_email' => 1,
+        ])->getKey()
     ];
 });
 

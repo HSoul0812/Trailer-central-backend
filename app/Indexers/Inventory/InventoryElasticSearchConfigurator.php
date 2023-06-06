@@ -275,6 +275,11 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'paymentCalculator.monthly_payment' => ['type' => 'float', 'index' => false],
         'paymentCalculator.down_percentage' => ['type' => 'float', 'index' => false],
         'hasImage' => ['type' => 'boolean'],
+        'hasStockImages' => ['type' => 'boolean'],
+        'customOverlay' => ['type' => 'keyword'],
+        'conversionCompany' => ['type' => 'keyword'],
+        'features' => ['type' => 'nested'],
+        'hiddenPrice' => ['type' => 'float']
     ];
 
     public function name(): string

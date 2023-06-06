@@ -200,6 +200,14 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'tilt'                 => $model->getAttributeById(Attribute::TILT),
             'entity_type_id'       => $model->entity_type_id,
             'paymentCalculator' => $paymentCalculatorSettings,
+            'hasStockImages' => TypesHelper::ensureBoolean($model->has_stock_images),
+            'customOverlay' => optional($model->customOverlay)->value,
+            'conversionCompany' => $model->getAttributeById(
+                Attribute::CONVERSION,
+                $model->getAttributeById(Attribute::CUSTOM_CONVERSION)
+            ),
+            'features' => $this->transformInventoryFeatures($model),
+            'hiddenPrice' => TypesHelper::ensureNumeric($model->hidden_price)
         ];
     }
 
@@ -246,5 +254,19 @@ class InventoryElasticSearchInputTransformer implements Transformer
         return $images->sortBy($this->imageSorter())->values()->filter(function (InventoryImage $image) {
             return $image->isSecondary();
         })->map(function (InventoryImage $image) { return $image->image->filename; })->values()->toArray();
+    }
+
+    /**
+     * @param $model
+     * @return array
+     */
+    private function transformInventoryFeatures($model): array
+    {
+        return $model->inventoryFeatures->map(function ($feature){
+            return [
+                'feature_name' => $feature->featureList->feature_name,
+                'value' => $feature->value
+            ];
+        })->values()->toArray();
     }
 }

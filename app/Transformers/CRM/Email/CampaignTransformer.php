@@ -4,9 +4,14 @@ namespace App\Transformers\CRM\Email;
 
 use League\Fractal\TransformerAbstract;
 use App\Models\CRM\Email\Campaign;
+use App\Transformers\CRM\Email\CampaignReportTransformer;
 
 class CampaignTransformer extends TransformerAbstract
 {
+    protected $availableIncludes = [
+        'report'
+    ];
+
     public function transform(Campaign $campaign)
     {
 	 return [
@@ -30,5 +35,10 @@ class CampaignTransformer extends TransformerAbstract
             'approved' => $campaign->factory ? $campaign->factory->is_approved : true,
             'is_from_factory' => isset($campaign->factory)
          ];
+    }
+
+    public function includeReport(Campaign $campaign)
+    {
+        return $this->item($campaign->stats, new CampaignReportTransformer());
     }
 }
