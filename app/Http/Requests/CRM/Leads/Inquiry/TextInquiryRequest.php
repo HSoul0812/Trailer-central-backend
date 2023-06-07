@@ -6,6 +6,7 @@ use App\Http\Requests\Request;
 use App\Rules\CRM\Leads\BannedLeadTextsRule;
 use Propaganistas\LaravelPhone\PhoneNumber;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Rules\CRM\Leads\ValidDealerLocationInquiry;
 
 class TextInquiryRequest extends Request
 {
@@ -14,7 +15,7 @@ class TextInquiryRequest extends Request
         return [
             'dealer_id' => 'required|exists:dealer,dealer_id',
             'website_id' => 'required|website_exists',
-            'dealer_location_id' => 'required|dealer_location_inquiry_valid',
+            'dealer_location_id' => ['required', new ValidDealerLocationInquiry($this->input('website_id'))],
             'inventory_id' => 'nullable|exists:inventory,inventory_id,dealer_id,' . $this->dealer_id,
             'phone_number' => 'required|min:10|phone:US,CA,CL,mobile',
             'sms_message' => ['required', new BannedLeadTextsRule()],

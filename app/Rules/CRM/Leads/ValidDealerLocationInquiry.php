@@ -9,6 +9,17 @@ use Illuminate\Support\Facades\Auth;
 
 class ValidDealerLocationInquiry implements Rule
 {
+    private $websiteId;
+
+    /**
+     * Create a new rule instance.
+     *
+     * @param $websiteId
+     */
+    public function __construct($websiteId)
+    {
+        $this->websiteId = $websiteId;
+    }
 
     /**
      * Determine if the validation rule passes.
@@ -37,7 +48,8 @@ class ValidDealerLocationInquiry implements Rule
             return false;
         }
 
-        $website = Website::whereDealerId($user->dealer_id)->first();
+        $website = Website::find($this->websiteId);
+
         $dealersIds = $website->getFilterValue('dealer_id') ?? [];
 
         if (empty($dealersIds)) {
@@ -46,14 +58,13 @@ class ValidDealerLocationInquiry implements Rule
                 return false;
             }
         } else {
-            $isLocationFound = false;
+            $dealersIds = (array)$dealersIds;
             foreach ($dealersIds as $dealerId) {
                 if($dealerLocation->dealer_id == $dealerId) {
-                    $isLocationFound = true;
-                    break;
+                    return true;
                 }
             }
-            return $isLocationFound;
+            return false;
         }
 
 
