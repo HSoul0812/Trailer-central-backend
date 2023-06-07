@@ -178,33 +178,62 @@ return [
         ],
 
         'cache' => [
-            'url' => env('REDIS_URL'),
-            'host' => env('REDIS_HOST', '127.0.0.1'),
-            'password' => env('REDIS_PASSWORD', null),
-            'port' => env('REDIS_PORT', '6379'),
+            'url' => env('REDIS_CACHE_URL', env('REDIS_URL')),
+            'host' => env('REDIS_CACHE_HOST', env('REDIS_HOST','127.0.0.1')),
+            'password' => env('REDIS_CACHE_PASSWORD', env('REDIS_PASSWORD', null)),
+            'port' => env('REDIS_CACHE_PORT', env('REDIS_PORT', '6379')),
             'database' => env('REDIS_CACHE_DB', '1'),
         ],
 
         /**
-         * This new connection is aimed to help us to flush only this db, so we will avoid mistake,
-         * also this is faster and safe
+         * This connection is aimed to isolate any inventory cache-related process, so we will be able
+         * to safely flush
          */
         'sdk-search-cache' => [
             'url' => env('REDIS_CACHE_URL', env('REDIS_URL')),
             'host' => env('REDIS_CACHE_HOST', env('REDIS_HOST','127.0.0.1')),
-            'password' => env('REDIS_CACHE_PASSWORD', env('REDIS_CACHE_PASSWORD', null)),
+            'password' => env('REDIS_CACHE_PASSWORD', env('REDIS_PASSWORD', null)),
             'port' => env('REDIS_CACHE_PORT', env('REDIS_PORT', '6379')),
-            'database' => env('REDIS_SDK_SEARCH_CACHE_DB', '3'),
+            'database' => env('REDIS_SDK_SEARCH_CACHE_DB', '10'),
         ],
 
+        /**
+         * This connection is aimed to isolate any inventory cache-related process, so we will be able
+         * to safely flush
+         */
         'sdk-single-cache' => [
             'url' => env('REDIS_CACHE_URL', env('REDIS_URL')),
             'host' => env('REDIS_CACHE_HOST', env('REDIS_HOST','127.0.0.1')),
-            'password' => env('REDIS_CACHE_PASSWORD', env('REDIS_CACHE_PASSWORD', null)),
+            'password' => env('REDIS_CACHE_PASSWORD', env('REDIS_PASSWORD', null)),
             'port' => env('REDIS_CACHE_PORT', env('REDIS_PORT', '6379')),
-            'database' => env('REDIS_SDK_SINGLE_CACHE_DB', '4'),
+            'database' => env('REDIS_SDK_SINGLE_CACHE_DB', '11'),
         ],
 
+        /**
+         * This new connection is aimed to isolate any jobs-related process
+         */
+        'jobs' => [
+            'url' => env('REDIS_JOBS_URL', env('REDIS_URL')),
+            'host' => env('REDIS_JOBS_HOST', env('REDIS_HOST','127.0.0.1')),
+            'password' => env('REDIS_JOBS_PASSWORD', env('REDIS_PASSWORD', null)),
+            'port' => env('REDIS_JOBS_PORT', env('REDIS_PORT', '6379')),
+            'database' => env('REDIS_JOBS_DB', env('REDIS_DB', '2')),
+        ],
+
+        /**
+         * This new connection is aimed to isolate any Horizon process, specially its metadata and metrics
+         */
+        'horizon' => [
+            'url' => env('REDIS_JOBS_URL', env('REDIS_URL')),
+            'host' => env('REDIS_JOBS_HOST', env('REDIS_HOST','127.0.0.1')),
+            'password' => env('REDIS_JOBS_PASSWORD', env('REDIS_PASSWORD', null)),
+            'port' => env('REDIS_JOBS_PORT', env('REDIS_PORT', '6379')),
+            'database' => env('REDIS_HORIZON_DB', env('REDIS_DB', '3')),
+        ],
+
+        /**
+         * We need to investigate why we need separate connections for `dealer-proxy`, `dealer-tunnels`, `persist`
+         */
         'dealer-proxy' => [
             'host' => env('REDIS_HOST_PROXY', '127.0.0.1'),
             'password' => env('REDIS_PASSWORD_PROXY', null),
@@ -232,18 +261,6 @@ return [
             'options' => [
                 'prefix' => env('REDIS_PERSIST_PREFIX', '')
             ]
-        ],
-
-        /**
-         * This new connection is aimed to have isolated the invalidation jobs, so we will ensure we will have only
-         * one job per invalidation key pattern, avoiding to have many jobs using resources.
-         */
-        'inventory-job-cache' => [
-            'url' => env('REDIS_URL'),
-            'host' => env('REDIS_HOST', '127.0.0.1'),
-            'password' => env('REDIS_PASSWORD', null),
-            'port' => env('REDIS_PORT', '6379'),
-            'database' => env('REDIS_INVENTORY_JOB_CACHE_DB', '5'),
-        ],
+        ]
     ],
 ];

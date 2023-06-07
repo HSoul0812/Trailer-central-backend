@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'use' => 'default',
+    'use' => 'horizon',
 
     /*
     |--------------------------------------------------------------------------
@@ -142,6 +142,10 @@ return [
 
     // https://laravel.com/docs/6.x/horizon
 
+    /**
+     * Please have in mind the supervisores have a connection, that connection is configured in `config/queue.php`,
+     * for instance, so far all connections used here are `queue.connections.redis`
+     */
     'environments' => [
         'local' => [
             'supervisor-1' => [
