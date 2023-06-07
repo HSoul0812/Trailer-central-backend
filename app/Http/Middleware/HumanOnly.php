@@ -71,6 +71,9 @@ class HumanOnly
         'SemrushBot',
         'PetalBot',
         'SirdataBot',
+        'CriteoBot',
+        'Quantcastbot',
+        'AhrefsBot',
     ];
 
     public function handle(Request $request, Closure $next)
