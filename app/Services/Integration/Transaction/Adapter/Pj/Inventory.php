@@ -120,10 +120,14 @@ class Inventory extends PjAdapter
             $inventoryParams['new_images'][] = ['url' => $image];
         }
 
+        $additionalSearchModelPart = strpos($inventoryParams['model'], '-') !== false ?
+            strstr($inventoryParams['model'], '-', true) :
+            $inventoryParams['model'];
+
         // Additional search by model excluding all characters after -
         $additionalSearchParams = [
             'search_by_model_part' => true,
-            'model_part' => strstr($inventoryParams['model'], '-', true)
+            'model_part' => $additionalSearchModelPart
         ];
 
         $inventoryParams = $this->showroomService->mapInventoryToFactory($inventoryParams, $additionalSearchParams);
