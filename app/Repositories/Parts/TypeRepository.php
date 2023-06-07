@@ -6,6 +6,7 @@ namespace App\Repositories\Parts;
 
 use App\Models\Parts\Type;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class TypeRepository implements TypeRepositoryInterface
 {
@@ -21,6 +22,11 @@ class TypeRepository implements TypeRepositoryInterface
 
     public function getAll(): Collection
     {
-        return $this->model->all()->sortBy('id');
+        return $this->model
+            ->with(['categories' => function (BelongsToMany $query) {
+                $query->orderBy('id');
+            }])
+            ->orderBy('id')
+            ->get();
     }
 }
