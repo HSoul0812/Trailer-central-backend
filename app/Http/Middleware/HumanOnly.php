@@ -65,6 +65,14 @@ class HumanOnly
         'MicrosoftPreview',
     ];
 
+    private array $blackListedUserAgents = [
+        'YandexBot',
+        'Clickagy Intelligence Bot',
+        'SemrushBot',
+        'PetalBot',
+        'SirdataBot',
+    ];
+
     public function handle(Request $request, Closure $next)
     {
         if ($this->shouldAllowRequestToGoThrough($request)) {
@@ -95,6 +103,13 @@ class HumanOnly
             return false;
         }
 
+        // Make it lowercase so word like Bingbot becomes bingbot
+        $userAgent = strtolower($userAgent);
+
+        if ($this->isBlackListedUserAgent($userAgent)) {
+            return false;
+        }
+
         // Allow request to go through if it's in the allows user agent list
         if ($this->allowUserAgent($userAgent)) {
             return true;
@@ -108,7 +123,7 @@ class HumanOnly
     private function allowUserAgent(string $userAgent): bool
     {
         foreach ($this->allowUserAgents as $allowUserAgent) {
-            if (str_contains($userAgent, $allowUserAgent)) {
+            if (str_contains($userAgent, strtolower($allowUserAgent))) {
                 return true;
             }
         }
@@ -120,7 +135,7 @@ class HumanOnly
             }
 
             foreach ($config['user_agents'] as $allowUserAgent) {
-                if (str_contains($userAgent, $allowUserAgent)) {
+                if (str_contains($userAgent, strtolower($allowUserAgent))) {
                     return true;
                 }
             }
@@ -178,6 +193,17 @@ class HumanOnly
             $ipRange = $ipRanges->first(fn (string $ipRange) => IpUtils::checkIp($ip, $ipRange));
 
             if ($ipRange !== null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function isBlackListedUserAgent(string $userAgent): bool
+    {
+        foreach ($this->blackListedUserAgents as $blackListedUserAgent) {
+            if (str_contains($userAgent, strtolower($blackListedUserAgent))) {
                 return true;
             }
         }

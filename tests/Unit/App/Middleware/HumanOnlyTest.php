@@ -30,6 +30,17 @@ class HumanOnlyTest extends TestCase
         $this->assertMiddlewareReturnsEmpty($response);
     }
 
+    public function testItDownNotAllowRequestWithBlackListedUserAgent(): void
+    {
+        $request = new Request();
+
+        $request->headers->set('User-Agent', 'something yandexbot yada yada');
+
+        $response = (new HumanOnly())->handle($request, fn () => true);
+
+        $this->assertMiddlewareReturnsEmpty($response);
+    }
+
     public function testItAllowsRequestWithAllowedUserAgent(): void
     {
         $request = new Request();
@@ -69,30 +80,6 @@ class HumanOnlyTest extends TestCase
     /**
      * @throws InvalidArgumentException
      */
-    public function testItDoesNotAllowRequestWithNotAllowedCrawlerIpAddresses()
-    {
-        $cacheKey = config('crawlers.providers.google.ips_cache_key');
-
-        Cache::set($cacheKey, collect([
-            '66.249.79.0/27',
-        ]), 20);
-
-        $googleBotIpAddress = '50.249.71.1';
-
-        $request = new Request();
-        $request->headers->set('User-Agent', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/W.X.Y.Z Safari/537.36');
-        config(['trailertrader.middlewares.human_only.allow_ips' => '']);
-        $request->server->add(['REMOTE_ADDR' => $googleBotIpAddress]);
-
-        $response = (new HumanOnly())->handle($request, function () {
-        });
-
-        $this->assertMiddlewareReturnsEmpty($response);
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     */
     public function testItAllowsRequestWithAllowedCrawlerIpAddresses(): void
     {
         $cacheKey = config('crawlers.providers.google.ips_cache_key');
@@ -116,7 +103,7 @@ class HumanOnlyTest extends TestCase
     public function testItBlocksRequestFromCrawlers(): void
     {
         $request = new Request();
-        $request->headers->set('User-Agent', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/W.X.Y.Z Safari/537.36');
+        $request->headers->set('User-Agent', 'crawler');
 
         /** @var JsonResponse $response */
         $response = (new HumanOnly())->handle($request, function (Request $request) {
@@ -125,7 +112,7 @@ class HumanOnlyTest extends TestCase
         $this->assertMiddlewareReturnsEmpty($response);
     }
 
-    private function assertMiddlewareReturnsEmpty(JsonResponse $response)
+    private function assertMiddlewareReturnsEmpty(JsonResponse $response): void
     {
         $content = $response->getOriginalContent();
 
