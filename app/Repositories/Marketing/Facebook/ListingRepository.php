@@ -177,14 +177,11 @@ class ListingRepository implements ListingRepositoryInterface {
         $query = $query->has('orderedImages');
 
         // Join with Listings
-        $query = $query->leftJoin(Listings::getTableName(), function ($join) use ($integration, $listingsTableName) {
+        $query = $query->leftJoin(Listings::getTableName(), function ($join) use ($integration, $listingsTableName, $inventoryTableName) {
             $statusDeleted = Listings::STATUS_DELETED;
             $statusExpired = Listings::STATUS_EXPIRED;
 
-            $identifyInventoryId = "fbapp_listings.inventory_id = inventory.inventory_id";
-            $identifyTitle = "(fbapp_listings.year = inventory.year AND fbapp_listings.make = inventory.manufacturer AND fbapp_listings.model = inventory.model)";
-
-            $join->on(DB::raw("($identifyInventoryId OR $identifyTitle)"), '=', DB::raw("1"));
+            $join->on("$listingsTableName.inventory_id", '=', "$inventoryTableName.inventory_id");
             $join->on("$listingsTableName.marketplace_id", '=', DB::raw($integration->id));
             $join->on(DB::raw("$listingsTableName.status NOT IN ('$statusDeleted', '$statusExpired')"), '=', DB::raw(1));
         })->whereNull("$listingsTableName.id");
