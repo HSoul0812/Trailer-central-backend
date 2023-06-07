@@ -22,6 +22,8 @@ use Symfony\Component\HttpFoundation\IpUtils;
  */
 class HumanOnly
 {
+    public const TT_SSR_ORIGINAL_IP_HEADER = 'TT-SSR-Original-IP';
+
     /**
      * List of user agent that we want to allow the request to go through.
      *
@@ -55,24 +57,16 @@ class HumanOnly
         'Google-Read-Aloud',
         'Storebot-Google',
         'Google-Site-Verification',
-    ];
 
-    /**
-     * @var string[]
-     */
-    private array $allowedDomainNames = [
-        'qa.trailertrader.com',
-        'deployment.trailertrader.com',
-        'trailertrader.com',
+        // Bingbot
+        'Bingbot',
+        'AdIdxBot',
+        'BingPreview',
+        'MicrosoftPreview',
     ];
 
     public function handle(Request $request, Closure $next)
     {
-        // Allow localhost domain if env is not production
-        if (config('app.env') !== 'production') {
-            $this->allowedDomainNames[] = 'localhost';
-        }
-
         if ($this->shouldAllowRequestToGoThrough($request)) {
             return $next($request);
         }
@@ -84,16 +78,13 @@ class HumanOnly
 
     private function shouldAllowRequestToGoThrough(Request $request): bool
     {
-        // Allow domain in the allowed list
-        $origin = trim(parse_url($request->headers->get('origin'), PHP_URL_HOST));
-
-        if (in_array($origin, $this->allowedDomainNames)) {
-            return true;
-        }
+        // We'll try to get the ip from the header first (TT frontend assigns this)
+        // if that doesn't exist, we'll get from the $_SERVER variable
+        $ip = $request->headers->get(self::TT_SSR_ORIGINAL_IP_HEADER, $request->ip());
 
         // Allow request to go through if it's in the allows ip address list
         // even when the user agent is empty
-        if ($this->allowIpAddress($request->ip())) {
+        if ($this->allowIpAddress($ip)) {
             return true;
         }
 
@@ -109,12 +100,9 @@ class HumanOnly
             return true;
         }
 
-        // Always block anything else
-        return false;
-
         // Do not allow request to go through if it's from a bot
         // Ref: https://github.com/JayBizzle/Crawler-Detect/blob/master/raw/Crawlers.json
-        // return !LaravelCrawlerDetect::isCrawler($request->userAgent());
+        return !LaravelCrawlerDetect::isCrawler($request->userAgent());
     }
 
     private function allowUserAgent(string $userAgent): bool
