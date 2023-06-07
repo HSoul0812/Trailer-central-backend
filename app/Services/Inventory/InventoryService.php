@@ -424,7 +424,7 @@ class InventoryService implements InventoryServiceInterface
     private function addScriptFilter(ESInventoryQueryBuilder $queryBuilder, array $params)
     {
         $priceDef = "double price = 0; double websitePrice = 0; double salesPrice = 0;
-                        if(doc['websitePrice'].size > 0){ price = websitePrice = doc['websitePrice'].value; }
+                        if(doc['websitePrice'] !== null){ price = websitePrice = doc['websitePrice'].value; }
                         if(doc['salesPrice'].size() > 0){ salesPrice = doc['salesPrice'].value; }
                         if(0 < salesPrice && salesPrice < price) { price = salesPrice; }";
 
