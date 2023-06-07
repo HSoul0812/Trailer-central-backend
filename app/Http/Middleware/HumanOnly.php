@@ -74,6 +74,7 @@ class HumanOnly
         'CriteoBot',
         'Quantcastbot',
         'AhrefsBot',
+        'Mail.RU_Bot/Fast/2.0',
     ];
 
     public function handle(Request $request, Closure $next)
