@@ -188,6 +188,9 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         // Only Get Slot 99
         $params['slot_id'] = 99;
 
+        // Dealer MUST Be Active
+        $params['is_active'] = true;
+
         // Scheduled End
         $params['end'] = DB::raw('NOW()');
 
@@ -214,6 +217,9 @@ class SchedulerRepository implements SchedulerRepositoryInterface
 
         // Only Get Slot 97
         $params['slot_id'] = 97;
+
+        // Dealer MUST Be Active
+        $params['is_active'] = true;
 
         // Scheduled End
         $params['end'] = DB::raw('NOW()');
@@ -275,6 +281,9 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         $params['s_status_not'] = ['error', 'done'];
         $params['q_status_not'] = ['error', 'done'];
 
+        // Dealer MUST Be Active
+        $params['is_active'] = true;
+
         // Append Minimum Balance
         $params['min_balance'] = (int) config('marketing.cl.settings.costs.min', 7);
 
@@ -302,6 +311,9 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         $params['s_status_not'] = ['error', 'done'];
         $params['q_status_not'] = ['error', 'done'];
 
+        // Dealer MUST Be Active
+        $params['is_active'] = true;
+
         // Only Get Slot 99
         if(!isset($params['slot_id'])) {
             $params['slot_id'] = 99;
@@ -328,16 +340,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface
             $join->on(Queue::getTableName().'.session_id', '=', Session::getTableName().'.session_id')
                          ->on(Queue::getTableName().'.dealer_id', '=', Session::getTableName().'.session_dealer_id')
                          ->on(Queue::getTableName().'.profile_id', '=', Session::getTableName().'.session_profile_id');
-        })->whereNotNull(Session::getTableName().'.session_scheduled')
-          ->where(Session::getTableName() . '.notify_error_init', 0)
-          ->where(Session::getTableName() . '.notify_error_timeout', 0)
-          ->leftJoin(User::getTableName(), User::getTableName() . '.dealer_id',
-                        '=', Queue::getTableName().'.dealer_id')
-          ->whereNotNull(User::getTableName() . '.stripe_id')
-          ->where(User::getTableName() . '.state', User::STATUS_ACTIVE)
-          ->leftJoin(DealerClapp::getTableName(), DealerClapp::getTableName() . '.dealer_id',
-                        '=', Queue::getTableName().'.dealer_id')
-          ->whereNotNull(DealerClapp::getTableName() . '.slots');
+        })->whereNotNull(Session::getTableName().'.session_scheduled');
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Session::getTableName().'.session_dealer_id', $params['dealer_id']);
@@ -397,6 +400,19 @@ class SchedulerRepository implements SchedulerRepositoryInterface
             $query->leftJoin(Balance::getTableName(), Balance::getTableName() . '.dealer_id',
                                 '=', Queue::getTableName().'.dealer_id')
                   ->where(Balance::getTableName() . '.balance', '>', $params['min_balance']);
+        }
+
+        // Is Dealer Active?
+        if (!empty($params['is_active'])) {
+            $query->where(Session::getTableName() . '.notify_error_init', 0)
+                  ->where(Session::getTableName() . '.notify_error_timeout', 0)
+                  ->leftJoin(User::getTableName(), User::getTableName() . '.dealer_id',
+                                '=', Queue::getTableName().'.dealer_id')
+                  ->whereNotNull(User::getTableName() . '.stripe_id')
+                  ->where(User::getTableName() . '.state', User::STATUS_ACTIVE)
+                  ->leftJoin(DealerClapp::getTableName(), DealerClapp::getTableName() . '.dealer_id',
+                                '=', Queue::getTableName().'.dealer_id')
+                  ->whereNotNull(DealerClapp::getTableName() . '.slots');
         }
 
         if (isset($params['with'])) {
