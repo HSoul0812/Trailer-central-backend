@@ -53,8 +53,11 @@ class ImageService extends AbstractFileService
         'image/x-portable-bitmap' => 'pbm',
         'image/x-photo-cd' => 'pcd',
         'image/x-pict' => 'pic',
-        'image/tiff' => 'tiff'
+        'image/tiff' => 'tiff',
+        'image/webp' => 'webp'
     ];
+
+    public const EXTENSION_WEBP = 'image/webp';
 
     public function __construct(Client $httpClient, SanitizeHelper $sanitizeHelper, ImageHelper $imageHelper)
     {
@@ -89,6 +92,13 @@ class ImageService extends AbstractFileService
 
         if ($localFilename) {
             $imageInfo = getimagesize($localFilename);
+
+            if ($imageInfo['mime'] === self::EXTENSION_WEBP) {
+                $newLocalFilename = $this->imageHelper->convertWebpToJpeg($localFilename);
+
+                $imageInfo = getimagesize($newLocalFilename);
+                $localFilename = $newLocalFilename;
+            }
         }
 
         if (isset($imageInfo['mime']) && in_array($imageInfo['mime'], array_keys(self::EXTENSION_MAPPING))) {
