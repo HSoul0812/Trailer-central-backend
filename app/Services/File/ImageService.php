@@ -95,8 +95,9 @@ class ImageService extends AbstractFileService
 
             if ($imageInfo['mime'] === self::EXTENSION_WEBP) {
                 $newLocalFilename = $this->imageHelper->convertWebpToJpeg($localFilename);
+                
                 // after image has been converted, the original one will be replaced, then it will be undetected
-                // by any subsequent process, having as a result `jpg` uploaded to AWS S3
+                // by any subsequent process, having as a result a `jpg` image uploaded to AWS S3
                 $imageInfo = getimagesize($newLocalFilename);
                 $localFilename = $newLocalFilename;
             }
