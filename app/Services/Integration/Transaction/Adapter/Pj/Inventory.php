@@ -19,6 +19,11 @@ class Inventory extends PjAdapter
 
     private const ENTITY_TYPE = 1;
 
+    private const REWRITABLE_FIELDS = [
+        'description',
+        'description_txt'
+    ];
+
     protected $entityType = 'inventory';
 
     /**
@@ -130,7 +135,9 @@ class Inventory extends PjAdapter
             'model_part' => $additionalSearchModelPart
         ];
 
-        $inventoryParams = $this->showroomService->mapInventoryToFactory($inventoryParams, $additionalSearchParams);
+        $mapInventoryOptions = [$this->showroomService::REWRITABLE_FIELDS_OPTION => self::REWRITABLE_FIELDS];
+
+        $inventoryParams = $this->showroomService->mapInventoryToFactory($inventoryParams, $additionalSearchParams, $mapInventoryOptions);
 
         $inventory = $this->inventoryService->create($inventoryParams);
 
