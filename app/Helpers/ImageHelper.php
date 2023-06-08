@@ -708,10 +708,10 @@ class ImageHelper
 
     /**
      * Get Image Placeholder
-     * 
+     *
      * @param int $width
      * @param int $height
-     * 
+     *
      * @return string file content
      */
     public function getImagePlaceholder($width, $height)
@@ -770,11 +770,11 @@ class ImageHelper
 
     /**
      * Alternative to resize() Method above without the original file getting deleted
-     * 
+     *
      * @param string $file
      * @param int $width
      * @param int $height
-     * 
+     *
      * @return string file content
      */
     public function resizeImage(string $file, int $width, int $height)
@@ -787,11 +787,11 @@ class ImageHelper
 
     /**
      * Not sure what this do
-     * 
+     *
      * @param string $file
      * @param int $width
      * @param int $height
-     * 
+     *
      * @return string file content
      */
     public function coverImage(string $file, int $width, int $height)
@@ -825,7 +825,7 @@ class ImageHelper
 
     /**
      * Create Thumbnail Image
-     * 
+     *
      * @param string $file
      * @return string
      */
@@ -833,7 +833,7 @@ class ImageHelper
     {
         $tempThumbnailPath = $this->createTempFile();
         $newImage = new Imagick($file);
-        $newImage->resizeImage(MosaicoServiceInterface::THUMBNAIL_WIDTH, 
+        $newImage->resizeImage(MosaicoServiceInterface::THUMBNAIL_WIDTH,
             MosaicoServiceInterface::THUMBNAIL_HEIGHT, Imagick::FILTER_LANCZOS, 1.0, TRUE );
         $newImage->writeImage($tempThumbnailPath);
 
@@ -848,5 +848,19 @@ class ImageHelper
         $headers = get_headers($url, 1);
         $filesize = $headers["Content-Length"] ?? 0;
         return $filesize;
+    }
+
+    /**
+     * @param  string  $localFilename
+     * @return string the new filename with `jpeg` extension
+     */
+    public function convertWebpToJpeg(string $localFilename): string
+    {
+        $imageInfo = pathinfo($localFilename);
+        $newLocalFilename = $imageInfo['dirname'].DIRECTORY_SEPARATOR.$imageInfo['filename'].'.jpeg';
+
+        imagejpeg(imagecreatefromwebp($localFilename), $newLocalFilename);
+
+        return $newLocalFilename;
     }
 }
