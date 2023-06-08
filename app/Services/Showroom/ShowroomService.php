@@ -105,9 +105,10 @@ class ShowroomService implements ShowroomServiceInterface
     /**
      * @param array $unit
      * @param array $additionalSearchParams
+     * @param array $options
      * @return array
      */
-    public function mapInventoryToFactory(array $unit, array $additionalSearchParams = []): array
+    public function mapInventoryToFactory(array $unit, array $additionalSearchParams = [], array $options = []): array
     {
         $showroom = $this->getShowroomByUnit($unit, $additionalSearchParams);
 
@@ -118,6 +119,7 @@ class ShowroomService implements ShowroomServiceInterface
         $showroomMappings = $this->showroomFieldsMappingRepository->getAll([]);
 
         $attributes = [];
+        $rewritableFields = $options[self::REWRITABLE_FIELDS_OPTION] ?? [];
 
         foreach ($showroomMappings as $showroomMapping) {
             if (empty($showroom->{$showroomMapping->map_from}) || is_object($showroom->{$showroomMapping->map_from})) {
@@ -132,7 +134,7 @@ class ShowroomService implements ShowroomServiceInterface
                 $attributes[$showroomMapping->map_to] = $showroom->{$showroomMapping->map_from};
 
             } else {
-                if (!empty($unit[$showroomMapping->map_to])) {
+                if (!empty($unit[$showroomMapping->map_to]) && !in_array($showroomMapping->map_to, $rewritableFields)) {
                     continue;
                 }
 
