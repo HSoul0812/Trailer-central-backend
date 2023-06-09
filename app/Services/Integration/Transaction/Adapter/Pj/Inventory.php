@@ -21,7 +21,9 @@ class Inventory extends PjAdapter
 
     private const REWRITABLE_FIELDS = [
         'description',
-        'description_txt'
+        'description_txt',
+        'axles',
+        'pull_type'
     ];
 
     protected $entityType = 'inventory';
