@@ -52,6 +52,7 @@ return [
         ],
         'captcha' => [
             'key' => env('GOOGLE_CAPTCHA_API_KEY', ''),
+            'human_threshold' => env('GOOGLE_CAPTCHA_HUMAN_THRESHOLD', 0.8),
         ],
         'client_id' => env('GOOGLE_AUTH_CLIENT_ID', ''),
         'client_secret' => env('GOOGLE_AUTH_CLIENT_SECRET', ''),

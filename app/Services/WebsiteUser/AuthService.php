@@ -69,7 +69,7 @@ class AuthService implements AuthServiceInterface
     {
         if (!$this->captchaService->validate($attributes['captcha'])) {
             throw ValidationException::withMessages([
-                'captcha' => 'The captcha token is not valid',
+                'captcha' => 'You failed bot check, please try again.',
             ]);
         }
 
