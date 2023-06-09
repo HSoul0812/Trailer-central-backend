@@ -849,4 +849,18 @@ class ImageHelper
         $filesize = $headers["Content-Length"] ?? 0;
         return $filesize;
     }
+
+    /**
+     * @param  string  $localFilename
+     * @return string the new filename with `jpeg` extension
+     */
+    public function convertWebpToJpeg(string $localFilename): string
+    {
+        $imageInfo = pathinfo($localFilename);
+        $newLocalFilename = $imageInfo['dirname'].DIRECTORY_SEPARATOR.$imageInfo['filename'].'.jpeg';
+
+        imagejpeg(imagecreatefromwebp($localFilename), $newLocalFilename);
+
+        return $newLocalFilename;
+    }
 }
