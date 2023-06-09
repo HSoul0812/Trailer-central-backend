@@ -249,6 +249,7 @@ namespace App\Models{
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property string                          $site
+     * @property int                             $inventory_clicked_total    Total count of the inventory clicked
      *
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport dealerId(int $dealerId)
      * @method static \Database\Factories\MonthlyImpressionReportFactory            factory(...$parameters)
@@ -261,6 +262,7 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereDealerId($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereInventoryCategory($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereInventoryClickedTotal($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereInventoryId($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereInventoryTitle($value)
      * @method static \Illuminate\Database\Eloquent\Builder|MonthlyImpressionReport whereInventoryType($value)
@@ -427,6 +429,52 @@ namespace App\Models\Parts{
      * @method static \Illuminate\Database\Eloquent\Builder|Type whereUpdatedAt($value)
      */
     class Type extends \Eloquent
+    {
+    }
+}
+
+namespace App\Models\Payment{
+    /**
+     * App\Models\Payment\PaymentLog.
+     *
+     * @property int                             $id
+     * @property string                          $payment_id
+     * @property string                          $client_reference_id
+     * @property string                          $full_response
+     * @property \Illuminate\Support\Carbon|null $created_at
+     * @property \Illuminate\Support\Carbon|null $updated_at
+     * @property string|null                     $plan_key
+     * @property string|null                     $plan_name
+     * @property int|null                        $plan_duration
+     *
+     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog query()
+     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereClientReferenceId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereCreatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereFullResponse($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog wherePaymentId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog wherePlanDuration($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog wherePlanKey($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog wherePlanName($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|PaymentLog whereUpdatedAt($value)
+     */
+    class PaymentLog extends \Eloquent
+    {
+    }
+}
+
+namespace App\Models{
+    /**
+     * App\Models\RecaptchaLog.
+     *
+     * @method static \Database\Factories\RecaptchaLogFactory            factory(...$parameters)
+     * @method static \Illuminate\Database\Eloquent\Builder|RecaptchaLog newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|RecaptchaLog newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|RecaptchaLog query()
+     */
+    class RecaptchaLog extends \Eloquent
     {
     }
 }
@@ -612,6 +660,7 @@ namespace App\Models\WebsiteUser{
      * @property \Illuminate\Support\Carbon|null                                                                               $updated_at
      * @property int|null                                                                                                      $tc_user_id
      * @property int|null                                                                                                      $tc_user_location_id
+     * @property \App\Models\WebsiteUser\WebsiteUserCache|null                                                                 $cache
      * @property \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
      * @property int|null                                                                                                      $notifications_count
      *
@@ -639,6 +688,33 @@ namespace App\Models\WebsiteUser{
      * @method static \Illuminate\Database\Eloquent\Builder|WebsiteUser  whereZipcode($value)
      */
     class WebsiteUser extends \Eloquent implements \Illuminate\Contracts\Auth\CanResetPassword, \Illuminate\Contracts\Auth\MustVerifyEmail, \Tymon\JWTAuth\Contracts\JWTSubject, \Illuminate\Contracts\Auth\Authenticatable
+    {
+    }
+}
+
+namespace App\Models\WebsiteUser{
+    /**
+     * App\Models\WebsiteUser\WebsiteUserCache.
+     *
+     * @property int                                      $id
+     * @property array                                    $profile_data
+     * @property array                                    $inventory_data
+     * @property \Illuminate\Support\Carbon|null          $created_at
+     * @property \Illuminate\Support\Carbon|null          $updated_at
+     * @property int                                      $website_user_id
+     * @property \App\Models\WebsiteUser\WebsiteUser|null $user
+     *
+     * @method static \Illuminate\Database\Eloquent\Builder|WebsiteUserCache newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|WebsiteUserCache newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|WebsiteUserCache query()
+     * @method static \Illuminate\Database\Eloquent\Builder|WebsiteUserCache whereCreatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|WebsiteUserCache whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|WebsiteUserCache whereInventoryData($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|WebsiteUserCache whereProfileData($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|WebsiteUserCache whereUpdatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder|WebsiteUserCache whereWebsiteUserId($value)
+     */
+    class WebsiteUserCache extends \Eloquent
     {
     }
 }
