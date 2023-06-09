@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Leads;
 
+use App\Domains\Recaptcha\Recaptcha;
 use App\DTOs\Lead\TcApiResponseLead;
 use App\Services\Captcha\CaptchaServiceInterface;
 use GuzzleHttp\Client as GuzzleHttpClient;
@@ -28,7 +29,7 @@ class LeadService implements LeadServiceInterface
     {
         if (!$this->captchaService->validate($params['captcha'])) {
             throw ValidationException::withMessages([
-                'captcha' => 'The captcha token is not valid',
+                'captcha' => Recaptcha::FAILED_CAPTCHA_MESSAGE,
             ]);
         }
 

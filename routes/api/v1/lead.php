@@ -11,5 +11,5 @@ $api->version('v1', config('api.routes_throttle'), function ($api) {
     |--------------------------------------------------------------------------
     */
 
-    $api->put('leads/', 'App\Http\Controllers\v1\Lead\LeadController@create');
+    $api->put('leads', 'App\Http\Controllers\v1\Lead\LeadController@create');
 });

@@ -53,7 +53,8 @@ class PasswordResetController extends AbstractRestfulController
             $attributes = $request->all();
             $token = $this->passwordResetService->forgetPassword(
                 $attributes['email'],
-                $attributes['callback'] ?? null
+                $attributes['callback'] ?? null,
+                $attributes['captcha'],
             );
 
             return $this->response->array([

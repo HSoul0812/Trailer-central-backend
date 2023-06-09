@@ -2,6 +2,7 @@
 
 namespace App\Services\WebsiteUser;
 
+use App\Domains\Recaptcha\Recaptcha;
 use App\DTOs\Dealer\PrivateDealerCheck;
 use App\DTOs\User\TcApiResponseUser;
 use App\Models\WebsiteUser\WebsiteUser;
@@ -69,7 +70,7 @@ class AuthService implements AuthServiceInterface
     {
         if (!$this->captchaService->validate($attributes['captcha'])) {
             throw ValidationException::withMessages([
-                'captcha' => 'You failed bot check, please try again.',
+                'captcha' => Recaptcha::FAILED_CAPTCHA_MESSAGE,
             ]);
         }
 
@@ -87,7 +88,7 @@ class AuthService implements AuthServiceInterface
     {
         if (!$this->captchaService->validate($attributes['captcha'])) {
             throw ValidationException::withMessages([
-                'captcha' => 'The captcha token is not valid',
+                'captcha' => Recaptcha::FAILED_CAPTCHA_MESSAGE,
             ]);
         }
 

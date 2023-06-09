@@ -2,12 +2,15 @@
 
 namespace App\Services\WebsiteUser;
 
+use App\Domains\Recaptcha\Recaptcha;
 use App\Models\WebsiteUser\WebsiteUser;
 use App\Notifications\WebsiteUserPasswordReset;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
+use App\Services\Captcha\CaptchaServiceInterface;
 use Illuminate\Auth\Passwords\DatabaseTokenRepository;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PasswordResetService implements PasswordResetServiceInterface
@@ -18,7 +21,8 @@ class PasswordResetService implements PasswordResetServiceInterface
     private DatabaseTokenRepository $tokenRepository;
 
     public function __construct(
-        private WebsiteUserRepositoryInterface $userRepository
+        private WebsiteUserRepositoryInterface $userRepository,
+        private CaptchaServiceInterface $captchaService,
     ) {
         $key = config('app.key');
         $config = config('auth.passwords.website_users');
@@ -35,8 +39,14 @@ class PasswordResetService implements PasswordResetServiceInterface
         );
     }
 
-    public function forgetPassword(string $email, ?string $callback): string
+    public function forgetPassword(string $email, ?string $callback, string $captcha): string
     {
+        if (!$this->captchaService->validate($captcha)) {
+            throw ValidationException::withMessages([
+                'captcha' => Recaptcha::FAILED_CAPTCHA_MESSAGE,
+            ]);
+        }
+
         $users = $this->userRepository->get(['email' => $email]);
         if ($users->isEmpty()) {
             throw new NotFoundHttpException("User doesn't exist");

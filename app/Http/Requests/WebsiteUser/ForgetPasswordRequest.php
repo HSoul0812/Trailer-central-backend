@@ -9,5 +9,6 @@ class ForgetPasswordRequest extends Request implements ForgetPasswordRequestInte
     protected array $rules = [
         'email' => 'required|email',
         'callback' => 'url',
+        'captcha' => 'required|string',
     ];
 }
