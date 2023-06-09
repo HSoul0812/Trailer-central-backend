@@ -121,17 +121,39 @@ class ShowroomService implements ShowroomServiceInterface
         $attributes = [];
         $rewritableFields = $options[self::REWRITABLE_FIELDS_OPTION] ?? [];
 
+        $defaultAttributes = $this->inventoryAttributeRepository
+            ->getAllByEntityTypeId($unit['entity_type_id'] ?? self::DEFAULT_ENTITY_TYPE)
+            ->pluck('attribute_id', 'code')
+            ->toArray();
+
         foreach ($showroomMappings as $showroomMapping) {
             if (empty($showroom->{$showroomMapping->map_from}) || is_object($showroom->{$showroomMapping->map_from})) {
                 continue;
             }
 
             if ($showroomMapping->type === 'attribute') {
-                if (!empty($unit['attributes'][$showroomMapping->map_to])) {
+                $currentAttributeKey = null;
+                $unitAttributeId = $defaultAttributes[$showroomMapping->map_to] ?? null;
+
+                foreach ($unit['attributes'] ?? [] as $key => $unitAttribute) {
+                    if (($unitAttribute['attribute_id'] ?? null) != $unitAttributeId) {
+                        continue;
+                    }
+
+                    $currentAttributeKey = $key;
+                    break;
+                }
+
+                if ($currentAttributeKey !== null && !in_array($showroomMapping->map_to, $rewritableFields)) {
                     continue;
                 }
 
-                $attributes[$showroomMapping->map_to] = $showroom->{$showroomMapping->map_from};
+                if ($currentAttributeKey !== null && in_array($showroomMapping->map_to, $rewritableFields)) {
+                    // rewrite existing attribute
+                    $unit['attributes'][$currentAttributeKey]['value'] = $showroom->{$showroomMapping->map_from};
+                } else {
+                    $attributes[$showroomMapping->map_to] = $showroom->{$showroomMapping->map_from};
+                }
 
             } else {
                 if (!empty($unit[$showroomMapping->map_to]) && !in_array($showroomMapping->map_to, $rewritableFields)) {
@@ -168,7 +190,7 @@ class ShowroomService implements ShowroomServiceInterface
         $features = $this->getShowroomFeatures($showroom);
         $files = $this->getShowroomFiles($showroom);
         $images = $this->getShowroomImages($showroom);
-        $inventoryAttributes = $this->getInventoryAttributes($unit['entity_type_id'] ?? self::DEFAULT_ENTITY_TYPE, $attributes);
+        $inventoryAttributes = $this->getInventoryAttributes($attributes, $defaultAttributes);
 
         $unit['has_stock_images'] = empty($unit['images']) ? $this->hasStockImages : false;
 
@@ -325,17 +347,12 @@ class ShowroomService implements ShowroomServiceInterface
     }
 
     /**
-     * @param string $entityType
      * @param array $attributes
+     * @param array $defaultAttributes
      * @return array
      */
-    protected function getInventoryAttributes(string $entityType, array $attributes): array
+    protected function getInventoryAttributes(array $attributes, array $defaultAttributes): array
     {
-        $defaultAttributes = $this->inventoryAttributeRepository
-            ->getAllByEntityTypeId($entityType)
-            ->pluck('attribute_id', 'code')
-            ->toArray();
-
         $inventoryAttributes = [];
 
         foreach ($attributes as $name => $value) {
