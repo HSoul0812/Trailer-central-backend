@@ -8,10 +8,10 @@ use PDO;
 use PDOException;
 
 /**
- * Class UpdateWebsiteHeadScript
+ * Class RestoreWebsiteHeadScript
  * @package App\Console\Commands\Website
  */
-class UpdateWebsiteHeadScript extends Command
+class RestoreWebsiteHeadScript extends Command
 {
     /**
      * The name and signature of the console command.
@@ -20,7 +20,7 @@ class UpdateWebsiteHeadScript extends Command
      * @var string
      */
     protected $signature = '
-        website:update-head-script
+        website:restore-head-script
         {backupDbUrl : Url from the Backup DB}
         {excludeIds* : Websites Ids comma separated}
         {--debug=false : Debug Mode}
@@ -31,7 +31,7 @@ class UpdateWebsiteHeadScript extends Command
      *
      * @var string
      */
-    protected $description = 'Update the website table\'s head_script value with decoded scripts from backup database excluding provided IDs';
+    protected $description = 'Restore the website table\'s head_script value with decoded scripts from backup database excluding provided IDs';
 
     /**
      * Execute the console command.
@@ -76,7 +76,7 @@ class UpdateWebsiteHeadScript extends Command
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($rows as $row) {
-            // Now complete redundancy, but I want to avoid making mistakes on the update and avoid any breaks.
+            // Now complete redundancy, but I want to avoid making mistakes on the restore and avoid any breaks.
             $currentWebsite = WebsiteConfig::where([
                 ['id', '=', (int)$row->config_id],
                 ['website_id', '=', (int)$row->website_id],
@@ -89,7 +89,7 @@ class UpdateWebsiteHeadScript extends Command
                 $newEncodedScript = base64_encode($newScript);
 
                 if ($debug) {
-                    $this->line('Would update website id ' . $row->website_id . ' with script: ' . json_encode($newEncodedScript));
+                    $this->line('Would restore website id ' . $row->website_id . ' with script: ' . json_encode($newEncodedScript));
                 } else {
                     $currentWebsite->value = $newEncodedScript;
                     $currentWebsite->save();
