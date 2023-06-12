@@ -16,6 +16,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use TrailerCentral\Sdk\Handlers\Search\Filters\Filter;
 use TrailerCentral\Sdk\Handlers\Search\Filters\FilterGroup;
 use TrailerCentral\Sdk\Handlers\Search\Filters\Operator;
+use TrailerCentral\Sdk\Handlers\Search\Filters\Type as FilterType;
 use TrailerCentral\Sdk\Handlers\Search\Geolocation\GeoCoordinates;
 use TrailerCentral\Sdk\Handlers\Search\Geolocation\Geolocation;
 use TrailerCentral\Sdk\Handlers\Search\Geolocation\GeolocationRange;
@@ -80,7 +81,8 @@ class InventorySDKService implements InventorySDKServiceInterface
 
     private Request $request;
     private Search $search;
-    private FilterGroup $mainFilterGroup;
+    private FilterGroup $queryFilterGroup;
+    private FilterGroup $postFilterGroup;
 
     private int $currentPage = 1;
     private int $perPage = self::PAGE_SIZE;
@@ -88,11 +90,12 @@ class InventorySDKService implements InventorySDKServiceInterface
     public function __construct()
     {
         $this->request = new Request();
-        $this->mainFilterGroup = new FilterGroup();
+        $this->queryFilterGroup = new FilterGroup([], FilterType::QUERY);
+        $this->postFilterGroup = new FilterGroup();
 
-        $this->request
-            ->addFilterGroup($this->mainFilterGroup)
-            ->withAggregationSize(config('inventory-sdk.aggregation_size'));
+        $this->request->addFilterGroup($this->queryFilterGroup);
+        $this->request->addFilterGroup($this->postFilterGroup);
+        $this->request->withAggregationSize(config('inventory-sdk.aggregation_size'));
 
         $sdk = new Sdk(config('inventory-sdk.url'), [
             'headers' => [
@@ -197,10 +200,17 @@ class InventorySDKService implements InventorySDKServiceInterface
                 $sort = self::DEFAULT_NO_LOCATION_SORT;
             }
 
-            $order = new SortOrder($sort);
-            $this->request->withSorting(new Sorting([
-                new SortingField($order->field, $order->direction),
-            ]));
+            $sorts = explode(';', $sort);
+            $sorting = new Sorting([]);
+            foreach ($sorts as $s) {
+                if (empty($s)) {
+                    continue;
+                }
+                $order = new SortOrder($s);
+                $sorting->addField(new SortingField($order->field, $order->direction));
+            }
+
+            $this->request->withSorting($sorting);
         }
     }
 
@@ -215,13 +225,22 @@ class InventorySDKService implements InventorySDKServiceInterface
             $attributes[self::PRICE_SCRIPT_ATTRIBUTE] = [$params['price_min'] ?? null, $params['price_max'] ?? null];
         }
 
-        $this->mainFilterGroup->add(new Filter('sale_price_script', new Collection($attributes)));
+        $this->postFilterGroup->add(new Filter('sale_price_script', new Collection($attributes)));
 
-        $this->mainFilterGroup->add(new Filter('classifieds_site', new Collection([true])));
-        $this->mainFilterGroup->add(new Filter(
+        if (!empty($params['exclude_stocks'])) {
+            $this->queryFilterGroup->add(
+                new Filter(
+                    'stock',
+                    new Collection($params['exclude_stocks'], Operator::NOT_EQUAL)
+                )
+            );
+        }
+
+        $this->postFilterGroup->add(new Filter('classifieds_site', new Collection([true])));
+        $this->postFilterGroup->add(new Filter(
             'availability', new Collection([self::INVENTORY_SOLD], Operator::NOT_EQUAL
             )));
-        $this->mainFilterGroup->add(new Filter('isRental', new Collection([false])));
+        $this->postFilterGroup->add(new Filter('isRental', new Collection([false])));
     }
 
     protected function addDealerFilter(array $params)
@@ -237,7 +256,7 @@ class InventorySDKService implements InventorySDKServiceInterface
     {
         foreach (self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
             if ($value = $params[$field] ?? null) {
-                $this->mainFilterGroup->add(new Filter(
+                $this->postFilterGroup->add(new Filter(
                     $searchField, new Collection(explode(';', $value))
                 ));
             }
@@ -250,7 +269,7 @@ class InventorySDKService implements InventorySDKServiceInterface
             $minFieldKey = "{$field}_min";
             $maxFieldKey = "{$field}_max";
             if (isset($params[$minFieldKey]) || isset($params[$maxFieldKey])) {
-                $this->mainFilterGroup->add(new Filter(
+                $this->postFilterGroup->add(new Filter(
                     $searchField,
                     new Range($params[$minFieldKey] ?? null, $params[$maxFieldKey] ?? null)
                 ));
@@ -277,7 +296,7 @@ class InventorySDKService implements InventorySDKServiceInterface
             throw new HttpException(400, 'No category was selected');
         }
 
-        $this->mainFilterGroup->add(new Filter(
+        $this->postFilterGroup->add(new Filter(
             'category', new Collection($categories)
         ));
 
@@ -286,10 +305,10 @@ class InventorySDKService implements InventorySDKServiceInterface
                 $params['type_id'] ?? null,
                 null
             );
-            $this->mainFilterGroup->add(new Filter(
+            $this->postFilterGroup->add(new Filter(
                 'tilt', new Collection([1])
             ));
-            $this->mainFilterGroup->add(new Filter(
+            $this->postFilterGroup->add(new Filter(
                 'category', new Collection($categories)
             ));
         }
@@ -298,7 +317,7 @@ class InventorySDKService implements InventorySDKServiceInterface
     protected function addImages(array $params)
     {
         if (isset($params['has_image']) && $params['has_image']) {
-            $this->mainFilterGroup->add(new Filter('empty_images', new Collection([false])));
+            $this->postFilterGroup->add(new Filter('empty_images', new Collection([false])));
         }
     }
 
