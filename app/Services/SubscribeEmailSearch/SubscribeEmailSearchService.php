@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\SubscribeEmailSearch;
 
+use App\Domains\Recaptcha\Recaptcha;
 use App\DTOs\SubscribeEmailSearch\SubscribeEmailSearchDTO;
 use App\Mail\SubscribeEmailSearch\SubscribeEmailSearchMail;
 use App\Models\SubscribeEmailSearch\SubscribeEmailSearch;
@@ -25,7 +26,7 @@ class SubscribeEmailSearchService implements SubscribeEmailSearchServiceInterfac
     {
         if (!$this->captchaService->validate($params['captcha'])) {
             throw ValidationException::withMessages([
-                'captcha' => 'The captcha token is not valid',
+                'captcha' => Recaptcha::FAILED_CAPTCHA_MESSAGE,
             ]);
         }
         $email = Mail::to([$params['email']]);
