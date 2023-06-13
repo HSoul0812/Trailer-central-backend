@@ -5,6 +5,7 @@ namespace App\Console\Commands\Website;
 use App\Models\Website\Config\WebsiteConfig;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use PDO;
 use PDOException;
 
@@ -23,8 +24,8 @@ class RestoreWebsiteHeadScript extends Command
     protected $signature = '
         website:restore-head-script
         {backupDbUrl : Url from the Backup DB}
-        {singleWebsiteId : ID of Single Website to TestDriven 1by1}
-        {excludeWebsiteIds* : Comma separated Websites Ids, ex=1439,1443}
+        {--singleWebsiteId|s= : ID of Single Website to TestDriven 1by1}
+        {--excludeWebsiteIds|e*= : Comma separated Websites Ids, ex=1439,1443}
         {--debug=false : Debug Mode}
         ';
 
@@ -42,9 +43,23 @@ class RestoreWebsiteHeadScript extends Command
      */
     public function handle(): int
     {
+        $validator = Validator::make($this->options(), [
+            'singleWebsiteId' => 'nullable|integer|min:1',
+            'excludeWebsiteIds' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            $this->info("Invalid input. Please see the error messages below:");
+            foreach ($validator->errors()->all() as $error) {
+                $this->error($error);
+            }
+
+            return 1; // Non-zero exit status indicates an error
+        }
+
         $backupDbHost = $this->argument('backupDbUrl');
-        $singleWebsiteId = $this->argument('singleWebsiteId');
-        $excludeWebsiteIds = $this->argument('excludeWebsiteIds');
+        $singleWebsiteId = $this->option('singleWebsiteId');
+        $excludeWebsiteIds = $this->option('excludeWebsiteIds');
         $debug = boolval($this->option('debug'));
 
         $username = config('database.connections.mysql.username');
@@ -76,7 +91,7 @@ class RestoreWebsiteHeadScript extends Command
             $sql .= ' AND `website_id` NOT IN (' . $excludeWebsiteIds . ')';
         }
 
-        if (!empty($singleWebsiteId) && is_numeric($singleWebsiteId) && (int)$singleWebsiteId > 0) {
+        if (!empty($singleWebsiteId) && (int)$singleWebsiteId > 0) {
             $sql .= ' AND `website_id` =' . (int)$singleWebsiteId;
         }
 
