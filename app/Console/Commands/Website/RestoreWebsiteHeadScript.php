@@ -4,6 +4,7 @@ namespace App\Console\Commands\Website;
 
 use App\Models\Website\Config\WebsiteConfig;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use PDO;
 use PDOException;
 
@@ -42,14 +43,15 @@ class RestoreWebsiteHeadScript extends Command
     {
         $backupDbHost = $this->argument('backupDbUrl');
         $excludeIds = $this->argument('excludeIds');
-        $debug = $this->option('debug') === 'true' ? true : false;
+        $debug = boolval($this->option('debug'));
 
-        $username = config(['database.connections.mysql.username']);
-        $password = config(['database.connections.mysql.password']);
+        $username = config('database.connections.mysql.username');
+        $password = config('database.connections.mysql.password');
+        $database = config('database.connections.mysql.database');
 
         try {
             // I use PDO to avoid setup backup database params on config so each run need update values there.
-            $dsn = "mysql:host=$backupDbHost;dbname=trailercentral;charset=utf8";
+            $dsn = "mysql:host=$backupDbHost;dbname=$database;charset=utf8";
             $backupDbConnection = new PDO($dsn, $username, $password);
             // Set PDO attributes for read-only mode
             $backupDbConnection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -62,7 +64,7 @@ class RestoreWebsiteHeadScript extends Command
         $sql = "SELECT
                     `id` AS config_id,
                     `website_id` AS website_id,
-                    FROM_BASE64(wc1.`value`) AS `head_script`
+                    FROM_BASE64(`value`) AS head_script
                 FROM
                     trailercentral.website_config
                 WHERE `key` = 'general/head_script' AND `value` <> '';";
@@ -73,29 +75,32 @@ class RestoreWebsiteHeadScript extends Command
         }
 
         $stmt = $backupDbConnection->query($sql);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $sourceData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        foreach ($rows as $row) {
-            // Now complete redundancy, but I want to avoid making mistakes on the restore and avoid any breaks.
-            $currentWebsite = WebsiteConfig::where([
-                ['id', '=', (int)$row->config_id],
-                ['website_id', '=', (int)$row->website_id],
-                ['key', '=', 'general/head_script']
-            ])->first();
+        DB::transaction(function () use ($sourceData, $debug) {
+            foreach ($sourceData as $source) {
+                // Now complete redundancy, but I want to avoid making mistakes on the restore and avoid any breaks.
+                // also prevent mismatch if the actual db have same id,website but not key
+                $currentWebsite = WebsiteConfig::where([
+                    ['id', '=', (int)$source->config_id],
+                    ['website_id', '=', (int)$source->website_id],
+                    ['key', '=', 'general/head_script']
+                ])->first();
 
-            if ($currentWebsite) {
-                $currentDecodedScript = base64_decode($currentWebsite->value);
-                $newScript = $currentDecodedScript . PHP_EOL . $row->head_script;
-                $newEncodedScript = base64_encode($newScript);
+                if ($currentWebsite) {
+                    $currentDecodedScript = base64_decode($currentWebsite->value);
+                    $newScript = $currentDecodedScript . PHP_EOL . $source->head_script;
+                    $newEncodedScript = base64_encode($newScript);
 
-                if ($debug) {
-                    $this->line('Would restore website id ' . $row->website_id . ' with script: ' . json_encode($newEncodedScript));
-                } else {
-                    $currentWebsite->value = $newEncodedScript;
-                    $currentWebsite->save();
+                    if ($debug) {
+                        $this->info('Would restore website id ' . $source->website_id . ' with script: ' . json_encode($newEncodedScript));
+                    } else {
+                        $currentWebsite->value = $newEncodedScript;
+                        $currentWebsite->save();
+                    }
                 }
             }
-        }
+        });
 
         $this->info($debug ? 'Debug complete.' : 'Update completed.');
 
