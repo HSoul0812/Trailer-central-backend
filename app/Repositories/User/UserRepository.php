@@ -319,10 +319,12 @@ class UserRepository implements UserRepositoryInterface {
      */
     public function getTrailerTraderDealers($params)
     {
-        $types = EntityType::TRAILER_TRADER_TYPES;
+        $types = array_reduce(EntityType::TRAILER_TRADER_TYPES, function($carry, $item) {
+            return array_merge($carry, $item);
+        }, []);
         
         if (isset($params['type'])) {
-            $types = [$params['type']];
+            $types = EntityType::TRAILER_TRADER_TYPES[$params['type']];
         }
         $query = DB::table('dealer')
             ->select([
@@ -348,7 +350,8 @@ class UserRepository implements UserRepositoryInterface {
                     ->from('inventory')
                     ->whereColumn('inventory.dealer_location_id', 'dealer_location.dealer_location_id')
                     ->where('inventory.is_archived', '!=', 1)
-                    ->whereIn('inventory.entity_type_id', $types);
+                    ->where('inventory.show_on_website', 1)
+                    ->whereIn('inventory.category', $types);
             });
         return $query->get();
     }
