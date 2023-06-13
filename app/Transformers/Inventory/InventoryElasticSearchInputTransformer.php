@@ -239,7 +239,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
     private function transformOriginalImages(Inventory $inventory): array
     {
         return $inventory->inventoryImages->sortBy($this->imageSorter())->values()->filter(static function (InventoryImage $image):bool {
-            return !$image->isSecondary();
+            return !$image->isSecondary() && is_object($image->image);
         })->map(static function (InventoryImage $image) use ($inventory): string {
             return $image->originalFilenameRegardingInventoryOverlayConfig($inventory->overlay_enabled);
         })->values()->toArray();
