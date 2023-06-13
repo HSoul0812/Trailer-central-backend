@@ -2647,7 +2647,8 @@ class InventoryServiceTest extends TestCase
                 'b_dueDate' => '12.12.12',
                 'b_memo' => 'b_memo',
                 'b_id' => '555',
-                'b_isFloorPlan' => true
+                'b_isFloorPlan' => true,
+                'chosen_overlay' => ''
             ]
         ]];
     }
