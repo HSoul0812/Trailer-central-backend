@@ -228,7 +228,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
     private function transformPrimaryImages(Collection $images): array
     {
         return $images->sortBy($this->imageSorter())->values()->filter(function (InventoryImage $image) {
-            return !$image->isSecondary();
+            return !$image->isSecondary() && is_object($image->image);
         })->map(function (InventoryImage $image) { return $image->image->filename; })->values()->toArray();
     }
 
@@ -252,7 +252,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
     private function transformSecondaryImages(Collection $images): array
     {
         return $images->sortBy($this->imageSorter())->values()->filter(function (InventoryImage $image) {
-            return $image->isSecondary();
+            return $image->isSecondary() && is_object($image->image);
         })->map(function (InventoryImage $image) { return $image->image->filename; })->values()->toArray();
     }
 
