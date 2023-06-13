@@ -468,7 +468,8 @@ class Inventory extends Model
 
     public function inventoryImages(): HasMany
     {
-        return $this->hasMany(InventoryImage::class, 'inventory_id', 'inventory_id');
+        return $this->hasMany(InventoryImage::class, 'inventory_id', 'inventory_id')
+            ->join('image', 'image.image_id', '=', 'inventory_image.image_id');
     }
 
     public function orderedImages(): HasMany
