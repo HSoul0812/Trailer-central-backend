@@ -17,13 +17,14 @@ class RestoreWebsiteHeadScript extends Command
     /**
      * The name and signature of the console command.
      *
-     * Note: excludeIds should be Website IDs instead of Dealer IDs because some sites are classifieds
+     * Note: excludeWebsiteIds should be Website IDs instead of Dealer IDs because some sites are classifieds
      * @var string
      */
     protected $signature = '
         website:restore-head-script
         {backupDbUrl : Url from the Backup DB}
-        {excludeIds* : Websites Ids comma separated}
+        {singleWebsiteId : ID of Single Website to TestDriven 1by1}
+        {excludeWebsiteIds* : Comma separated Websites Ids, ex=1439,1443}
         {--debug=false : Debug Mode}
         ';
 
@@ -42,7 +43,8 @@ class RestoreWebsiteHeadScript extends Command
     public function handle(): int
     {
         $backupDbHost = $this->argument('backupDbUrl');
-        $excludeIds = $this->argument('excludeIds');
+        $singleWebsiteId = $this->argument('singleWebsiteId');
+        $excludeWebsiteIds = $this->argument('excludeWebsiteIds');
         $debug = boolval($this->option('debug'));
 
         $username = config('database.connections.mysql.username');
@@ -67,11 +69,15 @@ class RestoreWebsiteHeadScript extends Command
                     FROM_BASE64(`value`) AS head_script
                 FROM
                     trailercentral.website_config
-                WHERE `key` = 'general/head_script' AND `value` <> '';";
+                WHERE `key` = 'general/head_script' AND `value` <> ''";
 
-        if (!empty($excludeIds)) {
-            $excludeIdsString = implode(',', $excludeIds);
-            $sql .= ' AND `website_id` NOT IN (' . $excludeIdsString . ')';
+        if (!empty($excludeWebsiteIds) && $excludeWebsiteIds != '0') {
+            $excludeWebsiteIds = implode(',', $excludeWebsiteIds);
+            $sql .= ' AND `website_id` NOT IN (' . $excludeWebsiteIds . ')';
+        }
+
+        if (!empty($singleWebsiteId) && is_numeric($singleWebsiteId) && (int)$singleWebsiteId > 0) {
+            $sql .= ' AND `website_id` =' . (int)$singleWebsiteId;
         }
 
         $stmt = $backupDbConnection->query($sql);
