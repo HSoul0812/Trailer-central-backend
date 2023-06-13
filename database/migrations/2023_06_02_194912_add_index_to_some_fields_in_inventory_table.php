@@ -14,7 +14,7 @@ class AddIndexToSomeFieldsInInventoryTable extends Migration
     public function up()
     {
         Schema::table('inventory', function (Blueprint $table) {
-            $table->index(['dealer_location_id', 'is_archived', 'show_on_website', 'category']);
+            $table->index(['dealer_location_id', 'is_archived', 'show_on_website', 'category'], 'inventory_tt_query');
         });
     }
 
@@ -26,7 +26,7 @@ class AddIndexToSomeFieldsInInventoryTable extends Migration
     public function down()
     {
         Schema::table('inventory', function (Blueprint $table) {
-            $table->dropIndex(['dealer_location_id', 'is_archived', 'show_on_website', 'category']);
+            $table->dropIndex('inventory_tt_query');
         });
     }
 }
