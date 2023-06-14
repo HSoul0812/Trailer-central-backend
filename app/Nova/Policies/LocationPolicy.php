@@ -33,7 +33,8 @@ class LocationPolicy extends PolicyManager
     /**
      * {@inheritDoc}
      */
-    public function create(NovaUser $user): bool {
+    public function create(NovaUser $user): bool
+    {
         return $user->hasAnyRole(self::VALID_ROLES);
     }
 
@@ -44,7 +45,7 @@ class LocationPolicy extends PolicyManager
      * @param DealerLocation $location
      * @return bool
      */
-    public function update(NovaUser $user, DealerLocation $location): bool {
+    public function update(NovaUser $user, $location): bool {
         return $user->hasAnyRole(self::VALID_ROLES);
     }
 
@@ -55,7 +56,7 @@ class LocationPolicy extends PolicyManager
      * @param DealerLocation $location
      * @return bool
      */
-    public function delete(NovaUser $user, DealerLocation $location): bool {
+    public function delete(NovaUser $user, $location): bool {
         return $user->hasAnyRole(self::VALID_ROLES);
     }
 
@@ -66,7 +67,7 @@ class LocationPolicy extends PolicyManager
      * @param DealerLocation $location
      * @return void
      */
-    public function restore(NovaUser $user, DealerLocation $location): void {
+    public function restore(NovaUser $user, $location): void {
         //
     }
 
@@ -77,7 +78,7 @@ class LocationPolicy extends PolicyManager
      * @param DealerLocation $location
      * @return void
      */
-    public function forceDelete(NovaUser $user, DealerLocation $location): void {
+    public function forceDelete(NovaUser $user, $location): void {
         //
     }
 }
