@@ -27,7 +27,7 @@ class GeoLocationRepository implements GeoLocationRepositoryInterface
      */
     public function get($params)
     {
-        return Geolocation::where('zip', $params['zip'])->firstOrFail();
+        return Geolocation::where($params)->firstOrFail();
     }
 
     public function delete($params)

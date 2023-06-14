@@ -31,4 +31,8 @@ interface DealerLocationServiceInterface
     public function moveAndDelete(int $id, ?int $moveToLocationId = null): bool;
 
     public function moveRelatedRecords(DealerLocation $location, ?int $moveToLocationId = null): bool;
+
+    public function fillGeolocationDetails(int $geolocationId, DealerLocation $location): DealerLocation;
+
+    public function updateFilledGeolocationDetails(?int $geolocationId, DealerLocation $location): DealerLocation;
 }

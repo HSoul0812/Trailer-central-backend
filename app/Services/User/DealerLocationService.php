@@ -15,8 +15,12 @@ use App\Repositories\User\DealerLocationQuoteFeeRepository;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\User\DealerLocationSalesTaxItemRepositoryInterface;
 use App\Repositories\User\DealerLocationSalesTaxRepositoryInterface;
+use App\Repositories\User\GeoLocationRepositoryInterface;
+use Grimzy\LaravelMysqlSpatial\Types\Geometry;
+use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use DomainException;
 use Exception;
@@ -45,6 +49,11 @@ class DealerLocationService implements DealerLocationServiceInterface
     /** @var LoggerServiceInterface */
     private $loggerService;
 
+    /**
+     * @var GeoLocationRepositoryInterface
+     */
+    private $geoLocationRepository;
+
     public function __construct(
         DealerLocationRepositoryInterface $locationRepo,
         InventoryRepositoryInterface $inventoryRepo,
@@ -52,6 +61,7 @@ class DealerLocationService implements DealerLocationServiceInterface
         DealerLocationSalesTaxRepositoryInterface $salesTaxRepo,
         DealerLocationSalesTaxItemRepositoryInterface $salesTaxItemRepo,
         DealerLocationQuoteFeeRepository $quoteFeeRepo,
+        GeoLocationRepositoryInterface $geoLocationRepository,
         LoggerServiceInterface $loggerService
     )
     {
@@ -62,6 +72,7 @@ class DealerLocationService implements DealerLocationServiceInterface
         $this->salesTaxItemRepo = $salesTaxItemRepo;
         $this->quoteFeeRepo = $quoteFeeRepo;
         $this->loggerService = $loggerService;
+        $this->geoLocationRepository = $geoLocationRepository;
     }
 
     /**
@@ -228,7 +239,7 @@ class DealerLocationService implements DealerLocationServiceInterface
                 //ensure dealer has only 1 default location
                 $defaultLocation = $this->locationRepo->getDefaultByDealerId($dealerId);
                 throw_unless(
-                   $defaultLocation && ($defaultLocation->dealer_location_id !== $locationId),
+                   $defaultLocation && ($defaultLocation->dealer_location_id === $locationId),
                     new DealerDefaultLocationException('A main location is required')
                 );
             }
@@ -463,5 +474,44 @@ class DealerLocationService implements DealerLocationServiceInterface
         }
 
         return $dealerLocations->toArray();
+    }
+
+    public function fillGeolocationDetails(int $geolocationId, DealerLocation $location): DealerLocation
+    {
+        $geolocation = $this->geoLocationRepository->get(['id' => $geolocationId]);
+
+        $location->postalcode = $geolocation->zip;
+        $location->city = $geolocation->city;
+        $location->county = $geolocation->state;
+        $location->region = $geolocation->state;
+        $location->country = $geolocation->country;
+        $location->latitude = $geolocation->latitude;
+        $location->longitude = $geolocation->longitude;
+        $location->geolocation = DB::raw(
+            "GeomFromText('" . (
+            new Point($geolocation->latitude, $geolocation->longitude)
+            )->toWKT() . "')"
+        );
+
+        return $location;
+    }
+
+    public function updateFilledGeolocationDetails(?int $geolocationId, DealerLocation $location): DealerLocation
+    {
+        $oldGeolocation = $location->geolocation;
+        $location->geolocation = null;
+        //to avoid errors since the geolocation is spatial and is not a valid utf8 in the original array
+        $location->syncOriginalAttribute('geolocation');
+
+        if ($geolocationId) {
+            $this->fillGeolocationDetails($geolocationId, $location);
+        } else if ($oldGeolocation) {
+            $point = Geometry::fromWKB($oldGeolocation);
+            $location->geolocation = DB::raw(
+                "GeomFromText('" . $point->toWKT() . "')"
+            );
+        }
+
+        return $location;
     }
 }

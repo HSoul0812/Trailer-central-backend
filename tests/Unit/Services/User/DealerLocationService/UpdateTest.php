@@ -58,6 +58,12 @@ class UpdateTest extends TestCase
         // Then I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
 
+        //Then I expect the created location as the default location
+        $dependencies->locationRepo
+            ->shouldReceive('getDefaultByDealerId')
+            ->with($dealerId)
+            ->andReturn($location);
+
         // And I expect that "DealerLocationRepositoryInterface::update" method is called once, with known parameters
         $dependencies->locationRepo
             ->shouldReceive('update')
@@ -195,6 +201,12 @@ class UpdateTest extends TestCase
         // Then I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
 
+        //Then I expect the created location as the default location
+        $dependencies->locationRepo
+            ->shouldReceive('getDefaultByDealerId')
+            ->with($dealerId)
+            ->andReturn($location);
+
         // And I expect that "DealerLocationRepositoryInterface::update" method is called once, with known parameters
         $dependencies->locationRepo
             ->shouldReceive('update')
@@ -281,6 +293,12 @@ class UpdateTest extends TestCase
 
         // Then I expect that "DealerLocationRepositoryInterface::beginTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('beginTransaction')->once();
+
+        //Then I expect the created location as the default location
+        $dependencies->locationRepo
+            ->shouldReceive('getDefaultByDealerId')
+            ->with($dealerId)
+            ->andReturn($location);
 
         // And I expect that "DealerLocationRepositoryInterface::update" method is called once, with known parameters
         $dependencies->locationRepo

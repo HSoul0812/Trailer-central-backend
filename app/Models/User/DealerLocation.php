@@ -6,6 +6,7 @@ use App\Helpers\GeographyHelper;
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Inventory\Inventory;
 use App\Models\Region;
+use App\Models\User\Location\Geolocation;
 use App\Observers\User\DealerLocationObserver;
 use App\Models\Traits\TableAware;
 use App\Models\CRM\Text\Number;
@@ -370,5 +371,14 @@ class DealerLocation extends Model
             new Point($latitude, $longitude)
             )->toWKT() . "')"
         );
+    }
+
+    /**
+     * This is only used to load geolocation values for Nova
+     * @return BelongsTo
+     */
+    public function possibleGeolocationByZip(): BelongsTo
+    {
+        return $this->belongsTo(Geolocation::class, 'zip', 'postalcode');
     }
 }

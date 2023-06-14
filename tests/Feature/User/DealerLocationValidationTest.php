@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\User;
 
+use App\Models\User\Location\Geolocation;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use App\Models\User\User;
@@ -18,6 +19,9 @@ class DealerLocationValidationTest extends TestCase {
 
     /** @var AuthToken */
     protected $token;
+
+    /** @var Geolocation */
+    protected $geolocation;
 
     /** @var DealerLocationRepositoryInterface */
     protected $dealerLocationRepo;
@@ -40,6 +44,8 @@ class DealerLocationValidationTest extends TestCase {
             'user_type' => AuthToken::USER_TYPE_DEALER,
         ]);
 
+        $this->geolocation = factory(Geolocation::class)->create();
+
         $this->dealerLocationRepo = app(DealerLocationRepositoryInterface::class);
     }
 
@@ -60,9 +66,12 @@ class DealerLocationValidationTest extends TestCase {
             'city' => $this->faker->city(),
             'county' => $this->faker->city(),
             'region' => $this->faker->state(),
-            'country' => 'US',
-            'postalcode' => $this->faker->postcode(),
-            'phone' => '(970) 592-8015'
+            'country' => 'USA',
+            'is_default' => true,
+            'postalcode' => $this->geolocation->zip,
+            'phone' => '(970) 592-8015',
+            'latitude' => $this->geolocation->latitude,
+            'longitude' => $this->geolocation->longitude
         ];
 
         $response = $this->withHeaders(['access-token' => $this->token->access_token])
@@ -90,8 +99,8 @@ class DealerLocationValidationTest extends TestCase {
             'city' => $this->faker->city(),
             'county' => $this->faker->city(),
             'region' => $this->faker->state(),
-            'country' => 'US',
-            'postalcode' => $this->faker->postcode(),
+            'country' => 'USA',
+            'postalcode' => $this->geolocation->zip,
             'phone' => '(267) 352-4031',
             'sms' => 1,
             'sms_phone' => '(979) 325-2092',
@@ -130,9 +139,12 @@ class DealerLocationValidationTest extends TestCase {
             'city' => $this->faker->city(),
             'county' => $this->faker->city(),
             'region' => $this->faker->state(),
-            'country' => 'US',
-            'postalcode' => $this->faker->postcode(),
-            'phone' => '(970) 592-8015'
+            'country' => 'USA',
+            'is_default' => true,
+            'postalcode' => $this->geolocation->zip,
+            'phone' => '(970) 592-8015',
+            'latitude' => $this->geolocation->latitude,
+            'longitude' => $this->geolocation->longitude
         ];
 
         $response = $this->withHeaders(['access-token' => $this->token->access_token])
@@ -157,8 +169,7 @@ class DealerLocationValidationTest extends TestCase {
             'city' => $this->faker->city(),
             'county' => $this->faker->city(),
             'region' => $this->faker->state(),
-            'country' => 'US',
-            'postalcode' => $this->faker->postcode(),
+            'country' => 'USA',
             'phone' => '(267) 352-4031',
             'sms' => 1,
             'sms_phone' => '(979) 325-2092',
@@ -194,7 +205,7 @@ class DealerLocationValidationTest extends TestCase {
             'Country does not match Primary Phone Number' => [
                 [
                     'phone' => '+56 2 3304 8683',
-                    'country' => 'US'
+                    'country' => 'USA'
                 ],
                 'phone'
             ],
@@ -203,7 +214,7 @@ class DealerLocationValidationTest extends TestCase {
                     'sms' => 1,
                     'permanent_phone' => 1,
                     'sms_phone' => '+56 2 3304 8683',
-                    'country' => 'US'
+                    'country' => 'USA'
                 ],
                 'sms_phone'
             ],
@@ -215,18 +226,18 @@ class DealerLocationValidationTest extends TestCase {
             ],
             'Country match Primary Phone Number' => [
                 [
-                    'phone' => '+56 2 3304 8683',
-                    'country' => 'CL'
+                    'phone' => '+1 970 592 8015',
+                    'country' => 'USA'
                 ],
                 null
             ],
             'Country match SMS Phone Number' => [
                 [
-                    'phone' => '+56 2 3304 8683',
+                    'phone' => '+1 970 592 8015',
                     'sms' => 1,
                     'permanent_phone' => 0,
-                    'sms_phone' => '+56 2 3304 8683',
-                    'country' => 'CL'
+                    'sms_phone' => '+1 970 592 8015',
+                    'country' => 'USA'
                 ],
                 null
             ],
@@ -250,8 +261,11 @@ class DealerLocationValidationTest extends TestCase {
             'city' => $this->faker->city(),
             'county' => $this->faker->city(),
             'region' => $this->faker->state(),
-            'country' => 'US',
-            'postalcode' => $this->faker->postcode()
+            'country' => 'USA',
+            'is_default' => true,
+            'postalcode' => $this->geolocation->zip,
+            'latitude' => $this->geolocation->latitude,
+            'longitude' => $this->geolocation->longitude
         ];
 
         $formData = array_merge($formData, $testFormData);
@@ -280,6 +294,7 @@ class DealerLocationValidationTest extends TestCase {
 
         $this->token->delete();
         $this->dealer->delete();
+        $this->geolocation->delete();
 
         parent::tearDown();
     }

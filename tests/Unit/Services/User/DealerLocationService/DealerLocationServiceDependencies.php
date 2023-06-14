@@ -16,6 +16,7 @@ use App\Repositories\User\DealerLocationSalesTaxItemRepository;
 use App\Repositories\User\DealerLocationSalesTaxItemRepositoryInterface;
 use App\Repositories\User\DealerLocationSalesTaxRepository;
 use App\Repositories\User\DealerLocationSalesTaxRepositoryInterface;
+use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Services\Common\LoggerService;
 use Mockery;
 
@@ -39,6 +40,9 @@ class DealerLocationServiceDependencies
     /** @var DealerLocationQuoteFeeRepository */
     public $quoteFeeRepo;
 
+    /** @var GeoLocationRepositoryInterface */
+    public $geolocationRepo;
+
     /** @var LoggerServiceInterface */
     public $loggerService;
 
@@ -51,6 +55,7 @@ class DealerLocationServiceDependencies
         $this->salesTaxItemRepo = Mockery::mock(DealerLocationSalesTaxItemRepository::class);
         $this->quoteFeeRepo = Mockery::mock(DealerLocationQuoteFeeRepository::class);
         $this->loggerService = Mockery::mock(LoggerService::class);
+        $this->geolocationRepo = Mockery::mock(GeoLocationRepositoryInterface::class);
     }
 
     public function getOrderedArguments(): array
@@ -62,6 +67,7 @@ class DealerLocationServiceDependencies
             $this->salesTaxRepo,
             $this->salesTaxItemRepo,
             $this->quoteFeeRepo,
+            $this->geolocationRepo,
             $this->loggerService
         ];
     }

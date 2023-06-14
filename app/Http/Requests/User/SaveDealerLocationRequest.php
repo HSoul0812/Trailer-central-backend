@@ -27,10 +27,10 @@ class SaveDealerLocationRequest extends Request
             'country' => 'required_without:id|string|min:2,max:255|in:USA,CA',
             'postalcode' => 'required_without:id|string|exists:geolocation,zip',
             'fax' => 'nullable|string|min:1,max:20',
-            'phone' => $this->validPhoneNumber(),
+            'phone' => 'required_without:id|string|max:20|phone:' . $this->phoneNumberCountry(),
             'is_default' => 'checkbox|in:0,1',
             'sms' => 'checkbox|in:0,1',
-            'sms_phone' => 'nullable|string|max:20|phone:country|required_if:sms,1',
+            'sms_phone' => 'nullable|string|max:20|required_if:sms,1|phone:' . $this->phoneNumberCountry(),
             'permanent_phone' => 'checkbox|in:0,1|required_if:sms,==,1',
             'show_on_website_locations' => 'checkbox|in:0,1',
             'county_issued' => 'nullable|min:0,max:50',
@@ -42,8 +42,8 @@ class SaveDealerLocationRequest extends Request
             'location_id' => 'nullable|string|max:255',
             // coordinates
             'coordinates_updated' => 'checkbox|in:0,1',
-            'latitude' => 'required|numeric|min:-90,max=90',
-            'longitude' => 'required|numeric|min:-180,max=180',
+            'latitude' => 'required_without:id|numeric|min:-90,max=90',
+            'longitude' => 'required_without:id|numeric|min:-180,max=180',
             // taxes
             'is_default_for_invoice' => 'checkbox|in:0,1',
             'sales_tax_id' => 'nullable|min:0,max:50',
@@ -83,7 +83,7 @@ class SaveDealerLocationRequest extends Request
             'fees' => 'nullable|array',
             'fees.*.title' => 'required_with:fees|min:1,max:50',
             'fees.*.fee_type' => 'required_with:fees|min:1,max:50',
-            'fees.*.amount' => ['required_with:fees', 'numeric', 'min:0', 'regex:/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,2})?$/'],
+            'fees.*.amount' => ['required_with:fees','numeric','min:0','regex:/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,2})?$/'],
             'fees.*.cost_amount' => 'required_if:fees.*.fee_charged_type,combined|numeric|min:0',
             // 'fees.*.cost_handler' => 'required_without:id|in:set_default_cost,set_amount',
             'fees.*.is_additional' => 'checkbox|in:0,1',
@@ -113,13 +113,9 @@ class SaveDealerLocationRequest extends Request
         );
     }
 
-    private function validPhoneNumber(): string
+    private function phoneNumberCountry()
     {
-        $country = $this->country;
-        if ($country === 'USA') {
-            $country = 'US';
-        }
-        return 'required_without:id|string|max:20|phone:' . $country;
+        return $this->country === 'USA' ? 'US' : $this->country;
     }
 
     /**
@@ -131,7 +127,7 @@ class SaveDealerLocationRequest extends Request
     {
         if ($this->filled('sms_phone')) {
             $this->merge([
-                'sms_phone' => PhoneNumber::make($this->sms_phone, $this->country)->formatE164()
+                'sms_phone' => PhoneNumber::make($this->sms_phone, $this->phoneNumberCountry())->formatE164()
             ]);
         }
     }

@@ -2,12 +2,15 @@
 
 namespace App\Nova\Resources\Dealer;
 
+use App\Models\User\DealerLocation;
+use App\Nova\Resources\Location\Geolocation;
+use App\Services\User\DealerLocationServiceInterface;
 use Illuminate\Http\Request;
-
+use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
-
 use App\Nova\Resource;
 
 class Location extends Resource
@@ -38,9 +41,21 @@ class Location extends Resource
     ];
 
     /**
+     * @var DealerLocationServiceInterface
+     */
+    private $dealerLocationService;
+
+    public function __construct($resource)
+    {
+        parent::__construct($resource);
+
+        $this->dealerLocationService = app(DealerLocationServiceInterface::class);
+    }
+
+    /**
      * Get the fields displayed by the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function fields(Request $request)
@@ -58,11 +73,36 @@ class Location extends Resource
 
             Text::make('Phone'),
 
-            Text::make('Address'),
+            Text::make('Street', 'address')->rules('required'),
 
-            Text::make('City'),
+            Text::make('City')->hideWhenCreating()->readonly(),
 
-            Text::make('Region'),
+            Text::make('Zip Code', 'postalcode')->hideWhenCreating()->readonly(),
+
+            Text::make('Country')->hideWhenCreating()->readonly(),
+
+            BelongsTo::make('Zip Code', 'possibleGeolocationByZip', Geolocation::class)
+                ->hideCreateRelationButton()
+                ->hideFromIndex()
+                ->hideWhenUpdating()
+                ->hideFromDetail()
+                ->searchable()
+                ->fillUsing(function (NovaRequest $request, DealerLocation $model) {
+                    $geolocationId = $request->get('possibleGeolocationByZip');
+                    $this->dealerLocationService->fillGeolocationDetails($geolocationId, $model);
+                }),
+
+            BelongsTo::make('Enter new zip code for change in location', 'possibleGeolocationByZip', Geolocation::class)
+                ->hideCreateRelationButton()
+                ->hideFromIndex()
+                ->hideWhenCreating()
+                ->hideFromDetail()
+                ->searchable()
+                ->fillUsing(function (NovaRequest $request, DealerLocation $model) {
+                    $geolocationId = $request->get('possibleGeolocationByZip');
+                    $this->dealerLocationService->updateFilledGeolocationDetails($geolocationId, $model);
+                })
+                ->nullable(),
 
             new Panel('Google', [
                 Text::make('Google Store Code', 'google_business_store_code')
@@ -73,7 +113,7 @@ class Location extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function cards(Request $request)
@@ -84,7 +124,7 @@ class Location extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function filters(Request $request)
@@ -95,7 +135,7 @@ class Location extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function lenses(Request $request)
@@ -106,7 +146,7 @@ class Location extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function actions(Request $request)
