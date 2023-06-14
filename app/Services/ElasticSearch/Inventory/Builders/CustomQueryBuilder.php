@@ -158,11 +158,8 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                     ],
                     'must_not' => [
                         [
-                            'terms' => [
-                                'status' => [
-                                    Inventory::STATUS_QUOTE,
-                                    Inventory::STATUS_SOLD,
-                                ]
+                            'term' => [
+                                'status' => Inventory::STATUS_QUOTE
                             ]
                         ]
                     ]
