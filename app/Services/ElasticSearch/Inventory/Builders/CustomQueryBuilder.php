@@ -176,6 +176,12 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                     'isClassified' => true
                 ]
             ];
+
+            $query['query']['bool']['must_not'][] = [
+                'term' => [
+                    'status' => Inventory::STATUS_SOLD
+                ]
+            ];
         }
 
         return $query;
