@@ -158,11 +158,8 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                     ],
                     'must_not' => [
                         [
-                            'terms' => [
-                                'status' => [
-                                    Inventory::STATUS_QUOTE,
-                                    Inventory::STATUS_SOLD,
-                                ]
+                            'term' => [
+                                'status' => Inventory::STATUS_QUOTE
                             ]
                         ]
                     ]
@@ -174,6 +171,12 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
             $query['query']['bool']['must'][] = [
                 'term' => [
                     'isClassified' => true
+                ]
+            ];
+
+            $query['query']['bool']['must_not'][] = [
+                'term' => [
+                    'status' => Inventory::STATUS_SOLD
                 ]
             ];
         }
