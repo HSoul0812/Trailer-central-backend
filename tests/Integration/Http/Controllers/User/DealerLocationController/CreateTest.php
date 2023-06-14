@@ -107,7 +107,7 @@ class CreateTest extends AbstractDealerLocationController
             'city' => 'Albuquerque',
             'county' => 'Albuquerque',
             'region' => 'New Mexico',
-            'country' => 'US',
+            'country' => 'USA',
             'postalcode' => '87104',
             'phone' => '8126295574',
             'tax_calculator_id' => 1,
@@ -122,6 +122,8 @@ class CreateTest extends AbstractDealerLocationController
                 ['title' => 'License fee', 'fee_type' => 'license_fee', 'amount' => 15, 'visibility' => 'visible_locked_pos','accounting_class' => 'Taxes & Fees Group 1'],
                 ['title' => 'Bank fee', 'fee_type' => 'bank_fee', 'amount' => 25, 'visibility' =>  'visible_locked','accounting_class' => 'Taxes & Fees Group 3']
             ],
+            'latitude' => $this->faker->latitude,
+            'longitude' => $this->faker->longitude
         ];
         $request = new SaveDealerLocationRequest($params);
 
@@ -170,7 +172,7 @@ class CreateTest extends AbstractDealerLocationController
         $otherAssertions = $this->errorsAssertions();
 
         return [                                          // array $params, string $expectedException, string $expectedExceptionMessage, string|array $firstExpectedErrorMessage
-            'No dealer'                                   => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
+            'No dealer'                                   => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required when id is not present.'],
             'Non existent dealer'                         => [['dealer_id' => $this->faker->numberBetween(700000, 800000)], ResourceException::class, 'Validation Failed', 'The selected dealer id is invalid.'],
             "Dealer location isn't unique"                => [['dealer_id' => $this->getSeededData(0,'dealerId'), 'name' => $this->getSeededData(0,'firstLocationName')], ResourceException::class, 'Validation Failed', 'Dealer Location must be unique'],
             'No others required parameters'               => [['dealer_id' => $this->getSeededData(0,'dealerId')], ResourceException::class, 'Validation Failed', ['name', 'contact', 'address', 'city', 'county', 'region', 'country', 'postalcode', 'phone']],

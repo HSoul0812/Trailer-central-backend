@@ -62,7 +62,7 @@ class CreateTest extends TestCase
         // returning a known "DealerLocation" instance
         $dependencies->locationRepo
             ->shouldReceive('create')
-            ->with($params + ['sales_tax_item_column_titles' => [], 'dealer_id' => $dealerId])
+            ->with($params + ['sales_tax_item_column_titles' => [], 'dealer_id' => $dealerId, 'location_id' => ''])
             ->once()
             ->andReturn($location);
 
@@ -136,7 +136,7 @@ class CreateTest extends TestCase
         // returning a known "DealerLocation" instance
         $dependencies->locationRepo
             ->shouldReceive('create')
-            ->with($params + ['sales_tax_item_column_titles' => [], 'dealer_id' => $dealerId])
+            ->with($params + ['sales_tax_item_column_titles' => [], 'dealer_id' => $dealerId, 'location_id' => ''])
             ->once()
             ->andReturn($expectedLocation);
 
@@ -200,7 +200,7 @@ class CreateTest extends TestCase
         // returning a known "DealerLocation" instance
         $dependencies->locationRepo
             ->shouldReceive('create')
-            ->with($params + ['sales_tax_item_column_titles' => [], 'dealer_id' => $dealerId])
+            ->with($params + ['sales_tax_item_column_titles' => [], 'dealer_id' => $dealerId, 'location_id' => ''])
             ->once()
             ->andReturn($expectedLocation);
 
@@ -278,7 +278,7 @@ class CreateTest extends TestCase
         // returning a known "DealerLocation" instance
         $dependencies->locationRepo
             ->shouldReceive('create')
-            ->with($params + ['sales_tax_item_column_titles' => [], 'dealer_id' => $dealerId])
+            ->with($params + ['sales_tax_item_column_titles' => [], 'dealer_id' => $dealerId, 'location_id' => ''])
             ->once()
             ->andReturn($expectedLocation);
 

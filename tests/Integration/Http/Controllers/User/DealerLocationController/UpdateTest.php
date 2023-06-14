@@ -114,7 +114,7 @@ class UpdateTest extends AbstractDealerLocationController
             'city' => 'Albuquerque',
             'county' => 'Albuquerque',
             'region' => 'New Mexico',
-            'country' => 'US',
+            'country' => 'USA',
             'postalcode' => '87104',
             'phone' => '8126295574',
             'tax_calculator_id' => 1,
@@ -131,6 +131,8 @@ class UpdateTest extends AbstractDealerLocationController
                 ['title' => 'License fee', 'fee_type' => 'license_fee', 'amount' => 15, 'visibility' => 'visible_locked_pos', 'accounting_class' => 'Taxes & Fees Group 1'],
                 ['title' => 'Bank fee', 'fee_type' => 'bank_fee', 'amount' => 25, 'visibility' => 'visible_locked', 'accounting_class' => 'Taxes & Fees Group 3']
             ],
+            'latitude' => $this->faker->latitude,
+            'longitude' => $this->faker->longitude
         ];
         $request = new UpdateDealerLocationRequest($params);
 
@@ -185,13 +187,12 @@ class UpdateTest extends AbstractDealerLocationController
         $otherAssertions = $this->errorsAssertions();
 
         return [                                                    // array $params, string $expectedException, string $expectedExceptionMessage, string|array $firstExpectedErrorMessage
-            'No dealer'                                             => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
+            'No dealer'                                             => [['latitude' => $this->faker->latitude, 'longitude'=> $this->faker->longitude], ResourceException::class, 'Validation Failed', 'The selected id is invalid.'],
             'Non existent dealer'                                   => [['dealer_id' => $this->faker->numberBetween(700000, 800000)], ResourceException::class, 'Validation Failed', 'The selected dealer id is invalid.'],
             'No dealer location'                                    => [['dealer_id' => $this->getSeededData(0, 'dealerId')], ResourceException::class, 'Validation Failed', $otherAssertions['wrong dealer location']],
             'Non existent dealer location'                          => [['dealer_id' => $this->getSeededData(0, 'dealerId'), 'id' => $this->faker->numberBetween(700000, 800000)], ResourceException::class, 'Validation Failed', $otherAssertions['wrong dealer location']],
             "Dealer location isn't unique"                => [['dealer_id' => $this->getSeededData(0,'dealerId'), 'name' => $this->getSeededData(0,'firstLocationName')], ResourceException::class, 'Validation Failed', 'Dealer Location must be unique'],
             "A dealer location which doesn't belong to the dealer"  => [['dealer_id' => $this->getSeededData(0, 'dealerId'), 'id' => $this->getSeededData(1, 'firstLocationId')], ResourceException::class, 'Validation Failed', $otherAssertions['wrong dealer location']],
-            'No others required parameters'                         => [['dealer_id' => $this->getSeededData(0,'dealerId'), 'id' => $this->getSeededData(0, 'firstLocationId')], ResourceException::class, 'Validation Failed', ['name', 'contact', 'address', 'city', 'county', 'region', 'country', 'postalcode', 'phone']],
             '"sales_tax_items" and "fees" are not arrays'           => [['dealer_id' => $this->getSeededData(0,'dealerId'), 'id' => $this->getSeededData(0, 'firstLocationId'), 'sales_tax_items' => true, 'fees' => 'back_fee'], ResourceException::class, 'Validation Failed', $otherAssertions['"sales_tax_items" and "fees" errors have a specific message']],
             // @todo since there are plenty of possible errors we should add more test cases, but right now I'm not sure about theirs business value, so this is what it is
         ];

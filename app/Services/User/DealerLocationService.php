@@ -132,6 +132,10 @@ class DealerLocationService implements DealerLocationServiceInterface
                 $this->locationRepo->turnOffDefaultLocationForInvoicingByDealerId($dealerId);
             }
 
+            if (empty($params['geolocation']) && !empty($params['latitude']) && !empty($params['longitude'])) {
+                $params['geolocation'] = DealerLocation::geolocationSQL(floatval($params['latitude']), floatval($params['longitude']));
+            }
+
             $salesTaxItemColumnTitles = $this->encodeTaxColumnTitles($params['sales_tax_item_column_titles'] ?? []);
 
             $locationParams = $params + [
@@ -232,6 +236,10 @@ class DealerLocationService implements DealerLocationServiceInterface
             if (!empty($params['is_default_for_invoice'])) {
                 // remove any default location for invoice if exists
                 $this->locationRepo->turnOffDefaultLocationForInvoicingByDealerId($dealerId);
+            }
+
+            if (empty($params['geolocation']) && !empty($params['latitude']) && !empty($params['longitude'])) {
+                $params['geolocation'] = DealerLocation::geolocationSQL(floatval($params['latitude']), floatval($params['longitude']));
             }
 
             $locationRelDefinition = ['dealer_location_id' => $locationId];

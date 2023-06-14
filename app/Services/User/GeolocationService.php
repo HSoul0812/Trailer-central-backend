@@ -5,6 +5,8 @@ namespace App\Services\User;
 use App\Contracts\LoggerServiceInterface;
 use App\Repositories\User\GeoLocationRepository;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
+use Illuminate\Database\Eloquent\Collection;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class GeolocationService implements GeoLocationServiceInterface
 {
@@ -13,6 +15,8 @@ class GeolocationService implements GeoLocationServiceInterface
 
     /** @var LoggerServiceInterface */
     private $loggerService;
+
+    const SEARCH_FIELDS = ['zip', 'city', 'state'];
 
     public function __construct(GeoLocationRepository $repository, LoggerServiceInterface $loggerService)
     {
@@ -31,5 +35,18 @@ class GeolocationService implements GeoLocationServiceInterface
 
             return null;
         }
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public function search(array $params): Collection
+    {
+        throw_if(
+            empty($params) || !empty(array_diff(array_keys($params), self::SEARCH_FIELDS)),
+            new BadRequestHttpException()
+        );
+
+        return $this->repository->search($params);
     }
 }

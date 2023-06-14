@@ -817,6 +817,8 @@ $api->version('v1', function ($route) {
             $route->delete('/mileage-fee/{feeId}', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@delete');
         });
 
+        $route->get('geolocation/search','App\Http\Controllers\v1\Location\GeolocationController@search');
+
         /*
         |--------------------------------------------------------------------------
         | Dealer Website Images

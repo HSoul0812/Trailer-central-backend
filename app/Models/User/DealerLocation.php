@@ -11,12 +11,15 @@ use App\Models\Traits\TableAware;
 use App\Models\CRM\Text\Number;
 use App\Models\User\Location\QboLocationMapping;
 use App\Traits\CompactHelper;
+use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Expression;
+use Illuminate\Support\Facades\DB;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
 /**
@@ -354,9 +357,18 @@ class DealerLocation extends Model
     public static function phoneWithNationalFormat(string $phone, string $countryCode = 'US'): string
     {
         try {
+            $countryCode = $countryCode === 'USA' ? 'US' : $countryCode;
             return PhoneNumber::make($phone, strtoupper($countryCode))->formatNational();
         } catch (\Exception $exception) {
             return $phone;
         }
+    }
+
+    public static function geolocationSQL(float $latitude, float $longitude): Expression {
+        return DB::raw(
+            "GeomFromText('" . (
+            new Point($latitude, $longitude)
+            )->toWKT() . "')"
+        );
     }
 }
