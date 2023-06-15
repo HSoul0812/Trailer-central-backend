@@ -782,7 +782,8 @@ class Validation
                         'atv',
                         'bed_equipment',
                         'tow_dolly',
-                        'equipment'
+                        'equipment',
+                        'landscape'
                     )
                 ),
                 'model'               => array(
@@ -883,7 +884,8 @@ class Validation
                         'atv',
                         'bed_equipment',
                         'tow_dolly',
-                        'equipment'
+                        'equipment',
+                        'landscape'
                     )
                 ),
                 'model'               => array(
