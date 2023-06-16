@@ -349,7 +349,10 @@ class UserRepository implements UserRepositoryInterface {
                     ->select(['*'])
                     ->from('inventory')
                     ->whereColumn('inventory.dealer_location_id', 'dealer_location.dealer_location_id')
-                    ->where('inventory.is_archived', '!=', 1)
+                    ->where(function(Builder $query) {
+                        $query->where('inventory.is_archived', '!=', 1)
+                            ->whereNull('inventory.archived_at');
+                    })
                     ->where('inventory.show_on_website', 1)
                     ->whereIn('inventory.category', $types);
             });
