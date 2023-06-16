@@ -218,7 +218,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('tt:process-expired-inventories')
             ->daily()
             ->runInBackground()
-            ->appendOutputTo(storage_path("logs/commands/tt:process-expired-inventories/{$this->dailyLogFileName()}"));
+            ->appendOutputTo(storage_path("logs/commands/tt-process-expired-inventories/{$this->dailyLogFileName()}"));
     }
 
     /**
