@@ -2,11 +2,13 @@
 
 namespace App\Services\Inventory;
 
+use App\DTOs\Dealer\PrivateDealerCheck;
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\Models\Inventory\InventoryStatusMap;
 use App\Models\Parts\CategoryMappings;
 use App\Models\Parts\Type;
+use App\Services\Dealers\DealerServiceInterface;
 use App\Services\Inventory\ESQuery\SortOrder;
 use Dingo\Api\Routing\Helpers;
 use GuzzleHttp\Exception\GuzzleException;
@@ -85,8 +87,9 @@ class InventorySDKService implements InventorySDKServiceInterface
     private int $currentPage = 1;
     private int $perPage = self::PAGE_SIZE;
 
-    public function __construct()
-    {
+    public function __construct(
+        private DealerServiceInterface $dealerService,
+    ) {
         $this->request = new Request();
         $this->queryFilterGroup = new FilterGroup([], FilterType::QUERY);
         $this->postFilterGroup = new FilterGroup();
@@ -146,6 +149,14 @@ class InventorySDKService implements InventorySDKServiceInterface
         foreach ($hits as $hit) {
             $esInventory = TcEsInventory::fromData($hit);
             $esInventory->type_id = $this->mapOldCategoryToNew($esInventory->category)['type_id'];
+
+            $dealerName = $hit['dealer.name'];
+            $dealer = $this->dealerService->listByName($dealerName);
+            $dealerData = [
+                'from' => $dealer[0]->from,
+                'id' => $dealer[0]->id,
+            ];
+            $esInventory->dealer->is_private = (new PrivateDealerCheck())->checkArray($dealerData);
 
             $result[] = $esInventory;
         }
@@ -376,6 +387,6 @@ class InventorySDKService implements InventorySDKServiceInterface
 
     protected function getUserAgent(): string
     {
-        return 'trailertrader-backend' . (request()->header('User-Agent') ? ';'.request()->header('User-Agent') : '');
+        return 'trailertrader-backend' . (request()->header('User-Agent') ? ';' . request()->header('User-Agent') : '');
     }
 }
